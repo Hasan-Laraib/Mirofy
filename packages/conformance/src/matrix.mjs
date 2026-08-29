@@ -504,6 +504,22 @@ export const HARVESTED_ROWS = [
     proof: 'contract.test.mjs',
     testTitle: 'every data-* a renderer emits has a declared consumer (5.17)',
   },
+  {
+    id: '5.19',
+    name: 'axe-core accessibility gate (all five visual presets)',
+    // Not harvested from the ancestor: added in P1a (Task 8) to prove
+    // 37-ENGINEERING-STANDARDS.md's accessibility-floor commitment against a
+    // real rendered artifact in real Chrome, rather than leaving it a
+    // restated promise. browser: true for the same reason as the 14 rows
+    // above -- accessibility.browser.test.mjs needs a real browser to run
+    // axe-core, and is deferred-by-id (never silently "passing") without
+    // MIROFY_CHROME.
+    origin: 'N',
+    phase: 'P1',
+    proof: 'accessibility.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.19] axe-core reports no serious or critical violations in the classic preset',
+  },
 
   // Phase 6 — Delivery
   {
