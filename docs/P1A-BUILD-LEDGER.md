@@ -240,7 +240,7 @@ truth.
 the palette-leak assertion (`viewer-modules.test.mjs:80`) checks only for the
 literal string `[data-preset="editorial"][data-theme="light"] {` leaking into
 `01-structure.css`, not all ten blocks. It was recorded at the time as
-backstopped by "the count assertion" (`viewer-modules.test.mjs:59`,
+backstopped by "the count assertion" (`viewer-modules.test.mjs:62`,
 `selectors.length === 10` against `emitPalette()`'s own output) —
 **that claim is false, corrected here:** the count assertion reads only the
 emitter's output, so it cannot see a palette block that never left
@@ -402,7 +402,7 @@ block already sitting in structural CSS cannot go unseen again.
 
 ## Bisectability
 
-Six of the 36 commits on this branch leave `npm run check` red, reproduced
+Seven of the 36 commits on this branch leave `npm run check` red, reproduced
 from clean detached checkouts (not a working-tree artefact):
 
 | Commit | Failure |
