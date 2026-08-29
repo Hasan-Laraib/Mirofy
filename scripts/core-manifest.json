@@ -42,7 +42,7 @@
     "renderers/sequence/README.md": "3c447ffb5c047d4b6a1dd3c86f69ee26737ba684",
     "renderers/sequence/render-sequence.mjs": "a86760ca4f0d6600330c0127cfcd1155b43e447b",
     "renderers/shared/brand-marks.mjs": "2c02243725e1c4485279314ce5cf64e889b4a244",
-    "renderers/shared/cli.mjs": "1bb6b2f874329bd8b841e614dbd018829a93bb6f",
+    "renderers/shared/cli.mjs": "835bd657a059701ba3a9be2318e3e6954ff3fa33",
     "renderers/shared/desktop-readability.mjs": "1a4c249d1f212e80cb41858ec6adda53cc3befcd",
     "renderers/shared/diagnostics.mjs": "d6e2d70a6859649e6f2578b8be67975e7f2e8b0f",
     "renderers/shared/engineering-profiles.mjs": "76e3166aa19cbd23cc2187f16b0c120280ef4d48",
