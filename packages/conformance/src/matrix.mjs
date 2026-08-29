@@ -468,6 +468,18 @@ export const HARVESTED_ROWS = [
       '[5.14b] print media emulation hides the toolbar chrome',
     ],
   },
+  {
+    id: '5.17',
+    name: 'data-* contract (renderer -> viewer/validator/tooling consumers)',
+    // Not harvested from the ancestor: added in P1a to close a gap the
+    // harvest never covered -- nothing previously checked that renderer-
+    // emitted data-* attributes agree with what the viewer, the post-render
+    // validator, and the delta/visual-check tooling actually read.
+    origin: 'N',
+    phase: 'P1',
+    proof: 'contract.test.mjs',
+    testTitle: 'every data-* a renderer emits has a declared consumer (5.17)',
+  },
 
   // Phase 6 — Delivery
   {
