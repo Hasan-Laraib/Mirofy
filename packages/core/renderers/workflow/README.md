@@ -1,13 +1,13 @@
 # Workflow Renderer
 
-Render `diagram_type: "workflow"` JSON files into the standard Archify HTML
+Render `diagram_type: "workflow"` JSON files into the standard Mirofy HTML
 template.
 
 ```bash
-node archify/renderers/workflow/render-workflow.mjs input.workflow.json output.html
+node mirofy/renderers/workflow/render-workflow.mjs input.workflow.json output.html
 ```
 
-The renderer validates input against `archify/schemas/workflow.schema.json`
+The renderer validates input against `mirofy/schemas/workflow.schema.json`
 with the bundled standalone validator. No dependency installation is required.
 
 If `output.html` is omitted, the renderer uses `meta.output` from the JSON file
@@ -16,7 +16,7 @@ or falls back to `workflow.html` in the current working directory.
 After rendering, run the artifact checker:
 
 ```bash
-node archify/scripts/check-render-output.mjs output.html
+node mirofy/scripts/check-render-output.mjs output.html
 ```
 
 It catches final-SVG issues that are easiest to see in a browser: non-finite
@@ -47,12 +47,12 @@ Workflow JSON files must set:
 Omit `meta.viewBox` for the common case: the width is fixed at 720 and the
 height is derived from the lane count, so lanes and legend always fit. A
 complete worked example lives at
-`archify/examples/agent-tool-call.workflow.json`.
+`mirofy/examples/agent-tool-call.workflow.json`.
 
 The schema lives at:
 
 ```text
-archify/schemas/workflow.schema.json
+mirofy/schemas/workflow.schema.json
 ```
 
 ## Legend

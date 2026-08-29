@@ -1,13 +1,13 @@
 # Lifecycle Renderer
 
-Render `diagram_type: "lifecycle"` JSON files into the standard Archify HTML
+Render `diagram_type: "lifecycle"` JSON files into the standard Mirofy HTML
 template.
 
 ```bash
-node archify/renderers/lifecycle/render-lifecycle.mjs input.lifecycle.json output.html
+node mirofy/renderers/lifecycle/render-lifecycle.mjs input.lifecycle.json output.html
 ```
 
-The renderer validates input against `archify/schemas/lifecycle.schema.json`
+The renderer validates input against `mirofy/schemas/lifecycle.schema.json`
 with the bundled standalone validator. No dependency installation is required.
 
 If `output.html` is omitted, the renderer uses `meta.output` from the JSON file
@@ -37,12 +37,12 @@ to the top phase band; `terminal` maps to the bottom outcome band; every other
 lane id (up to 4 lanes total) shares the single middle event band. The three
 band headers render from your lane labels — the middle band joins the labels of
 all event lanes with ` + `. A complete worked example lives at
-`archify/examples/agent-run.lifecycle.json`.
+`mirofy/examples/agent-run.lifecycle.json`.
 
 The schema lives at:
 
 ```text
-archify/schemas/lifecycle.schema.json
+mirofy/schemas/lifecycle.schema.json
 ```
 
 ## Legend

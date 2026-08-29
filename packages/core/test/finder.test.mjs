@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-finder-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-finder-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -38,9 +38,9 @@ test('all typed renderers ship the same geometry-neutral node finder', () => {
     assert.match(html, /id="btn-node-finder"[^>]+aria-label="Find a node"[^>]+aria-haspopup="dialog"/, mode);
     assert.match(html, /id="node-finder" hidden role="dialog" aria-modal="false"/, mode);
     assert.match(html, /id="node-finder-input" type="search"/, mode);
-    assert.match(html, /Archify\.finder = \(function \(\)/, mode);
+    assert.match(html, /Mirofy\.finder = \(function \(\)/, mode);
     assert.match(html, /svg\.querySelectorAll\('\[data-node-id\]'\)/, mode);
-    assert.doesNotMatch(svg(html), /node-finder|Archify\.finder|Find a node/, mode);
+    assert.doesNotMatch(svg(html), /node-finder|Mirofy\.finder|Find a node/, mode);
   }
 });
 
@@ -48,10 +48,10 @@ test('finder searches semantic ids and labels, then delegates to focus and revea
   const html = render('architecture', CASES.architecture);
   assert.match(html, /search: \(id \+ ' ' \+ label \+ ' ' \+ type \+ ' ' \+ sublabel \+ ' ' \+ context \+ ' ' \+ tag \+ ' ' \+ sourceSearch \+ ' ' \+ text\)\.toLowerCase\(\)/);
   assert.match(html, /item\.search\.indexOf\(query\) !== -1/);
-  assert.match(html, /Archify\.guidedViews\.showAll\(\{ clearFocus: false, updateUrl: false \}\)/);
-  assert.match(html, /Archify\.view\.reset\(\{ automatic: true \}\)/);
-  assert.match(html, /Archify\.focus\.set\(id, \{ toggle: false \}\)/);
-  assert.match(html, /Archify\.view\.reveal\(\[id\], \{ includeNeighbors: true, reason: 'finder' \}\)/);
+  assert.match(html, /Mirofy\.guidedViews\.showAll\(\{ clearFocus: false, updateUrl: false \}\)/);
+  assert.match(html, /Mirofy\.view\.reset\(\{ automatic: true \}\)/);
+  assert.match(html, /Mirofy\.focus\.set\(id, \{ toggle: false \}\)/);
+  assert.match(html, /Mirofy\.view\.reveal\(\[id\], \{ includeNeighbors: true, reason: 'finder' \}\)/);
   assert.match(html, /item\.node\.focus\(\{ preventScroll: true \}\)/);
   assert.match(html, /var key = from \+ '\\u0000' \+ to/);
 });
@@ -73,10 +73,10 @@ test('finder presents one focused search control and a structured result list', 
 test('finder becomes a contextual Route Probe endpoint picker without changing semantic focus', () => {
   const html = render('workflow', CASES.workflow);
   assert.match(html, /function resolveContext\(options\)/);
-  assert.match(html, /Archify\.routeProbe\.finderContext\(\)/);
+  assert.match(html, /Mirofy\.routeProbe\.finderContext\(\)/);
   assert.match(html, /context\.allowedIds\.indexOf\(item\.id\) !== -1/);
   assert.match(html, /context\.kind === 'route-source' \|\| context\.kind === 'route-target'/);
-  assert.match(html, /Archify\.routeProbe\.choose\(id\)/);
+  assert.match(html, /Mirofy\.routeProbe\.choose\(id\)/);
   assert.match(html, /reason: 'route-pick'/);
   assert.match(html, /data-context="route-source"/);
   assert.match(html, /data-context="route-target"/);
@@ -88,12 +88,12 @@ test('finder becomes a contextual Route Probe endpoint picker without changing s
 test('finder is keyboard accessible, mobile-pinned, and subordinate to embed mode', () => {
   const html = render('workflow', CASES.workflow);
   assert.match(html, /e\.key === '\/'/);
-  assert.match(html, /Archify\.finder\.open\(\)/);
+  assert.match(html, /Mirofy\.finder\.open\(\)/);
   assert.match(html, /event\.key === 'ArrowDown'/);
   assert.match(html, /event\.key === 'ArrowUp'/);
   assert.match(html, /event\.key === 'Escape'/);
   assert.match(html, /event\.stopPropagation\(\)/);
-  assert.match(html, /Archify\.exportMenu\.isOpen\(\)\) Archify\.exportMenu\.close\(false\)/);
+  assert.match(html, /Mirofy\.exportMenu\.isOpen\(\)\) Mirofy\.exportMenu\.close\(false\)/);
   assert.match(html, /data-wide-diagram="true"\] \.node-finder/);
   assert.match(html, /html\[data-embed="true"\] \.node-finder/);
   assert.match(html, /html\.getAttribute\('data-embed'\) === 'true'/);

@@ -12,7 +12,7 @@ const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
 
 test('start page: checked-in HTML is reproducible from canonical scenario recipes', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-start-page-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-start-page-'));
   const generated = path.join(tmp, 'start.html');
   try {
     execFileSync(process.execPath, [path.join(repoRoot, 'scripts/build-start.mjs'), generated]);
@@ -28,8 +28,8 @@ test('start page: checked-in HTML is reproducible from canonical scenario recipe
 test('start page: offers five bounded bilingual starts without ingesting source content', () => {
   const html = fs.readFileSync(path.join(repoRoot, 'docs/start.html'), 'utf8');
   assert.doesNotMatch(html, /\[\[[A-Z0-9_]+\]\]/);
-  assert.match(html, /npx -y skills add tt-a1i\/archify --skill archify --agent codex --global --copy --yes/);
-  assert.match(html, /npx -y skills add tt-a1i\/archify --skill archify --agent codex --copy --yes/);
+  assert.match(html, /npx -y skills add tt-a1i\/mirofy --skill mirofy --agent codex --global --copy --yes/);
+  assert.match(html, /npx -y skills add tt-a1i\/mirofy --skill mirofy --agent codex --copy --yes/);
   for (const agent of ['cursor', 'codex', 'claude-code', 'opencode']) {
     assert.match(html, new RegExp(`role="tab" data-agent="${agent}"`));
   }
@@ -60,8 +60,8 @@ test('start page: offers five bounded bilingual starts without ingesting source 
   assert.match(scriptMatch[1], /--agent ' \+ agent \+ ' --global --copy --yes/);
   assert.match(scriptMatch[1], /--agent ' \+ agent \+ ' --copy --yes/);
   assert.match(scriptMatch[1], /function starterText\(\)/);
-  assert.match(scriptMatch[1], /archify:start-funnel/);
-  assert.match(scriptMatch[1], /archify\.start\.events\.v1/);
+  assert.match(scriptMatch[1], /mirofy:start-funnel/);
+  assert.match(scriptMatch[1], /mirofy\.start\.events\.v1/);
   assert.doesNotMatch(scriptMatch[1], /fetch\(|sendBeacon\(|XMLHttpRequest/);
   assert.match(scriptMatch[1], /textContent/);
   assert.match(scriptMatch[1], /replaceChildren/);
@@ -76,7 +76,7 @@ test('generated artifacts omit the promotional footer and shortcut manual', () =
     dataflow: 'product-analytics.dataflow.json',
     lifecycle: 'agent-run.lifecycle.json',
   };
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-start-artifacts-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-start-artifacts-'));
   try {
     for (const [type, input] of Object.entries(examples)) {
       const out = path.join(tmp, `${type}.html`);
@@ -87,7 +87,7 @@ test('generated artifacts omit the promotional footer and shortcut manual', () =
       ]);
       const html = fs.readFileSync(out, 'utf8');
       assert.doesNotMatch(html, /<p class="footer">/, `${type}: footer element`);
-      assert.doesNotMatch(html, /Built with Archify/, `${type}: product signature`);
+      assert.doesNotMatch(html, /Built with Mirofy/, `${type}: product signature`);
       assert.doesNotMatch(html, /Create yours/, `${type}: promotional CTA`);
       assert.doesNotMatch(html, /Hover to trace/, `${type}: shortcut manual`);
       assert.doesNotMatch(html, /source=artifact/, `${type}: removed artifact CTA URL`);
@@ -103,10 +103,10 @@ test('generated artifacts omit the promotional footer and shortcut manual', () =
 
 test('viewer gives wide screens a larger canvas without forcing a subtitle row', () => {
   const template = fs.readFileSync(path.join(skillRoot, 'assets', 'template.html'), 'utf8');
-  assert.match(template, /max-width: var\(--archify-reader-width, 1440px\)/);
-  assert.match(template, /Archify\.readerLayout = \(function \(\)/);
+  assert.match(template, /max-width: var\(--mirofy-reader-width, 1440px\)/);
+  assert.match(template, /Mirofy\.readerLayout = \(function \(\)/);
 
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-title-hierarchy-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-title-hierarchy-'));
   try {
     const input = JSON.parse(fs.readFileSync(
       path.join(skillRoot, 'examples', 'web-app.architecture.json'),

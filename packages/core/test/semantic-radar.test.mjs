@@ -10,8 +10,8 @@ import { ChromeVisualBrowser, findChrome } from '../bin/visual-check.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-semantic-radar-'));
-const chromePath = process.env.ARCHIFY_CHROME ? findChrome() : null;
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-semantic-radar-'));
+const chromePath = process.env.MIROFY_CHROME ? findChrome() : null;
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -147,7 +147,7 @@ test('all typed renderers inherit one viewer-only Semantic Radar', () => {
     assert.match(html, /id="overview-map-expand"[^>]+aria-label="Open full semantic radar"/, mode);
     assert.match(html, /id="overview-map-feedback" role="status" aria-live="polite" hidden/, mode);
     assert.match(html, /id="btn-overview-map"[^>]+aria-label="Open semantic radar"[^>]+aria-expanded="false"[^>]+aria-controls="overview-map"/, mode);
-    assert.match(html, /Archify\.radar = \(function \(\)/, mode);
+    assert.match(html, /Mirofy\.radar = \(function \(\)/, mode);
     assert.match(html, /document\.createElementNS\(namespace, 'svg'\)/, mode);
     assert.match(html, /mapSvg\.setAttribute\('aria-label', viewerText\('viewer\.radar\.nodes'\)\)/, mode);
     assert.match(html, /diagram\.querySelectorAll\('\[data-node-id\]'\)/, mode);
@@ -162,8 +162,8 @@ test('Semantic Radar derives semantic node bounds and focuses stable IDs', () =>
   assert.match(html, /rect\.setAttribute\('data-radar-node-id', id\)/);
   assert.match(html, /rect\.setAttribute\('data-kind', node\.getAttribute\('data-node-kind'\) \|\| 'neutral'\)/);
   assert.match(html, /rect\.setAttribute\('aria-label', viewerText\('viewer\.radar\.focus'/);
-  assert.match(html, /Archify\.focus\.set\(id, \{ toggle: false \}\)/);
-  assert.match(html, /Archify\.view\.reveal\(\[id\], \{ includeNeighbors: true, reason: 'radar' \}\)/);
+  assert.match(html, /Mirofy\.focus\.set\(id, \{ toggle: false \}\)/);
+  assert.match(html, /Mirofy\.view\.reveal\(\[id\], \{ includeNeighbors: true, reason: 'radar' \}\)/);
   assert.match(html, /function bringNodeIntoWindow\(node\)/);
   assert.match(html, /window\.scrollY \+ rect\.top \+ rect\.height \/ 2 - window\.innerHeight \/ 2/);
   assert.match(html, /data-radar-active/);
@@ -181,7 +181,7 @@ test('Semantic Radar tracks desktop camera and mobile contained scroll', () => {
   assert.match(html, /container\.scrollTo\(\{ left: mobileTarget, behavior: options\.instant \? 'auto' : 'smooth' \}\)/);
   assert.match(html, /data-wide-diagram="true"\] \.overview-map/);
   assert.match(html, /function updateDocking\(\)/);
-  assert.match(html, /chip\.style\.top = Math\.round\(top\) \+ 'px';[\s\S]+Archify\.radar\.sync\(\)/);
+  assert.match(html, /chip\.style\.top = Math\.round\(top\) \+ 'px';[\s\S]+Mirofy\.radar\.sync\(\)/);
   assert.match(html, /var navigation = container\.querySelector\('\.diagram-nav'\)/);
   assert.match(html, /if \(controlRect\) bottom = Math\.min\(bottom, controlRect\.top - placementGap\)/);
   assert.match(html, /hardBlockers: \[lensRect, controlRect, legendRect\]\.filter\(Boolean\)/);
@@ -193,7 +193,7 @@ test('Semantic Radar tracks desktop camera and mobile contained scroll', () => {
   assert.match(html, /panelHead\.addEventListener\('pointerdown', beginPanelDrag\)/);
   assert.match(html, /surface\.addEventListener\('pointerdown',[\s\S]+viewportDrag = \{ pointerId: event\.pointerId \}/);
   assert.match(html, /target\.closest\('\[data-node-id\], \[data-relationship-hit-key\], \.overview-map'\)/);
-  assert.match(html, /--archify-radar-top/);
+  assert.match(html, /--mirofy-radar-top/);
   assert.match(html, /\.overview-map\[data-docked="true"\]/);
 });
 
@@ -201,7 +201,7 @@ test('Semantic Radar keeps redundant accessible navigation and clean exports', (
   const html = render('architecture', CASES.architecture);
   assert.match(html, /Semantic radar \(M\)/);
   assert.match(html, /e\.key === 'm' \|\| e\.key === 'M'/);
-  assert.match(html, /e\.key === 'Escape' && Archify\.radar\.isOpen\(\)/);
+  assert.match(html, /e\.key === 'Escape' && Mirofy\.radar\.isOpen\(\)/);
   assert.match(html, /event\.key === 'ArrowLeft'[\s\S]+event\.key === 'ArrowRight'[\s\S]+event\.key === 'ArrowUp'[\s\S]+event\.key === 'ArrowDown'/);
   assert.match(html, /node && \(event\.key === 'Enter' \|\| event\.key === ' '\)/);
   assert.match(html, /\.overview-map-viewport \{[\s\S]*?pointer-events: none;/);
@@ -212,7 +212,7 @@ test('Semantic Radar keeps redundant accessible navigation and clean exports', (
 });
 
 test('Semantic Radar stays above the measured MAP control strip', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const artifact = path.join(tmp, 'radar-control-clearance.html');
   execFileSync(process.execPath, [
@@ -226,7 +226,7 @@ test('Semantic Radar stays above the measured MAP control strip', {
     const rects = await radarRects(browser, sessionId, `
       var container = document.querySelector('.diagram-container');
       window.scrollTo(0, Math.max(0, container.offsetTop + container.offsetHeight - window.innerHeight + 8));
-      Archify.radar.open();
+      Mirofy.radar.open();
     `);
     const controlGap = rects.controls.top - rects.radar.bottom;
     assert.ok(controlGap >= 15, JSON.stringify({ ...rects, controlGap }, null, 2));
@@ -240,7 +240,7 @@ test('Semantic Radar stays above the measured MAP control strip', {
 });
 
 test('Semantic Radar avoids an expanded mobile Passport without hiding a collision', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const artifact = path.join(tmp, 'radar-mobile-passport.html');
   execFileSync(process.execPath, [
@@ -254,9 +254,9 @@ test('Semantic Radar avoids an expanded mobile Passport without hiding a collisi
     const state = await evaluate(browser, sessionId, `(function () {
       var container = document.querySelector('.diagram-container');
       window.scrollTo(0, Math.max(0, container.offsetTop));
-      Archify.focus.set('lb', { toggle: false });
+      Mirofy.focus.set('lb', { toggle: false });
       document.getElementById('btn-focus-relations').click();
-      Archify.radar.open();
+      Mirofy.radar.open();
       return new Promise(function (resolve) {
         setTimeout(function () {
             var radar = document.getElementById('overview-map');
@@ -324,7 +324,7 @@ test('Semantic Radar avoids an expanded mobile Passport without hiding a collisi
 });
 
 test('Semantic Radar reports a consistent unavailable state and recovers when space returns', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const artifact = path.join(tmp, 'radar-unavailable.html');
   execFileSync(process.execPath, [
@@ -338,9 +338,9 @@ test('Semantic Radar reports a consistent unavailable state and recovers when sp
     const unavailable = await evaluate(browser, sessionId, `(function () {
       var container = document.querySelector('.diagram-container');
       window.scrollTo(0, Math.max(0, container.offsetTop));
-      Archify.focus.set('lb', { toggle: false });
+      Mirofy.focus.set('lb', { toggle: false });
       document.getElementById('btn-focus-relations').click();
-      Archify.radar.open();
+      Mirofy.radar.open();
       return new Promise(function (resolve) {
         setTimeout(function () {
           var panel = document.getElementById('overview-map');
@@ -389,7 +389,7 @@ test('Semantic Radar reports a consistent unavailable state and recovers when sp
 });
 
 test('Semantic Radar automatically avoids a tall Semantic Passport', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const input = path.join(tmp, 'tall-passport.architecture.json');
   const artifact = path.join(tmp, 'tall-passport.html');
@@ -431,8 +431,8 @@ test('Semantic Radar automatically avoids a tall Semantic Passport', {
     const rects = await radarRects(browser, sessionId, `
       var container = document.querySelector('.diagram-container');
       window.scrollTo(0, Math.max(0, container.offsetTop));
-      Archify.focus.set('hub', { toggle: false });
-      Archify.radar.open();
+      Mirofy.focus.set('hub', { toggle: false });
+      Mirofy.radar.open();
     `);
     assert.ok(rects.passport, JSON.stringify(rects, null, 2));
     assert.equal(overlaps(rects.radar, rects.passport, 10), false, JSON.stringify(rects, null, 2));
@@ -477,7 +477,7 @@ test('Semantic Radar automatically avoids a tall Semantic Passport', {
 });
 
 test('Semantic Radar titlebar drag persists while surface drag still pans the diagram', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const artifact = path.join(tmp, 'radar-dragging.html');
   execFileSync(process.execPath, [
@@ -491,14 +491,14 @@ test('Semantic Radar titlebar drag persists while surface drag still pans the di
     const geometry = await evaluate(browser, sessionId, `(function () {
       var container = document.querySelector('.diagram-container');
       window.scrollTo(0, Math.max(0, container.offsetTop + container.offsetHeight - window.innerHeight + 8));
-      Archify.radar.open();
+      Mirofy.radar.open();
       var radar = document.getElementById('overview-map').getBoundingClientRect();
       var head = document.querySelector('.overview-map-head').getBoundingClientRect();
       var containerRect = container.getBoundingClientRect();
       return {
         radar: { left: radar.left, top: radar.top, width: radar.width, height: radar.height },
         head: { left: head.left, top: head.top, width: head.width, height: head.height },
-        state: Archify.view.state(),
+        state: Mirofy.view.state(),
         target: {
           left: Math.max(24, containerRect.left + 360),
           top: Math.max(24, containerRect.top + 20)
@@ -516,9 +516,9 @@ test('Semantic Radar titlebar drag persists while surface drag still pans the di
     await dragMouse(browser, sessionId, titleStart, titleTarget);
 
     const manuallyPlaced = await evaluate(browser, sessionId, `(function () {
-      Archify.radar.sync();
+      Mirofy.radar.sync();
       var radar = document.getElementById('overview-map').getBoundingClientRect();
-      return { left: radar.left, top: radar.top, state: Archify.view.state() };
+      return { left: radar.left, top: radar.top, state: Mirofy.view.state() };
     })()`);
     assert.ok(Math.abs(manuallyPlaced.left - geometry.target.left) <= 2, JSON.stringify({ geometry, manuallyPlaced }, null, 2));
     assert.ok(Math.abs(manuallyPlaced.top - geometry.target.top) <= 2, JSON.stringify({ geometry, manuallyPlaced }, null, 2));
@@ -529,7 +529,7 @@ test('Semantic Radar titlebar drag persists while surface drag still pans the di
       var surface = document.getElementById('overview-map-surface').getBoundingClientRect();
       return {
         radar: { left: radar.left, top: radar.top },
-        state: Archify.view.state(),
+        state: Mirofy.view.state(),
         start: { x: surface.left + 8, y: surface.top + 8 },
         end: { x: surface.right - 8, y: surface.bottom - 8 }
       };
@@ -539,7 +539,7 @@ test('Semantic Radar titlebar drag persists while surface drag still pans the di
       var radar = document.getElementById('overview-map').getBoundingClientRect();
       return {
         radar: { left: radar.left, top: radar.top },
-        state: Archify.view.state()
+        state: Mirofy.view.state()
       };
     })()`);
     assert.deepEqual(afterSurfaceDrag.radar, surfaceState.radar);

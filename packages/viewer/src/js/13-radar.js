@@ -4,7 +4,7 @@
        The radar is built at runtime so the checked artifact still contains
        one canonical SVG block, and export serialization remains untouched.
        ============================================================ */
-    Archify.radar = (function () {
+    Mirofy.radar = (function () {
       var container = document.querySelector('.diagram-container');
       var diagram = container.querySelector(':scope > svg');
       var panel = document.getElementById('overview-map');
@@ -212,13 +212,13 @@
         panel.setAttribute('data-docked', 'true');
         panel.setAttribute('data-dock-side', useLeft ? 'left' : 'right');
         if (useLeft) {
-          panel.style.setProperty('--archify-radar-left', Math.round(position.left) + 'px');
-          panel.style.removeProperty('--archify-radar-right');
+          panel.style.setProperty('--mirofy-radar-left', Math.round(position.left) + 'px');
+          panel.style.removeProperty('--mirofy-radar-right');
         } else {
-          panel.style.setProperty('--archify-radar-right', Math.round(window.innerWidth - position.left - panel.offsetWidth) + 'px');
-          panel.style.removeProperty('--archify-radar-left');
+          panel.style.setProperty('--mirofy-radar-right', Math.round(window.innerWidth - position.left - panel.offsetWidth) + 'px');
+          panel.style.removeProperty('--mirofy-radar-left');
         }
-        panel.style.setProperty('--archify-radar-top', Math.round(position.top) + 'px');
+        panel.style.setProperty('--mirofy-radar-top', Math.round(position.top) + 'px');
         if (remember !== false) lastPlacement = { left: position.left, top: position.top };
       }
       function resetDockingStyles() {
@@ -231,9 +231,9 @@
         panel.removeAttribute('data-compact');
         panel.removeAttribute('title');
         panel.style.removeProperty('visibility');
-        panel.style.removeProperty('--archify-radar-right');
-        panel.style.removeProperty('--archify-radar-left');
-        panel.style.removeProperty('--archify-radar-top');
+        panel.style.removeProperty('--mirofy-radar-right');
+        panel.style.removeProperty('--mirofy-radar-left');
+        panel.style.removeProperty('--mirofy-radar-top');
       }
       function updateDocking() {
         var options = arguments[0] || {};
@@ -353,7 +353,7 @@
       }
       function syncNow() {
         syncFrame = 0;
-        if (panel.hidden || !Archify.view || typeof Archify.view.logicalViewport !== 'function') return;
+        if (panel.hidden || !Mirofy.view || typeof Mirofy.view.logicalViewport !== 'function') return;
         if (!updateDocking()) {
           reflectUnavailable();
           return;
@@ -366,7 +366,7 @@
           }
         }
         reflectVisible();
-        var visible = Archify.view.logicalViewport();
+        var visible = Mirofy.view.logicalViewport();
         if (!visible) return;
         viewport.setAttribute('x', String(visible.x));
         viewport.setAttribute('y', String(visible.y));
@@ -398,9 +398,9 @@
       function setOpen(next, options) {
         options = options || {};
         next = Boolean(next);
-        if (next && Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (next && Archify.semanticLens && Archify.semanticLens.isOpen()) {
-          Archify.semanticLens.close({ restoreFocus: false });
+        if (next && Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (next && Mirofy.semanticLens && Mirofy.semanticLens.isOpen()) {
+          Mirofy.semanticLens.close({ restoreFocus: false });
         }
         requestedOpen = next;
         if (next) {
@@ -443,14 +443,14 @@
       function focusNode(id) {
         var main = diagram.querySelector('[data-node-id="' + id + '"]');
         if (!main) return false;
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
-        if (Archify.focus && typeof Archify.focus.set === 'function') {
-          Archify.focus.set(id, { toggle: false });
+        if (Mirofy.focus && typeof Mirofy.focus.set === 'function') {
+          Mirofy.focus.set(id, { toggle: false });
         }
-        if (Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'radar' });
+        if (Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'radar' });
         }
         bringNodeIntoWindow(main);
         try { main.focus({ preventScroll: true }); } catch (_) { try { main.focus(); } catch (_) {} }
@@ -467,8 +467,8 @@
       }
       function navigate(event) {
         var point = diagramPoint(event);
-        if (!point || !Archify.view || typeof Archify.view.centerAt !== 'function') return;
-        Archify.view.centerAt(point.x, point.y, { minimumScale: 1.5, instant: true });
+        if (!point || !Mirofy.view || typeof Mirofy.view.centerAt !== 'function') return;
+        Mirofy.view.centerAt(point.x, point.y, { minimumScale: 1.5, instant: true });
         sync();
       }
       function endViewportDrag(event) {
@@ -574,7 +574,7 @@
           return;
         }
         if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
-        var visible = Archify.view && Archify.view.logicalViewport ? Archify.view.logicalViewport() : null;
+        var visible = Mirofy.view && Mirofy.view.logicalViewport ? Mirofy.view.logicalViewport() : null;
         if (!visible) return;
         event.preventDefault();
         var x = visible.x + visible.width / 2;
@@ -585,7 +585,7 @@
         else if (event.key === 'ArrowRight') x += stepX;
         else if (event.key === 'ArrowUp') y -= stepY;
         else y += stepY;
-        Archify.view.centerAt(x, y, { minimumScale: 1.5, instant: true });
+        Mirofy.view.centerAt(x, y, { minimumScale: 1.5, instant: true });
         sync();
       });
       document.addEventListener('keydown', function (event) {

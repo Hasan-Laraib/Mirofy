@@ -8,7 +8,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { coreRoot, fixturesRoot, repoRoot } from '../src/render.mjs';
 
-const cli = path.join(coreRoot, 'bin/archify.mjs');
+const cli = path.join(coreRoot, 'bin/mirofy.mjs');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-delivery-'));
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
@@ -57,7 +57,7 @@ test('deliver never clobbers a previously delivered artifact when given invalid 
 
   assert.equal(sha256(fs.readFileSync(output)), goodHash, 'the previously delivered good artifact was overwritten');
 
-  const leftoverStaging = fs.readdirSync(path.dirname(output)).filter((name) => name.startsWith('.archify-delivery-'));
+  const leftoverStaging = fs.readdirSync(path.dirname(output)).filter((name) => name.startsWith('.mirofy-delivery-'));
   assert.deepEqual(leftoverStaging, [], 'a delivery staging directory was left behind after failure');
 });
 
@@ -187,7 +187,7 @@ test('compare produces a Before/After delta receipt whose hashes match the real 
 
 // A usage-banner grep cannot tell "the subcommand dispatches" from "the
 // subcommand's name is merely mentioned in a help string" -- renaming
-// `case 'doctor':` in the switch (bin/archify.mjs) while leaving `archify
+// `case 'doctor':` in the switch (bin/mirofy.mjs) while leaving `mirofy
 // doctor` in the printed usage() text left the old version of this test
 // green. Each subcommand below is actually invoked instead. The CLI's
 // `default:` branch (an unrecognised command) always prints `Unknown
@@ -208,12 +208,12 @@ test('the CLI exposes render, validate, deliver, check, guide, brands, doctor, a
     const output = `${result.stdout}${result.stderr}`;
     assert.doesNotMatch(
       output, unknownCommand(subcommand),
-      `"archify ${subcommand}" fell through to the unknown-command handler -- it is no longer wired in the switch`,
+      `"mirofy ${subcommand}" fell through to the unknown-command handler -- it is no longer wired in the switch`,
     );
     if (expectStatus !== undefined) {
-      assert.equal(result.status, expectStatus, `"archify ${subcommand}": unexpected exit status\n${output}`);
+      assert.equal(result.status, expectStatus, `"mirofy ${subcommand}": unexpected exit status\n${output}`);
     }
-    assert.match(output, mustMatch, `"archify ${subcommand}": output did not match the expected command-specific marker\n${output}`);
+    assert.match(output, mustMatch, `"mirofy ${subcommand}": output did not match the expected command-specific marker\n${output}`);
   }
 
   // Dispatched into their own function, then fail fast on missing
@@ -223,14 +223,14 @@ test('the CLI exposes render, validate, deliver, check, guide, brands, doctor, a
     assertDispatches(subcommand, [], { expectStatus: 2, mustMatch: /^Usage:/ });
   }
 
-  assertDispatches('guide', [], { expectStatus: 0, mustMatch: /Archify scenario recipes/ });
+  assertDispatches('guide', [], { expectStatus: 0, mustMatch: /Mirofy scenario recipes/ });
   assertDispatches('brands', [], { expectStatus: 0, mustMatch: /collaboration:.*airtable/ });
-  assertDispatches('doctor', [], { expectStatus: 0, mustMatch: /Archify doctor/ });
+  assertDispatches('doctor', [], { expectStatus: 0, mustMatch: /Mirofy doctor/ });
 
   const demoTmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-demo-'));
   try {
     assertDispatches('demo', [demoTmp], { expectStatus: 0, mustMatch: /Demo ready:/ });
-    assert.ok(fs.existsSync(path.join(demoTmp, 'archify-demo.html')), 'demo did not actually render an artifact');
+    assert.ok(fs.existsSync(path.join(demoTmp, 'mirofy-demo.html')), 'demo did not actually render an artifact');
   } finally {
     fs.rmSync(demoTmp, { recursive: true, force: true });
   }

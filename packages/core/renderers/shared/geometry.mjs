@@ -412,7 +412,7 @@ export function cleanCrossingProblems({
   profile = 'standard',
   routeHint = 'adjust route/via or channel coordinates so the relationships use separate corridors'
 }) {
-  const requestedProfile = process.env.ARCHIFY_QUALITY_PROFILE || profile;
+  const requestedProfile = process.env.MIROFY_QUALITY_PROFILE || profile;
   const activeProfile = requestedProfile === 'showcase' ? 'showcase' : 'standard';
   if (activeProfile !== 'showcase') return [];
   const routed = asArray(relations).map((relation, index) => {
@@ -539,7 +539,7 @@ export function cleanAmbiguousCorridorProblems({
   routeHint = 'adjust route/via or channel coordinates so the relationships use separate corridors',
   minOverlapPx = 8,
 }) {
-  const requestedProfile = process.env.ARCHIFY_QUALITY_PROFILE || profile;
+  const requestedProfile = process.env.MIROFY_QUALITY_PROFILE || profile;
   if (requestedProfile !== 'showcase') return [];
   const routedRelations = asArray(relations).map((relation, relationIndex) => {
     if (!relation || typeof relation.from !== 'string' || typeof relation.to !== 'string') return null;
@@ -636,7 +636,7 @@ export function cleanBorderRunProblems({
   profile,
   routeHint = 'adjust route/via or channel coordinates so the relationship crosses the frame perpendicularly through a clear opening'
 }) {
-  if (!process.env.ARCHIFY_QUALITY_PROFILE && !profile) return [];
+  if (!process.env.MIROFY_QUALITY_PROFILE && !profile) return [];
   const routedRelations = asArray(relations).map((relation, relationIndex) => {
     if (!relation || typeof relation.from !== 'string' || typeof relation.to !== 'string') return null;
     if (endpointIds && (!endpointIds.has(relation.from) || !endpointIds.has(relation.to))) return null;
@@ -783,7 +783,7 @@ export function cleanRouteRhythmProblems({
   interiorSegmentPx = 16,
   microSegmentPx = 8,
 }) {
-  const requestedProfile = process.env.ARCHIFY_QUALITY_PROFILE || profile;
+  const requestedProfile = process.env.MIROFY_QUALITY_PROFILE || profile;
   if (requestedProfile !== 'showcase') return [];
   const routedRelations = asArray(relations).map((relation, relationIndex) => {
     if (!relation || typeof relation.from !== 'string' || typeof relation.to !== 'string') return null;
@@ -830,7 +830,7 @@ export function cleanLabelRouteClearanceProblems({
   threshold = 4,
   routeHint = 'adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel',
 }) {
-  const requestedProfile = process.env.ARCHIFY_QUALITY_PROFILE || profile;
+  const requestedProfile = process.env.MIROFY_QUALITY_PROFILE || profile;
   if (requestedProfile !== 'showcase') return [];
   const routedRelations = asArray(relations).map((relation, relationIndex) => {
     if (!relation || typeof relation.from !== 'string' || typeof relation.to !== 'string') return null;

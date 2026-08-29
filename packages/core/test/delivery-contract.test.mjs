@@ -17,7 +17,7 @@ test('skill requires a bounded and truthful perceptual delivery receipt', () => 
 });
 
 test('skill uses atomic verified delivery for the final artifact', () => {
-  assert.match(delivery, /archify\.mjs deliver <type>/);
+  assert.match(delivery, /mirofy\.mjs deliver <type>/);
   assert.match(delivery, /same-directory candidate/i);
   assert.match(delivery, /only replaces the target after.*artifact checks pass/i);
   assert.match(delivery, /never claim that the deterministic receipt includes visual review/i);

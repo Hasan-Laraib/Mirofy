@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-intent-trace-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-intent-trace-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -35,7 +35,7 @@ function canonicalSvg(html) {
 test('all typed renderers inherit one geometry-neutral Intent Trace', () => {
   for (const [mode, example] of Object.entries(CASES)) {
     const html = render(mode, example);
-    assert.match(html, /Archify\.intentTrace = \(function \(\)/, mode);
+    assert.match(html, /Mirofy\.intentTrace = \(function \(\)/, mode);
     assert.match(html, /id="intent-trace-status" role="status" aria-live="polite" aria-atomic="true"/, mode);
     assert.match(html, /svg\.setAttribute\('data-intent-trace-active', id\)/, mode);
     assert.match(html, /data-intent-trace-overlay/, mode);
@@ -69,7 +69,7 @@ test('Intent Trace keeps incoming and outgoing motion on authored source-to-targ
     );
     assert.match(incomingRule, /animation-direction\s*:\s*normal/, mode);
     assert.match(html, /function traceGeometry\(shape, direction\)[\s\S]+shape\.cloneNode\(false\)/, mode);
-    assert.match(html, /@keyframes archify-intent-trace-flow[\s\S]+stroke-dashoffset: -1/, mode);
+    assert.match(html, /@keyframes mirofy-intent-trace-flow[\s\S]+stroke-dashoffset: -1/, mode);
   }
 });
 
@@ -87,9 +87,9 @@ test('Intent Trace separates hover, keyboard, touch, and committed focus', () =>
   assert.match(html, /container\.classList\.contains\('is-panning'\)/);
   assert.match(html, /svg\.hasAttribute\('data-story-active'\)/);
   assert.match(html, /svg\.hasAttribute\('data-relationship-preview-active'\)/);
-  assert.match(html, /Archify\.focus\.active\(\)/);
-  assert.match(html, /Archify\.intentTrace\.clear\(\{ announce: false \}\)/);
-  assert.match(html, /e\.key === 'Escape' && Archify\.intentTrace\.active\(\)/);
+  assert.match(html, /Mirofy\.focus\.active\(\)/);
+  assert.match(html, /Mirofy\.intentTrace\.clear\(\{ announce: false \}\)/);
+  assert.match(html, /e\.key === 'Escape' && Mirofy\.intentTrace\.active\(\)/);
 });
 
 test('Intent Trace normalizes motion, respects reduced motion, and exports cleanly', () => {
@@ -98,8 +98,8 @@ test('Intent Trace normalizes motion, respects reduced motion, and exports clean
   assert.match(html, /\.intent-trace-flow\[data-direction="out"\]/);
   assert.match(html, /\.intent-trace-flow\[data-direction="in"\]/);
   assert.match(html, /\.intent-trace-flow\[data-direction="loop"\]/);
-  assert.match(html, /@keyframes archify-intent-trace-flow/);
-  assert.match(html, /animation: archify-intent-trace-flow 1\.15s linear 1 both/);
+  assert.match(html, /@keyframes mirofy-intent-trace-flow/);
+  assert.match(html, /animation: mirofy-intent-trace-flow 1\.15s linear 1 both/);
   assert.match(html, /@media \(prefers-reduced-motion: reduce\)[\s\S]+\.intent-trace-flow \{[\s\S]+animation: none !important/);
   assert.match(html, /clone\.removeAttribute\('data-intent-trace-active'\)/);
   assert.match(html, /clone\.querySelectorAll\('\[data-intent-trace-overlay\]'\)/);

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="generator" content="archify 2.16.0-dev.0">
+  <meta name="generator" content="mirofy 2.16.0-dev.0">
   <title>Cache Miss Request Sequence Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
@@ -22,7 +22,7 @@
           }
         } catch (_) {}
         if (!theme) {
-          try { theme = localStorage.getItem('archify-theme'); } catch (_) {}
+          try { theme = localStorage.getItem('mirofy-theme'); } catch (_) {}
         }
         if (theme !== 'light' && theme !== 'dark') {
           theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
@@ -441,7 +441,7 @@
       box-shadow: 0 14px 42px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.045);
       backdrop-filter: blur(16px);
       pointer-events: none;
-      animation: archify-share-cue-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: mirofy-share-cue-enter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     html[data-preset="blueprint"] .share-chapter-cue {
       border-radius: 0.2rem;
@@ -491,7 +491,7 @@
       content: '';
     }
     .share-chapter-cue[data-state="playing"] .share-chapter-state::before {
-      animation: archify-share-cue-pulse 1.15s ease-in-out infinite;
+      animation: mirofy-share-cue-pulse 1.15s ease-in-out infinite;
     }
     .share-chapter-count {
       color: var(--text-faint);
@@ -586,7 +586,7 @@
       justify-content: center;
       min-height: 0;
       padding: 0.75rem;
-      padding-bottom: calc(0.75rem + var(--archify-nav-reserve));
+      padding-bottom: calc(0.75rem + var(--mirofy-nav-reserve));
     }
     html[data-present="true"]:not([data-embed="true"]) .diagram-container > svg {
       flex: 1 1 auto;
@@ -607,7 +607,7 @@
        jumps between a laptop and a tall monitor. */
     .container {
       width: 100%;
-      max-width: var(--archify-reader-width, 1440px);
+      max-width: var(--mirofy-reader-width, 1440px);
       margin: 0 auto;
     }
     @media (min-width: 768px) and (max-height: 920px) {
@@ -725,12 +725,12 @@
     }
 
     .diagram-container {
-      --archify-nav-reserve: 0px;
+      --mirofy-nav-reserve: 0px;
       background: var(--panel);
       border-radius: 1rem;
       border: 1px solid var(--panel-border);
       padding: 1.5rem;
-      padding-bottom: calc(1.5rem + var(--archify-nav-reserve));
+      padding-bottom: calc(1.5rem + var(--mirofy-nav-reserve));
       overflow: hidden;
       position: relative;
     }
@@ -806,7 +806,7 @@
       pointer-events: none;
       background: linear-gradient(115deg, transparent 28%, rgba(103, 232, 249, 0.035) 48%, transparent 68%);
       transform: translateX(-70%);
-      animation: archify-signal-scan 4.8s ease-in-out 1 both;
+      animation: mirofy-signal-scan 4.8s ease-in-out 1 both;
     }
 
     /* Motion Governor gives the reader a real static state and gives the
@@ -1057,7 +1057,7 @@
     .overview-map {
       position: absolute;
       right: 1rem;
-      bottom: calc(4.15rem + var(--archify-nav-reserve));
+      bottom: calc(4.15rem + var(--mirofy-nav-reserve));
       z-index: 12;
       width: 11.25rem;
       overflow: hidden;
@@ -1072,13 +1072,13 @@
     .overview-map[hidden] { display: none; }
     .overview-map[data-docked="true"] {
       position: fixed;
-      right: var(--archify-radar-right, 1rem);
-      top: var(--archify-radar-top, 1rem);
+      right: var(--mirofy-radar-right, 1rem);
+      top: var(--mirofy-radar-top, 1rem);
       bottom: auto;
     }
     .overview-map[data-docked="true"][data-dock-side="left"] {
       right: auto;
-      left: var(--archify-radar-left, 1rem);
+      left: var(--mirofy-radar-left, 1rem);
     }
     html[data-preset="blueprint"] .overview-map { border-radius: 0.28rem; }
     .overview-map-head {
@@ -1127,7 +1127,7 @@
       border-radius: 50%;
       background: var(--backend-stroke);
       box-shadow: 0 0 0 0 color-mix(in srgb, var(--backend-stroke) 52%, transparent);
-      animation: archify-radar-live 2.4s ease-out infinite;
+      animation: mirofy-radar-live 2.4s ease-out infinite;
     }
     .overview-map-copy { min-width: 0; line-height: 1.1; }
     .overview-map-copy strong {
@@ -1302,7 +1302,7 @@
     .semantic-lens {
       position: absolute;
       right: 1rem;
-      bottom: calc(4.15rem + var(--archify-nav-reserve));
+      bottom: calc(4.15rem + var(--mirofy-nav-reserve));
       z-index: 24;
       width: min(20rem, calc(100% - 2rem));
       overflow: hidden;
@@ -1314,7 +1314,7 @@
       color: var(--toolbar-text);
       box-shadow: 0 18px 52px rgba(0, 0, 0, 0.36);
       backdrop-filter: blur(18px);
-      animation: archify-lens-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      animation: mirofy-lens-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     .semantic-lens[hidden] { display: none; }
     .semantic-lens[data-dock-side="left"] { left: 1rem; right: auto; }
@@ -1466,7 +1466,7 @@
     }
     .semantic-lens-actions button:hover { background: var(--toolbar-hover); }
     .semantic-lens-actions #semantic-lens-copy { color: var(--database-stroke); }
-    @keyframes archify-lens-in {
+    @keyframes mirofy-lens-in {
       from { opacity: 0; transform: translateY(5px) scale(0.985); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
@@ -1477,7 +1477,7 @@
     .route-probe {
       position: absolute;
       left: 1rem;
-      bottom: calc(1rem + var(--archify-nav-reserve));
+      bottom: calc(1rem + var(--mirofy-nav-reserve));
       z-index: 12;
       width: min(46rem, calc(100% - 25rem));
       min-width: 18rem;
@@ -2016,7 +2016,7 @@
       color: var(--toolbar-text);
       box-shadow: 0 22px 64px rgba(0, 0, 0, 0.4);
       backdrop-filter: blur(18px);
-      animation: archify-guide-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      animation: mirofy-guide-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
     }
     .diagram-guide[hidden] { display: none; }
     html[data-preset="blueprint"] .diagram-guide { border-radius: 0.28rem; }
@@ -2186,7 +2186,7 @@
       font-size: 0.5rem;
     }
     .diagram-guide-feedback:empty { display: none; }
-    @keyframes archify-guide-in {
+    @keyframes mirofy-guide-in {
       from { opacity: 0; transform: translateY(-5px) scale(0.985); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
@@ -2458,12 +2458,12 @@
       stroke-dasharray: 4 4;
       vector-effect: non-scaling-stroke;
       opacity: 0.96;
-      animation: archify-chapter-anchor 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: mirofy-chapter-anchor 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     svg[data-chapter-handoff] [data-node-id][data-chapter-role="stay"] { opacity: 1; }
     svg[data-chapter-handoff] [data-node-id][data-chapter-role="enter"] { opacity: 0.78; }
     svg[data-chapter-handoff] [data-node-id][data-chapter-role="leave"] { opacity: 0.26; }
-    @keyframes archify-chapter-anchor {
+    @keyframes mirofy-chapter-anchor {
       0% { opacity: 0.35; stroke-dashoffset: 8; }
       45% { opacity: 1; }
       100% { opacity: 0.72; stroke-dashoffset: 0; }
@@ -2500,7 +2500,7 @@
       border: 1px solid color-mix(in srgb, var(--frontend-stroke) 32%, var(--toolbar-border));
       border-radius: 0.58rem;
       background: color-mix(in srgb, var(--frontend-fill) 26%, transparent);
-      animation: archify-story-caption-in 140ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: mirofy-story-caption-in 140ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     .guided-story-caption[hidden] { display: none; }
     .guided-story-caption-index {
@@ -2549,7 +2549,7 @@
     html[data-preset="blueprint"] .guided-story-caption { border-radius: 0.2rem; }
     .guided-views[data-story-beat] .guided-view-copy > #guided-view-label,
     .guided-views[data-story-beat] .guided-view-copy > #guided-view-note { display: none; }
-    @keyframes archify-story-caption-in {
+    @keyframes mirofy-story-caption-in {
       from { opacity: 0; transform: translateY(3px); }
       to { opacity: 1; transform: translateY(0); }
     }
@@ -2878,7 +2878,7 @@
       .header { margin-bottom: 1rem; }
       .diagram-container {
         padding: 0.875rem;
-        padding-bottom: calc(0.875rem + var(--archify-nav-reserve));
+        padding-bottom: calc(0.875rem + var(--mirofy-nav-reserve));
       }
       .cards { margin-top: 1rem; }
       .card { padding: 1rem; }
@@ -3000,13 +3000,13 @@
       }
       body { background: #ffffff !important; padding: 0; }
       .container { max-width: none; }
-      .toolbar, .diagram-nav, .focus-chip, .guided-views, .archify-toast, .no-print { display: none !important; }
+      .toolbar, .diagram-nav, .focus-chip, .guided-views, .mirofy-toast, .no-print { display: none !important; }
       .chapter-handoff-overlay { display: none !important; }
       svg [data-node-id][data-chapter-role] { opacity: 1 !important; }
       svg[data-chapter-preview] [data-node-id],
       svg[data-chapter-preview] [data-edge-from] { opacity: 1 !important; filter: none !important; }
       .diagram-container, .card { box-shadow: none; border-color: #e2e8f0; }
-      .diagram-container { --archify-nav-reserve: 0px !important; }
+      .diagram-container { --mirofy-nav-reserve: 0px !important; }
       html[data-preset="signal-flow"] .diagram-container,
       html[data-preset="signal-flow"] .card { background: #ffffff; }
       .cards { grid-template-columns: 1fr 1fr; }
@@ -3545,7 +3545,7 @@
     }
 
     /* Toast — brief feedback for actions like "copied" */
-    .archify-toast {
+    .mirofy-toast {
       position: fixed;
       top: 1rem;
       left: 50%;
@@ -3563,7 +3563,7 @@
       pointer-events: none;
       box-shadow: 0 4px 20px rgba(0,0,0,0.25);
     }
-    .archify-toast.show {
+    .mirofy-toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
@@ -3643,7 +3643,7 @@
       html:not([data-embed="true"]) .diagram-container[data-wide-diagram="true"] .semantic-lens,
       html:not([data-embed="true"]) .diagram-container[data-wide-diagram="true"] .diagram-guide,
       html:not([data-embed="true"]) .diagram-container[data-wide-diagram="true"] .node-finder {
-        transform: translateX(var(--archify-scroll-x, 0px));
+        transform: translateX(var(--mirofy-scroll-x, 0px));
       }
       .diagram-nav { right: 0.5rem; bottom: 0.5rem; }
       .diagram-nav button {
@@ -3658,14 +3658,14 @@
         width: min(10.25rem, calc(100% - 1rem));
       }
       .overview-map[data-docked="true"] {
-        right: var(--archify-radar-right, 0.5rem);
-        top: var(--archify-radar-top, 0.5rem);
+        right: var(--mirofy-radar-right, 0.5rem);
+        top: var(--mirofy-radar-top, 0.5rem);
         bottom: auto;
         transform: none !important;
       }
       .overview-map[data-docked="true"][data-dock-side="left"] {
         right: auto;
-        left: var(--archify-radar-left, 0.5rem);
+        left: var(--mirofy-radar-left, 0.5rem);
       }
       .overview-map-surface { height: 4rem; }
       .overview-map-feedback { right: 0.5rem; bottom: 3.7rem; }
@@ -3981,7 +3981,7 @@
     svg .s-external   { color: var(--external-stroke); }
 
     /* Brand Marks are authored identity badges. Their color is contained
-       inside one neutral plate so vendor color never replaces Archify's
+       inside one neutral plate so vendor color never replaces Mirofy's
        semantic node and relationship vocabulary. */
     svg .brand-mark { pointer-events: none; }
     svg .brand-mark-badge { fill: #fff; stroke: none; }
@@ -4181,7 +4181,7 @@
       stroke-dashoffset: 0;
       vector-effect: non-scaling-stroke;
       opacity: 0.9;
-      animation: archify-semantic-lens-flow 1.35s linear 1 both;
+      animation: mirofy-semantic-lens-flow 1.35s linear 1 both;
       animation-delay: var(--lens-flow-delay, 0s);
     }
     .semantic-lens-flow[data-direction="out"],
@@ -4334,7 +4334,7 @@
       vector-effect: non-scaling-stroke;
       opacity: 0;
       filter: drop-shadow(0 0 4px var(--arrow-emphasis));
-      animation: archify-relationship-pulse 1.2s linear 1 both;
+      animation: mirofy-relationship-pulse 1.2s linear 1 both;
     }
     svg[data-preset="signal-flow"] .relationship-flow-pulse {
       stroke: var(--frontend-stroke);
@@ -4357,10 +4357,10 @@
       pointer-events: none;
     }
     .relationship-flow-token {
-      animation: archify-relationship-token-life 1.2s linear 1 both;
+      animation: mirofy-relationship-token-life 1.2s linear 1 both;
     }
     .story-flow-token {
-      animation: archify-relationship-token-life 0.78s linear 1 both;
+      animation: mirofy-relationship-token-life 0.78s linear 1 both;
     }
     .semantic-flow-token-halo {
       fill: var(--mask);
@@ -4414,7 +4414,7 @@
       stroke-dashoffset: 0;
       vector-effect: non-scaling-stroke;
       opacity: 0.94;
-      animation: archify-intent-trace-flow 1.15s linear 1 both;
+      animation: mirofy-intent-trace-flow 1.15s linear 1 both;
     }
     /* Direction names describe each edge relative to the focused node only.
        The cloned geometry already runs from the authored source to target, so
@@ -4496,7 +4496,7 @@
       vector-effect: non-scaling-stroke;
       opacity: 0.96;
       filter: drop-shadow(0 0 5px var(--backend-stroke));
-      animation: archify-route-probe-flow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 1 both;
+      animation: mirofy-route-probe-flow 1.1s cubic-bezier(0.22, 1, 0.36, 1) 1 both;
       animation-delay: calc(var(--route-step, 0) * 0.16s);
     }
     .route-journey-flow {
@@ -4509,7 +4509,7 @@
       vector-effect: non-scaling-stroke;
       opacity: 0;
       filter: drop-shadow(0 0 6px var(--backend-stroke));
-      animation: archify-route-journey-flow 780ms cubic-bezier(0.22, 1, 0.36, 1) 1 both;
+      animation: mirofy-route-journey-flow 780ms cubic-bezier(0.22, 1, 0.36, 1) 1 both;
     }
     svg[data-preset="blueprint"] [data-route-start],
     svg[data-preset="blueprint"] [data-route-end],
@@ -4598,7 +4598,7 @@
     svg[data-story-beat] [data-story-step][data-story-beat-state="active"] {
       opacity: 1;
       filter: drop-shadow(0 0 7px var(--frontend-stroke));
-      animation: archify-story-beat-node 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation: mirofy-story-beat-node 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     svg[data-story-beat] [data-edge-from][data-story-beat-step] {
       opacity: 0.16;
@@ -4615,7 +4615,7 @@
       stroke-dasharray: 2 13;
       stroke-dashoffset: 30;
       opacity: 0.92;
-      animation: archify-story-flow 0.78s linear 1 both;
+      animation: mirofy-story-flow 0.78s linear 1 both;
     }
     svg[data-preset="blueprint"] .story-trail-flow {
       stroke-linecap: square;
@@ -4665,13 +4665,13 @@
        authored solid/security/async line language. WebM samples the same
        authored geometry into an explicit canvas timeline. */
     html[data-ambient-motion="running"] svg[data-animation="trace"] [data-animate="edge"] {
-      animation: archify-edge-flow 2.4s linear 1;
+      animation: mirofy-edge-flow 2.4s linear 1;
       animation-delay: calc(var(--step, 0) * 160ms);
     }
     html[data-ambient-motion="running"] svg[data-animation="trace"] [data-animate="node"] {
       transform-box: fill-box;
       transform-origin: center;
-      animation: archify-node-pulse 3.6s ease-in-out 1;
+      animation: mirofy-node-pulse 3.6s ease-in-out 1;
       animation-delay: calc(var(--step, 0) * 160ms);
     }
     svg[data-preset="signal-flow"][data-animation="trace"] [data-animate="edge"] {
@@ -4688,7 +4688,7 @@
       animation-duration: 2.15s;
     }
     svg[data-preset="blueprint"][data-animation="trace"] [data-animate="node"] {
-      animation-name: archify-blueprint-node-pulse;
+      animation-name: mirofy-blueprint-node-pulse;
       animation-duration: 3.8s;
     }
     svg[data-preset="editorial"][data-animation="trace"] [data-animate="edge"] {
@@ -4696,7 +4696,7 @@
       animation-duration: 2.2s;
     }
     svg[data-preset="editorial"][data-animation="trace"] [data-animate="node"] {
-      animation-name: archify-editorial-node-pulse;
+      animation-name: mirofy-editorial-node-pulse;
       animation-duration: 3.5s;
     }
     /* Embedded proofs are static until a named Story Trail chapter is played.
@@ -4707,83 +4707,83 @@
       animation: none !important;
       stroke-dashoffset: 0;
     }
-    @keyframes archify-edge-flow {
+    @keyframes mirofy-edge-flow {
       0% { stroke-dasharray: 10 8; stroke-dashoffset: 54; opacity: 0.42; }
       88% { stroke-dasharray: 10 8; stroke-dashoffset: 0; opacity: 1; }
       99.9% { stroke-dasharray: 10 8; stroke-dashoffset: 0; opacity: 1; }
       100% { stroke-dashoffset: 0; opacity: 1; }
     }
-    @keyframes archify-node-pulse {
+    @keyframes mirofy-node-pulse {
       0%, 72%, 100% { filter: none; stroke-width: 1.5; }
       18%, 36% {
         filter: drop-shadow(0 0 8px var(--arrow-emphasis));
         stroke-width: 2.4;
       }
     }
-    @keyframes archify-blueprint-node-pulse {
+    @keyframes mirofy-blueprint-node-pulse {
       0%, 72%, 100% { opacity: 1; filter: none; }
       18%, 36% { opacity: 0.72; filter: drop-shadow(0 0 2px var(--frontend-stroke)); }
     }
-    @keyframes archify-editorial-node-pulse {
+    @keyframes mirofy-editorial-node-pulse {
       0%, 72%, 100% { opacity: 1; filter: none; }
       18%, 36% { opacity: 0.78; filter: drop-shadow(0 2px 2px color-mix(in srgb, var(--text) 18%, transparent)); }
     }
-    @keyframes archify-signal-scan {
+    @keyframes mirofy-signal-scan {
       0%, 18% { opacity: 1; transform: translateX(-70%); }
       70% { opacity: 1; transform: translateX(70%); }
       100% { opacity: 0; transform: translateX(70%); }
     }
-    @keyframes archify-radar-live {
+    @keyframes mirofy-radar-live {
       0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--backend-stroke) 52%, transparent); }
       55%, 100% { box-shadow: 0 0 0 0.32rem transparent; }
     }
-    @keyframes archify-guided-progress {
+    @keyframes mirofy-guided-progress {
       from { transform: scaleX(var(--guided-progress-start, 0)); }
       to { transform: scaleX(1); }
     }
-    @keyframes archify-story-flow {
+    @keyframes mirofy-story-flow {
       to { stroke-dashoffset: 0; }
     }
-    @keyframes archify-intent-trace-flow {
+    @keyframes mirofy-intent-trace-flow {
       0% { opacity: 0.28; stroke-dashoffset: 0; }
       12%, 78% { opacity: 0.94; }
       100% { opacity: 0; stroke-dashoffset: -1; }
     }
-    @keyframes archify-route-probe-flow {
+    @keyframes mirofy-route-probe-flow {
       0% { stroke-dashoffset: 0; opacity: 0.96; }
       78% { stroke-dashoffset: -1; opacity: 0.96; }
       100% { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 0.58; }
     }
-    @keyframes archify-route-journey-flow {
+    @keyframes mirofy-route-journey-flow {
       0% { opacity: 0.16; stroke-dashoffset: 0; }
       14%, 76% { opacity: 1; }
       100% { opacity: 0; stroke-dashoffset: -1; }
     }
-    @keyframes archify-semantic-lens-flow {
+    @keyframes mirofy-semantic-lens-flow {
       0% { opacity: 0.2; stroke-dashoffset: 0; }
       12%, 78% { opacity: 0.9; }
       100% { opacity: 0; stroke-dashoffset: -1; }
     }
-    @keyframes archify-relationship-pulse {
+    @keyframes mirofy-relationship-pulse {
       0% { opacity: 0.18; stroke-dashoffset: 0; }
       10%, 76% { opacity: 0.98; }
       100% { opacity: 0; stroke-dashoffset: -1; }
     }
-    @keyframes archify-relationship-token-life {
+    @keyframes mirofy-relationship-token-life {
       0%, 7% { opacity: 0; }
       13%, 82% { opacity: 1; }
       100% { opacity: 0; }
     }
-    @keyframes archify-story-beat-node {
+    @keyframes mirofy-story-beat-node {
       from { opacity: 0.48; filter: saturate(0.6); }
       58% { opacity: 1; filter: drop-shadow(0 0 10px var(--frontend-stroke)); }
       to { opacity: 1; filter: drop-shadow(0 0 7px var(--frontend-stroke)); }
     }
-    @keyframes archify-share-cue-enter {
+    @keyframes mirofy-share-cue-enter {
       from { opacity: 0; transform: translate(-50%, -0.45rem); }
       to { opacity: 1; transform: translate(-50%, 0); }
     }
-    @keyframes archify-share-cue-pulse {
+    @keyframes mirofy-share-cue-pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.48; transform: scale(0.78); }
     }
@@ -4959,9 +4959,9 @@
       </div>
     </div>
 
-    <script id="archify-guided-views-data" type="application/json">[{"id":"request-and-auth","label":"Request and identity","focus":["user","web","api","auth"],"note":"Follow the user request through the authentication check."},{"id":"cache-fallback","label":"Cache fallback","focus":["api","redis","db"],"note":"See the cache miss and the source-of-truth query it triggers."},{"id":"return-and-trace","label":"Return and trace","focus":["db","api","redis","trace","web","user"],"note":"Separate response latency from the non-blocking observability write."}]</script>
+    <script id="mirofy-guided-views-data" type="application/json">[{"id":"request-and-auth","label":"Request and identity","focus":["user","web","api","auth"],"note":"Follow the user request through the authentication check."},{"id":"cache-fallback","label":"Cache fallback","focus":["api","redis","db"],"note":"See the cache miss and the source-of-truth query it triggers."},{"id":"return-and-trace","label":"Return and trace","focus":["db","api","redis","trace","web","user"],"note":"Separate response latency from the non-blocking observability write."}]</script>
 
-    <script id="archify-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"S cycles","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"ARCHIFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.story":"the guided story","viewer.owner.chapter":"the active chapter","viewer.owner.chapterPreview":"the chapter delta preview","viewer.owner.handoff":"the chapter handoff","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyShareCard":"Copy Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.period":"Clipboard image write not supported by this browser.","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.copiedShare":"Copied Share Card","viewer.export.downloadedShare":"Downloaded Share Card","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Route: {source} → {target} · {count} directed hop","viewer.export.card.routeSummary.other":"Route: {source} → {target} · {count} directed hops","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"ARCHIFY · ROUTE · {hops}","viewer.export.card.reachBadge":"ARCHIFY · {direction} REACH","viewer.export.card.defaultBadge":"ARCHIFY · {preset} · {theme}","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guided.region":"Guided diagram views","viewer.guided.previous":"Previous guided view","viewer.guided.previous.title":"Previous guided view ([)","viewer.guided.next":"Next guided view","viewer.guided.next.title":"Next guided view (])","viewer.guided.views":"Guided views","viewer.guided.explore":"Explore this system","viewer.guided.intro":"Step through curated paths without changing the source diagram.","viewer.guided.trail":"Story trail","viewer.guided.beat":"Beat","viewer.guided.nextBeat":"Next","viewer.guided.play":"Play guided story","viewer.guided.play.title":"Play guided story (P)","viewer.guided.pause":"Pause guided story","viewer.guided.pause.title":"Pause guided story (P)","viewer.guided.replay":"Replay guided story","viewer.guided.replay.title":"Replay guided story (P)","viewer.guided.playStory":"Play story","viewer.guided.pauseStory":"Pause","viewer.guided.replayStory":"Replay story","viewer.guided.motionUnavailable":"Story playback unavailable while motion is Still","viewer.guided.enableMotion":"Switch motion to Live to play the guided story","viewer.guided.selectBeatLink":"Select a Story Beat to copy its exact link","viewer.guided.copyMoment":"Copy moment","viewer.guided.momentCopied":"Moment link copied","viewer.guided.momentCopyFailed":"Could not copy story moment link","viewer.guided.copied":"Copied","viewer.guided.copyFailed":"Copy failed","viewer.guided.showAll":"Show all","viewer.guided.showAll.aria":"Show entire diagram","viewer.guided.chapters":"Story chapters","viewer.guided.storyTrail":"Story trail for {label}: {count} beats","viewer.guided.chapter.open":"Open chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.current":"Current chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.selectedNodes":"{count} selected nodes","viewer.guided.chapter.stops":"{count} stops","viewer.guided.chapter.stop.one":"{count} stop","viewer.guided.chapter.stop.other":"{count} stops","viewer.guided.chapter.current.title":"{label} — current chapter, {count} stops","viewer.guided.chapter.delta.expanded":"{stay} stay, {enter} enter, {leave} leave","viewer.guided.chapter.delta.aria":"Open chapter {index} of {total}: {label}. Chapter focus delta: {delta}","viewer.guided.chapter.delta.title":"{label} — {delta} chapter focus","viewer.guided.handoff":"{from} → {to} · via {label}","viewer.guided.share.chapter":"Chapter {index} / {total}","viewer.guided.share.initial":"Chapter 01 / 01","viewer.guided.share.default":"Guided chapter","viewer.guided.state.ready":"Ready","viewer.guided.state.playing":"Playing","viewer.guided.state.settled":"Settled","viewer.guided.state.paused":"Paused","viewer.guided.state.pinned":"Pinned","viewer.guided.state.still":"Still","viewer.guided.share.step":"Step {index} / {total} · {label}","viewer.guided.share.staticMoment":"{step} · Static moment","viewer.guided.share.complete":"{count} steps complete · {note}","viewer.guided.share.settled":"Path settled for reading.","viewer.guided.share.staticPath":"{count} steps · Static path","viewer.guided.share.ready":"{count} steps · Ready","viewer.guided.share.aria":"{state} chapter {index} of {total}: {label}. {beat}. {route}","viewer.guided.beat.start":"Beat {index} / {total} · {label} · starting point","viewer.guided.beat.forward":"Beat {index} / {total} · {from} → {to}","viewer.guided.beat.reverse":"Beat {index} / {total} · {from} → {to} · reverse authored link","viewer.guided.beat.multiple":"Beat {index} / {total} · {from} ⇄ {to} · {count} authored links","viewer.guided.beat.group":"Beat {index} / {total} · {from} · {to} · grouped · no direct link","viewer.guided.beat.aria.prefix":"Story beat {index} of {total}: {label}. ","viewer.guided.beat.aria.start":"Starting point.","viewer.guided.beat.aria.forward":"From {from} through one authored forward relationship.","viewer.guided.beat.aria.reverse":"From {from}; the authored relationship points from {to} to {from}.","viewer.guided.beat.aria.multiple":"From {from} through {count} authored relationships; shown without arbitrary motion.","viewer.guided.beat.aria.group":"Grouped from {from} with no direct authored relationship.","viewer.guided.caption.start":"Starting point","viewer.guided.caption.grouped":"Grouped transition · no direct authored link","viewer.guided.caption.more":" +{count} more","viewer.guided.caption.reverse":"Reverse authored relationship","viewer.guided.caption.relationships":"{count} authored relationships","viewer.guided.caption.relationship":"Authored relationship","viewer.guided.caption.direction":"authored direction: {from} → {to}","viewer.guided.caption.starting":"Authored starting point","viewer.guided.beatLink":"Copy link to current story moment: Beat {index} of {total}: {label}","viewer.guided.noStory":"This diagram has no authored guided story.","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.story":"Play the guided story","viewer.guide.story.hint":"Walk the authored chapters and real relationships.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.facts":"{nodes} · {relationships} · {views}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.fact.view.one":"{count} guided view","viewer.guide.fact.view.other":"{count} guided views","viewer.guide.story.available.one":"Walk {count} authored chapter and its real relationships.","viewer.guide.story.available.other":"Walk {count} authored chapters and their real relationships.","viewer.guide.story.unavailable":"No authored guided story in this diagram.","viewer.guide.open":"Open diagram guide","viewer.guide.noStory":"This diagram has no authored guided story.","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.sourceMarker":"SRC","viewer.passport.beacon.one":"{count} verified source; focus this node to inspect","viewer.passport.beacon.other":"{count} verified sources; focus this node to inspect","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Route probe","viewer.route.start":"Choose a start node","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Traced route","viewer.route.pickTwo":"Pick two semantic nodes on the diagram","viewer.route.pickOne":"Pick a semantic node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Choose the source, then the destination. Direction matters.","viewer.route.destination":"Choose a destination from {label}","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"A route needs two distinct semantic nodes.","viewer.route.unreachable":"No directed route to {label}","viewer.route.unreachable.detail":"{target} is not reachable from {source}. Pick a highlighted destination.","viewer.route.start.instructions":"Select the source. The next step will reveal only directed destinations.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest authored route","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} directed hop","viewer.route.overview.hop.other":"{count} directed hops","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} directed destination available. Pick a highlighted node.","viewer.route.destination.count.other":"{count} directed destinations available. Pick a highlighted node.","viewer.route.noOutgoing":"No outgoing route starts here. Clear and choose another source.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"PATH","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
+    <script id="mirofy-i18n-data" type="application/json">{"locale":"en","messages":{"viewer.kind.frontend":"Frontend","viewer.kind.backend":"Backend","viewer.kind.database":"Database","viewer.kind.cloud":"Cloud","viewer.kind.security":"Security","viewer.kind.messagebus":"Message bus","viewer.kind.external":"External","viewer.kind.neutral":"Neutral","viewer.kind.node":"Node","viewer.kind.start":"Start","viewer.kind.active":"Active","viewer.kind.waiting":"Waiting","viewer.kind.decision":"Decision","viewer.kind.success":"Success","viewer.kind.failure":"Failure","viewer.toolbar.actions":"Diagram actions","viewer.theme.toggle.title":"Toggle theme (T)","viewer.theme.toggle":"Toggle color theme","viewer.theme.dark":"Dark","viewer.theme.light":"Light","viewer.preset.choose.title":"Choose visual style (S cycles)","viewer.preset.choose":"Choose visual style","viewer.preset.style":"Style","viewer.preset.menu":"Visual style","viewer.preset.identity":"Visual identity","viewer.preset.cycles":"S cycles","viewer.preset.classic":"Classic","viewer.preset.classic.short":"Classic","viewer.preset.classic.hint":"Stable technical default","viewer.preset.flow":"Signal Flow","viewer.preset.flow.short":"Flow","viewer.preset.flow.hint":"Motion-forward presentation","viewer.preset.blueprint":"Blueprint","viewer.preset.blueprint.hint":"Engineering review","viewer.preset.editorial":"Editorial","viewer.preset.editorial.hint":"Publication and launch notes","viewer.preset.badge.signalFlow":"SIGNAL FLOW","viewer.preset.badge.blueprint":"BLUEPRINT / REV 01","viewer.preset.badge.editorial":"EDITORIAL / FIELD NOTE","viewer.preset.badge.editorialPlate":"MIROFY / PLATE 04","viewer.preset.current":"Visual style: {style}. Choose visual style","viewer.motion.live":"Live","viewer.motion.still":"Still","viewer.motion.pause":"Pause motion","viewer.motion.resume":"Resume motion","viewer.motion.reduced":"Motion paused by reduced-motion preference","viewer.motion.hidden":"Motion paused while this page is hidden","viewer.motion.yielding":"Pause motion; currently yielding to {owner}","viewer.motion.yielding.title":"Live preview enabled · yielding to {owner}","viewer.owner.story":"the guided story","viewer.owner.chapter":"the active chapter","viewer.owner.chapterPreview":"the chapter delta preview","viewer.owner.handoff":"the chapter handoff","viewer.owner.route":"Route Probe","viewer.owner.lens":"Semantic Lens","viewer.owner.relationship":"Relationship Preview","viewer.owner.intent":"Intent Trace","viewer.owner.focus":"semantic focus","viewer.owner.legend":"legend preview","viewer.owner.reader":"reader interaction","viewer.present.enter":"Enter presentation stage","viewer.present.enter.title":"Presentation stage (F)","viewer.present.exit":"Exit presentation stage","viewer.present.exit.title":"Exit presentation stage (F or Escape)","viewer.present.present":"Present","viewer.present.exit.label":"Exit","viewer.export.button":"Export","viewer.export.button.title":"Export diagram (E)","viewer.export.diagram":"Export diagram","viewer.export.menu":"Export","viewer.export.subtitle":"Portable, clean outputs","viewer.export.share":"Share","viewer.export.shareCard":"Share Card","viewer.export.routeShareCard":"Route Share Card","viewer.export.reachShareCard":"Reach Share Card","viewer.export.copyShareCard":"Copy Share Card","viewer.export.copyDiagram":"Copy diagram","viewer.export.clipboardPng":"PNG to clipboard","viewer.export.raster":"Raster images","viewer.export.image":"Image","viewer.export.lossless":"Lossless image","viewer.export.compact":"Compact image","viewer.export.modern":"Modern image","viewer.export.vectorMotion":"Vector and motion","viewer.export.vectorMotion.heading":"Vector \u0026 motion","viewer.export.editable":"Editable vector","viewer.export.motion6s":"6s motion","viewer.export.unsupported":"Not supported by this browser","viewer.export.clipboardUnsupported":"Clipboard image write not supported by this browser","viewer.export.clipboardUnsupported.period":"Clipboard image write not supported by this browser.","viewer.export.clipboardUnsupported.short":"Clipboard image write not supported in this browser.","viewer.export.motionUnavailable":"Motion capture unavailable in this browser","viewer.export.webmUnavailable":"WebM unavailable in this browser","viewer.export.failed":"Export failed: {message}","viewer.export.unknownVariant":"Unknown Share Card variant: {variant}","viewer.export.routeRequired":"Trace a route before exporting a Route Share Card","viewer.export.reachRequired":"Trace authored reach before exporting a Reach Share Card","viewer.export.unknown":"unknown","viewer.export.routeFailed":"Route Share Card export failed: {message}","viewer.export.reachFailed":"Reach Share Card export failed: {message}","viewer.export.copyFailed":"Copy failed: {message}","viewer.export.copiedPng":"Copied PNG to clipboard","viewer.export.copiedShare":"Copied Share Card","viewer.export.downloadedShare":"Downloaded Share Card","viewer.export.downloadedRoute":"Downloaded Route Share Card","viewer.export.downloadedReach":"Downloaded Reach Share Card","viewer.export.downloadedWebm":"Downloaded WebM","viewer.export.recording":"Recording 6 seconds of motion…","viewer.export.card.routeSummary.one":"Route: {source} → {target} · {count} directed hop","viewer.export.card.routeSummary.other":"Route: {source} → {target} · {count} directed hops","viewer.export.card.reachSummary":"Authored {direction} from {origin} · {nodes} · {links} · max {hops}","viewer.export.card.node.one":"{count} node","viewer.export.card.node.other":"{count} nodes","viewer.export.card.link.one":"{count} link","viewer.export.card.link.other":"{count} links","viewer.export.card.hop.one":"{count} hop","viewer.export.card.hop.other":"{count} hops","viewer.export.card.routeBadge":"MIROFY · ROUTE · {hops}","viewer.export.card.reachBadge":"MIROFY · {direction} REACH","viewer.export.card.defaultBadge":"MIROFY · {preset} · {theme}","viewer.export.direction.upstream":"Upstream","viewer.export.direction.downstream":"Downstream","viewer.export.error.canvasUnavailable":"Canvas unavailable for {label}","viewer.export.error.contextUnavailable":"2D canvas context unavailable for {label}","viewer.export.error.toBlobUnavailable":"canvas.toBlob unavailable for {label}","viewer.export.error.toBlobNull":"canvas.toBlob returned no data for {label}","viewer.export.error.variantsCombined":"Share Card variants cannot be combined","viewer.export.error.viewerState":"Share Card export could not remove temporary viewer state","viewer.export.error.routeState":"Route Card export could not preserve the resolved route safely","viewer.export.error.reachState":"Reach Card export could not preserve authored reach safely","viewer.export.error.webmRequirements":"WebM motion export requires a trace animation and browser MediaRecorder support","viewer.export.error.mediaRecorder":"MediaRecorder failed","viewer.export.error.emptyWebm":"MediaRecorder produced an empty WebM","viewer.export.error.webmBackground":"SVG background could not be loaded for WebM export","viewer.guided.region":"Guided diagram views","viewer.guided.previous":"Previous guided view","viewer.guided.previous.title":"Previous guided view ([)","viewer.guided.next":"Next guided view","viewer.guided.next.title":"Next guided view (])","viewer.guided.views":"Guided views","viewer.guided.explore":"Explore this system","viewer.guided.intro":"Step through curated paths without changing the source diagram.","viewer.guided.trail":"Story trail","viewer.guided.beat":"Beat","viewer.guided.nextBeat":"Next","viewer.guided.play":"Play guided story","viewer.guided.play.title":"Play guided story (P)","viewer.guided.pause":"Pause guided story","viewer.guided.pause.title":"Pause guided story (P)","viewer.guided.replay":"Replay guided story","viewer.guided.replay.title":"Replay guided story (P)","viewer.guided.playStory":"Play story","viewer.guided.pauseStory":"Pause","viewer.guided.replayStory":"Replay story","viewer.guided.motionUnavailable":"Story playback unavailable while motion is Still","viewer.guided.enableMotion":"Switch motion to Live to play the guided story","viewer.guided.selectBeatLink":"Select a Story Beat to copy its exact link","viewer.guided.copyMoment":"Copy moment","viewer.guided.momentCopied":"Moment link copied","viewer.guided.momentCopyFailed":"Could not copy story moment link","viewer.guided.copied":"Copied","viewer.guided.copyFailed":"Copy failed","viewer.guided.showAll":"Show all","viewer.guided.showAll.aria":"Show entire diagram","viewer.guided.chapters":"Story chapters","viewer.guided.storyTrail":"Story trail for {label}: {count} beats","viewer.guided.chapter.open":"Open chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.current":"Current chapter {index} of {total}: {label}, {count} stops","viewer.guided.chapter.selectedNodes":"{count} selected nodes","viewer.guided.chapter.stops":"{count} stops","viewer.guided.chapter.stop.one":"{count} stop","viewer.guided.chapter.stop.other":"{count} stops","viewer.guided.chapter.current.title":"{label} — current chapter, {count} stops","viewer.guided.chapter.delta.expanded":"{stay} stay, {enter} enter, {leave} leave","viewer.guided.chapter.delta.aria":"Open chapter {index} of {total}: {label}. Chapter focus delta: {delta}","viewer.guided.chapter.delta.title":"{label} — {delta} chapter focus","viewer.guided.handoff":"{from} → {to} · via {label}","viewer.guided.share.chapter":"Chapter {index} / {total}","viewer.guided.share.initial":"Chapter 01 / 01","viewer.guided.share.default":"Guided chapter","viewer.guided.state.ready":"Ready","viewer.guided.state.playing":"Playing","viewer.guided.state.settled":"Settled","viewer.guided.state.paused":"Paused","viewer.guided.state.pinned":"Pinned","viewer.guided.state.still":"Still","viewer.guided.share.step":"Step {index} / {total} · {label}","viewer.guided.share.staticMoment":"{step} · Static moment","viewer.guided.share.complete":"{count} steps complete · {note}","viewer.guided.share.settled":"Path settled for reading.","viewer.guided.share.staticPath":"{count} steps · Static path","viewer.guided.share.ready":"{count} steps · Ready","viewer.guided.share.aria":"{state} chapter {index} of {total}: {label}. {beat}. {route}","viewer.guided.beat.start":"Beat {index} / {total} · {label} · starting point","viewer.guided.beat.forward":"Beat {index} / {total} · {from} → {to}","viewer.guided.beat.reverse":"Beat {index} / {total} · {from} → {to} · reverse authored link","viewer.guided.beat.multiple":"Beat {index} / {total} · {from} ⇄ {to} · {count} authored links","viewer.guided.beat.group":"Beat {index} / {total} · {from} · {to} · grouped · no direct link","viewer.guided.beat.aria.prefix":"Story beat {index} of {total}: {label}. ","viewer.guided.beat.aria.start":"Starting point.","viewer.guided.beat.aria.forward":"From {from} through one authored forward relationship.","viewer.guided.beat.aria.reverse":"From {from}; the authored relationship points from {to} to {from}.","viewer.guided.beat.aria.multiple":"From {from} through {count} authored relationships; shown without arbitrary motion.","viewer.guided.beat.aria.group":"Grouped from {from} with no direct authored relationship.","viewer.guided.caption.start":"Starting point","viewer.guided.caption.grouped":"Grouped transition · no direct authored link","viewer.guided.caption.more":" +{count} more","viewer.guided.caption.reverse":"Reverse authored relationship","viewer.guided.caption.relationships":"{count} authored relationships","viewer.guided.caption.relationship":"Authored relationship","viewer.guided.caption.direction":"authored direction: {from} → {to}","viewer.guided.caption.starting":"Authored starting point","viewer.guided.beatLink":"Copy link to current story moment: Beat {index} of {total}: {label}","viewer.guided.noStory":"This diagram has no authored guided story.","viewer.guide.eyebrow":"Diagram guide","viewer.guide.close":"Close diagram guide","viewer.guide.inspecting":"Inspecting compiled semantics","viewer.guide.actions":"Diagram exploration actions","viewer.guide.find":"Find any node","viewer.guide.find.hint":"Search labels, responsibilities, kinds, and stable IDs.","viewer.guide.route":"Trace a route","viewer.guide.route.aria":"Trace a directed route","viewer.guide.route.hint":"Ask how two semantic nodes connect in authored direction.","viewer.guide.map":"See the whole system","viewer.guide.map.hint":"Open Semantic Radar with a live viewport and stable nodes.","viewer.guide.lens":"Compare semantic kinds","viewer.guide.lens.hint":"Count roles, reveal their traffic, and compare direct authored links.","viewer.guide.story":"Play the guided story","viewer.guide.story.hint":"Walk the authored chapters and real relationships.","viewer.guide.present":"Enter Presentation Stage","viewer.guide.present.hint":"Give the live diagram the viewport without changing export.","viewer.guide.shortcuts":"Additional keyboard shortcuts","viewer.guide.shortcut.export":"Export","viewer.guide.shortcut.theme":"Theme","viewer.guide.shortcut.style":"Style","viewer.guide.shortcut.reset":"Reset","viewer.guide.shortcut.zoomIn":"Zoom in","viewer.guide.shortcut.zoomOut":"Zoom out","viewer.guide.shortcut.close":"Close","viewer.guide.facts":"{nodes} · {relationships} · {views}","viewer.guide.fact.node.one":"{count} semantic node","viewer.guide.fact.node.other":"{count} semantic nodes","viewer.guide.fact.relationship.one":"{count} relationship","viewer.guide.fact.relationship.other":"{count} relationships","viewer.guide.fact.view.one":"{count} guided view","viewer.guide.fact.view.other":"{count} guided views","viewer.guide.story.available.one":"Walk {count} authored chapter and its real relationships.","viewer.guide.story.available.other":"Walk {count} authored chapters and their real relationships.","viewer.guide.story.unavailable":"No authored guided story in this diagram.","viewer.guide.open":"Open diagram guide","viewer.guide.noStory":"This diagram has no authored guided story.","viewer.finder.title":"Find a node","viewer.finder.close":"Close node finder","viewer.finder.placeholder":"Search labels or IDs","viewer.finder.search":"Search diagram nodes","viewer.finder.results":"Diagram nodes","viewer.finder.empty":"No matching nodes","viewer.finder.result.focus":"Focus {label}","viewer.finder.result.routeStart":"Choose {label} as route start","viewer.finder.result.routeTarget":"Choose {label} as route destination, {links}","viewer.finder.status.empty":"No matching nodes","viewer.finder.status.count.one":"{count} matching node","viewer.finder.status.count.other":"{count} matching nodes","viewer.finder.noun.nodes":"nodes","viewer.finder.link.one":"{count} link","viewer.finder.link.other":"{count} links","viewer.finder.result.focus.one":"Focus {label}, {count} related connection","viewer.finder.result.focus.other":"Focus {label}, {count} related connections","viewer.finder.status.filtered":"{visible} of {available} {noun}","viewer.finder.status.all":"{available} {noun}","viewer.passport.eyebrow":"Semantic passport","viewer.passport.metadata":"Node metadata","viewer.passport.evidence":"Verified source evidence","viewer.passport.verified":"Verified source","viewer.passport.reach":"Authored reach","viewer.passport.reach.trace":"Trace authored reachability","viewer.passport.upstream":"Upstream","viewer.passport.downstream":"Downstream","viewer.passport.upstream.trace":"Trace upstream authored reachability","viewer.passport.downstream.trace":"Trace downstream authored reachability","viewer.passport.close":"Close semantic passport","viewer.passport.copy":"Copy link","viewer.passport.copy.focus":"Copy link to focused node","viewer.passport.relations":"Relations","viewer.passport.relations.show":"Show connected relationships","viewer.passport.relations.hide":"Hide connected relationships","viewer.passport.relations.list":"Connected relationships","viewer.passport.copyRelation":"Copy relation","viewer.passport.copyNode":"Copy node","viewer.passport.copyPinned":"Copy link to pinned relationship","viewer.passport.copySource":"Copy link to source node","viewer.passport.copy.focused.success":"Focused node link copied","viewer.passport.copy.pinned.success":"Pinned relationship link copied","viewer.passport.copy.focused.failed":"Could not copy focused node link","viewer.passport.copy.pinned.failed":"Could not copy pinned relationship link","viewer.passport.relationship.none":"No connected relationships","viewer.passport.relationship.count.one":"{count} relation","viewer.passport.relationship.count.other":"{count} relations","viewer.passport.relationship.show.one":"Show {count} connected relationship","viewer.passport.relationship.show.other":"Show {count} connected relationships","viewer.passport.relationship.summary":"{out} outgoing · {in} incoming{loops}","viewer.passport.relationship.loops":" · {count} loop","viewer.passport.relationship.explorer":"Direct relationship explorer","viewer.passport.relationship.help":"Use arrow keys to explore relationships. Press Enter or Space to pin details; Escape clears.","viewer.passport.relationship.loopsBack":"loops back","viewer.passport.relationship.connectsTo":"connects to","viewer.passport.relationship.connectsFrom":"connects from","viewer.passport.relationship.pinned":"Pinned relationship · {from} → {to} · {label}","viewer.passport.relationship.inspect":"Inspect relationship {index} of {total}: {from} to {to}, {label}. Press Enter for details.","viewer.passport.relationship.group.out":"Outgoing","viewer.passport.relationship.group.in":"Incoming","viewer.passport.relationship.group.loop":"Self loops","viewer.passport.relationship.row":"{group}: {relationship}, {neighbor}","viewer.passport.relationship.direction.out":"OUT →","viewer.passport.relationship.direction.in":"← IN","viewer.passport.relationship.direction.loop":"LOOP","viewer.passport.sourceCount.one":"{count} verified source reference","viewer.passport.sourceCount.other":"{count} verified source references","viewer.passport.sourceMarker":"SRC","viewer.passport.beacon.one":"{count} verified source; focus this node to inspect","viewer.passport.beacon.other":"{count} verified sources; focus this node to inspect","viewer.passport.repository.open":"Open verified repository revision {revision}","viewer.passport.source.open":"Open verified source {path} at revision {revision}","viewer.passport.source.openLink":"Open ↗","viewer.passport.reach.upstream.one":"Trace {count} upstream authored node","viewer.passport.reach.upstream.other":"Trace {count} upstream authored nodes","viewer.passport.reach.downstream.one":"Trace {count} downstream authored node","viewer.passport.reach.downstream.other":"Trace {count} downstream authored nodes","viewer.passport.reach.noUpstream":"No upstream authored nodes","viewer.passport.reach.noDownstream":"No downstream authored nodes","viewer.passport.reach.status":"{direction} · {nodes} nodes · {links} links · max {hops} hops","viewer.route.eyebrow":"Route probe","viewer.route.start":"Choose a start node","viewer.route.start.find":"Find start","viewer.route.start.find.aria":"Find a route start","viewer.route.copy":"Copy link","viewer.route.copy.aria":"Copy link to traced route","viewer.route.clear":"Clear","viewer.route.clear.aria":"Clear route probe","viewer.route.traced":"Traced route","viewer.route.pickTwo":"Pick two semantic nodes on the diagram","viewer.route.pickOne":"Pick a semantic node on the diagram","viewer.route.controls":"Route journey controls","viewer.route.previous":"Previous route position","viewer.route.play":"Play route journey","viewer.route.pause":"Pause route journey","viewer.route.replay":"Replay route journey","viewer.route.next":"Next route position","viewer.route.journey":"Journey","viewer.route.pause.label":"Pause","viewer.route.replay.label":"Replay","viewer.route.overview":"Overview","viewer.route.overview.aria":"Show complete route overview","viewer.route.instructions":"Choose the source, then the destination. Direction matters.","viewer.route.destination":"Choose a destination from {label}","viewer.route.destination.find":"Find target","viewer.route.destination.find.aria":"Find a reachable route destination","viewer.route.differentDestination":"Choose a different destination","viewer.route.distinct":"A route needs two distinct semantic nodes.","viewer.route.unreachable":"No directed route to {label}","viewer.route.unreachable.detail":"{target} is not reachable from {source}. Pick a highlighted destination.","viewer.route.start.instructions":"Select the source. The next step will reveal only directed destinations.","viewer.route.copy.success":"Traced route link copied","viewer.route.copy.failed":"Could not copy traced route link","viewer.route.position":"Route position {index} of {total}: {label}","viewer.route.step":"Step {index} of {total} · {phase} · {label}","viewer.route.motionRequired":"Automatic journey requires Live motion","viewer.route.trigger.clear":"Clear traced route","viewer.route.overview.status":"{nodes} · {hops} · shortest authored route","viewer.route.overview.node.one":"{count} node","viewer.route.overview.node.other":"{count} nodes","viewer.route.overview.hop.one":"{count} directed hop","viewer.route.overview.hop.other":"{count} directed hops","viewer.route.phase.playing":"Playing","viewer.route.phase.complete":"Complete","viewer.route.phase.inspecting":"Inspecting","viewer.route.destination.count.one":"{count} directed destination available. Pick a highlighted node.","viewer.route.destination.count.other":"{count} directed destinations available. Pick a highlighted node.","viewer.route.noOutgoing":"No outgoing route starts here. Clear and choose another source.","viewer.route.result.title":"{source} to {target}","viewer.route.finder.source.title":"Choose route start","viewer.route.finder.source.placeholder":"Search route sources","viewer.route.finder.source.empty":"No matching route sources","viewer.route.finder.source.results":"Nodes that can start a route","viewer.route.finder.source.noun":"route sources","viewer.route.finder.source.badge":"start","viewer.route.finder.target.title":"Destination from {label}","viewer.route.finder.target.placeholder":"Search reachable destinations","viewer.route.finder.target.empty":"No matching reachable destinations","viewer.route.finder.target.results":"Reachable route destinations","viewer.route.finder.target.noun":"reachable destinations","viewer.route.hop.one":"{count} hop","viewer.route.hop.other":"{count} hops","viewer.lens.eyebrow":"Semantic lens","viewer.lens.title":"Compare system roles","viewer.lens.close":"Close semantic lens","viewer.lens.instruction":"Choose up to two semantic kinds. One reveals its real traffic; two compare only direct authored relationships.","viewer.lens.kinds":"Semantic kinds","viewer.lens.choose":"Choose a kind to inspect its nodes and touching relationships.","viewer.lens.copy":"Copy link to semantic lens","viewer.lens.clear":"Clear semantic lens","viewer.lens.open":"Open semantic lens","viewer.lens.openActive":"Open active semantic lens","viewer.lens.legend":"Semantic legend","viewer.lens.legend.inspect.one":"Inspect {label}, {count} node","viewer.lens.legend.inspect.other":"Inspect {label}, {count} nodes","viewer.lens.kind.count.one":"{label}, {count} node","viewer.lens.kind.count.other":"{label}, {count} nodes","viewer.lens.compare.one":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationship","viewer.lens.compare.other":"{first} → {second}: {forward} · {second} → {first}: {reverse} · {count} direct relationships","viewer.lens.single":"{nodes} · {relationships} · connected peers remain visible","viewer.lens.node.one":"{count} {label} node","viewer.lens.node.other":"{count} {label} nodes","viewer.lens.relationship.one":"{count} touching relationship","viewer.lens.relationship.other":"{count} touching relationships","viewer.radar.title":"Semantic radar","viewer.radar.building":"Building overview","viewer.radar.openFull":"Open full semantic radar","viewer.radar.open":"Open radar","viewer.radar.close":"Close semantic radar","viewer.radar.surface":"Diagram overview. Click a node to focus it, or use arrow keys to pan.","viewer.radar.click":"Click node","viewer.radar.drag":"Drag to pan","viewer.radar.space":"Semantic radar needs more MAP space.","viewer.radar.nodes":"Semantic diagram radar nodes","viewer.radar.focus":"Focus {label} from Semantic Radar","viewer.radar.status":"{count} nodes · {viewport}","viewer.radar.fullMap":"{count} nodes · full map","viewer.radar.compacted":"Radar compacted to avoid covering the Semantic Passport or MAP controls.","viewer.radar.cancelWaiting":"Cancel semantic radar waiting for more MAP space","viewer.radar.needsSpace":"Semantic radar needs more visible MAP space","viewer.radar.viewport.full":"full map","viewer.radar.viewport.width":"{percent}% width","viewer.radar.viewport.scale":"{percent}% viewport","viewer.nav.controls":"Diagram view controls","viewer.nav.route":"Trace a directed route","viewer.nav.route.title":"Trace route (R)","viewer.nav.route.short":"PATH","viewer.nav.radar":"Open semantic radar","viewer.nav.radar.title":"Semantic radar (M)","viewer.nav.radar.short":"MAP","viewer.nav.lens":"Open semantic lens","viewer.nav.lens.title":"Semantic lens (L)","viewer.nav.lens.short":"LENS","viewer.nav.find":"Find a node","viewer.nav.find.title":"Find a node (/)","viewer.nav.guide":"Open diagram guide","viewer.nav.guide.title":"Diagram guide (?)","viewer.nav.zoomOut":"Zoom out","viewer.nav.zoomOut.title":"Zoom out (-)","viewer.nav.reset":"Reset diagram view","viewer.nav.reset.title":"Reset view (0)","viewer.nav.read":"READ","viewer.nav.zoomIn":"Zoom in","viewer.nav.zoomIn.title":"Zoom in (+)","viewer.nav.camera":"{hint}. Reset diagram view","viewer.nav.camera.title":"{semantic}{hint} · reset view (0)","viewer.nav.camera.semantic":"Semantic camera active · ","viewer.nav.level.map":"MAP","viewer.nav.level.read":"READ","viewer.nav.level.full":"FULL","viewer.nav.level.auto":"AUTO","viewer.nav.detail.map":"Zoom in to reveal relationship labels and node context","viewer.nav.detail.read":"Zoom in again to reveal tags and annotations","viewer.nav.detail.full":"Full diagram detail","viewer.intent.summary":"{label}. {out} outgoing, {in} incoming{loops}. {total} connections. Press Enter for details.","viewer.intent.loops":", {count} self loop","viewer.common.copied":"Copied","viewer.common.copyFailed":"Copy failed","viewer.common.copyLink":"Copy link","viewer.common.clear":"Clear","viewer.common.close":"Close"}}</script>
     <div class="guided-views no-print" id="guided-views" hidden aria-label="Guided diagram views">
       <button id="guided-view-prev" type="button" aria-label="Previous guided view" title="Previous guided view ([)">&#8592;</button>
       <div class="guided-view-copy">
@@ -5003,10 +5003,10 @@
 
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read"
-         data-preset-badge-editorial-plate="ARCHIFY / PLATE 04">
-      <svg viewBox="0 0 820 760" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase">
-        <title id="archify-diagram-title">Cache Miss Request Sequence</title>
-        <desc id="archify-diagram-description">A sequence diagram generated by Archify.</desc>
+         data-preset-badge-editorial-plate="MIROFY / PLATE 04">
+      <svg viewBox="0 0 820 760" role="img" lang="en" aria-labelledby="mirofy-diagram-title mirofy-diagram-description" data-animation="trace" data-preset="classic" data-quality-profile="showcase">
+        <title id="mirofy-diagram-title">Cache Miss Request Sequence</title>
+        <desc id="mirofy-diagram-description">A sequence diagram generated by Mirofy.</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -5508,16 +5508,16 @@
   </div>
 
   <script>
-    var Archify = {};
-    var archifyI18nData = (function () {
-      var node = document.getElementById('archify-i18n-data');
+    var Mirofy = {};
+    var mirofyI18nData = (function () {
+      var node = document.getElementById('mirofy-i18n-data');
       try { return JSON.parse(node ? node.textContent : '{}'); }
       catch (_) { return { locale: 'en', messages: {} }; }
     })();
-    Archify.locale = archifyI18nData.locale || 'en';
+    Mirofy.locale = mirofyI18nData.locale || 'en';
 
     function viewerText(key, values) {
-      var messages = archifyI18nData.messages || {};
+      var messages = mirofyI18nData.messages || {};
       var template = Object.prototype.hasOwnProperty.call(messages, key) ? messages[key] : key;
       return String(template).replace(/\{([a-zA-Z0-9_]+)\}/g, function (match, name) {
         return values && Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : match;
@@ -5568,7 +5568,7 @@
        live page and canonical SVG together, but never rewrites the source,
        URL, or a later diagram's authored default.
        ============================================================ */
-    Archify.preset = (function () {
+    Mirofy.preset = (function () {
       var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];
       var LABELS = {
         classic: viewerText('viewer.preset.classic.short'),
@@ -5615,7 +5615,7 @@
       function isOpen() { return menu.classList.contains('open'); }
       function open(focusLast) {
         if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
         menu.classList.add('open');
         btn.setAttribute('aria-expanded', 'true');
         var available = options();
@@ -5682,8 +5682,8 @@
        Theme toggle — persists to localStorage, respects system pref
        ============================================================ */
 
-    Archify.theme = (function () {
-      var STORAGE_KEY = 'archify-theme';
+    Mirofy.theme = (function () {
+      var STORAGE_KEY = 'mirofy-theme';
       var html = document.documentElement;
       var btn = document.getElementById('btn-theme');
       var label = document.getElementById('theme-label');
@@ -5766,12 +5766,12 @@
 
       function exportError(key, values) {
         var error = new Error(viewerText(key, values));
-        error.archifyViewerMessage = true;
+        error.mirofyViewerMessage = true;
         return error;
       }
 
       function exportMessage(error) {
-        return error && error.archifyViewerMessage
+        return error && error.mirofyViewerMessage
           ? error.message
           : viewerText('viewer.export.unknown');
       }
@@ -6183,7 +6183,7 @@
             try { rules = sheet.cssRules; } catch (_) { return; } // cross-origin
             if (!rules) return;
             Array.prototype.forEach.call(rules, function (rule) {
-              if (rule.type === 7 && /^archify-/.test(rule.name || '')) {
+              if (rule.type === 7 && /^mirofy-/.test(rule.name || '')) {
                 out.push(rule.cssText);
                 return;
               }
@@ -6543,12 +6543,12 @@
           return Promise.reject(exportError('viewer.export.unknownVariant', { variant: options.variant }));
         }
         if (options.variant === 'route') {
-          var routeSnapshot = Archify.routeProbe && Archify.routeProbe.exportSnapshot();
+          var routeSnapshot = Mirofy.routeProbe && Mirofy.routeProbe.exportSnapshot();
           if (!routeSnapshot) return Promise.reject(exportError('viewer.export.routeRequired'));
           return renderShareCard({ routeSnapshot: routeSnapshot });
         }
-        var snapshot = Archify.focus && typeof Archify.focus.reachabilitySnapshot === 'function'
-          ? Archify.focus.reachabilitySnapshot()
+        var snapshot = Mirofy.focus && typeof Mirofy.focus.reachabilitySnapshot === 'function'
+          ? Mirofy.focus.reachabilitySnapshot()
           : null;
         if (!snapshot) return Promise.reject(exportError('viewer.export.reachRequired'));
         return renderShareCard({ reachSnapshot: snapshot });
@@ -6823,8 +6823,8 @@
       };
 
       function syncRouteShareItem() {
-        var snapshot = Archify.routeProbe && typeof Archify.routeProbe.exportSnapshot === 'function'
-          ? Archify.routeProbe.exportSnapshot()
+        var snapshot = Mirofy.routeProbe && typeof Mirofy.routeProbe.exportSnapshot === 'function'
+          ? Mirofy.routeProbe.exportSnapshot()
           : null;
         routeShareItem.hidden = !snapshot;
         routeShareItem.disabled = !snapshot;
@@ -6832,8 +6832,8 @@
       }
 
       function syncReachShareItem() {
-        var snapshot = Archify.focus && typeof Archify.focus.reachabilitySnapshot === 'function'
-          ? Archify.focus.reachabilitySnapshot()
+        var snapshot = Mirofy.focus && typeof Mirofy.focus.reachabilitySnapshot === 'function'
+          ? Mirofy.focus.reachabilitySnapshot()
           : null;
         reachShareItem.hidden = !snapshot;
         reachShareItem.disabled = !snapshot;
@@ -6878,7 +6878,7 @@
       // A live region only announces CHANGES to an existing node, so the toast
       // element is created once up front and updated in place.
       var toastEl = document.createElement('div');
-      toastEl.className = 'archify-toast';
+      toastEl.className = 'mirofy-toast';
       toastEl.setAttribute('role', 'status');
       document.body.appendChild(toastEl);
       var toastTimer = null;
@@ -6894,9 +6894,9 @@
       }
 
       function open(focusLast) {
-        if (Archify.preset && Archify.preset.isOpen()) Archify.preset.close(false);
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.semanticLens && Archify.semanticLens.isOpen()) Archify.semanticLens.close({ restoreFocus: false });
+        if (Mirofy.preset && Mirofy.preset.isOpen()) Mirofy.preset.close(false);
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.semanticLens && Mirofy.semanticLens.isOpen()) Mirofy.semanticLens.close({ restoreFocus: false });
         syncRouteShareItem();
         syncReachShareItem();
         menu.classList.add('open');
@@ -7008,7 +7008,7 @@
       function runRouteShareCard() {
         close(false);
         clearExportReceipt();
-        var snapshot = Archify.routeProbe && Archify.routeProbe.exportSnapshot();
+        var snapshot = Mirofy.routeProbe && Mirofy.routeProbe.exportSnapshot();
         var blobPromise = snapshot
           ? renderShareCard({ routeSnapshot: snapshot })
           : Promise.reject(exportError('viewer.export.routeRequired'));
@@ -7030,8 +7030,8 @@
       function runReachShareCard() {
         close(false);
         clearExportReceipt();
-        var snapshot = Archify.focus && typeof Archify.focus.reachabilitySnapshot === 'function'
-          ? Archify.focus.reachabilitySnapshot()
+        var snapshot = Mirofy.focus && typeof Mirofy.focus.reachabilitySnapshot === 'function'
+          ? Mirofy.focus.reachabilitySnapshot()
           : null;
         var blobPromise = snapshot
           ? renderShareCard({ reachSnapshot: snapshot })
@@ -7166,8 +7166,8 @@
         if (formatBtn && !formatBtn.disabled) { runExport(formatBtn.dataset.format); }
       });
 
-      Archify.motion = { canRecord: canRecordMotion, recordWebm: recordWebm };
-      Archify.exportMenu = {
+      Mirofy.motion = { canRecord: canRecordMotion, recordWebm: recordWebm };
+      Mirofy.exportMenu = {
         open: open,
         close: close,
         isOpen: isOpen,
@@ -7203,8 +7203,8 @@
        trace yields to the strongest semantic owner; Still also parks bounded
        viewer signals without discarding their static meaning.
        ============================================================ */
-    Archify.motionGovernor = (function () {
-      var STORAGE_KEY = 'archify-motion';
+    Mirofy.motionGovernor = (function () {
+      var STORAGE_KEY = 'mirofy-motion';
       var html = document.documentElement;
       var svg = document.querySelector('.diagram-container svg');
       var btn = document.getElementById('btn-motion');
@@ -7296,17 +7296,17 @@
         btn.setAttribute('aria-pressed', paused ? 'false' : 'true');
         btn.disabled = systemPaused;
         label.textContent = viewerText(paused ? 'viewer.motion.still' : 'viewer.motion.live');
-        if (paused && lastEffectivePaused !== true && Archify.guidedViews && Archify.guidedViews.isPlaying()) {
-          Archify.guidedViews.pause();
+        if (paused && lastEffectivePaused !== true && Mirofy.guidedViews && Mirofy.guidedViews.isPlaying()) {
+          Mirofy.guidedViews.pause();
         }
-        if (paused && lastEffectivePaused !== true && Archify.guidedViews && Archify.guidedViews.settleHandoff) {
-          Archify.guidedViews.settleHandoff(systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still'));
+        if (paused && lastEffectivePaused !== true && Mirofy.guidedViews && Mirofy.guidedViews.settleHandoff) {
+          Mirofy.guidedViews.settleHandoff(systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still'));
         }
-        if (paused && lastEffectivePaused !== true && Archify.routeProbe && Archify.routeProbe.isJourneyPlaying && Archify.routeProbe.isJourneyPlaying()) {
-          Archify.routeProbe.pauseJourney({ preserveElapsed: true, reason: systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still') });
+        if (paused && lastEffectivePaused !== true && Mirofy.routeProbe && Mirofy.routeProbe.isJourneyPlaying && Mirofy.routeProbe.isJourneyPlaying()) {
+          Mirofy.routeProbe.pauseJourney({ preserveElapsed: true, reason: systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still') });
         }
         lastEffectivePaused = paused;
-        if (Archify.routeProbe && typeof Archify.routeProbe.syncMotion === 'function') Archify.routeProbe.syncMotion();
+        if (Mirofy.routeProbe && typeof Mirofy.routeProbe.syncMotion === 'function') Mirofy.routeProbe.syncMotion();
         if (systemPaused) {
           btn.setAttribute('aria-label', viewerText('viewer.motion.reduced'));
           btn.title = viewerText('viewer.motion.reduced');
@@ -7467,8 +7467,8 @@
        the authored GitHub revision, source blobs, and optional line ranges
        against the explicit --repo-root. It remains outside the SVG so every
        canonical visual export stays free of repository paths. */
-    Archify.sourceEvidence = (function () {
-      var element = document.getElementById('archify-source-evidence-data');
+    Mirofy.sourceEvidence = (function () {
+      var element = document.getElementById('mirofy-source-evidence-data');
       var payload = null;
       var svgNamespace = 'http://www.w3.org/2000/svg';
       if (element) {
@@ -7532,14 +7532,14 @@
         installBeacons: installBeacons
       };
     })();
-    Archify.sourceEvidence.installBeacons();
+    Mirofy.sourceEvidence.installBeacons();
 
     /* ============================================================
        Explore — stable-ID neighborhood focus + dependency-free pan/zoom.
        Renderer IDs become deep-linkable semantic hooks without turning the
        standalone artifact into a canvas editor.
        ============================================================ */
-    Archify.focus = (function () {
+    Mirofy.focus = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector('svg');
@@ -7676,8 +7676,8 @@
         resetReachabilityButtons();
         reachStatus.textContent = '';
         reachStatus.hidden = true;
-        if (Archify.exportMenu && typeof Archify.exportMenu.syncReachShare === 'function') {
-          Archify.exportMenu.syncReachShare();
+        if (Mirofy.exportMenu && typeof Mirofy.exportMenu.syncReachShare === 'function') {
+          Mirofy.exportMenu.syncReachShare();
         }
         if (options.updateUrl === true && activeIds.length === 1) {
           try {
@@ -7711,8 +7711,8 @@
         }
         var result = reachabilityFor(activeIds[0], direction);
         if (!result || result.nodeIds.length <= 1) return false;
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false, resetView: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false, resetView: false });
         }
         clearRelationshipPreview({ clearPin: true });
         clearReachability({ updateUrl: false });
@@ -7755,8 +7755,8 @@
           hops: result.maxDepth
         });
         reachStatus.hidden = false;
-        if (Archify.exportMenu && typeof Archify.exportMenu.syncReachShare === 'function') {
-          Archify.exportMenu.syncReachShare();
+        if (Mirofy.exportMenu && typeof Mirofy.exportMenu.syncReachShare === 'function') {
+          Mirofy.exportMenu.syncReachShare();
         }
         if (options.updateUrl !== false) {
           try {
@@ -7764,8 +7764,8 @@
               encodeURIComponent(activeIds[0]) + '&reach=' + direction);
           } catch (_) {}
         }
-        if (options.reveal !== false && Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal(result.nodeIds, { includeNeighbors: false, reason: 'reachability' });
+        if (options.reveal !== false && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal(result.nodeIds, { includeNeighbors: false, reason: 'reachability' });
         }
         requestLensPlacement();
         return true;
@@ -7871,8 +7871,8 @@
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
         repositoryLink.textContent = '';
-        var sources = Archify.sourceEvidence.node(id);
-        var repository = Archify.sourceEvidence.repository();
+        var sources = Mirofy.sourceEvidence.node(id);
+        var repository = Mirofy.sourceEvidence.repository();
         if (!repository || !sources.length) {
           evidence.hidden = true;
           return;
@@ -8165,7 +8165,7 @@
         );
         return relationshipTokenGeometry(shape, relationshipTokenKind(edge), key, options);
       }
-      Archify.flowTokens = {
+      Mirofy.flowTokens = {
         create: createSemanticFlowToken,
         kind: function (edge) { return relationshipTokenKind(edge); },
         path: relationshipTokenPath
@@ -8173,7 +8173,7 @@
       function renderRelationshipPulse(key) {
         removeRelationshipPulse();
         if (!key || document.documentElement.getAttribute('data-embed') === 'true') return false;
-        if (document.hidden || (Archify.motionGovernor && Archify.motionGovernor.isPaused())) return false;
+        if (document.hidden || (Mirofy.motionGovernor && Mirofy.motionGovernor.isPaused())) return false;
         if (reducedMotionQuery && reducedMotionQuery.matches) return false;
         var matchingEdges = edges().filter(function (edge) {
           return edge.getAttribute('data-edge-key') === key;
@@ -8304,8 +8304,8 @@
       function revealPinnedRelationship(record) {
         function reveal() {
           if (!record || pinnedRelationshipKey !== record.key) return true;
-          if (!Archify.view || typeof Archify.view.reveal !== 'function') return false;
-          Archify.view.reveal([record.from, record.to], { reason: 'relationship-direct' });
+          if (!Mirofy.view || typeof Mirofy.view.reveal !== 'function') return false;
+          Mirofy.view.reveal([record.from, record.to], { reason: 'relationship-direct' });
           return true;
         }
         if (!reveal()) requestAnimationFrame(reveal);
@@ -8324,8 +8324,8 @@
         }
         var record = relationshipRecordForKey(key);
         if (!record) return false;
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
         set(record.from, { toggle: false, updateUrl: false });
         var row = Array.prototype.slice.call(relationshipList.querySelectorAll('[data-relationship-key]')).find(function (candidate) {
@@ -8364,7 +8364,7 @@
         relationshipHitOverlay.setAttribute('role', 'group');
         relationshipHitOverlay.setAttribute('aria-label', viewerText('viewer.passport.relationship.explorer'));
         var relationshipHelp = document.createElementNS(svgNamespace, 'desc');
-        relationshipHelp.id = 'archify-relationship-help';
+        relationshipHelp.id = 'mirofy-relationship-help';
         relationshipHelp.textContent = viewerText('viewer.passport.relationship.help');
         relationshipHitOverlay.appendChild(relationshipHelp);
         records.forEach(function (record, index) {
@@ -8626,7 +8626,7 @@
           if (valid.length) top = valid[0];
         }
         chip.style.top = Math.round(top) + 'px';
-        if (Archify.radar && typeof Archify.radar.sync === 'function') Archify.radar.sync();
+        if (Mirofy.radar && typeof Mirofy.radar.sync === 'function') Mirofy.radar.sync();
       }
       function requestLensPlacement() {
         if (lensFrame) return;
@@ -8638,8 +8638,8 @@
           ? svg.querySelector('[data-node-id="' + activeIds[0] + '"]')
           : null;
         clearReachability({ updateUrl: false });
-        if (Archify.intentTrace && typeof Archify.intentTrace.clear === 'function') {
-          Archify.intentTrace.clear({ announce: false });
+        if (Mirofy.intentTrace && typeof Mirofy.intentTrace.clear === 'function') {
+          Mirofy.intentTrace.clear({ announce: false });
         }
         hoveredRelationship = null;
         focusedRelationship = null;
@@ -8682,8 +8682,8 @@
         relationsBtn.setAttribute('aria-expanded', 'false');
         chip.removeAttribute('data-relations-expanded');
         chip.style.removeProperty('top');
-        if (options.preserveView !== true && Archify.view && typeof Archify.view.reset === 'function') {
-          Archify.view.reset({ automatic: true });
+        if (options.preserveView !== true && Mirofy.view && typeof Mirofy.view.reset === 'function') {
+          Mirofy.view.reset({ automatic: true });
         }
         if (options.updateUrl !== false) {
           try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
@@ -8696,12 +8696,12 @@
 
       function setMany(ids, options) {
         options = options || {};
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.semanticLens && Archify.semanticLens.active()) {
-          Archify.semanticLens.clear({ updateUrl: false, preserveView: true, closePanel: true });
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.semanticLens && Mirofy.semanticLens.active()) {
+          Mirofy.semanticLens.clear({ updateUrl: false, preserveView: true, closePanel: true });
         }
-        if (options.preserveRoute !== true && Archify.routeProbe && typeof Archify.routeProbe.clear === 'function') {
-          Archify.routeProbe.clear({ updateUrl: false, restoreFocus: false });
+        if (options.preserveRoute !== true && Mirofy.routeProbe && typeof Mirofy.routeProbe.clear === 'function') {
+          Mirofy.routeProbe.clear({ updateUrl: false, restoreFocus: false });
         }
         var nodeList = nodes();
         var byId = {};
@@ -8809,8 +8809,8 @@
         if (node) {
           var id = node.getAttribute('data-node-id');
           set(id);
-          if (activeIds.indexOf(id) !== -1 && Archify.view && typeof Archify.view.reveal === 'function') {
-            Archify.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
+          if (activeIds.indexOf(id) !== -1 && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+            Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
           }
         }
         else if (activeIds.length) clear();
@@ -8821,8 +8821,8 @@
         event.preventDefault();
         var id = node.getAttribute('data-node-id');
         set(id);
-        if (activeIds.indexOf(id) !== -1 && Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
+        if (activeIds.indexOf(id) !== -1 && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
         }
       });
       clearBtn.addEventListener('click', function () { clear({ restoreFocus: true }); });
@@ -8843,12 +8843,12 @@
         var button = event.target.closest('[data-relationship-target]');
         if (!button) return;
         var id = button.getAttribute('data-relationship-target');
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
         set(id, { toggle: false });
-        if (Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'relationship' });
+        if (Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'relationship' });
         }
         var node = svg.querySelector('[data-node-id="' + id + '"]');
         if (node) {
@@ -8976,7 +8976,7 @@
        Fine-pointer hover and keyboard focus share the same stable-ID preview;
        touch continues directly to the existing click-to-focus contract.
        ============================================================ */
-    Archify.intentTrace = (function () {
+    Mirofy.intentTrace = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector(':scope > svg');
@@ -9010,8 +9010,8 @@
           svg.hasAttribute('data-lens-active') ||
           svg.hasAttribute('data-story-active') ||
           svg.hasAttribute('data-relationship-preview-active') ||
-          !!(Archify.routeProbe && typeof Archify.routeProbe.active === 'function' && Archify.routeProbe.active()) ||
-          !!(Archify.focus && typeof Archify.focus.active === 'function' && Archify.focus.active());
+          !!(Mirofy.routeProbe && typeof Mirofy.routeProbe.active === 'function' && Mirofy.routeProbe.active()) ||
+          !!(Mirofy.focus && typeof Mirofy.focus.active === 'function' && Mirofy.focus.active());
       }
       function edgeShapes(edge) {
         if (/^(path|line|polyline)$/i.test(edge.tagName)) return [edge];
@@ -9185,8 +9185,8 @@
       };
     })();
 
-    Archify.guidedViews = (function () {
-      var data = document.getElementById('archify-guided-views-data');
+    Mirofy.guidedViews = (function () {
+      var data = document.getElementById('mirofy-guided-views-data');
       var panel = document.getElementById('guided-views');
       var prev = document.getElementById('guided-view-prev');
       var next = document.getElementById('guided-view-next');
@@ -9311,7 +9311,7 @@
         if (document.hidden || reducedMotion()) return false;
         if (document.documentElement.getAttribute('data-embed') === 'true') return false;
         if (window.matchMedia && window.matchMedia('print').matches) return false;
-        return !(Archify.motionGovernor && Archify.motionGovernor.capable && Archify.motionGovernor.isPaused());
+        return !(Mirofy.motionGovernor && Mirofy.motionGovernor.capable && Mirofy.motionGovernor.isPaused());
       }
 
       function classifyHandoff(delta, anchor) {
@@ -9368,7 +9368,7 @@
         handoff.holdTimer = null;
         currentHandoff = null;
         clearHandoffPresentation();
-        if (handoff.ownerToken && Archify.motionGovernor) Archify.motionGovernor.release(handoff.ownerToken);
+        if (handoff.ownerToken && Mirofy.motionGovernor) Mirofy.motionGovernor.release(handoff.ownerToken);
         handoff.resolve({ id: handoff.id, state: outcome || 'complete', anchor: handoff.anchor || null });
         syncStoryControlsDisabled();
         syncChapterPreview();
@@ -9381,7 +9381,7 @@
         if (handoff.holdTimer) clearTimeout(handoff.holdTimer);
         handoff.holdTimer = null;
         if (handoff.camera && handoff.camera.cancel) handoff.camera.cancel(reason || 'settled', true);
-        else if (Archify.view && Archify.view.reveal) Archify.view.reveal(handoff.focus, { instant: true, reason: reason || 'settled' });
+        else if (Mirofy.view && Mirofy.view.reveal) Mirofy.view.reveal(handoff.focus, { instant: true, reason: reason || 'settled' });
         completeHandoff(handoff, reason || 'settled');
         return true;
       }
@@ -9402,15 +9402,15 @@
       }
 
       function beginHandoff(previousIndex, nextIndex, previous, destination, outgoingBeatIndex, reason) {
-        if (!Archify.view || !Archify.view.reveal) return null;
+        if (!Mirofy.view || !Mirofy.view.reveal) return null;
         if (!previous || previousIndex === nextIndex) {
-          Archify.view.reveal(destination.focus, { reason: reason });
+          Mirofy.view.reveal(destination.focus, { reason: reason });
           return null;
         }
         var delta = chapterDelta(previous, destination);
         var anchor = chapterAnchor(previous, destination, outgoingBeatIndex, delta);
         if (!handoffMotionAllowed()) {
-          Archify.view.reveal(destination.focus, { instant: true, reason: reason });
+          Mirofy.view.reveal(destination.focus, { instant: true, reason: reason });
           return null;
         }
         var resolver;
@@ -9438,8 +9438,8 @@
           });
           handoffReceipt.hidden = false;
         }
-        if (Archify.motionGovernor) {
-          handoff.ownerToken = Archify.motionGovernor.claim('handoff', function () {
+        if (Mirofy.motionGovernor) {
+          handoff.ownerToken = Mirofy.motionGovernor.claim('handoff', function () {
             if (currentHandoff === handoff) settleHandoff('preempted');
           });
         }
@@ -9448,7 +9448,7 @@
           handoff.holdTimer = null;
           handoff.mode = 'settling';
           svg.setAttribute('data-chapter-handoff', anchor ? 'settling' : 'no-anchor');
-          handoff.camera = Archify.view.reveal(destination.focus, { reason: reason, duration: 420 });
+          handoff.camera = Mirofy.view.reveal(destination.focus, { reason: reason, duration: 420 });
           if (handoff.camera && handoff.camera.finished) {
             handoff.camera.finished.then(function (outcome) {
               if (currentHandoff === handoff) completeHandoff(handoff, outcome && outcome.state || 'complete');
@@ -9600,10 +9600,10 @@
         });
         chapterButtons.forEach(function (button) { button.removeAttribute('data-preview-active'); });
         activePreviewIndex = -1;
-        if (previewOwnerToken && Archify.motionGovernor) {
+        if (previewOwnerToken && Mirofy.motionGovernor) {
           var token = previewOwnerToken;
           previewOwnerToken = 0;
-          Archify.motionGovernor.release(token);
+          Mirofy.motionGovernor.release(token);
         }
       }
 
@@ -9643,8 +9643,8 @@
         svg.setAttribute('data-chapter-preview', views[index].id);
         chapterButtons[index].setAttribute('data-preview-active', 'true');
         activePreviewIndex = index;
-        if (Archify.motionGovernor && Archify.motionGovernor.capable) {
-          previewOwnerToken = Archify.motionGovernor.claim('chapter-preview', function () {
+        if (Mirofy.motionGovernor && Mirofy.motionGovernor.capable) {
+          previewOwnerToken = Mirofy.motionGovernor.claim('chapter-preview', function () {
             previewOwnerToken = 0;
             clearChapterPreviewPresentation();
           });
@@ -9792,7 +9792,7 @@
         if (!shareCueProgress) return;
         setShareCueProgress(fraction || 0);
         void shareCueProgress.offsetWidth;
-        shareCueProgress.style.animation = 'archify-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
+        shareCueProgress.style.animation = 'mirofy-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
       }
 
       function storyNodeLabel(node, fallback) {
@@ -10014,13 +10014,13 @@
         if (document.documentElement.getAttribute('data-embed') === 'true' &&
             document.documentElement.getAttribute('data-share-playback') !== 'true') return false;
         if (window.matchMedia && window.matchMedia('print').matches) return false;
-        return !(Archify.motionGovernor && Archify.motionGovernor.isPaused());
+        return !(Mirofy.motionGovernor && Mirofy.motionGovernor.isPaused());
       }
 
       function storyAutomaticPlaybackAllowed() {
         if (document.hidden || reducedMotion()) return false;
         if (window.matchMedia && window.matchMedia('print').matches) return false;
-        if (Archify.motionGovernor && Archify.motionGovernor.capable) return !Archify.motionGovernor.isPaused();
+        if (Mirofy.motionGovernor && Mirofy.motionGovernor.capable) return !Mirofy.motionGovernor.isPaused();
         return true;
       }
 
@@ -10033,10 +10033,10 @@
         Array.prototype.forEach.call(svg.querySelectorAll('[data-story-carrier-overlay]'), function (overlay) {
           overlay.remove();
         });
-        if (storyPulseOwnerToken && options.release !== false && Archify.motionGovernor) {
+        if (storyPulseOwnerToken && options.release !== false && Mirofy.motionGovernor) {
           var token = storyPulseOwnerToken;
           storyPulseOwnerToken = 0;
-          Archify.motionGovernor.release(token);
+          Mirofy.motionGovernor.release(token);
         } else if (options.release === false) storyPulseOwnerToken = 0;
       }
 
@@ -10046,16 +10046,16 @@
         var flows = Array.prototype.slice.call(svg.querySelectorAll('.story-trail-flow[data-story-beat-step="' + step.index + '"]'));
         if (!flows.length) return false;
         var pulseGeneration = storyPulseGeneration;
-        if (Archify.motionGovernor && Archify.motionGovernor.capable) {
-          storyPulseOwnerToken = Archify.motionGovernor.claim('story', function () {
+        if (Mirofy.motionGovernor && Mirofy.motionGovernor.capable) {
+          storyPulseOwnerToken = Mirofy.motionGovernor.claim('story', function () {
             clearStoryPulse({ release: false });
           });
         }
         flows.forEach(function (flow) { flow.setAttribute('data-story-pulse', 'true'); });
-        if (Archify.flowTokens && typeof Archify.flowTokens.create === 'function') {
+        if (Mirofy.flowTokens && typeof Mirofy.flowTokens.create === 'function') {
           var edge = step.edges[0];
           var shapes = storyGeometry(edge);
-          var carrier = shapes.length ? Archify.flowTokens.create(edge, shapes[0], {
+          var carrier = shapes.length ? Mirofy.flowTokens.create(edge, shapes[0], {
             className: 'story-flow-token',
             duration: '0.78s'
           }) : null;
@@ -10124,12 +10124,12 @@
       function followStoryStep(step, options) {
         options = options || {};
         if (!step || document.hidden) return false;
-        if (!Archify.view || typeof Archify.view.reveal !== 'function') {
+        if (!Mirofy.view || typeof Mirofy.view.reveal !== 'function') {
           var deferredIndex = step.index;
           var deferredGeneration = ++storyFollowGeneration;
           requestAnimationFrame(function () {
             if (deferredGeneration !== storyFollowGeneration || storyBeatIndex !== deferredIndex) return;
-            if (Archify.view && typeof Archify.view.reveal === 'function') followStoryStep(step, options);
+            if (Mirofy.view && typeof Mirofy.view.reveal === 'function') followStoryStep(step, options);
           });
           return true;
         }
@@ -10142,7 +10142,7 @@
         svg.setAttribute('data-story-follow', step.nodeId);
         panel.setAttribute('data-story-follow', 'moving');
         panel.setAttribute('data-story-follow-node', step.nodeId);
-        var receipt = Archify.view.reveal(ids, {
+        var receipt = Mirofy.view.reveal(ids, {
           reason: options.manual === true ? 'story-beat' : 'story-follow',
           padding: 64,
           maxScale: 1.65,
@@ -10278,7 +10278,7 @@
       }
 
       function renderStoryTrail(view) {
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
         clearStoryTrail();
         if (!view) return;
 
@@ -10372,7 +10372,7 @@
       function startProgress(fraction, duration) {
         resetProgress(fraction);
         void progressBar.offsetWidth;
-        progressBar.style.animation = 'archify-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
+        progressBar.style.animation = 'mirofy-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
       }
 
       function currentStoryProgress() {
@@ -10586,7 +10586,7 @@
         storyBeatElapsedMs = 0;
         storyBeatDwellMs = storyBeatDwell(storySteps.length);
         var view = views[activeIndex];
-        Archify.focus.setMany(view.focus, {
+        Mirofy.focus.setMany(view.focus, {
           toggle: false,
           updateUrl: false,
           mode: 'selection',
@@ -10640,9 +10640,9 @@
         cancelHandoff('overview');
         activeIndex = -1;
         renderStoryTrail(null);
-        if (options.clearFocus !== false) Archify.focus.clear({ updateUrl: false });
-        if (options.resetView !== false && Archify.view && typeof Archify.view.reset === 'function') {
-          Archify.view.reset({ automatic: true });
+        if (options.clearFocus !== false) Mirofy.focus.clear({ updateUrl: false });
+        if (options.resetView !== false && Mirofy.view && typeof Mirofy.view.reset === 'function') {
+          Mirofy.view.reset({ automatic: true });
         }
         render();
         if (options.updateUrl !== false) updateUrl(null);
@@ -10662,7 +10662,7 @@
         cancelHandoff('replaced');
         activeIndex = index;
         var view = views[index];
-        Archify.focus.setMany(view.focus, {
+        Mirofy.focus.setMany(view.focus, {
           toggle: false,
           updateUrl: false,
           mode: 'selection',
@@ -10906,7 +10906,7 @@
        embed, presentation, print, and non-wide diagrams retain their own
        established layout contracts.
        ============================================================ */
-    Archify.waitForStableLayout = function (options) {
+    Mirofy.waitForStableLayout = function (options) {
       options = options || {};
       var maximumFrames = Math.max(1, Number(options.maximumFrames) || 240);
       var fontsReady = document.fonts && document.fonts.ready
@@ -10946,7 +10946,7 @@
       });
     };
 
-    Archify.readerLayout = (function () {
+    Mirofy.readerLayout = (function () {
       var html = document.documentElement;
       var body = document.body;
       var shell = document.querySelector('.container');
@@ -10993,7 +10993,7 @@
         );
       }
       function clear() {
-        html.style.removeProperty('--archify-reader-width');
+        html.style.removeProperty('--mirofy-reader-width');
         html.removeAttribute('data-reader-layout');
         html.removeAttribute('data-reader-overflow');
         lastWidth = 0;
@@ -11014,7 +11014,7 @@
         var rounded = Math.round(width);
         if (Math.abs(rounded - lastWidth) < 1) return false;
         lastWidth = rounded;
-        html.style.setProperty('--archify-reader-width', rounded + 'px');
+        html.style.setProperty('--mirofy-reader-width', rounded + 'px');
         html.setAttribute('data-reader-layout', 'adaptive');
         return true;
       }
@@ -11083,7 +11083,7 @@
         ].join('|');
       }
       function whenStable() {
-        return Archify.waitForStableLayout({
+        return Mirofy.waitForStableLayout({
           schedule: schedule,
           pending: function () { return Boolean(frame || settleFrame); },
           snapshot: stableSnapshot,
@@ -11121,7 +11121,7 @@
        appearance while a small bottom stage rail becomes part of the reader
        budget whenever its zero-reserve position would enter the stage.
        ============================================================ */
-    Archify.viewerChromeLayout = (function () {
+    Mirofy.viewerChromeLayout = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container && container.querySelector(':scope > svg');
@@ -11216,16 +11216,16 @@
         reserve = next;
         if (reserve) {
           if (options.remember !== false) restorableReserve = reserve;
-          container.style.setProperty('--archify-nav-reserve', reserve + 'px');
+          container.style.setProperty('--mirofy-nav-reserve', reserve + 'px');
           container.setAttribute('data-nav-stage-rail', 'true');
           html.setAttribute('data-nav-stage-rail', 'true');
         } else {
-          container.style.removeProperty('--archify-nav-reserve');
+          container.style.removeProperty('--mirofy-nav-reserve');
           container.removeAttribute('data-nav-stage-rail');
           html.removeAttribute('data-nav-stage-rail');
         }
-        if (Archify.readerLayout && typeof Archify.readerLayout.schedule === 'function') {
-          Archify.readerLayout.schedule();
+        if (Mirofy.readerLayout && typeof Mirofy.readerLayout.schedule === 'function') {
+          Mirofy.readerLayout.schedule();
         }
         if (options.quiet !== true) {
           if (settleFrame) cancelAnimationFrame(settleFrame);
@@ -11349,8 +11349,8 @@
         baselineStageGap = null;
         restorableReserve = 0;
         writeReserve(0, { quiet: true });
-        var readerReady = Archify.readerLayout && typeof Archify.readerLayout.whenStable === 'function'
-          ? Archify.readerLayout.whenStable().catch(function () {})
+        var readerReady = Mirofy.readerLayout && typeof Mirofy.readerLayout.whenStable === 'function'
+          ? Mirofy.readerLayout.whenStable().catch(function () {})
           : Promise.resolve();
         probePromise = readerReady.then(function () {
           probingBaseline = false;
@@ -11385,7 +11385,7 @@
         ].join('|');
       }
       function whenStable() {
-        return Archify.waitForStableLayout({
+        return Mirofy.waitForStableLayout({
           schedule: schedule,
           pending: function () { return Boolean(frame || settleFrame || probingBaseline); },
           snapshot: stableSnapshot,
@@ -11427,7 +11427,7 @@
       };
     })();
 
-    Archify.view = (function () {
+    Mirofy.view = (function () {
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector('svg');
       var outBtn = container.querySelector('[data-view="out"]');
@@ -11569,9 +11569,9 @@
         inBtn.disabled = state.scale >= 3;
         container.classList.toggle('is-pannable', state.scale > 1);
         svg.setAttribute('data-view-scale', String(state.scale));
-        if (Archify.radar && typeof Archify.radar.sync === 'function') Archify.radar.sync();
-        if (Archify.viewerChromeLayout && typeof Archify.viewerChromeLayout.schedule === 'function') {
-          Archify.viewerChromeLayout.schedule();
+        if (Mirofy.radar && typeof Mirofy.radar.sync === 'function') Mirofy.radar.sync();
+        if (Mirofy.viewerChromeLayout && typeof Mirofy.viewerChromeLayout.schedule === 'function') {
+          Mirofy.viewerChromeLayout.schedule();
         }
       }
       function sampleRenderedState() {
@@ -11599,7 +11599,7 @@
         container.classList.remove('is-camera-moving');
         container.classList.remove('is-camera-transaction');
         container.removeAttribute('data-camera-transaction');
-        if (Archify.focus && Archify.focus.reposition) Archify.focus.reposition();
+        if (Mirofy.focus && Mirofy.focus.reposition) Mirofy.focus.reposition();
         transaction.resolve({ id: transaction.id, state: transaction.state });
         return true;
       }
@@ -11648,8 +11648,8 @@
         container.removeAttribute('data-camera-transaction');
       }
       function interruptCamera(reason) {
-        if (Archify.guidedViews && Archify.guidedViews.cancelHandoff) {
-          Archify.guidedViews.cancelHandoff(reason || 'manual');
+        if (Mirofy.guidedViews && Mirofy.guidedViews.cancelHandoff) {
+          Mirofy.guidedViews.cancelHandoff(reason || 'manual');
         }
         var rendered = sampleRenderedState();
         stopCameraMotion(reason || 'manual', false);
@@ -11657,11 +11657,11 @@
         state.mode = 'manual';
         apply();
         renderControls();
-        if (Archify.guidedViews && Archify.guidedViews.isPlaying && Archify.guidedViews.isPlaying()) {
-          Archify.guidedViews.pause();
+        if (Mirofy.guidedViews && Mirofy.guidedViews.isPlaying && Mirofy.guidedViews.isPlaying()) {
+          Mirofy.guidedViews.pause();
         }
-        if (Archify.routeProbe && Archify.routeProbe.isJourneyPlaying && Archify.routeProbe.isJourneyPlaying()) {
-          Archify.routeProbe.pauseJourney({ preserveElapsed: true, reason: reason || 'manual' });
+        if (Mirofy.routeProbe && Mirofy.routeProbe.isJourneyPlaying && Mirofy.routeProbe.isJourneyPlaying()) {
+          Mirofy.routeProbe.pauseJourney({ preserveElapsed: true, reason: reason || 'manual' });
         }
       }
       function zoom(next, options) {
@@ -11715,7 +11715,7 @@
         state.y = metrics.height / 2 - contentY * state.scale;
         state.mode = 'manual';
         apply();
-        if (Archify.focus && Archify.focus.reposition) Archify.focus.reposition();
+        if (Mirofy.focus && Mirofy.focus.reposition) Mirofy.focus.reposition();
         return true;
       }
       function semanticIds(ids, includeNeighbors) {
@@ -11877,20 +11877,20 @@
         return transaction;
       }
       function syncSemantic() {
-        var guided = Archify.guidedViews && typeof Archify.guidedViews.focus === 'function'
-          ? Archify.guidedViews.focus() : [];
+        var guided = Mirofy.guidedViews && typeof Mirofy.guidedViews.focus === 'function'
+          ? Mirofy.guidedViews.focus() : [];
         if (guided && guided.length) return reveal(guided, { reason: 'guided-sync' });
-        var active = Archify.focus && typeof Archify.focus.active === 'function' ? Archify.focus.active() : null;
+        var active = Mirofy.focus && typeof Mirofy.focus.active === 'function' ? Mirofy.focus.active() : null;
         if (typeof active === 'string') return reveal([active], { includeNeighbors: true, reason: 'focus-sync' });
         if (Array.isArray(active) && active.length) return reveal(active, { reason: 'selection-sync' });
         return false;
       }
       function pinControls() {
-        container.style.setProperty('--archify-scroll-x', container.scrollLeft + 'px');
+        container.style.setProperty('--mirofy-scroll-x', container.scrollLeft + 'px');
       }
       function onScroll() {
         pinControls();
-        if (Archify.radar && typeof Archify.radar.sync === 'function') Archify.radar.sync();
+        if (Mirofy.radar && typeof Mirofy.radar.sync === 'function') Mirofy.radar.sync();
         if (window.innerWidth <= 720 && container.hasAttribute('data-wide-diagram') && Date.now() > autoScrollUntil) {
           interruptCamera();
         }
@@ -11959,7 +11959,7 @@
        The radar is built at runtime so the checked artifact still contains
        one canonical SVG block, and export serialization remains untouched.
        ============================================================ */
-    Archify.radar = (function () {
+    Mirofy.radar = (function () {
       var container = document.querySelector('.diagram-container');
       var diagram = container.querySelector(':scope > svg');
       var panel = document.getElementById('overview-map');
@@ -12167,13 +12167,13 @@
         panel.setAttribute('data-docked', 'true');
         panel.setAttribute('data-dock-side', useLeft ? 'left' : 'right');
         if (useLeft) {
-          panel.style.setProperty('--archify-radar-left', Math.round(position.left) + 'px');
-          panel.style.removeProperty('--archify-radar-right');
+          panel.style.setProperty('--mirofy-radar-left', Math.round(position.left) + 'px');
+          panel.style.removeProperty('--mirofy-radar-right');
         } else {
-          panel.style.setProperty('--archify-radar-right', Math.round(window.innerWidth - position.left - panel.offsetWidth) + 'px');
-          panel.style.removeProperty('--archify-radar-left');
+          panel.style.setProperty('--mirofy-radar-right', Math.round(window.innerWidth - position.left - panel.offsetWidth) + 'px');
+          panel.style.removeProperty('--mirofy-radar-left');
         }
-        panel.style.setProperty('--archify-radar-top', Math.round(position.top) + 'px');
+        panel.style.setProperty('--mirofy-radar-top', Math.round(position.top) + 'px');
         if (remember !== false) lastPlacement = { left: position.left, top: position.top };
       }
       function resetDockingStyles() {
@@ -12186,9 +12186,9 @@
         panel.removeAttribute('data-compact');
         panel.removeAttribute('title');
         panel.style.removeProperty('visibility');
-        panel.style.removeProperty('--archify-radar-right');
-        panel.style.removeProperty('--archify-radar-left');
-        panel.style.removeProperty('--archify-radar-top');
+        panel.style.removeProperty('--mirofy-radar-right');
+        panel.style.removeProperty('--mirofy-radar-left');
+        panel.style.removeProperty('--mirofy-radar-top');
       }
       function updateDocking() {
         var options = arguments[0] || {};
@@ -12308,7 +12308,7 @@
       }
       function syncNow() {
         syncFrame = 0;
-        if (panel.hidden || !Archify.view || typeof Archify.view.logicalViewport !== 'function') return;
+        if (panel.hidden || !Mirofy.view || typeof Mirofy.view.logicalViewport !== 'function') return;
         if (!updateDocking()) {
           reflectUnavailable();
           return;
@@ -12321,7 +12321,7 @@
           }
         }
         reflectVisible();
-        var visible = Archify.view.logicalViewport();
+        var visible = Mirofy.view.logicalViewport();
         if (!visible) return;
         viewport.setAttribute('x', String(visible.x));
         viewport.setAttribute('y', String(visible.y));
@@ -12353,9 +12353,9 @@
       function setOpen(next, options) {
         options = options || {};
         next = Boolean(next);
-        if (next && Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (next && Archify.semanticLens && Archify.semanticLens.isOpen()) {
-          Archify.semanticLens.close({ restoreFocus: false });
+        if (next && Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (next && Mirofy.semanticLens && Mirofy.semanticLens.isOpen()) {
+          Mirofy.semanticLens.close({ restoreFocus: false });
         }
         requestedOpen = next;
         if (next) {
@@ -12398,14 +12398,14 @@
       function focusNode(id) {
         var main = diagram.querySelector('[data-node-id="' + id + '"]');
         if (!main) return false;
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
-        if (Archify.focus && typeof Archify.focus.set === 'function') {
-          Archify.focus.set(id, { toggle: false });
+        if (Mirofy.focus && typeof Mirofy.focus.set === 'function') {
+          Mirofy.focus.set(id, { toggle: false });
         }
-        if (Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'radar' });
+        if (Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'radar' });
         }
         bringNodeIntoWindow(main);
         try { main.focus({ preventScroll: true }); } catch (_) { try { main.focus(); } catch (_) {} }
@@ -12422,8 +12422,8 @@
       }
       function navigate(event) {
         var point = diagramPoint(event);
-        if (!point || !Archify.view || typeof Archify.view.centerAt !== 'function') return;
-        Archify.view.centerAt(point.x, point.y, { minimumScale: 1.5, instant: true });
+        if (!point || !Mirofy.view || typeof Mirofy.view.centerAt !== 'function') return;
+        Mirofy.view.centerAt(point.x, point.y, { minimumScale: 1.5, instant: true });
         sync();
       }
       function endViewportDrag(event) {
@@ -12529,7 +12529,7 @@
           return;
         }
         if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
-        var visible = Archify.view && Archify.view.logicalViewport ? Archify.view.logicalViewport() : null;
+        var visible = Mirofy.view && Mirofy.view.logicalViewport ? Mirofy.view.logicalViewport() : null;
         if (!visible) return;
         event.preventDefault();
         var x = visible.x + visible.width / 2;
@@ -12540,7 +12540,7 @@
         else if (event.key === 'ArrowRight') x += stepX;
         else if (event.key === 'ArrowUp') y -= stepY;
         else y += stepY;
-        Archify.view.centerAt(x, y, { minimumScale: 1.5, instant: true });
+        Mirofy.view.centerAt(x, y, { minimumScale: 1.5, instant: true });
         sync();
       });
       document.addEventListener('keydown', function (event) {
@@ -12588,7 +12588,7 @@
        serialization remain untouched. Escape first clears an active guided
        view/focus, then exits the stage.
        ============================================================ */
-    Archify.presentation = (function () {
+    Mirofy.presentation = (function () {
       var html = document.documentElement;
       var btn = document.getElementById('btn-present');
       var label = document.getElementById('present-label');
@@ -12620,7 +12620,7 @@
           return next;
         }
         if (next) {
-          if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
+          if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
           previousScrollY = window.scrollY || 0;
           html.setAttribute('data-present', 'true');
           try { window.scrollTo(0, 0); } catch (_) {}
@@ -12630,10 +12630,10 @@
         render(next);
         if (options.updateUrl !== false) updateUrl(next);
         requestAnimationFrame(function () {
-          if (Archify.view && typeof Archify.view.reset === 'function') {
-            Archify.view.reset({ automatic: true });
+          if (Mirofy.view && typeof Mirofy.view.reset === 'function') {
+            Mirofy.view.reset({ automatic: true });
             requestAnimationFrame(function () {
-              if (Archify.view && typeof Archify.view.sync === 'function') Archify.view.sync();
+              if (Mirofy.view && typeof Mirofy.view.sync === 'function') Mirofy.view.sync();
             });
           }
           if (!next && previousScrollY) {
@@ -12661,7 +12661,7 @@
        Search never changes the IR or SVG geometry: selecting a result resets
        the viewport, releases a guided view, and delegates to semantic focus.
        ============================================================ */
-    Archify.finder = (function () {
+    Mirofy.finder = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector('svg');
@@ -12721,7 +12721,7 @@
         var tag = node.getAttribute('data-node-tag') || '';
         var brand = node.getAttribute('data-node-brand') || '';
         var type = semanticType(node);
-        var sources = Archify.sourceEvidence.node(id);
+        var sources = Mirofy.sourceEvidence.node(id);
         var sourceSearch = sources.map(function (source) {
           return [source.path, source.label, source.line, source.endLine].filter(Boolean).join(' ');
         }).join(' ');
@@ -12746,8 +12746,8 @@
 
       function resolveContext(options) {
         var requested = options && options.context ? options.context : null;
-        if (!requested && Archify.routeProbe && typeof Archify.routeProbe.finderContext === 'function') {
-          requested = Archify.routeProbe.finderContext();
+        if (!requested && Mirofy.routeProbe && typeof Mirofy.routeProbe.finderContext === 'function') {
+          requested = Mirofy.routeProbe.finderContext();
         }
         if (!requested) return defaultContext();
         var resolved = defaultContext();
@@ -12773,21 +12773,21 @@
         if (!item) return false;
         var routeSelection = context.kind === 'route-source' || context.kind === 'route-target';
         if (routeSelection) {
-          if (!Archify.routeProbe || typeof Archify.routeProbe.choose !== 'function' || !Archify.routeProbe.choose(id)) return false;
-          if (Archify.routeProbe.active() === 'target' && Archify.view && typeof Archify.view.reveal === 'function') {
-            Archify.view.reveal([id], { includeNeighbors: true, reason: 'route-pick' });
+          if (!Mirofy.routeProbe || typeof Mirofy.routeProbe.choose !== 'function' || !Mirofy.routeProbe.choose(id)) return false;
+          if (Mirofy.routeProbe.active() === 'target' && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+            Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'route-pick' });
           }
           close({ restoreFocus: false });
           try { item.node.focus({ preventScroll: true }); } catch (_) { try { item.node.focus(); } catch (_) {} }
           return true;
         }
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
-        if (Archify.view && typeof Archify.view.reset === 'function') Archify.view.reset({ automatic: true });
-        Archify.focus.set(id, { toggle: false });
-        if (Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'finder' });
+        if (Mirofy.view && typeof Mirofy.view.reset === 'function') Mirofy.view.reset({ automatic: true });
+        Mirofy.focus.set(id, { toggle: false });
+        if (Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'finder' });
         }
         close({ restoreFocus: false });
         try { item.node.focus({ preventScroll: true }); } catch (_) { try { item.node.focus(); } catch (_) {} }
@@ -12842,15 +12842,15 @@
 
       function open(options) {
         if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
-        if (Archify.semanticLens && Archify.semanticLens.isOpen()) Archify.semanticLens.close({ restoreFocus: false });
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
+        if (Mirofy.semanticLens && Mirofy.semanticLens.isOpen()) Mirofy.semanticLens.close({ restoreFocus: false });
         context = resolveContext(options || {});
         applyContext();
         panel.hidden = false;
         trigger.setAttribute('aria-expanded', 'true');
-        if (context.kind.indexOf('route-') === 0 && Archify.routeProbe && typeof Archify.routeProbe.finderOpening === 'function') {
-          Archify.routeProbe.finderOpening();
+        if (context.kind.indexOf('route-') === 0 && Mirofy.routeProbe && typeof Mirofy.routeProbe.finderOpening === 'function') {
+          Mirofy.routeProbe.finderOpening();
         }
         input.value = '';
         render('');
@@ -12864,8 +12864,8 @@
         panel.hidden = true;
         trigger.setAttribute('aria-expanded', 'false');
         input.value = '';
-        if (routeContext && Archify.routeProbe && typeof Archify.routeProbe.finderClosed === 'function') {
-          Archify.routeProbe.finderClosed({ restoreFocus: options.restoreFocus !== false });
+        if (routeContext && Mirofy.routeProbe && typeof Mirofy.routeProbe.finderClosed === 'function') {
+          Mirofy.routeProbe.finderClosed({ restoreFocus: options.restoreFocus !== false });
         } else if (options.restoreFocus !== false) {
           trigger.focus();
         }
@@ -12928,7 +12928,7 @@
        endpoints. BFS order follows authored DOM edge order, so equal-length
        choices are deterministic without adding weights or a graph runtime.
        ============================================================ */
-    Archify.routeProbe = (function () {
+    Mirofy.routeProbe = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector(':scope > svg');
@@ -13040,10 +13040,10 @@
         Array.prototype.forEach.call(svg.querySelectorAll('[data-route-journey-overlay]'), function (overlay) {
           overlay.remove();
         });
-        if (journeyOwnerToken && options.release !== false && Archify.motionGovernor) {
+        if (journeyOwnerToken && options.release !== false && Mirofy.motionGovernor) {
           var token = journeyOwnerToken;
           journeyOwnerToken = 0;
-          Archify.motionGovernor.release(token);
+          Mirofy.motionGovernor.release(token);
         }
       }
       function stopJourneyTimer(options) {
@@ -13158,8 +13158,8 @@
       function clear(options) {
         options = options || {};
         var wasActive = mode !== 'idle';
-        if (Archify.finder && Archify.finder.isOpen() && typeof Archify.finder.context === 'function' && Archify.finder.context().indexOf('route-') === 0) {
-          Archify.finder.close({ restoreFocus: false });
+        if (Mirofy.finder && Mirofy.finder.isOpen() && typeof Mirofy.finder.context === 'function' && Mirofy.finder.context().indexOf('route-') === 0) {
+          Mirofy.finder.close({ restoreFocus: false });
         }
         mode = 'idle';
         startId = null;
@@ -13178,10 +13178,10 @@
         findBtn.setAttribute('aria-label', viewerText('viewer.route.start.find.aria'));
         copyBtn.hidden = true;
         copyBtn.textContent = viewerText('viewer.route.copy');
-        if (Archify.exportMenu && typeof Archify.exportMenu.syncRouteShare === 'function') Archify.exportMenu.syncRouteShare();
+        if (Mirofy.exportMenu && typeof Mirofy.exportMenu.syncRouteShare === 'function') Mirofy.exportMenu.syncRouteShare();
         setTrigger(false);
-        if (wasActive && options.preserveView !== true && Archify.view && typeof Archify.view.reset === 'function') {
-          Archify.view.reset({ automatic: true });
+        if (wasActive && options.preserveView !== true && Mirofy.view && typeof Mirofy.view.reset === 'function') {
+          Mirofy.view.reset({ automatic: true });
         }
         if (options.updateUrl !== false) replaceRouteHash('');
         if (options.restoreFocus === true) trigger.focus();
@@ -13303,9 +13303,9 @@
       function journeyMotionAllowed() {
         return html.getAttribute('data-embed') !== 'true' &&
           !document.hidden &&
-          Archify.motionGovernor &&
-          Archify.motionGovernor.capable === true &&
-          !Archify.motionGovernor.isPaused();
+          Mirofy.motionGovernor &&
+          Mirofy.motionGovernor.capable === true &&
+          !Mirofy.motionGovernor.isPaused();
       }
       function routeOverviewStatus() {
         return viewerText('viewer.route.overview.status', {
@@ -13396,9 +13396,9 @@
         var firstNode = svg.querySelector('[data-node-id]');
         if (firstNode) svg.insertBefore(overlay, firstNode);
         else svg.appendChild(overlay);
-        if (Archify.motionGovernor && Archify.motionGovernor.capable) {
+        if (Mirofy.motionGovernor && Mirofy.motionGovernor.capable) {
           var token = 0;
-          token = Archify.motionGovernor.claim('route', function () {
+          token = Mirofy.motionGovernor.claim('route', function () {
             if (journeyOwnerToken === token) journeyOwnerToken = 0;
             removeJourneyPulse({ release: false });
           });
@@ -13456,8 +13456,8 @@
           label: nodeLabel(byId[activeNodeIds[journeyIndex]], activeNodeIds[journeyIndex])
         });
         if (options.pulse === true && journeyIndex > 0) renderJourneyPulse(activeEdges[journeyIndex - 1]);
-        if (options.reveal !== false && Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal(activeNodeIds.slice(Math.max(0, journeyIndex - 1), Math.min(activeNodeIds.length, journeyIndex + 2)), {
+        if (options.reveal !== false && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal(activeNodeIds.slice(Math.max(0, journeyIndex - 1), Math.min(activeNodeIds.length, journeyIndex + 2)), {
             includeNeighbors: false,
             reason: 'route-journey',
             maxScale: 1.65,
@@ -13502,8 +13502,8 @@
         clearJourneyPresentation({ keepControls: true });
         status.textContent = routeOverviewStatus();
         renderJourneyControls();
-        if (options.reveal !== false && Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal(activeNodeIds, { includeNeighbors: false, reason: 'route', instant: !journeyMotionAllowed() });
+        if (options.reveal !== false && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal(activeNodeIds, { includeNeighbors: false, reason: 'route', instant: !journeyMotionAllowed() });
         }
         requestDocking();
         return true;
@@ -13673,13 +13673,13 @@
         findBtn.hidden = true;
         copyBtn.hidden = false;
         setTrigger(true);
-        if (Archify.exportMenu && typeof Archify.exportMenu.syncRouteShare === 'function') Archify.exportMenu.syncRouteShare();
+        if (Mirofy.exportMenu && typeof Mirofy.exportMenu.syncRouteShare === 'function') Mirofy.exportMenu.syncRouteShare();
         if (options.updateUrl !== false) {
           replaceRouteHash(encodeURIComponent(startId) + '~' + encodeURIComponent(endId));
         }
         showJourneyOverview({ reveal: false });
-        if (Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal(result.nodes, { includeNeighbors: false, reason: 'route' });
+        if (Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal(result.nodes, { includeNeighbors: false, reason: 'route' });
         }
         return true;
       }
@@ -13710,22 +13710,22 @@
       function begin(options) {
         options = options || {};
         if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.semanticLens && Archify.semanticLens.active()) {
-          Archify.semanticLens.clear({ updateUrl: false, preserveView: true, closePanel: true });
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.semanticLens && Mirofy.semanticLens.active()) {
+          Mirofy.semanticLens.clear({ updateUrl: false, preserveView: true, closePanel: true });
         }
-        var focused = options.source || (Archify.focus && typeof Archify.focus.active === 'function' ? Archify.focus.active() : null);
+        var focused = options.source || (Mirofy.focus && typeof Mirofy.focus.active === 'function' ? Mirofy.focus.active() : null);
         if (Array.isArray(focused)) focused = null;
         clear({ updateUrl: false, preserveView: true, restoreFocus: false });
-        if (Archify.intentTrace && typeof Archify.intentTrace.clear === 'function') Archify.intentTrace.clear({ announce: false });
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.intentTrace && typeof Mirofy.intentTrace.clear === 'function') Mirofy.intentTrace.clear({ announce: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
-        if (Archify.focus && typeof Archify.focus.clear === 'function') {
-          Archify.focus.clear({ updateUrl: false, preserveView: true });
+        if (Mirofy.focus && typeof Mirofy.focus.clear === 'function') {
+          Mirofy.focus.clear({ updateUrl: false, preserveView: true });
         }
-        if (Archify.finder && Archify.finder.isOpen()) Archify.finder.close({ restoreFocus: false });
-        if (Archify.radar && Archify.radar.isOpen()) Archify.radar.close({ restoreFocus: false });
+        if (Mirofy.finder && Mirofy.finder.isOpen()) Mirofy.finder.close({ restoreFocus: false });
+        if (Mirofy.radar && Mirofy.radar.isOpen()) Mirofy.radar.close({ restoreFocus: false });
         mode = 'source';
         panel.hidden = false;
         panel.setAttribute('data-state', 'source');
@@ -13805,8 +13805,8 @@
       }
       function openFinder() {
         var context = finderContext();
-        if (!context || !Archify.finder) return false;
-        return Archify.finder.open({ context: context });
+        if (!context || !Mirofy.finder) return false;
+        return Mirofy.finder.open({ context: context });
       }
       function fallbackCopy(value) {
         var field = document.createElement('textarea');
@@ -13963,7 +13963,7 @@
        Two selected kinds compare only direct cross-kind relationships while
        preserving the full diagram as a dimmed spatial reference.
        ============================================================ */
-    Archify.semanticLens = (function () {
+    Mirofy.semanticLens = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector(':scope > svg');
@@ -14408,17 +14408,17 @@
       }
       function prepareForLens() {
         clearLegendPreview();
-        if (Archify.focus && typeof Archify.focus.clear === 'function') {
-          Archify.focus.clear({ updateUrl: false, preserveView: true });
+        if (Mirofy.focus && typeof Mirofy.focus.clear === 'function') {
+          Mirofy.focus.clear({ updateUrl: false, preserveView: true });
         }
-        if (Archify.routeProbe && typeof Archify.routeProbe.clear === 'function') {
-          Archify.routeProbe.clear({ updateUrl: false, restoreFocus: false });
+        if (Mirofy.routeProbe && typeof Mirofy.routeProbe.clear === 'function') {
+          Mirofy.routeProbe.clear({ updateUrl: false, restoreFocus: false });
         }
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
-        if (Archify.intentTrace && typeof Archify.intentTrace.clear === 'function') {
-          Archify.intentTrace.clear({ announce: false });
+        if (Mirofy.intentTrace && typeof Mirofy.intentTrace.clear === 'function') {
+          Mirofy.intentTrace.clear({ announce: false });
         }
       }
       function select(kind, options) {
@@ -14447,10 +14447,10 @@
         options = options || {};
         if (html.getAttribute('data-embed') === 'true') return false;
         lensOpener = options.opener || trigger;
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
-        if (Archify.finder && Archify.finder.isOpen()) Archify.finder.close({ restoreFocus: false });
-        if (Archify.radar && Archify.radar.isOpen()) Archify.radar.close({ restoreFocus: false });
-        if (Archify.guide && Archify.guide.isOpen()) Archify.guide.close({ restoreFocus: false });
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
+        if (Mirofy.finder && Mirofy.finder.isOpen()) Mirofy.finder.close({ restoreFocus: false });
+        if (Mirofy.radar && Mirofy.radar.isOpen()) Mirofy.radar.close({ restoreFocus: false });
+        if (Mirofy.guide && Mirofy.guide.isOpen()) Mirofy.guide.close({ restoreFocus: false });
         renderKinds();
         panel.hidden = false;
         trigger.setAttribute('aria-expanded', 'true');
@@ -14473,8 +14473,8 @@
         renderKinds();
         status.textContent = viewerText('viewer.lens.choose');
         if (options.updateUrl !== false) updateHash();
-        if (options.preserveView !== true && Archify.view && typeof Archify.view.reset === 'function') {
-          Archify.view.reset({ automatic: true });
+        if (options.preserveView !== true && Mirofy.view && typeof Mirofy.view.reset === 'function') {
+          Mirofy.view.reset({ automatic: true });
         }
         if (options.closePanel === true) close({ restoreFocus: false });
         return false;
@@ -14639,7 +14639,7 @@
        Probe, Semantic Radar, Semantic Lens, Story Trail, Presentation, theme, export, and
        camera without adding a second command implementation or SVG state.
        ============================================================ */
-    Archify.guide = (function () {
+    Mirofy.guide = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector(':scope > svg');
@@ -14654,7 +14654,7 @@
       var routePanel = document.getElementById('route-probe');
 
       function viewCount() {
-        return Archify.guidedViews && Number(Archify.guidedViews.count) || 0;
+        return Mirofy.guidedViews && Number(Mirofy.guidedViews.count) || 0;
       }
       function relationshipCount() {
         var seen = {};
@@ -14699,16 +14699,16 @@
       }
       function open() {
         if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
-        if (Archify.finder && Archify.finder.isOpen()) Archify.finder.close({ restoreFocus: false });
-        if (Archify.radar && Archify.radar.isOpen()) Archify.radar.close({ restoreFocus: false });
-        if (Archify.semanticLens && Archify.semanticLens.isOpen()) Archify.semanticLens.close({ restoreFocus: false });
-        if (Archify.guidedViews && Archify.guidedViews.isPlaying && Archify.guidedViews.isPlaying()) {
-          Archify.guidedViews.pause();
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
+        if (Mirofy.finder && Mirofy.finder.isOpen()) Mirofy.finder.close({ restoreFocus: false });
+        if (Mirofy.radar && Mirofy.radar.isOpen()) Mirofy.radar.close({ restoreFocus: false });
+        if (Mirofy.semanticLens && Mirofy.semanticLens.isOpen()) Mirofy.semanticLens.close({ restoreFocus: false });
+        if (Mirofy.guidedViews && Mirofy.guidedViews.isPlaying && Mirofy.guidedViews.isPlaying()) {
+          Mirofy.guidedViews.pause();
         }
-        if (Archify.routeProbe && Archify.routeProbe.isJourneyPlaying && Archify.routeProbe.isJourneyPlaying()) {
-          Archify.routeProbe.pauseJourney({ preserveElapsed: true, reason: 'guide' });
+        if (Mirofy.routeProbe && Mirofy.routeProbe.isJourneyPlaying && Mirofy.routeProbe.isJourneyPlaying()) {
+          Mirofy.routeProbe.pauseJourney({ preserveElapsed: true, reason: 'guide' });
         }
         renderFacts();
         panel.hidden = false;
@@ -14731,18 +14731,18 @@
           return false;
         }
         close({ restoreFocus: false });
-        if (action === 'find') return Archify.finder.open();
-        if (action === 'route') return Archify.routeProbe.begin({ focusNode: true });
-        if (action === 'map') return Archify.radar.open();
-        if (action === 'lens') return Archify.semanticLens.open();
-        if (action === 'story') return Archify.guidedViews.play();
-        if (action === 'present') return Archify.presentation.enter();
-        if (action === 'export') return Archify.exportMenu.open();
-        if (action === 'theme') return Archify.theme.toggle();
-        if (action === 'preset') return Archify.preset.cycle();
-        if (action === 'reset') return Archify.view.reset();
-        if (action === 'zoom-in') return Archify.view.zoomIn();
-        if (action === 'zoom-out') return Archify.view.zoomOut();
+        if (action === 'find') return Mirofy.finder.open();
+        if (action === 'route') return Mirofy.routeProbe.begin({ focusNode: true });
+        if (action === 'map') return Mirofy.radar.open();
+        if (action === 'lens') return Mirofy.semanticLens.open();
+        if (action === 'story') return Mirofy.guidedViews.play();
+        if (action === 'present') return Mirofy.presentation.enter();
+        if (action === 'export') return Mirofy.exportMenu.open();
+        if (action === 'theme') return Mirofy.theme.toggle();
+        if (action === 'preset') return Mirofy.preset.cycle();
+        if (action === 'reset') return Mirofy.view.reset();
+        if (action === 'zoom-in') return Mirofy.view.zoomIn();
+        if (action === 'zoom-out') return Mirofy.view.zoomOut();
         return false;
       }
       function actionForKey(key) {
@@ -14840,72 +14840,72 @@
       if (e.defaultPrevented) return;
       var t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      if (Archify.preset && Archify.preset.isOpen() && e.key !== 'Escape' && e.key !== 's' && e.key !== 'S') {
-        Archify.preset.close(false);
+      if (Mirofy.preset && Mirofy.preset.isOpen() && e.key !== 'Escape' && e.key !== 's' && e.key !== 'S') {
+        Mirofy.preset.close(false);
       }
       if (e.key === '?') {
         e.preventDefault();
-        Archify.guide.toggle();
+        Mirofy.guide.toggle();
       } else if (e.key === '/') {
         e.preventDefault();
-        Archify.finder.open();
+        Mirofy.finder.open();
       } else if (e.key === 't' || e.key === 'T') {
         e.preventDefault();
-        Archify.theme.toggle();
+        Mirofy.theme.toggle();
       } else if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
-        Archify.preset.cycle();
+        Mirofy.preset.cycle();
       } else if (e.key === 'e' || e.key === 'E') {
         e.preventDefault();
-        if (!Archify.exportMenu.isOpen()) Archify.exportMenu.open();
+        if (!Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.open();
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
-        Archify.presentation.toggle();
+        Mirofy.presentation.toggle();
       } else if (e.key === 'm' || e.key === 'M') {
         e.preventDefault();
-        Archify.radar.toggle();
+        Mirofy.radar.toggle();
       } else if (e.key === 'l' || e.key === 'L') {
         e.preventDefault();
-        Archify.semanticLens.toggle();
+        Mirofy.semanticLens.toggle();
       } else if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
-        Archify.routeProbe.toggle({ focusNode: true });
+        Mirofy.routeProbe.toggle({ focusNode: true });
       } else if (e.key === '+' || e.key === '=') {
         e.preventDefault();
-        Archify.view.zoomIn();
+        Mirofy.view.zoomIn();
       } else if (e.key === '-') {
         e.preventDefault();
-        Archify.view.zoomOut();
+        Mirofy.view.zoomOut();
       } else if (e.key === '0') {
         e.preventDefault();
-        Archify.view.reset();
-      } else if (e.key === 'Escape' && Archify.preset.isOpen()) {
+        Mirofy.view.reset();
+      } else if (e.key === 'Escape' && Mirofy.preset.isOpen()) {
         e.preventDefault();
-        Archify.preset.close(true);
-      } else if (e.key === 'Escape' && Archify.semanticLens.isOpen()) {
+        Mirofy.preset.close(true);
+      } else if (e.key === 'Escape' && Mirofy.semanticLens.isOpen()) {
         e.preventDefault();
-        Archify.semanticLens.close({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.semanticLens.active()) {
+        Mirofy.semanticLens.close({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.semanticLens.active()) {
         e.preventDefault();
-        Archify.semanticLens.clear({ preserveView: true });
-      } else if (e.key === 'Escape' && Archify.guide.isOpen()) {
+        Mirofy.semanticLens.clear({ preserveView: true });
+      } else if (e.key === 'Escape' && Mirofy.guide.isOpen()) {
         e.preventDefault();
-        Archify.guide.close({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.radar.isOpen()) {
+        Mirofy.guide.close({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.radar.isOpen()) {
         e.preventDefault();
-        Archify.radar.close({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.routeProbe.active()) {
+        Mirofy.radar.close({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.routeProbe.active()) {
         e.preventDefault();
-        Archify.routeProbe.escape({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.intentTrace.active()) {
+        Mirofy.routeProbe.escape({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.intentTrace.active()) {
         e.preventDefault();
-        Archify.intentTrace.clear();
-      } else if (e.key === 'Escape' && Archify.focus.active()) {
+        Mirofy.intentTrace.clear();
+      } else if (e.key === 'Escape' && Mirofy.focus.active()) {
         e.preventDefault();
-        Archify.focus.clear({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.presentation.active()) {
+        Mirofy.focus.clear({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.presentation.active()) {
         e.preventDefault();
-        Archify.presentation.exit();
+        Mirofy.presentation.exit();
       }
     });
   </script>

@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-reach-share-card-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-reach-share-card-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -105,7 +105,7 @@ test('Reach styling preserves context, direction, and Blueprint restraint withou
 test('Reach Share Card reuses the 1200x630 seam and publishes a truthful scoped receipt', () => {
   const html = render('architecture', CASES.architecture);
   assert.match(html, /options\.variant !== 'route' && options\.variant !== 'reach'/);
-  assert.match(html, /Archify\.focus\.reachabilitySnapshot\(\)/);
+  assert.match(html, /Mirofy\.focus\.reachabilitySnapshot\(\)/);
   assert.match(html, /renderShareCard\(\{ reachSnapshot: snapshot \}\)/);
   assert.doesNotMatch(html, /function rasterizeReachShareCard|reachShareCard:/);
   assert.match(html, /viewerText\('viewer\.export\.card\.reachSummary'/);

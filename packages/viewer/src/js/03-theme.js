@@ -3,8 +3,8 @@
        Theme toggle — persists to localStorage, respects system pref
        ============================================================ */
 
-    Archify.theme = (function () {
-      var STORAGE_KEY = 'archify-theme';
+    Mirofy.theme = (function () {
+      var STORAGE_KEY = 'mirofy-theme';
       var html = document.documentElement;
       var btn = document.getElementById('btn-theme');
       var label = document.getElementById('theme-label');

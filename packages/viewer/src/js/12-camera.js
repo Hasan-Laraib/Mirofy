@@ -1,5 +1,5 @@
 
-    Archify.view = (function () {
+    Mirofy.view = (function () {
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector('svg');
       var outBtn = container.querySelector('[data-view="out"]');
@@ -141,9 +141,9 @@
         inBtn.disabled = state.scale >= 3;
         container.classList.toggle('is-pannable', state.scale > 1);
         svg.setAttribute('data-view-scale', String(state.scale));
-        if (Archify.radar && typeof Archify.radar.sync === 'function') Archify.radar.sync();
-        if (Archify.viewerChromeLayout && typeof Archify.viewerChromeLayout.schedule === 'function') {
-          Archify.viewerChromeLayout.schedule();
+        if (Mirofy.radar && typeof Mirofy.radar.sync === 'function') Mirofy.radar.sync();
+        if (Mirofy.viewerChromeLayout && typeof Mirofy.viewerChromeLayout.schedule === 'function') {
+          Mirofy.viewerChromeLayout.schedule();
         }
       }
       function sampleRenderedState() {
@@ -171,7 +171,7 @@
         container.classList.remove('is-camera-moving');
         container.classList.remove('is-camera-transaction');
         container.removeAttribute('data-camera-transaction');
-        if (Archify.focus && Archify.focus.reposition) Archify.focus.reposition();
+        if (Mirofy.focus && Mirofy.focus.reposition) Mirofy.focus.reposition();
         transaction.resolve({ id: transaction.id, state: transaction.state });
         return true;
       }
@@ -220,8 +220,8 @@
         container.removeAttribute('data-camera-transaction');
       }
       function interruptCamera(reason) {
-        if (Archify.guidedViews && Archify.guidedViews.cancelHandoff) {
-          Archify.guidedViews.cancelHandoff(reason || 'manual');
+        if (Mirofy.guidedViews && Mirofy.guidedViews.cancelHandoff) {
+          Mirofy.guidedViews.cancelHandoff(reason || 'manual');
         }
         var rendered = sampleRenderedState();
         stopCameraMotion(reason || 'manual', false);
@@ -229,11 +229,11 @@
         state.mode = 'manual';
         apply();
         renderControls();
-        if (Archify.guidedViews && Archify.guidedViews.isPlaying && Archify.guidedViews.isPlaying()) {
-          Archify.guidedViews.pause();
+        if (Mirofy.guidedViews && Mirofy.guidedViews.isPlaying && Mirofy.guidedViews.isPlaying()) {
+          Mirofy.guidedViews.pause();
         }
-        if (Archify.routeProbe && Archify.routeProbe.isJourneyPlaying && Archify.routeProbe.isJourneyPlaying()) {
-          Archify.routeProbe.pauseJourney({ preserveElapsed: true, reason: reason || 'manual' });
+        if (Mirofy.routeProbe && Mirofy.routeProbe.isJourneyPlaying && Mirofy.routeProbe.isJourneyPlaying()) {
+          Mirofy.routeProbe.pauseJourney({ preserveElapsed: true, reason: reason || 'manual' });
         }
       }
       function zoom(next, options) {
@@ -287,7 +287,7 @@
         state.y = metrics.height / 2 - contentY * state.scale;
         state.mode = 'manual';
         apply();
-        if (Archify.focus && Archify.focus.reposition) Archify.focus.reposition();
+        if (Mirofy.focus && Mirofy.focus.reposition) Mirofy.focus.reposition();
         return true;
       }
       function semanticIds(ids, includeNeighbors) {
@@ -449,20 +449,20 @@
         return transaction;
       }
       function syncSemantic() {
-        var guided = Archify.guidedViews && typeof Archify.guidedViews.focus === 'function'
-          ? Archify.guidedViews.focus() : [];
+        var guided = Mirofy.guidedViews && typeof Mirofy.guidedViews.focus === 'function'
+          ? Mirofy.guidedViews.focus() : [];
         if (guided && guided.length) return reveal(guided, { reason: 'guided-sync' });
-        var active = Archify.focus && typeof Archify.focus.active === 'function' ? Archify.focus.active() : null;
+        var active = Mirofy.focus && typeof Mirofy.focus.active === 'function' ? Mirofy.focus.active() : null;
         if (typeof active === 'string') return reveal([active], { includeNeighbors: true, reason: 'focus-sync' });
         if (Array.isArray(active) && active.length) return reveal(active, { reason: 'selection-sync' });
         return false;
       }
       function pinControls() {
-        container.style.setProperty('--archify-scroll-x', container.scrollLeft + 'px');
+        container.style.setProperty('--mirofy-scroll-x', container.scrollLeft + 'px');
       }
       function onScroll() {
         pinControls();
-        if (Archify.radar && typeof Archify.radar.sync === 'function') Archify.radar.sync();
+        if (Mirofy.radar && typeof Mirofy.radar.sync === 'function') Mirofy.radar.sync();
         if (window.innerWidth <= 720 && container.hasAttribute('data-wide-diagram') && Date.now() > autoScrollUntil) {
           interruptCamera();
         }

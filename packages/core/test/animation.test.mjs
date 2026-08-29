@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-animation-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-animation-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -66,11 +66,11 @@ test('signal-flow preset reaches the page, SVG, and motion export surface', () =
   assert.match(html, /data-preset-badge-signal-flow="SIGNAL FLOW"/);
   assert.match(html, /data-format="webm"/);
   assert.match(html, /data-last-motion-bytes/);
-  assert.match(html, /Archify\.motion = \{ canRecord: canRecordMotion, recordWebm: recordWebm \}/);
+  assert.match(html, /Mirofy\.motion = \{ canRecord: canRecordMotion, recordWebm: recordWebm \}/);
   assert.match(html, /recorder\.requestData\(\)/);
   assert.match(html, /aria-label="Diagram view controls"/);
-  assert.match(html, /Archify\.focus = \(function \(\)/);
-  assert.match(html, /Archify\.view = \(function \(\)/);
+  assert.match(html, /Mirofy\.focus = \(function \(\)/);
+  assert.match(html, /Mirofy\.view = \(function \(\)/);
   assert.match(html, /clone\.style\.removeProperty\('transform'\)/);
   assert.match(html, /clone\.removeAttribute\('data-view-scale'\)/);
   assert.match(html, /data-last-export-canonical/);
@@ -124,7 +124,7 @@ test('editorial preset reaches every visual surface and all five typed renderers
     assert.match(html, /content: attr\(data-preset-badge-editorial\)/, mode);
     assert.match(html, /data-preset-badge-editorial="EDITORIAL \/ FIELD NOTE"/, mode);
     assert.match(html, /content: attr\(data-preset-badge-editorial-plate\)/, mode);
-    assert.match(html, /data-preset-badge-editorial-plate="ARCHIFY \/ PLATE 04"/, mode);
+    assert.match(html, /data-preset-badge-editorial-plate="MIROFY \/ PLATE 04"/, mode);
     assert.match(html, /\[data-preset="editorial"\]\[data-theme="dark"\]/, mode);
     assert.match(html, /html\[data-preset="editorial"\] \.diagram-container/, mode);
     assert.match(html, /svg\[data-preset="editorial"\] \.story-trail-flow/, mode);
@@ -161,9 +161,9 @@ for (const [mode, example] of Object.entries(CASES)) {
     assert.match(svg, /<svg[^>]+data-animation="trace"/);
     assert.match(svg, /data-animate="edge" style="--step:0"/);
     assert.match(svg, /data-animate="node" style="--step:0"/);
-    assert.match(svg, /aria-labelledby="archify-diagram-title archify-diagram-description"/);
-    assert.match(svg, /<title id="archify-diagram-title">[^<]+<\/title>/);
-    assert.match(svg, /<desc id="archify-diagram-description">[^<]+<\/desc>/);
+    assert.match(svg, /aria-labelledby="mirofy-diagram-title mirofy-diagram-description"/);
+    assert.match(svg, /<title id="mirofy-diagram-title">[^<]+<\/title>/);
+    assert.match(svg, /<desc id="mirofy-diagram-description">[^<]+<\/desc>/);
     assert.match(svg, /id="node-[^"]+" data-node-id="[^"]+"[^>]+role="button"[^>]+aria-pressed="false"/);
     assert.match(svg, /data-edge-from="[^"]+" data-edge-to="[^"]+"/);
   });

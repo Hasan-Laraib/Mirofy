@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
-const cli = path.join(skillRoot, 'bin/archify.mjs');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-repair-receipt-'));
+const cli = path.join(skillRoot, 'bin/mirofy.mjs');
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-repair-receipt-'));
 
 function run(args) {
   return spawnSync(process.execPath, [cli, ...args], {
@@ -125,7 +125,7 @@ test('repair receipt: validate and deliver share exact Clean Flow evidence while
   assert.equal(validateRepair.evidence.clearancePx, 2);
   assert.ok(validateRepair.supportedFixes.some((fix) => fix.includes('route/via')));
   assert.equal(fs.readFileSync(output, 'utf8'), trusted);
-  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.archify-delivery-')), []);
+  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.mirofy-delivery-')), []);
 });
 
 test('repair receipt: repository evidence failures retain a stable rule and exact repair', () => {

@@ -8,13 +8,13 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-base-input-compatibility-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-base-input-compatibility-'));
 
 function renderBaseFixture(type, name) {
   const input = path.join(skillRoot, 'test', 'fixtures', 'v1-baseline', name);
   const output = path.join(tmp, `${name}.html`);
   return spawnSync(process.execPath, [
-    path.join(skillRoot, 'bin', 'archify.mjs'),
+    path.join(skillRoot, 'bin', 'mirofy.mjs'),
     'render',
     type,
     input,

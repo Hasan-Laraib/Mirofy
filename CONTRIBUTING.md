@@ -27,8 +27,8 @@
    covered.
 5. **`packages/core/` is harvested code.** Do not refactor it during P0.
    Import unmodified, prove parity, refactor in P1 — never both at once.
-6. **Do not rename `ARCHIFY_*` environment variables.** The product name is
-   parked; renaming is a P1 task.
+6. **`MIROFY_*` is the environment-variable namespace.** The ancestor's
+   prefix was retired in P1; do not reintroduce it.
 
 ## Test types
 
@@ -56,8 +56,10 @@ npm run check             # all of the above, in order
 - Node `>=18`, pure ESM throughout.
 - Zero runtime dependencies (`dependencies` absent from every workspace
   `package.json` — this is itself a proved conformance row, 6.9).
-- The product name is a placeholder (`<PRODUCT>`, scope `@product/*`) pending
-  an owner decision (P0.8, parked). Do not invent or substitute a name.
+- The product name is `Mirofy`, scope `@mirofy/*` (P0.8, decided). The
+  ancestor's name survives only in `LICENSE`, `NOTICE`, `packages/core/LICENSE`,
+  `docs/harvest.md` and `docs/P0-BUILD-LEDGER.md`, where it is attribution or
+  historical record rather than product identity — do not rename it there.
 - Nothing under `packages/core/` is modified as part of ordinary feature
   work. If a fix there is genuinely required, it needs its own explicit,
   reviewed exception — not a drive-by edit alongside unrelated work.

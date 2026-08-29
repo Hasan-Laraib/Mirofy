@@ -5,7 +5,7 @@
        Probe, Semantic Radar, Semantic Lens, Story Trail, Presentation, theme, export, and
        camera without adding a second command implementation or SVG state.
        ============================================================ */
-    Archify.guide = (function () {
+    Mirofy.guide = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector(':scope > svg');
@@ -20,7 +20,7 @@
       var routePanel = document.getElementById('route-probe');
 
       function viewCount() {
-        return Archify.guidedViews && Number(Archify.guidedViews.count) || 0;
+        return Mirofy.guidedViews && Number(Mirofy.guidedViews.count) || 0;
       }
       function relationshipCount() {
         var seen = {};
@@ -65,16 +65,16 @@
       }
       function open() {
         if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
-        if (Archify.finder && Archify.finder.isOpen()) Archify.finder.close({ restoreFocus: false });
-        if (Archify.radar && Archify.radar.isOpen()) Archify.radar.close({ restoreFocus: false });
-        if (Archify.semanticLens && Archify.semanticLens.isOpen()) Archify.semanticLens.close({ restoreFocus: false });
-        if (Archify.guidedViews && Archify.guidedViews.isPlaying && Archify.guidedViews.isPlaying()) {
-          Archify.guidedViews.pause();
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
+        if (Mirofy.finder && Mirofy.finder.isOpen()) Mirofy.finder.close({ restoreFocus: false });
+        if (Mirofy.radar && Mirofy.radar.isOpen()) Mirofy.radar.close({ restoreFocus: false });
+        if (Mirofy.semanticLens && Mirofy.semanticLens.isOpen()) Mirofy.semanticLens.close({ restoreFocus: false });
+        if (Mirofy.guidedViews && Mirofy.guidedViews.isPlaying && Mirofy.guidedViews.isPlaying()) {
+          Mirofy.guidedViews.pause();
         }
-        if (Archify.routeProbe && Archify.routeProbe.isJourneyPlaying && Archify.routeProbe.isJourneyPlaying()) {
-          Archify.routeProbe.pauseJourney({ preserveElapsed: true, reason: 'guide' });
+        if (Mirofy.routeProbe && Mirofy.routeProbe.isJourneyPlaying && Mirofy.routeProbe.isJourneyPlaying()) {
+          Mirofy.routeProbe.pauseJourney({ preserveElapsed: true, reason: 'guide' });
         }
         renderFacts();
         panel.hidden = false;
@@ -97,18 +97,18 @@
           return false;
         }
         close({ restoreFocus: false });
-        if (action === 'find') return Archify.finder.open();
-        if (action === 'route') return Archify.routeProbe.begin({ focusNode: true });
-        if (action === 'map') return Archify.radar.open();
-        if (action === 'lens') return Archify.semanticLens.open();
-        if (action === 'story') return Archify.guidedViews.play();
-        if (action === 'present') return Archify.presentation.enter();
-        if (action === 'export') return Archify.exportMenu.open();
-        if (action === 'theme') return Archify.theme.toggle();
-        if (action === 'preset') return Archify.preset.cycle();
-        if (action === 'reset') return Archify.view.reset();
-        if (action === 'zoom-in') return Archify.view.zoomIn();
-        if (action === 'zoom-out') return Archify.view.zoomOut();
+        if (action === 'find') return Mirofy.finder.open();
+        if (action === 'route') return Mirofy.routeProbe.begin({ focusNode: true });
+        if (action === 'map') return Mirofy.radar.open();
+        if (action === 'lens') return Mirofy.semanticLens.open();
+        if (action === 'story') return Mirofy.guidedViews.play();
+        if (action === 'present') return Mirofy.presentation.enter();
+        if (action === 'export') return Mirofy.exportMenu.open();
+        if (action === 'theme') return Mirofy.theme.toggle();
+        if (action === 'preset') return Mirofy.preset.cycle();
+        if (action === 'reset') return Mirofy.view.reset();
+        if (action === 'zoom-in') return Mirofy.view.zoomIn();
+        if (action === 'zoom-out') return Mirofy.view.zoomOut();
         return false;
       }
       function actionForKey(key) {

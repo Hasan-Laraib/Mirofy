@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/archify/schemas/sequence.schema.json",
-  "title": "Archify Sequence Diagram",
+  "$id": "https://github.com/tt-a1i/mirofy/schemas/sequence.schema.json",
+  "title": "Mirofy Sequence Diagram",
   "type": "object",
   "additionalProperties": false,
   "required": [

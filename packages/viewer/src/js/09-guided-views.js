@@ -1,6 +1,6 @@
 
-    Archify.guidedViews = (function () {
-      var data = document.getElementById('archify-guided-views-data');
+    Mirofy.guidedViews = (function () {
+      var data = document.getElementById('mirofy-guided-views-data');
       var panel = document.getElementById('guided-views');
       var prev = document.getElementById('guided-view-prev');
       var next = document.getElementById('guided-view-next');
@@ -125,7 +125,7 @@
         if (document.hidden || reducedMotion()) return false;
         if (document.documentElement.getAttribute('data-embed') === 'true') return false;
         if (window.matchMedia && window.matchMedia('print').matches) return false;
-        return !(Archify.motionGovernor && Archify.motionGovernor.capable && Archify.motionGovernor.isPaused());
+        return !(Mirofy.motionGovernor && Mirofy.motionGovernor.capable && Mirofy.motionGovernor.isPaused());
       }
 
       function classifyHandoff(delta, anchor) {
@@ -182,7 +182,7 @@
         handoff.holdTimer = null;
         currentHandoff = null;
         clearHandoffPresentation();
-        if (handoff.ownerToken && Archify.motionGovernor) Archify.motionGovernor.release(handoff.ownerToken);
+        if (handoff.ownerToken && Mirofy.motionGovernor) Mirofy.motionGovernor.release(handoff.ownerToken);
         handoff.resolve({ id: handoff.id, state: outcome || 'complete', anchor: handoff.anchor || null });
         syncStoryControlsDisabled();
         syncChapterPreview();
@@ -195,7 +195,7 @@
         if (handoff.holdTimer) clearTimeout(handoff.holdTimer);
         handoff.holdTimer = null;
         if (handoff.camera && handoff.camera.cancel) handoff.camera.cancel(reason || 'settled', true);
-        else if (Archify.view && Archify.view.reveal) Archify.view.reveal(handoff.focus, { instant: true, reason: reason || 'settled' });
+        else if (Mirofy.view && Mirofy.view.reveal) Mirofy.view.reveal(handoff.focus, { instant: true, reason: reason || 'settled' });
         completeHandoff(handoff, reason || 'settled');
         return true;
       }
@@ -216,15 +216,15 @@
       }
 
       function beginHandoff(previousIndex, nextIndex, previous, destination, outgoingBeatIndex, reason) {
-        if (!Archify.view || !Archify.view.reveal) return null;
+        if (!Mirofy.view || !Mirofy.view.reveal) return null;
         if (!previous || previousIndex === nextIndex) {
-          Archify.view.reveal(destination.focus, { reason: reason });
+          Mirofy.view.reveal(destination.focus, { reason: reason });
           return null;
         }
         var delta = chapterDelta(previous, destination);
         var anchor = chapterAnchor(previous, destination, outgoingBeatIndex, delta);
         if (!handoffMotionAllowed()) {
-          Archify.view.reveal(destination.focus, { instant: true, reason: reason });
+          Mirofy.view.reveal(destination.focus, { instant: true, reason: reason });
           return null;
         }
         var resolver;
@@ -252,8 +252,8 @@
           });
           handoffReceipt.hidden = false;
         }
-        if (Archify.motionGovernor) {
-          handoff.ownerToken = Archify.motionGovernor.claim('handoff', function () {
+        if (Mirofy.motionGovernor) {
+          handoff.ownerToken = Mirofy.motionGovernor.claim('handoff', function () {
             if (currentHandoff === handoff) settleHandoff('preempted');
           });
         }
@@ -262,7 +262,7 @@
           handoff.holdTimer = null;
           handoff.mode = 'settling';
           svg.setAttribute('data-chapter-handoff', anchor ? 'settling' : 'no-anchor');
-          handoff.camera = Archify.view.reveal(destination.focus, { reason: reason, duration: 420 });
+          handoff.camera = Mirofy.view.reveal(destination.focus, { reason: reason, duration: 420 });
           if (handoff.camera && handoff.camera.finished) {
             handoff.camera.finished.then(function (outcome) {
               if (currentHandoff === handoff) completeHandoff(handoff, outcome && outcome.state || 'complete');
@@ -414,10 +414,10 @@
         });
         chapterButtons.forEach(function (button) { button.removeAttribute('data-preview-active'); });
         activePreviewIndex = -1;
-        if (previewOwnerToken && Archify.motionGovernor) {
+        if (previewOwnerToken && Mirofy.motionGovernor) {
           var token = previewOwnerToken;
           previewOwnerToken = 0;
-          Archify.motionGovernor.release(token);
+          Mirofy.motionGovernor.release(token);
         }
       }
 
@@ -457,8 +457,8 @@
         svg.setAttribute('data-chapter-preview', views[index].id);
         chapterButtons[index].setAttribute('data-preview-active', 'true');
         activePreviewIndex = index;
-        if (Archify.motionGovernor && Archify.motionGovernor.capable) {
-          previewOwnerToken = Archify.motionGovernor.claim('chapter-preview', function () {
+        if (Mirofy.motionGovernor && Mirofy.motionGovernor.capable) {
+          previewOwnerToken = Mirofy.motionGovernor.claim('chapter-preview', function () {
             previewOwnerToken = 0;
             clearChapterPreviewPresentation();
           });
@@ -606,7 +606,7 @@
         if (!shareCueProgress) return;
         setShareCueProgress(fraction || 0);
         void shareCueProgress.offsetWidth;
-        shareCueProgress.style.animation = 'archify-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
+        shareCueProgress.style.animation = 'mirofy-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
       }
 
       function storyNodeLabel(node, fallback) {
@@ -828,13 +828,13 @@
         if (document.documentElement.getAttribute('data-embed') === 'true' &&
             document.documentElement.getAttribute('data-share-playback') !== 'true') return false;
         if (window.matchMedia && window.matchMedia('print').matches) return false;
-        return !(Archify.motionGovernor && Archify.motionGovernor.isPaused());
+        return !(Mirofy.motionGovernor && Mirofy.motionGovernor.isPaused());
       }
 
       function storyAutomaticPlaybackAllowed() {
         if (document.hidden || reducedMotion()) return false;
         if (window.matchMedia && window.matchMedia('print').matches) return false;
-        if (Archify.motionGovernor && Archify.motionGovernor.capable) return !Archify.motionGovernor.isPaused();
+        if (Mirofy.motionGovernor && Mirofy.motionGovernor.capable) return !Mirofy.motionGovernor.isPaused();
         return true;
       }
 
@@ -847,10 +847,10 @@
         Array.prototype.forEach.call(svg.querySelectorAll('[data-story-carrier-overlay]'), function (overlay) {
           overlay.remove();
         });
-        if (storyPulseOwnerToken && options.release !== false && Archify.motionGovernor) {
+        if (storyPulseOwnerToken && options.release !== false && Mirofy.motionGovernor) {
           var token = storyPulseOwnerToken;
           storyPulseOwnerToken = 0;
-          Archify.motionGovernor.release(token);
+          Mirofy.motionGovernor.release(token);
         } else if (options.release === false) storyPulseOwnerToken = 0;
       }
 
@@ -860,16 +860,16 @@
         var flows = Array.prototype.slice.call(svg.querySelectorAll('.story-trail-flow[data-story-beat-step="' + step.index + '"]'));
         if (!flows.length) return false;
         var pulseGeneration = storyPulseGeneration;
-        if (Archify.motionGovernor && Archify.motionGovernor.capable) {
-          storyPulseOwnerToken = Archify.motionGovernor.claim('story', function () {
+        if (Mirofy.motionGovernor && Mirofy.motionGovernor.capable) {
+          storyPulseOwnerToken = Mirofy.motionGovernor.claim('story', function () {
             clearStoryPulse({ release: false });
           });
         }
         flows.forEach(function (flow) { flow.setAttribute('data-story-pulse', 'true'); });
-        if (Archify.flowTokens && typeof Archify.flowTokens.create === 'function') {
+        if (Mirofy.flowTokens && typeof Mirofy.flowTokens.create === 'function') {
           var edge = step.edges[0];
           var shapes = storyGeometry(edge);
-          var carrier = shapes.length ? Archify.flowTokens.create(edge, shapes[0], {
+          var carrier = shapes.length ? Mirofy.flowTokens.create(edge, shapes[0], {
             className: 'story-flow-token',
             duration: '0.78s'
           }) : null;
@@ -938,12 +938,12 @@
       function followStoryStep(step, options) {
         options = options || {};
         if (!step || document.hidden) return false;
-        if (!Archify.view || typeof Archify.view.reveal !== 'function') {
+        if (!Mirofy.view || typeof Mirofy.view.reveal !== 'function') {
           var deferredIndex = step.index;
           var deferredGeneration = ++storyFollowGeneration;
           requestAnimationFrame(function () {
             if (deferredGeneration !== storyFollowGeneration || storyBeatIndex !== deferredIndex) return;
-            if (Archify.view && typeof Archify.view.reveal === 'function') followStoryStep(step, options);
+            if (Mirofy.view && typeof Mirofy.view.reveal === 'function') followStoryStep(step, options);
           });
           return true;
         }
@@ -956,7 +956,7 @@
         svg.setAttribute('data-story-follow', step.nodeId);
         panel.setAttribute('data-story-follow', 'moving');
         panel.setAttribute('data-story-follow-node', step.nodeId);
-        var receipt = Archify.view.reveal(ids, {
+        var receipt = Mirofy.view.reveal(ids, {
           reason: options.manual === true ? 'story-beat' : 'story-follow',
           padding: 64,
           maxScale: 1.65,
@@ -1092,7 +1092,7 @@
       }
 
       function renderStoryTrail(view) {
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
         clearStoryTrail();
         if (!view) return;
 
@@ -1186,7 +1186,7 @@
       function startProgress(fraction, duration) {
         resetProgress(fraction);
         void progressBar.offsetWidth;
-        progressBar.style.animation = 'archify-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
+        progressBar.style.animation = 'mirofy-guided-progress ' + Math.max(1, duration || VIEW_INTERVAL_MS) + 'ms linear forwards';
       }
 
       function currentStoryProgress() {
@@ -1400,7 +1400,7 @@
         storyBeatElapsedMs = 0;
         storyBeatDwellMs = storyBeatDwell(storySteps.length);
         var view = views[activeIndex];
-        Archify.focus.setMany(view.focus, {
+        Mirofy.focus.setMany(view.focus, {
           toggle: false,
           updateUrl: false,
           mode: 'selection',
@@ -1454,9 +1454,9 @@
         cancelHandoff('overview');
         activeIndex = -1;
         renderStoryTrail(null);
-        if (options.clearFocus !== false) Archify.focus.clear({ updateUrl: false });
-        if (options.resetView !== false && Archify.view && typeof Archify.view.reset === 'function') {
-          Archify.view.reset({ automatic: true });
+        if (options.clearFocus !== false) Mirofy.focus.clear({ updateUrl: false });
+        if (options.resetView !== false && Mirofy.view && typeof Mirofy.view.reset === 'function') {
+          Mirofy.view.reset({ automatic: true });
         }
         render();
         if (options.updateUrl !== false) updateUrl(null);
@@ -1476,7 +1476,7 @@
         cancelHandoff('replaced');
         activeIndex = index;
         var view = views[index];
-        Archify.focus.setMany(view.focus, {
+        Mirofy.focus.setMany(view.focus, {
           toggle: false,
           updateUrl: false,
           mode: 'selection',

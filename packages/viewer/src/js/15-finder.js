@@ -4,7 +4,7 @@
        Search never changes the IR or SVG geometry: selecting a result resets
        the viewport, releases a guided view, and delegates to semantic focus.
        ============================================================ */
-    Archify.finder = (function () {
+    Mirofy.finder = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector('svg');
@@ -64,7 +64,7 @@
         var tag = node.getAttribute('data-node-tag') || '';
         var brand = node.getAttribute('data-node-brand') || '';
         var type = semanticType(node);
-        var sources = Archify.sourceEvidence.node(id);
+        var sources = Mirofy.sourceEvidence.node(id);
         var sourceSearch = sources.map(function (source) {
           return [source.path, source.label, source.line, source.endLine].filter(Boolean).join(' ');
         }).join(' ');
@@ -89,8 +89,8 @@
 
       function resolveContext(options) {
         var requested = options && options.context ? options.context : null;
-        if (!requested && Archify.routeProbe && typeof Archify.routeProbe.finderContext === 'function') {
-          requested = Archify.routeProbe.finderContext();
+        if (!requested && Mirofy.routeProbe && typeof Mirofy.routeProbe.finderContext === 'function') {
+          requested = Mirofy.routeProbe.finderContext();
         }
         if (!requested) return defaultContext();
         var resolved = defaultContext();
@@ -116,21 +116,21 @@
         if (!item) return false;
         var routeSelection = context.kind === 'route-source' || context.kind === 'route-target';
         if (routeSelection) {
-          if (!Archify.routeProbe || typeof Archify.routeProbe.choose !== 'function' || !Archify.routeProbe.choose(id)) return false;
-          if (Archify.routeProbe.active() === 'target' && Archify.view && typeof Archify.view.reveal === 'function') {
-            Archify.view.reveal([id], { includeNeighbors: true, reason: 'route-pick' });
+          if (!Mirofy.routeProbe || typeof Mirofy.routeProbe.choose !== 'function' || !Mirofy.routeProbe.choose(id)) return false;
+          if (Mirofy.routeProbe.active() === 'target' && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+            Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'route-pick' });
           }
           close({ restoreFocus: false });
           try { item.node.focus({ preventScroll: true }); } catch (_) { try { item.node.focus(); } catch (_) {} }
           return true;
         }
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
-        if (Archify.view && typeof Archify.view.reset === 'function') Archify.view.reset({ automatic: true });
-        Archify.focus.set(id, { toggle: false });
-        if (Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'finder' });
+        if (Mirofy.view && typeof Mirofy.view.reset === 'function') Mirofy.view.reset({ automatic: true });
+        Mirofy.focus.set(id, { toggle: false });
+        if (Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'finder' });
         }
         close({ restoreFocus: false });
         try { item.node.focus({ preventScroll: true }); } catch (_) { try { item.node.focus(); } catch (_) {} }
@@ -185,15 +185,15 @@
 
       function open(options) {
         if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
-        if (Archify.semanticLens && Archify.semanticLens.isOpen()) Archify.semanticLens.close({ restoreFocus: false });
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
+        if (Mirofy.semanticLens && Mirofy.semanticLens.isOpen()) Mirofy.semanticLens.close({ restoreFocus: false });
         context = resolveContext(options || {});
         applyContext();
         panel.hidden = false;
         trigger.setAttribute('aria-expanded', 'true');
-        if (context.kind.indexOf('route-') === 0 && Archify.routeProbe && typeof Archify.routeProbe.finderOpening === 'function') {
-          Archify.routeProbe.finderOpening();
+        if (context.kind.indexOf('route-') === 0 && Mirofy.routeProbe && typeof Mirofy.routeProbe.finderOpening === 'function') {
+          Mirofy.routeProbe.finderOpening();
         }
         input.value = '';
         render('');
@@ -207,8 +207,8 @@
         panel.hidden = true;
         trigger.setAttribute('aria-expanded', 'false');
         input.value = '';
-        if (routeContext && Archify.routeProbe && typeof Archify.routeProbe.finderClosed === 'function') {
-          Archify.routeProbe.finderClosed({ restoreFocus: options.restoreFocus !== false });
+        if (routeContext && Mirofy.routeProbe && typeof Mirofy.routeProbe.finderClosed === 'function') {
+          Mirofy.routeProbe.finderClosed({ restoreFocus: options.restoreFocus !== false });
         } else if (options.restoreFocus !== false) {
           trigger.focus();
         }

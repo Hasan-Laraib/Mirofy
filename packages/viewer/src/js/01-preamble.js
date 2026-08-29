@@ -1,13 +1,13 @@
-    var Archify = {};
-    var archifyI18nData = (function () {
-      var node = document.getElementById('archify-i18n-data');
+    var Mirofy = {};
+    var mirofyI18nData = (function () {
+      var node = document.getElementById('mirofy-i18n-data');
       try { return JSON.parse(node ? node.textContent : '{}'); }
       catch (_) { return { locale: 'en', messages: {} }; }
     })();
-    Archify.locale = archifyI18nData.locale || 'en';
+    Mirofy.locale = mirofyI18nData.locale || 'en';
 
     function viewerText(key, values) {
-      var messages = archifyI18nData.messages || {};
+      var messages = mirofyI18nData.messages || {};
       var template = Object.prototype.hasOwnProperty.call(messages, key) ? messages[key] : key;
       return String(template).replace(/\{([a-zA-Z0-9_]+)\}/g, function (match, name) {
         return values && Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : match;

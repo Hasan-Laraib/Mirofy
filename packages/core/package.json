@@ -1,11 +1,11 @@
 {
-  "name": "@product/core",
+  "name": "@mirofy/core",
   "version": "2.16.0",
   "private": true,
   "type": "module",
-  "description": "Harvested renderers and validators. Imported unmodified from tt-a1i/archify@12106be.",
+  "description": "Harvested renderers and validators. MIT-derived from the ancestor project named in /NOTICE.",
   "license": "MIT",
-  "bin": { "product": "./bin/archify.mjs" },
+  "bin": { "mirofy": "./bin/mirofy.mjs" },
   "engines": { "node": ">=18" },
   "scripts": {
     "generate:brand-marks": "node scripts/generate-brand-marks.mjs",
