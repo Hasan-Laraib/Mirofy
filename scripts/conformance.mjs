@@ -103,6 +103,31 @@ for (const suite of suites) {
 }
 
 const scriptProofs = new Set(provableRows.map((row) => row.proof).filter((proof) => !proof.endsWith('.test.mjs')));
+
+// Guard: a script proof (anything not ending .test.mjs, e.g. scripts/golden.mjs
+// for row 4.3) has no TAP output and no testTitle mechanism to verify -- its
+// exit code is the entire signal, applied identically to every row that names
+// it. That is only honest when exactly one row depends on it (see 4.3's
+// comment in matrix.mjs for the accepted exemption). If a second row pointed
+// at the same script, both would silently ride to "proved" on that one exit
+// code with no way to tell them apart -- the exact file-level-accounting
+// defect two fix rounds were just spent closing (see this file's header
+// comment), reopened via the script path instead of the test-file path.
+for (const scriptProof of scriptProofs) {
+  const rowsForScript = HARVESTED_ROWS.filter((row) => row.proof === scriptProof);
+  if (rowsForScript.length > 1) {
+    console.error(
+      `\nconfiguration error: ${rowsForScript.length} rows map to the script proof "${scriptProof}" ` +
+      `(${rowsForScript.map((row) => row.id).join(', ')}).\n` +
+      'A script proof has no TAP output and cannot distinguish per-row outcomes -- its exit code is ' +
+      'all-or-nothing across every row that names it, so more than one row sharing it cannot be ' +
+      'honestly proved. Exactly one row may use a script proof. Give the additional row(s) their own ' +
+      'testTitle-verified test in a *.test.mjs suite instead.',
+    );
+    process.exit(1);
+  }
+}
+
 for (const scriptProof of scriptProofs) {
   console.log(`\n-- ${scriptProof} --`);
   try {
