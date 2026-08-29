@@ -62,6 +62,16 @@ five fixtures, so an edit on a path no fixture exercises moves no digest;
 `MIROFY_CHROME=/path/to/chrome npm run check` to also exercise the 16
 browser-only rows.
 
+## Viewer source
+
+`packages/core/assets/template.html` is **generated**, not hand-authored — it
+is built from the JS modules, CSS parts, and generated design tokens under
+`packages/viewer/`. Never edit `template.html` directly; edit its source
+under `packages/viewer/src/` and run `npm run build:template` to regenerate
+it. `npm run check:template` is the check that enforces this: it rebuilds
+the template from source and fails if the committed file has drifted from
+what that source now produces.
+
 ## Layout
 
 - `packages/core/` — the harvested rendering and validation core. Imported
