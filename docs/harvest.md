@@ -128,6 +128,10 @@ the anchor is recorded here, with why:
 - `renderers/shared/generated-validators.mjs` — regenerated from the schemas
   above via `packages/core`'s `npm run generate:validators`; this file is
   build output, never hand-edited.
+- `bin/preview.mjs` — **fixed** in P1a Task 9. `fs.watch` is given a resolved
+  long path via `resolveWatchRoot()`. The ancestor passes an unresolved
+  directory, which aborts the process under libuv on Windows when the watch
+  root is an 8.3 short path.
 
 ## How parity is proved
 
