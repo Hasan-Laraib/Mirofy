@@ -1,0 +1,672 @@
+{
+  "schemaVersion": 1,
+  "ancestorRepo": "tt-a1i/archify",
+  "ancestorRevision": "12106be58b34f94b108ab30f6ac0eb37c16a8f71",
+  "ancestorSubtree": "archify/",
+  "identical": [
+    {
+      "path": "LICENSE",
+      "sha1": "4c27b7152c7e4593dfdd153761ce178177d30464"
+    },
+    {
+      "path": "SKILL.md",
+      "sha1": "ae9251d2042712ad327ad5c0cfb6d442538f01b8"
+    },
+    {
+      "path": "assets/template.html",
+      "sha1": "8e15e85cfd80a0c71621379a3eea6ff86f68753e"
+    },
+    {
+      "path": "bin/archify.mjs",
+      "sha1": "13a782f9521c9e83873b6193426d95c6a6795870"
+    },
+    {
+      "path": "bin/open-artifact.mjs",
+      "sha1": "878f6b4caa06b5ed2185ae45fb3be9675925ce5b"
+    },
+    {
+      "path": "bin/preview.mjs",
+      "sha1": "449383f8beb1276f6b0c9e1d7eb20dc86736e23f"
+    },
+    {
+      "path": "bin/visual-check.mjs",
+      "sha1": "1a483a90b1a7ac0ee2d26e1200336b10e4760f01"
+    },
+    {
+      "path": "brand-marks/README.md",
+      "sha1": "83578f6f6cb3d10bc48c3044c46c7b7d46e84be7"
+    },
+    {
+      "path": "brand-marks/catalog.json",
+      "sha1": "ac5698939b0baba2582e3b65556b1ebdbeea8fe6"
+    },
+    {
+      "path": "delta/architecture-delta.mjs",
+      "sha1": "6b63b4dd6390ae1c49bbaea0bad5cbdd58d4784f"
+    },
+    {
+      "path": "examples/agent-run.lifecycle.json",
+      "sha1": "329208b45946c04607770a6a74d83968121ad757"
+    },
+    {
+      "path": "examples/agent-tool-call.workflow.json",
+      "sha1": "1144e1d5e0e74180554a854cabd16ecb2c757d4b"
+    },
+    {
+      "path": "examples/async-job-roundtrip.sequence.json",
+      "sha1": "351104966631e17a490c594c4d614b9547a65576"
+    },
+    {
+      "path": "examples/brand-aware-delivery.architecture.json",
+      "sha1": "1ccc9c02e62aedf892294bca02be52460c3c1193"
+    },
+    {
+      "path": "examples/cache-miss-request.sequence.json",
+      "sha1": "3a5d502f985a9bc9934e8caaf03e2edc6f504b5d"
+    },
+    {
+      "path": "examples/checkout-platform.base.architecture.json",
+      "sha1": "6a0697c10f9cada3a08e3bab73b87b3158280513"
+    },
+    {
+      "path": "examples/checkout-platform.head.architecture.json",
+      "sha1": "224d62b4b5c3cc02ec29b5adc14146d666956fce"
+    },
+    {
+      "path": "examples/dataflow-product-analytics.html",
+      "sha1": "4a3c6288196c550c07757594087832e57b61a78a"
+    },
+    {
+      "path": "examples/deployment-release.lifecycle.json",
+      "sha1": "ba87dc22eb3624b3d1ac4dd094b922d0fd20a436"
+    },
+    {
+      "path": "examples/event-stream.dataflow.json",
+      "sha1": "e7cc500295908d715778c3587d994b40319e9cf2"
+    },
+    {
+      "path": "examples/incident-response.workflow.json",
+      "sha1": "7446e55f29d73b1fceb1fc0b03a86b374fdb3db4"
+    },
+    {
+      "path": "examples/lifecycle-agent-run.html",
+      "sha1": "ea79fa9b864f56ac2c722631b3695fd560ab7dc3"
+    },
+    {
+      "path": "examples/product-analytics.dataflow.json",
+      "sha1": "57270cf1bbf70c7f125d53c87105b5ac5dbdb1b5"
+    },
+    {
+      "path": "examples/production-deployment.architecture.json",
+      "sha1": "472cb83e5b92f7937c3e0a522fc90402d9e301bb"
+    },
+    {
+      "path": "examples/release-delivery.workflow.json",
+      "sha1": "915e39c47e095b99cab59f9525071fdfa97d0914"
+    },
+    {
+      "path": "examples/sequence-cache-miss-request.html",
+      "sha1": "aaa743061990786eebee3e5379e71f15ca56c8b5"
+    },
+    {
+      "path": "examples/web-app-rendered.html",
+      "sha1": "cef9fccf72f3906cea58b5e53993a76602ad9711"
+    },
+    {
+      "path": "examples/web-app.architecture.json",
+      "sha1": "9f6cb1404b005bd2feff1274cee73a1e94a2ae2c"
+    },
+    {
+      "path": "examples/workflow-agent-tool-call-rendered.html",
+      "sha1": "b5ea59d33c748b8754d365d7ccda575686d52878"
+    },
+    {
+      "path": "recipes/scenarios.mjs",
+      "sha1": "392df1784255534a6b51632d001cd21b31040887"
+    },
+    {
+      "path": "references/authoring-contract.md",
+      "sha1": "762399a33a298a18482788c30fe12916f9921c08"
+    },
+    {
+      "path": "references/brand-marks.md",
+      "sha1": "55411787dc17bc228bb43e9de6435115aa5305a6"
+    },
+    {
+      "path": "references/delivery-contract.md",
+      "sha1": "655794b4d1d1cbbf162d4301bed35ce66c2752b4"
+    },
+    {
+      "path": "references/viewer-runtime.md",
+      "sha1": "919b71bc94d13ae9927b2fa83a6c2f97a2a2aad5"
+    },
+    {
+      "path": "renderers/architecture/grid.mjs",
+      "sha1": "807a1b860f531bab0ee217af19e6887fbbade398"
+    },
+    {
+      "path": "renderers/architecture/render-architecture.mjs",
+      "sha1": "247c604256d71947297716b75e50ac991293d1ac"
+    },
+    {
+      "path": "renderers/dataflow/README.md",
+      "sha1": "d5c43fcb3db0ea55472d41fbaf3534e30ee995fd"
+    },
+    {
+      "path": "renderers/dataflow/render-dataflow.mjs",
+      "sha1": "1a539eb0d94a2902c0a37f1779eb9503621ace16"
+    },
+    {
+      "path": "renderers/lifecycle/README.md",
+      "sha1": "ad39bb0e3c3527067ee873906d5802c1ffc88335"
+    },
+    {
+      "path": "renderers/lifecycle/render-lifecycle.mjs",
+      "sha1": "759af9216b2a528abb218df7c12a2b73760db5f4"
+    },
+    {
+      "path": "renderers/sequence/README.md",
+      "sha1": "82cfa166bf02dfa736944f396e18400783072fba"
+    },
+    {
+      "path": "renderers/sequence/render-sequence.mjs",
+      "sha1": "a86760ca4f0d6600330c0127cfcd1155b43e447b"
+    },
+    {
+      "path": "renderers/shared/brand-marks.mjs",
+      "sha1": "1e18e0b5311ddbfa954f5bca317d7ffc30089e50"
+    },
+    {
+      "path": "renderers/shared/cli.mjs",
+      "sha1": "6fa45e9ca875389e0e31ca63dbdf8eb893e0a9dc"
+    },
+    {
+      "path": "renderers/shared/desktop-readability.mjs",
+      "sha1": "1a4c249d1f212e80cb41858ec6adda53cc3befcd"
+    },
+    {
+      "path": "renderers/shared/diagnostics.mjs",
+      "sha1": "f392f038648b588057c22d9997d49ac8c9731d4d"
+    },
+    {
+      "path": "renderers/shared/engineering-profiles.mjs",
+      "sha1": "76e3166aa19cbd23cc2187f16b0c120280ef4d48"
+    },
+    {
+      "path": "renderers/shared/generated-brand-marks.mjs",
+      "sha1": "69dbb7c1c290f28620705486ecacba4d2184f634"
+    },
+    {
+      "path": "renderers/shared/generated-validators.mjs",
+      "sha1": "b8e9e73f8e48d2713e4a0315adf648b409e45ee0"
+    },
+    {
+      "path": "renderers/shared/geometry.mjs",
+      "sha1": "7b091f1c2c6f52552d8c41b98fb86ca358498f39"
+    },
+    {
+      "path": "renderers/shared/i18n.mjs",
+      "sha1": "dc69c720d676da70c3785c354adc243ebbc07fff"
+    },
+    {
+      "path": "renderers/shared/layout-report.mjs",
+      "sha1": "3128a65aa2678e4f705c2a662d33aa8289318ee4"
+    },
+    {
+      "path": "renderers/shared/legend.mjs",
+      "sha1": "e9e80d6fd74f013c30bf87d56fcaf0dfa2b794cf"
+    },
+    {
+      "path": "renderers/shared/output-path.mjs",
+      "sha1": "ca9119652fea8191d626a617590f7e2b0f93d33a"
+    },
+    {
+      "path": "renderers/shared/repository-evidence.mjs",
+      "sha1": "23cb6383fac2f1b3887760ff0ea44e8f2d522a1e"
+    },
+    {
+      "path": "renderers/shared/text-fit.mjs",
+      "sha1": "31c0b1799089b760eae103ede9d357b04d5ca035"
+    },
+    {
+      "path": "renderers/shared/utils.mjs",
+      "sha1": "8307518359a103ea51ad38293f72a9e518f34363"
+    },
+    {
+      "path": "renderers/shared/validator.mjs",
+      "sha1": "7664657b62f684f19af0fdb362e11209d7fb0d3c"
+    },
+    {
+      "path": "renderers/workflow/README.md",
+      "sha1": "a2a1f10e728b14defef19955fb1e2749563b34d0"
+    },
+    {
+      "path": "renderers/workflow/render-workflow.mjs",
+      "sha1": "994173d23e880af80d9f92b366d886772eb1646d"
+    },
+    {
+      "path": "schemas/README.md",
+      "sha1": "e667c0322bc8718676650473058ae69473e6db56"
+    },
+    {
+      "path": "schemas/architecture.schema.json",
+      "sha1": "fa9954923f456bbaafa05788895a603d9ed35ac0"
+    },
+    {
+      "path": "schemas/common.schema.json",
+      "sha1": "64327f16faed0b13ff692653bced8a8b8e141f04"
+    },
+    {
+      "path": "schemas/dataflow.schema.json",
+      "sha1": "599ca18c9fb68fff95c86e6a23573970707add55"
+    },
+    {
+      "path": "schemas/lifecycle.schema.json",
+      "sha1": "b05ef40f640a9d19db0cdc1cf25ac42416c93f33"
+    },
+    {
+      "path": "schemas/sequence.schema.json",
+      "sha1": "3449dd425221fd83a8c21431021fa5401532bb38"
+    },
+    {
+      "path": "schemas/workflow.schema.json",
+      "sha1": "b1a16ff560c99ec5a6db8faccc59287516c85f7a"
+    },
+    {
+      "path": "scripts/check-render-output.mjs",
+      "sha1": "704b96503b581493e17e83d8d9001be7418f9295"
+    },
+    {
+      "path": "scripts/generate-brand-marks.mjs",
+      "sha1": "73490babbbbde02ffd6f657ab9edb5538bee5cca"
+    },
+    {
+      "path": "scripts/generate-validators.mjs",
+      "sha1": "ab205bd1a586e764e9ee06d1940b6dba15a6653a"
+    },
+    {
+      "path": "scripts/render-examples.mjs",
+      "sha1": "9889a2f7a41c73907a048a30e3f6671dc7a616d7"
+    },
+    {
+      "path": "test/adaptive-reader-layout.test.mjs",
+      "sha1": "6a8fa7a14f0c4cd7cf46e3555679bbaf7e42e352"
+    },
+    {
+      "path": "test/animation.test.mjs",
+      "sha1": "df13590299fb8488fefe54fee094e88c48859644"
+    },
+    {
+      "path": "test/architecture-delta.test.mjs",
+      "sha1": "71d28fbab213690b3082abe40806fd28ef17e4e3"
+    },
+    {
+      "path": "test/authored-reachability.test.mjs",
+      "sha1": "6aced775389bf550ebf3fbe5da4e3c9a5c6c4bcf"
+    },
+    {
+      "path": "test/authoring-safety-contract.test.mjs",
+      "sha1": "3acc7e8b6bff2d1b8753ddde7753ab24d8dd4e0e"
+    },
+    {
+      "path": "test/automatic-port-spread.test.mjs",
+      "sha1": "dc6e1868680f33d338afda6e8f1628405b6f2565"
+    },
+    {
+      "path": "test/base-input-compatibility.test.mjs",
+      "sha1": "c500d36a69ac2334a2bcf9ed4e325f18e235c780"
+    },
+    {
+      "path": "test/brand-marks.test.mjs",
+      "sha1": "aeeda2ab3b51776d89fa2731b8cb877fb8f52f5e"
+    },
+    {
+      "path": "test/chapter-delta-preview.test.mjs",
+      "sha1": "f269651f3e5edc63ab7d18d2a72061d6b632b452"
+    },
+    {
+      "path": "test/chapter-handoff.test.mjs",
+      "sha1": "6a2bf62d5fdd9b1ecc926acb61076f1019b7e196"
+    },
+    {
+      "path": "test/chapter-rail.test.mjs",
+      "sha1": "ed1ec6a54eb42899a2e08a881dce1c7d830dfcf1"
+    },
+    {
+      "path": "test/cli.test.mjs",
+      "sha1": "b0b756abcda7c44b8e64b0787e6136db680f7685"
+    },
+    {
+      "path": "test/community-proof-intake.test.mjs",
+      "sha1": "5557da93646a11963cf776296da64634f5cd5eec"
+    },
+    {
+      "path": "test/cursor-onboarding.test.mjs",
+      "sha1": "358becce7e11cd62b52500f305e63259a1fcb945"
+    },
+    {
+      "path": "test/degraded.test.mjs",
+      "sha1": "1385906873e6d49f37fe9d9efe717109ba0aa40a"
+    },
+    {
+      "path": "test/delivery-contract.test.mjs",
+      "sha1": "f05a9daaf9a1d4a392e1ca507c96ffeb9d13e361"
+    },
+    {
+      "path": "test/desktop-reader-browser.test.mjs",
+      "sha1": "867a7cb4859c01d3759efcda31481bcb6d29413f"
+    },
+    {
+      "path": "test/diagram-guide.test.mjs",
+      "sha1": "a47630052cae806385bcdac123ec88d747205beb"
+    },
+    {
+      "path": "test/engineering-profile.test.mjs",
+      "sha1": "ad3de7ff9b12d52a3f9517ca7ae7c0014690eed6"
+    },
+    {
+      "path": "test/finder.test.mjs",
+      "sha1": "979d8910b4b3fd08e73d7f03420f8eac578ee8ee"
+    },
+    {
+      "path": "test/fixtures/automatic-routing-node-border-clearance.workflow.json",
+      "sha1": "f5e48e87d2bdcc2844e406872e36337a44e6c3a0"
+    },
+    {
+      "path": "test/fixtures/v1-baseline/agent-run.lifecycle.json",
+      "sha1": "eb09b78f190448b795c5bdf4644c1c891f30866c"
+    },
+    {
+      "path": "test/fixtures/v1-baseline/agent-tool-call.workflow.json",
+      "sha1": "eb13d731388de309c46332c355938ec6a0db7587"
+    },
+    {
+      "path": "test/fixtures/v1-baseline/cache-miss-request.sequence.json",
+      "sha1": "6a10a97ecd962512fd8f5d9bf85417e7e036715b"
+    },
+    {
+      "path": "test/fixtures/v1-baseline/event-stream.dataflow.json",
+      "sha1": "e7cc500295908d715778c3587d994b40319e9cf2"
+    },
+    {
+      "path": "test/fixtures/v1-baseline/product-analytics.dataflow.json",
+      "sha1": "09b1f8b278b3d626c333b372b2fdbaf84bbdf9a8"
+    },
+    {
+      "path": "test/fixtures/v1-baseline/production-deployment.architecture.json",
+      "sha1": "9150768979f4c0e704214ef2250da9a8b90c6111"
+    },
+    {
+      "path": "test/fixtures/v1-baseline/web-app.architecture.json",
+      "sha1": "87df60afd953acbf00e625a4442c2e6c86b11b91"
+    },
+    {
+      "path": "test/gallery.test.mjs",
+      "sha1": "bf64205c2c698dd64fe830a5a10198d9d3f6f9f1"
+    },
+    {
+      "path": "test/generate-validators.test.mjs",
+      "sha1": "7252e281d40de154495075d8bb075bb59b104f46"
+    },
+    {
+      "path": "test/generated-artifact-xml.test.mjs",
+      "sha1": "3ed8d14aa396d05ffae369b64c472bb0f573b3cd"
+    },
+    {
+      "path": "test/geometry.test.mjs",
+      "sha1": "4064b005887608e5a775bb44fd38c119033f86b9"
+    },
+    {
+      "path": "test/grid.test.mjs",
+      "sha1": "4154d847bedb4474221be0bb168eb9d36a8ad9f6"
+    },
+    {
+      "path": "test/guide-page.test.mjs",
+      "sha1": "16886cde7b61095ffdd403f0faee7cf7bc13c6df"
+    },
+    {
+      "path": "test/guide.test.mjs",
+      "sha1": "939cba0f7f06de1c2c6f1d8ed49a52568e438ad0"
+    },
+    {
+      "path": "test/guided-views.test.mjs",
+      "sha1": "544b5ffd7d89b9929b03653432181b0ddaf8d0ea"
+    },
+    {
+      "path": "test/helpers/xml.mjs",
+      "sha1": "84c006df5ac46d815d347641b29a2c7bc3c913d8"
+    },
+    {
+      "path": "test/i18n.test.mjs",
+      "sha1": "a93d433bb074e784cbfb16c4a47cb6a18cf31b26"
+    },
+    {
+      "path": "test/intent-trace.test.mjs",
+      "sha1": "04d702e7caec42174b8d53da3d26dde3291c5959"
+    },
+    {
+      "path": "test/landing.test.mjs",
+      "sha1": "340241c482b6c8ef0b72c18e5da3458c9ec78bfe"
+    },
+    {
+      "path": "test/layout-rules.test.mjs",
+      "sha1": "f3a47e84cbd8c019a7a9fcec175d81fcee5647f0"
+    },
+    {
+      "path": "test/legend-contract.test.mjs",
+      "sha1": "978f951e373180a8a3922492fa5afa41819642ca"
+    },
+    {
+      "path": "test/motion-governor.test.mjs",
+      "sha1": "e3d216303b586995df87410593a25fe985be6096"
+    },
+    {
+      "path": "test/open-artifact.test.mjs",
+      "sha1": "22be2813e2f7a6f3841a7429f3c4e094365481fa"
+    },
+    {
+      "path": "test/ordinary-model-floor.test.mjs",
+      "sha1": "89b3e0d726b362f3eeb5d280ba0e287586d0d7ae"
+    },
+    {
+      "path": "test/output-path.test.mjs",
+      "sha1": "296be60f9fb4ba8442e8834e1b8d9fa333356fe6"
+    },
+    {
+      "path": "test/presentation.test.mjs",
+      "sha1": "57fd6a72781573dafac09596fa2714a8fa52bc33"
+    },
+    {
+      "path": "test/preset-tryon.test.mjs",
+      "sha1": "37c55dd43d9797e2d2d59a5274c71d93c2ab6322"
+    },
+    {
+      "path": "test/preview-contract.test.mjs",
+      "sha1": "32eaf1c18dc2b6fcf3874e47169a25196c2b0b6a"
+    },
+    {
+      "path": "test/preview.test.mjs",
+      "sha1": "fc381fbe9096da2882c44bc4889da5bf2604f3d1"
+    },
+    {
+      "path": "test/proof-aperture.test.mjs",
+      "sha1": "97a869fb7033ef8464b4a86e80f4bed8c80017e7"
+    },
+    {
+      "path": "test/reach-share-card.test.mjs",
+      "sha1": "d98342d73fd970d2a4e6a0dc1fecfd32c134e22d"
+    },
+    {
+      "path": "test/readme-showcase.test.mjs",
+      "sha1": "fac0705f49bec5d4bd40c31a936a2612e7a83f15"
+    },
+    {
+      "path": "test/real-repository-proof.test.mjs",
+      "sha1": "a6597f10b348075642bba75275009f3a3ab1a1c1"
+    },
+    {
+      "path": "test/relationship-direct-explorer.test.mjs",
+      "sha1": "d3805b28b5375614dd1233dd8d1479119ed35fad"
+    },
+    {
+      "path": "test/relationship-lens.test.mjs",
+      "sha1": "7ceda226e63f66c1cef19f372bae087b1d6fc671"
+    },
+    {
+      "path": "test/relationship-permalink.test.mjs",
+      "sha1": "769a4c1280aef84277cbb9b70b13dfe8c99e8eeb"
+    },
+    {
+      "path": "test/relationship-pulse.test.mjs",
+      "sha1": "fd01a00d23af9926e6836b6abfa121137d701a2f"
+    },
+    {
+      "path": "test/release-identity.test.mjs",
+      "sha1": "370e8331bf7e64549ebbf92db0197b6d82606f23"
+    },
+    {
+      "path": "test/release-package-gates.test.mjs",
+      "sha1": "567268eafd7bb1853058e5d9115db4b862c880b0"
+    },
+    {
+      "path": "test/render-output-checks.test.mjs",
+      "sha1": "0a7bbd477937f27f994137c368624d7892665423"
+    },
+    {
+      "path": "test/repair-receipt.test.mjs",
+      "sha1": "faf4329379bd2100b402b613539f04ed51b3836e"
+    },
+    {
+      "path": "test/repository-evidence.test.mjs",
+      "sha1": "7df16e857f83685d087543a47a911cac028797fe"
+    },
+    {
+      "path": "test/repository-language-metadata.test.mjs",
+      "sha1": "0a1535aefd13efaa534280c82d991e42ec7d6d5d"
+    },
+    {
+      "path": "test/route-journey.test.mjs",
+      "sha1": "87f7020df435d6a603c5c22466fc614d538cbd96"
+    },
+    {
+      "path": "test/route-probe.test.mjs",
+      "sha1": "1cb6fea3777d4fae5a949318d041701da19965b0"
+    },
+    {
+      "path": "test/route-share-card.test.mjs",
+      "sha1": "b501112fcf5c5da427bba4179d72b2311bb2d037"
+    },
+    {
+      "path": "test/semantic-camera.test.mjs",
+      "sha1": "0b5da3bdbb30d9219f5ff8f9ff8705af9eb69a1d"
+    },
+    {
+      "path": "test/semantic-flow.test.mjs",
+      "sha1": "a71d476d3eb0654e140decc043e2bc8e6423af81"
+    },
+    {
+      "path": "test/semantic-legend-gateway.test.mjs",
+      "sha1": "e5d70106912a27edd40bfc407c391db4b81367d0"
+    },
+    {
+      "path": "test/semantic-lens.test.mjs",
+      "sha1": "5ec17ade2e0673ca176aabdb91f882d434837e1d"
+    },
+    {
+      "path": "test/semantic-passport.test.mjs",
+      "sha1": "f988a3836c5aac8c095dc650f8fc087949245696"
+    },
+    {
+      "path": "test/semantic-radar.test.mjs",
+      "sha1": "2cf1efac86bd66b359f75cc706fb0f275edf9048"
+    },
+    {
+      "path": "test/semantic-zoom.test.mjs",
+      "sha1": "7cba629527255892865744789eda81d6842d5f44"
+    },
+    {
+      "path": "test/sequence-column-fit.test.mjs",
+      "sha1": "e8917d87c81d690fdd09e7f0a121d2bb193186ca"
+    },
+    {
+      "path": "test/settled-flow.test.mjs",
+      "sha1": "665456c8ef455e094da2140abb6136381c1450ee"
+    },
+    {
+      "path": "test/share-card-export.test.mjs",
+      "sha1": "52977011c71c5ca026a8b8ea1a0aff459cbd564b"
+    },
+    {
+      "path": "test/skill-metadata.test.mjs",
+      "sha1": "02f1d3105827cf0b8befa42251fb05eb14b6a7ab"
+    },
+    {
+      "path": "test/start-page.test.mjs",
+      "sha1": "58351607962b6702d37db62d27142e3566fc9e35"
+    },
+    {
+      "path": "test/story-beat-navigator.test.mjs",
+      "sha1": "058e1e3f0b443856194df4ed0bf4a73b9f26905e"
+    },
+    {
+      "path": "test/story-carrier.test.mjs",
+      "sha1": "73303feb3269f76597422f958d7855ebdf83ec37"
+    },
+    {
+      "path": "test/story-director-strip.test.mjs",
+      "sha1": "87a4feb39cbef9a3566863a205bd82940a3a8569"
+    },
+    {
+      "path": "test/story-follow-camera.test.mjs",
+      "sha1": "b33a717fa9464348e5f72caa8069fa148603f81d"
+    },
+    {
+      "path": "test/story-horizon.test.mjs",
+      "sha1": "2cd213d3cd3bcc59966f3f73ee74144e5ee3a360"
+    },
+    {
+      "path": "test/story-moment-link.test.mjs",
+      "sha1": "345dfa275d87c350474efab751a9cf22e56c54c7"
+    },
+    {
+      "path": "test/story-shelf.test.mjs",
+      "sha1": "d079cc3565e654ae964d3ad15c5241d7a511eeaa"
+    },
+    {
+      "path": "test/story-trail.test.mjs",
+      "sha1": "e4ef0130e5d65aee8d51079c8bbf05d51259ff17"
+    },
+    {
+      "path": "test/toolbar-polish.test.mjs",
+      "sha1": "34d8330ab0d022577be6b75af5e00c6111751ea2"
+    },
+    {
+      "path": "test/v1-compatibility.test.mjs",
+      "sha1": "21c6f9cbda8410ffd542079f21dbf27eceabdf9c"
+    },
+    {
+      "path": "test/viewer-chrome-layout.test.mjs",
+      "sha1": "6b9725ffa244f3a0f99709afaf4cf904c6a149d5"
+    },
+    {
+      "path": "test/visual-check.test.mjs",
+      "sha1": "62127ec6f6ba37a2d4900fb84130814f60bbc160"
+    },
+    {
+      "path": "test/webm-artifact.smoke.mjs",
+      "sha1": "82822d4b4185bf08b86c2ad1267fd6a5b64fc91a"
+    }
+  ],
+  "deviations": {
+    "removed": [
+      "package-lock.json",
+      "test/golden.mjs"
+    ],
+    "added": [
+      "README.md"
+    ],
+    "changed": [
+      "package.json"
+    ]
+  }
+}
