@@ -21,7 +21,7 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-gates-'));
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
 function cliPath() {
-  return path.join(coreRoot, 'bin/archify.mjs');
+  return path.join(coreRoot, 'bin/mirofy.mjs');
 }
 
 function validate(mode, fixture, extraArgs = []) {
@@ -244,7 +244,7 @@ test('guided views round-trip into the rendered artifact and are capped at 5 (1.
   const source = JSON.parse(fs.readFileSync(path.join(fixturesRoot, 'production-deployment.architecture.json'), 'utf8'));
   assert.ok(source.meta.views.length > 0 && source.meta.views.length <= 5);
   const html = render('architecture', source, 'guided-views');
-  const match = html.match(/<script id="archify-guided-views-data" type="application\/json">([\s\S]*?)<\/script>/);
+  const match = html.match(/<script id="mirofy-guided-views-data" type="application\/json">([\s\S]*?)<\/script>/);
   assert.ok(match, 'guided views were not embedded in the rendered artifact');
   const embedded = JSON.parse(match[1]);
   assert.deepEqual(embedded.map((v) => v.id), source.meta.views.map((v) => v.id));
@@ -441,7 +441,7 @@ test('repository evidence verifies a pinned 40-char revision against a real repo
     cliPath(), 'render', 'architecture', input, output, '--repo-root', evidenceRepo,
   ], { encoding: 'utf8' });
   const html = fs.readFileSync(output, 'utf8');
-  const match = html.match(/<script id="archify-source-evidence-data" type="application\/json">([\s\S]*?)<\/script>/);
+  const match = html.match(/<script id="mirofy-source-evidence-data" type="application\/json">([\s\S]*?)<\/script>/);
   assert.ok(match, 'verified repository evidence was not embedded in the rendered artifact');
   const evidence = JSON.parse(match[1]);
   assert.equal(evidence.verified, true);
@@ -594,7 +594,7 @@ test('rendered nodes carry semantic sigils (4.7)', () => {
 
 test('the viewer runtime ships the Semantic Flow Token machinery in every artifact (4.8)', () => {
   const html = render('dataflow', JSON.parse(fs.readFileSync(path.join(fixturesRoot, 'product-analytics.dataflow.json'), 'utf8')), 'flow-tokens');
-  assert.ok(html.includes('Archify.flowTokens'), 'flow token creation API missing from the artifact');
+  assert.ok(html.includes('Mirofy.flowTokens'), 'flow token creation API missing from the artifact');
   assert.ok(html.includes('.semantic-flow-token'), 'flow token CSS missing from the artifact');
 });
 

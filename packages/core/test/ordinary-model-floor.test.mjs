@@ -10,7 +10,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
 const repoRoot = path.resolve(skillRoot, '..');
 const benchmark = path.join(repoRoot, 'benchmarks/ordinary-model-floor/benchmark.mjs');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-ordinary-model-floor-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-ordinary-model-floor-'));
 
 function writeJson(name, value) {
   const file = path.join(tmp, name);
@@ -663,7 +663,7 @@ test('checked-in prompts permit bundled CLI repair while retaining external vali
     const prompt = fs.readFileSync(path.join(suiteRoot, entry.prompt), 'utf8');
     assert.match(
       prompt,
-      /Use the bundled Archify CLI to validate and repair the candidate when shell access is available\./,
+      /Use the bundled Mirofy CLI to validate and repair the candidate when shell access is available\./,
       entry.prompt,
     );
     assert.match(
@@ -814,7 +814,7 @@ test('benchmark documentation locks the fair-run and truthful-evidence contract'
     'same repository commit',
     'packaged skill root',
     'model-visible working tree',
-    'bundled Archify CLI',
+    'bundled Mirofy CLI',
     'independently revalidates',
     'attempt 1',
     'no post-hoc edits',

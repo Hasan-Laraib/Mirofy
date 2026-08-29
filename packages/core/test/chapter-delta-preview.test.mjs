@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-chapter-delta-preview-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-chapter-delta-preview-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -120,7 +120,7 @@ test('pointer and keyboard inspect while touch and native activation still commi
     html.indexOf('function chapterPreviewBlocked()'),
     html.indexOf('function sharePlaybackRequested()'),
   );
-  assert.doesNotMatch(previewRuntime, /Archify\.view\.|updateUrl\(|Archify\.focus\.|renderStoryTrail\(/);
+  assert.doesNotMatch(previewRuntime, /Mirofy\.view\.|updateUrl\(|Mirofy\.focus\.|renderStoryTrail\(/);
 });
 
 test('latest intent, stronger owners, playback, and lifecycle cleanup remain bounded', () => {
@@ -133,8 +133,8 @@ test('latest intent, stronger owners, playback, and lifecycle cleanup remain bou
   assert.match(html, /data-lens-active'[\s\S]*?data-legend-preview-active/);
   assert.match(html, /data-relationship-preview-active'[\s\S]*?data-intent-trace-active/);
   assert.match(html, /if \(playing\) pausePlayback\(\)/);
-  assert.match(html, /Archify\.motionGovernor\.claim\('chapter-preview'/);
-  assert.match(html, /Archify\.motionGovernor\.release\(token\)/);
+  assert.match(html, /Mirofy\.motionGovernor\.claim\('chapter-preview'/);
+  assert.match(html, /Mirofy\.motionGovernor\.release\(token\)/);
   assert.match(html, /handoff\.resolve[\s\S]*?syncChapterPreview\(\)/);
   assert.match(html, /visibilitychange'[\s\S]*?clearChapterPreview/);
   assert.match(html, /beforeprint'[\s\S]*?clearChapterPreview[\s\S]*?settleHandoff/);

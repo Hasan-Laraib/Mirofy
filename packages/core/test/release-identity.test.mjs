@@ -29,20 +29,20 @@ function writeValidDevelopmentFixture(root, overrides = {}) {
     '',
     `Current development version: \`v${version}\``,
     '',
-    'Raven uses manual ZIP installation: extract archify.zip into `~/.raven/workspace/skills`, which yields `~/.raven/workspace/skills/archify`; Raven is not an agent-switcher target.',
+    'Raven uses manual ZIP installation: extract mirofy.zip into `~/.raven/workspace/skills`, which yields `~/.raven/workspace/skills/mirofy`; Raven is not an agent-switcher target.',
   ].join('\n');
   const chinese = [
     '![开发版本](https://img.shields.io/badge/version-2.13.0--dev.0-blue)',
     '',
     `当前开发版本：\`v${version}\``,
     '',
-    'Raven 使用 ZIP 手动安装：将 archify.zip 解压到 `~/.raven/workspace/skills`，解压后会得到 `~/.raven/workspace/skills/archify`；Raven 不属于 Agent 切换器目标。',
+    'Raven 使用 ZIP 手动安装：将 mirofy.zip 解压到 `~/.raven/workspace/skills`，解压后会得到 `~/.raven/workspace/skills/mirofy`；Raven 不属于 Agent 切换器目标。',
   ].join('\n');
   const files = {
-    'archify/package.json': JSON.stringify({ version }),
-    'archify/package-lock.json': JSON.stringify({ version, packages: { '': { version } } }),
-    'archify/SKILL.md': '---\nmetadata:\n  version: "2.13"\n---\n',
-    'archify/assets/template.html': '<meta name="generator" content="archify 2.13.0-dev.0">',
+    'mirofy/package.json': JSON.stringify({ version }),
+    'mirofy/package-lock.json': JSON.stringify({ version, packages: { '': { version } } }),
+    'mirofy/SKILL.md': '---\nmetadata:\n  version: "2.13"\n---\n',
+    'mirofy/assets/template.html': '<meta name="generator" content="mirofy 2.13.0-dev.0">',
     'CHANGELOG.md': [
       '# Changelog',
       '',
@@ -59,11 +59,11 @@ function writeValidDevelopmentFixture(root, overrides = {}) {
     'README.md': english,
     'README_EN.md': english,
     'README_ZH.md': chinese,
-    'scripts/start-template.html': 'development · 开发版 · [[ARCHIFY_VERSION]]',
-    'scripts/guide-template.html': 'development · 开发版 · [[ARCHIFY_VERSION]]',
-    'scripts/gallery-template.html': 'development · 开发版 · [[ARCHIFY_VERSION]]',
-    'docs/index.html': `<span>development · v${version} · 开发版 · 9/9 checks</span><p>Raven manual ZIP / ZIP 手动安装: extract archify.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/archify; 将 archify.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/archify; not an agent-switcher target.</p>`,
-    'docs/start.html': `<span>development · v${version} · 开发版</span><p>Raven manual ZIP / ZIP 手动安装: extract archify.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/archify; 将 archify.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/archify; not an agent-switcher target.</p>`,
+    'scripts/start-template.html': 'development · 开发版 · [[MIROFY_VERSION]]',
+    'scripts/guide-template.html': 'development · 开发版 · [[MIROFY_VERSION]]',
+    'scripts/gallery-template.html': 'development · 开发版 · [[MIROFY_VERSION]]',
+    'docs/index.html': `<span>development · v${version} · 开发版 · 9/9 checks</span><p>Raven manual ZIP / ZIP 手动安装: extract mirofy.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/mirofy; 将 mirofy.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/mirofy; not an agent-switcher target.</p>`,
+    'docs/start.html': `<span>development · v${version} · 开发版</span><p>Raven manual ZIP / ZIP 手动安装: extract mirofy.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/mirofy; 将 mirofy.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/mirofy; not an agent-switcher target.</p>`,
     'ROADMAP.md': `The current development line is \`v${version}\`; it contains the work under Changelog Unreleased and is not a stable release.`,
   };
   for (const [relativePath, content] of Object.entries({ ...files, ...overrides })) {
@@ -78,20 +78,20 @@ function writeValidStableFixture(root, overrides = {}) {
     '',
     `Current stable version: \`v${version}\``,
     '',
-    'Raven uses manual ZIP installation: extract archify.zip into `~/.raven/workspace/skills`, which yields `~/.raven/workspace/skills/archify`; Raven is not an agent-switcher target.',
+    'Raven uses manual ZIP installation: extract mirofy.zip into `~/.raven/workspace/skills`, which yields `~/.raven/workspace/skills/mirofy`; Raven is not an agent-switcher target.',
   ].join('\n');
   const chinese = [
     '![稳定版本](https://img.shields.io/badge/version-2.13.0-blue)',
     '',
     `当前稳定版本：\`v${version}\``,
     '',
-    'Raven 使用 ZIP 手动安装：将 archify.zip 解压到 `~/.raven/workspace/skills`，解压后会得到 `~/.raven/workspace/skills/archify`；Raven 不属于 Agent 切换器目标。',
+    'Raven 使用 ZIP 手动安装：将 mirofy.zip 解压到 `~/.raven/workspace/skills`，解压后会得到 `~/.raven/workspace/skills/mirofy`；Raven 不属于 Agent 切换器目标。',
   ].join('\n');
   const files = {
-    'archify/package.json': JSON.stringify({ version }),
-    'archify/package-lock.json': JSON.stringify({ version, packages: { '': { version } } }),
-    'archify/SKILL.md': '---\nmetadata:\n  version: "2.13"\n---\n',
-    'archify/assets/template.html': '<meta name="generator" content="archify 2.13.0">',
+    'mirofy/package.json': JSON.stringify({ version }),
+    'mirofy/package-lock.json': JSON.stringify({ version, packages: { '': { version } } }),
+    'mirofy/SKILL.md': '---\nmetadata:\n  version: "2.13"\n---\n',
+    'mirofy/assets/template.html': '<meta name="generator" content="mirofy 2.13.0">',
     'CHANGELOG.md': [
       '# Changelog',
       '',
@@ -104,11 +104,11 @@ function writeValidStableFixture(root, overrides = {}) {
     'README.md': english,
     'README_EN.md': english,
     'README_ZH.md': chinese,
-    'scripts/start-template.html': 'stable · 稳定版 · [[ARCHIFY_VERSION]]',
-    'scripts/guide-template.html': 'stable · 稳定版 · [[ARCHIFY_VERSION]]',
-    'scripts/gallery-template.html': 'stable · 稳定版 · [[ARCHIFY_VERSION]]',
-    'docs/index.html': `<span>stable · v${version} · 稳定版 · 9/9 checks</span><p>Raven manual ZIP / ZIP 手动安装: extract archify.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/archify; 将 archify.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/archify; not an agent-switcher target.</p>`,
-    'docs/start.html': `<span>stable · v${version} · 稳定版</span><p>Raven manual ZIP / ZIP 手动安装: extract archify.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/archify; 将 archify.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/archify; not an agent-switcher target.</p>`,
+    'scripts/start-template.html': 'stable · 稳定版 · [[MIROFY_VERSION]]',
+    'scripts/guide-template.html': 'stable · 稳定版 · [[MIROFY_VERSION]]',
+    'scripts/gallery-template.html': 'stable · 稳定版 · [[MIROFY_VERSION]]',
+    'docs/index.html': `<span>stable · v${version} · 稳定版 · 9/9 checks</span><p>Raven manual ZIP / ZIP 手动安装: extract mirofy.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/mirofy; 将 mirofy.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/mirofy; not an agent-switcher target.</p>`,
+    'docs/start.html': `<span>stable · v${version} · 稳定版</span><p>Raven manual ZIP / ZIP 手动安装: extract mirofy.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/mirofy; 将 mirofy.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/mirofy; not an agent-switcher target.</p>`,
     'ROADMAP.md': `The current stable version is \`v${version}\`.`,
   };
   for (const [relativePath, content] of Object.entries({ ...files, ...overrides })) {
@@ -117,7 +117,7 @@ function writeValidStableFixture(root, overrides = {}) {
 }
 
 test('an empty Unreleased section accepts a coherent stable release identity', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     writeValidStableFixture(fixture);
 
@@ -130,9 +130,9 @@ test('an empty Unreleased section accepts a coherent stable release identity', (
 });
 
 test('real Unreleased changes cannot reuse a stable published package identity', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
-    writeFile(fixture, 'archify/package.json', JSON.stringify({ version: '2.12.0' }));
+    writeFile(fixture, 'mirofy/package.json', JSON.stringify({ version: '2.12.0' }));
     writeFile(fixture, 'CHANGELOG.md', [
       '# Changelog',
       '',
@@ -154,14 +154,14 @@ test('real Unreleased changes cannot reuse a stable published package identity',
 });
 
 test('package, lockfile, Skill metadata, escaped Shields badge, and public docs share one development identity', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
-    writeFile(fixture, 'archify/package.json', JSON.stringify({ version: '2.13.0-dev.0' }));
-    writeFile(fixture, 'archify/package-lock.json', JSON.stringify({
+    writeFile(fixture, 'mirofy/package.json', JSON.stringify({ version: '2.13.0-dev.0' }));
+    writeFile(fixture, 'mirofy/package-lock.json', JSON.stringify({
       version: '2.12.0',
       packages: { '': { version: '2.12.0' } },
     }));
-    writeFile(fixture, 'archify/SKILL.md', '---\nmetadata:\n  version: "2.12"\n---\n');
+    writeFile(fixture, 'mirofy/SKILL.md', '---\nmetadata:\n  version: "2.12"\n---\n');
     writeFile(fixture, 'CHANGELOG.md', [
       '# Changelog',
       '',
@@ -176,13 +176,13 @@ test('package, lockfile, Skill metadata, escaped Shields badge, and public docs 
     const staleEnglish = [
       '![Version](https://img.shields.io/badge/version-2.13.0-blue)',
       '',
-      'Archify 2.12 includes unreleased capabilities.',
+      'Mirofy 2.12 includes unreleased capabilities.',
     ].join('\n');
     writeFile(fixture, 'README.md', staleEnglish);
     writeFile(fixture, 'README_EN.md', staleEnglish);
-    writeFile(fixture, 'README_ZH.md', '![Version](https://img.shields.io/badge/version-2.13.0-blue)\n\nArchify 2.12 包含未发布能力。\n');
+    writeFile(fixture, 'README_ZH.md', '![Version](https://img.shields.io/badge/version-2.13.0-blue)\n\nMirofy 2.12 包含未发布能力。\n');
     writeFile(fixture, 'docs/index.html', '<span>Agent Skill · v2.12.0</span>');
-    writeFile(fixture, 'docs/start.html', '<span>Archify v2.12.0</span>');
+    writeFile(fixture, 'docs/start.html', '<span>Mirofy v2.12.0</span>');
 
     const result = runCheck(fixture);
     assert.notEqual(result.status, 0);
@@ -197,10 +197,10 @@ test('package, lockfile, Skill metadata, escaped Shields badge, and public docs 
 });
 
 test('landing proof receipt matches the current nine-check artifact contract', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     writeValidDevelopmentFixture(fixture, {
-      'docs/index.html': '<span>development · v2.13.0-dev.0 · 开发版 · 8/8 checks</span><p>Raven manual ZIP / ZIP 手动安装: extract archify.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/archify; 将 archify.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/archify; not an agent-switcher target.</p>',
+      'docs/index.html': '<span>development · v2.13.0-dev.0 · 开发版 · 8/8 checks</span><p>Raven manual ZIP / ZIP 手动安装: extract mirofy.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/mirofy; 将 mirofy.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/mirofy; not an agent-switcher target.</p>',
     });
 
     const result = runCheck(fixture);
@@ -212,13 +212,13 @@ test('landing proof receipt matches the current nine-check artifact contract', (
 });
 
 test('landing rejects every stale N/N contract count even when 9/9 is also present', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     writeValidDevelopmentFixture(fixture, {
       'docs/index.html': [
         '<span>development · v2.13.0-dev.0 · 开发版 · 9/9 checks</span>',
         '<span>legacy receipt · 7/7 checks</span>',
-        '<p>Raven manual ZIP / ZIP 手动安装: extract archify.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/archify; 将 archify.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/archify; not an agent-switcher target.</p>',
+        '<p>Raven manual ZIP / ZIP 手动安装: extract mirofy.zip into ~/.raven/workspace/skills, which yields ~/.raven/workspace/skills/mirofy; 将 mirofy.zip 解压到 ~/.raven/workspace/skills，解压后会得到 ~/.raven/workspace/skills/mirofy; not an agent-switcher target.</p>',
       ].join('\n'),
     });
 
@@ -231,13 +231,13 @@ test('landing rejects every stale N/N contract count even when 9/9 is also prese
 });
 
 test('Raven stays a truthful manual ZIP install and never becomes a generated agent-switcher command', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     writeValidDevelopmentFixture(fixture, {
       'docs/start.html': [
         '<span>development · v2.13.0-dev.0 · 开发版</span>',
         '<button data-agent="raven">Raven</button>',
-        '<pre>npx skills add tt-a1i/archify --agent raven</pre>',
+        '<pre>npx skills add tt-a1i/mirofy --agent raven</pre>',
       ].join('\n'),
     });
 
@@ -250,14 +250,14 @@ test('Raven stays a truthful manual ZIP install and never becomes a generated ag
 });
 
 test('Raven instructions reject extracting the archive into the final Skill directory', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     const nestedEnglish = [
       '![Development Version](https://img.shields.io/badge/version-2.13.0--dev.0-blue)',
       '',
       'Current development version: `v2.13.0-dev.0`',
       '',
-      'Raven is manual ZIP only: extract archify.zip into `~/.raven/workspace/skills/archify`; Raven is not an agent-switcher target.',
+      'Raven is manual ZIP only: extract mirofy.zip into `~/.raven/workspace/skills/mirofy`; Raven is not an agent-switcher target.',
     ].join('\n');
     writeValidDevelopmentFixture(fixture, {
       'README.md': nestedEnglish,
@@ -266,29 +266,29 @@ test('Raven instructions reject extracting the archive into the final Skill dire
 
     const result = runCheck(fixture);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /extract archify\.zip into ~\/\.raven\/workspace\/skills, yielding ~\/\.raven\/workspace\/skills\/archify/);
+    assert.match(result.stderr, /extract mirofy\.zip into ~\/\.raven\/workspace\/skills, yielding ~\/\.raven\/workspace\/skills\/mirofy/);
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }
 });
 
 test('renderer template generator carries the complete package prerelease identity', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     writeValidDevelopmentFixture(fixture, {
-      'archify/assets/template.html': '<meta name="generator" content="archify 2.12.0">',
+      'mirofy/assets/template.html': '<meta name="generator" content="mirofy 2.12.0">',
     });
 
     const result = runCheck(fixture);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /archify\/assets\/template\.html generator must be archify 2\.13\.0-dev\.0/);
+    assert.match(result.stderr, /mirofy\/assets\/template\.html generator must be mirofy 2\.13\.0-dev\.0/);
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }
 });
 
 test('roadmap current identity follows the package release state', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     writeValidDevelopmentFixture(fixture, {
       'ROADMAP.md': 'The current development line is `v2.12.0`; it is not a stable release.',
@@ -303,7 +303,7 @@ test('roadmap current identity follows the package release state', () => {
 });
 
 test('generated public-page templates keep a development marker and version placeholder', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-release-identity-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-release-identity-'));
   try {
     writeValidDevelopmentFixture(fixture, {
       'scripts/gallery-template.html': 'Proof Lab / 2.12.0',
@@ -311,7 +311,7 @@ test('generated public-page templates keep a development marker and version plac
 
     const result = runCheck(fixture);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /scripts\/gallery-template\.html must use \[\[ARCHIFY_VERSION\]\] with development and 开发版 labels/);
+    assert.match(result.stderr, /scripts\/gallery-template\.html must use \[\[MIROFY_VERSION\]\] with development and 开发版 labels/);
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }

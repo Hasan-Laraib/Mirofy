@@ -17,12 +17,12 @@ const COLLECTIONS = Object.freeze({
 const MARK_BY_LOOKUP = new Map();
 const MARK_BY_DOMAIN = new Map();
 const RESOLVED_BY_NODE = new WeakMap();
-const RESOLVED_MARK = Symbol('archify.brandMark');
+const RESOLVED_MARK = Symbol('mirofy.brandMark');
 const MAX_HTML_BYTES = 256 * 1024;
 const MAX_IMAGE_BYTES = 1024 * 1024;
 const MAX_CAPTURE_CONCURRENCY = 3;
 const DEFAULT_CAPTURE_TIMEOUT_MS = 8000;
-const USER_AGENT = 'Archify/2.15 brand-preview';
+const USER_AGENT = 'Mirofy/2.15 brand-preview';
 
 function lookupForms(value) {
   const raw = String(value ?? '').trim().toLocaleLowerCase('en-US');
@@ -121,7 +121,7 @@ export function isPrivateBrandAddress(address) {
   return family === 4 ? ipv4Private(address) : (family === 6 ? ipv6Private(address) : true);
 }
 
-function validateUrlShape(url, allowPrivate = process.env.ARCHIFY_BRAND_ALLOW_PRIVATE === '1') {
+function validateUrlShape(url, allowPrivate = process.env.MIROFY_BRAND_ALLOW_PRIVATE === '1') {
   if (!['https:', 'http:'].includes(url.protocol)) throw new Error('only HTTP(S) brand links are supported');
   if (url.username || url.password) throw new Error('brand links cannot contain credentials');
   const expectedPort = url.protocol === 'https:' ? '443' : '80';
@@ -149,7 +149,7 @@ function beforeDeadline(promise, deadline) {
 }
 
 async function resolveRequestTarget(url, deadline) {
-  const allowPrivate = process.env.ARCHIFY_BRAND_ALLOW_PRIVATE === '1';
+  const allowPrivate = process.env.MIROFY_BRAND_ALLOW_PRIVATE === '1';
   const host = validateUrlShape(url, allowPrivate);
   const directFamily = net.isIP(host);
   const addresses = directFamily
@@ -170,7 +170,7 @@ function timeoutSignal(milliseconds) {
 }
 
 function captureTimeoutMilliseconds() {
-  const configured = Number(process.env.ARCHIFY_BRAND_CAPTURE_TIMEOUT_MS);
+  const configured = Number(process.env.MIROFY_BRAND_CAPTURE_TIMEOUT_MS);
   if (!Number.isFinite(configured)) return DEFAULT_CAPTURE_TIMEOUT_MS;
   return Math.max(100, Math.min(30000, Math.round(configured)));
 }
@@ -483,7 +483,7 @@ export async function prepareDiagramBrandMarks(diagramType, diagram) {
     }
     const url = asUrl(node.brand);
     if (url) {
-      unknown.push(`/${collection}/${index}/brand ${JSON.stringify(node.brand)} is an unpinned URL; capture it first with \`archify brands capture ${url.href} --json\``);
+      unknown.push(`/${collection}/${index}/brand ${JSON.stringify(node.brand)} is an unpinned URL; capture it first with \`mirofy brands capture ${url.href} --json\``);
       return;
     }
     unknown.push(`/${collection}/${index}/brand ${JSON.stringify(node.brand)} is not a built-in brand; closest IDs: ${suggestions(node.brand).join(', ')}`);
@@ -498,8 +498,8 @@ export async function prepareDiagramBrandMarks(diagramType, diagram) {
       subject: { diagramType, collection },
       evidence: {},
       supportedFixes: message.includes('is an unpinned URL')
-        ? ['run `archify brands capture <url> --json` and author the returned digest-pinned brand object']
-        : ['choose an ID from `archify brands`', 'run `archify brands capture <url> --json` for an unknown official site'],
+        ? ['run `mirofy brands capture <url> --json` and author the returned digest-pinned brand object']
+        : ['choose an ID from `mirofy brands`', 'run `mirofy brands capture <url> --json` for an unknown official site'],
     })));
   }
 }

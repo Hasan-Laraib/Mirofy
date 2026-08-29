@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const template = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-story-shelf-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-story-shelf-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -71,14 +71,14 @@ test('active stories expand through existing state without storage or a second i
   assert.match(template, /data-active-view', view \? view\.id : 'all'/);
   assert.match(template, /if \(activeIndex < 0\) activate\(0, \{ playback: true \}\)/);
   assert.match(template, /showAll\([\s\S]*activeIndex = -1;[\s\S]*render\(\)/);
-  assert.doesNotMatch(template, /storyShelf(?:Open|Expanded|Storage)|archify-story-shelf|localStorage[^\n]*shelf/i);
+  assert.doesNotMatch(template, /storyShelf(?:Open|Expanded|Storage)|mirofy-story-shelf|localStorage[^\n]*shelf/i);
 });
 
 test('Story Shelf remains viewer-only, embed-safe, print-safe, and motion-neutral', () => {
   assert.match(template, /html\[data-embed="true"\] \.guided-views \{ display: none !important; \}/);
-  assert.match(template, /\.toolbar, \.diagram-nav, \.focus-chip, \.guided-views, \.archify-toast, \.no-print \{ display: none !important; \}/);
+  assert.match(template, /\.toolbar, \.diagram-nav, \.focus-chip, \.guided-views, \.mirofy-toast, \.no-print \{ display: none !important; \}/);
   assert.doesNotMatch(canonicalSvg(render('workflow')), /Story Shelf|guided-view|data-active-view/);
-  assert.doesNotMatch(template, /@keyframes\s+archify-story-shelf|animation:[^;]*story-shelf/i);
+  assert.doesNotMatch(template, /@keyframes\s+mirofy-story-shelf|animation:[^;]*story-shelf/i);
 });
 
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));

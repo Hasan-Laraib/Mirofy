@@ -4,7 +4,7 @@
        Fine-pointer hover and keyboard focus share the same stable-ID preview;
        touch continues directly to the existing click-to-focus contract.
        ============================================================ */
-    Archify.intentTrace = (function () {
+    Mirofy.intentTrace = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector(':scope > svg');
@@ -38,8 +38,8 @@
           svg.hasAttribute('data-lens-active') ||
           svg.hasAttribute('data-story-active') ||
           svg.hasAttribute('data-relationship-preview-active') ||
-          !!(Archify.routeProbe && typeof Archify.routeProbe.active === 'function' && Archify.routeProbe.active()) ||
-          !!(Archify.focus && typeof Archify.focus.active === 'function' && Archify.focus.active());
+          !!(Mirofy.routeProbe && typeof Mirofy.routeProbe.active === 'function' && Mirofy.routeProbe.active()) ||
+          !!(Mirofy.focus && typeof Mirofy.focus.active === 'function' && Mirofy.focus.active());
       }
       function edgeShapes(edge) {
         if (/^(path|line|polyline)$/i.test(edge.tagName)) return [edge];

@@ -24,7 +24,7 @@ export function loadDiagram({ rendererDir, diagramType, defaultExample, argv = p
   validateGuidedViews(diagramType, diagram);
   validateRelationshipIds(diagramType, diagram);
   validateEngineeringProfile(diagramType, diagram);
-  const sourceEvidence = verifyRepositoryEvidence(diagramType, diagram, process.env.ARCHIFY_REPO_ROOT);
+  const sourceEvidence = verifyRepositoryEvidence(diagramType, diagram, process.env.MIROFY_REPO_ROOT);
   const template = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
   // Optional chaining: in degraded mode (no ajv) malformed input must still
   // reach the renderer's friendly layout checks instead of crashing here.
@@ -154,18 +154,18 @@ export function svgRootAttrs(meta, kind) {
   const engineeringProfile = meta.engineering_profile
     ? ` data-engineering-profile="${esc(meta.engineering_profile)}"`
     : '';
-  const requestedProfile = process.env.ARCHIFY_QUALITY_PROFILE || meta.quality_profile;
+  const requestedProfile = process.env.MIROFY_QUALITY_PROFILE || meta.quality_profile;
   const qualityProfile = requestedProfile === 'showcase' ? 'showcase' : 'standard';
   const advisory = requestedProfile ? '' : ' data-quality-gates="advisory"';
-  return `role="img" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="archify-diagram-title archify-diagram-description"${animation}${preset}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
+  return `role="img" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="mirofy-diagram-title mirofy-diagram-description"${animation}${preset}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
 }
 
 // Keep the accessible name inside the SVG so it survives standalone SVG
-// export and embedding. The fixed IDs are deterministic because an Archify
+// export and embedding. The fixed IDs are deterministic because an Mirofy
 // artifact intentionally contains one primary diagram SVG.
 export function svgAccessibleText(meta, kind) {
   const description = meta.subtitle || translateMessage(meta.locale, `diagram.description.${kind}`);
-  return `        <title id="archify-diagram-title">${esc(meta.title)}</title>\n        <desc id="archify-diagram-description">${esc(description)}</desc>`;
+  return `        <title id="mirofy-diagram-title">${esc(meta.title)}</title>\n        <desc id="mirofy-diagram-description">${esc(description)}</desc>`;
 }
 
 export function animateAttr(meta, kind, step) {
@@ -203,7 +203,7 @@ export function focusNodeAttrs(id, label, metadata = {}, locale) {
 }
 
 // Native SVG titles preserve a compact details-on-demand fallback when the
-// canonical SVG is embedded inline outside the full Archify viewer.
+// canonical SVG is embedded inline outside the full Mirofy viewer.
 export function focusNodeTitle(label, metadata = {}) {
   const parts = [label, metadata.sublabel, metadata.context, metadata.tag, metadata.brand]
     .filter((value) => value !== undefined && value !== null && String(value).trim() !== '');

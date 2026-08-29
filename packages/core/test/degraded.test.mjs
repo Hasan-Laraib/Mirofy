@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-degraded-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-degraded-'));
 
 const EXAMPLES = {
   workflow: 'agent-tool-call.workflow.json',

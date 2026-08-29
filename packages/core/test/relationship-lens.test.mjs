@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-relationship-lens-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-relationship-lens-'));
 
 const CASES = {
   architecture: { example: 'web-app.architecture.json', collection: 'connections' },
@@ -73,7 +73,7 @@ test('relationship lens groups incoming, outgoing, and self-loop paths and follo
   assert.match(html, /data-relationship-from/);
   assert.match(html, /data-relationship-to/);
   assert.match(html, /set\(id, \{ toggle: false \}\)/);
-  assert.match(html, /Archify\.view\.reveal\(\[id\], \{ includeNeighbors: true, reason: 'relationship' \}\)/);
+  assert.match(html, /Mirofy\.view\.reveal\(\[id\], \{ includeNeighbors: true, reason: 'relationship' \}\)/);
   assert.doesNotMatch(svg(html), /relationship-lens|Connected relationships/);
 });
 

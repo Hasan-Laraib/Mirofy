@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const template = fs.readFileSync(path.join(skillRoot, 'assets', 'template.html'), 'utf8');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-story-follow-camera-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-story-follow-camera-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -49,7 +49,7 @@ test('Story Follow frames the exact previous, current, and next authored stops t
   assert.match(template, /ids\.push\(step\.nodeId\)/);
   assert.match(template, /step\.index \+ 1 < storySteps\.length/);
   assert.match(template, /var ids = storyFrameIds\(step\)/);
-  assert.match(template, /Archify\.view\.reveal\(ids, \{/);
+  assert.match(template, /Mirofy\.view\.reveal\(ids, \{/);
   assert.match(template, /reason: options\.manual === true \? 'story-beat' : 'story-follow'/);
   assert.match(template, /padding: 64/);
   assert.match(template, /maxScale: 1\.65/);
@@ -79,7 +79,7 @@ test('adaptive dwell, Still, reduced motion, hidden pages, and print keep camera
   assert.match(template, /window\.matchMedia\('print'\)\.matches/);
   assert.match(template, /instant: options\.instant === true \|\| reducedMotion\(\) \|\| document\.documentElement\.getAttribute\('data-motion'\) !== 'live'/);
   assert.match(template, /function storyAutomaticPlaybackAllowed\(\)/);
-  assert.match(template, /Archify\.motionGovernor && Archify\.motionGovernor\.capable\) return !Archify\.motionGovernor\.isPaused\(\)/);
+  assert.match(template, /Mirofy\.motionGovernor && Mirofy\.motionGovernor\.capable\) return !Mirofy\.motionGovernor\.isPaused\(\)/);
   assert.match(template, /play\.disabled = !playing && !automaticPlaybackAllowed/);
   assert.match(template, /'viewer\.guided\.motionUnavailable'/);
   assert.match(template, /function startPlayback\(\) \{[\s\S]*?if \(!storyAutomaticPlaybackAllowed\(\)\)/);
@@ -95,7 +95,7 @@ test('pause, settle, overview, and manual camera takeover cancel Story Follow st
   assert.match(template, /function pausePlayback\(options\)[\s\S]*?clearStoryFollow\(\)/);
   assert.match(template, /function settleStoryBeats\(\)[\s\S]*?clearStoryFollow\(\)/);
   assert.match(template, /function clearStoryTrail\(\)[\s\S]*?clearStoryFollow\(\)/);
-  assert.match(template, /function interruptCamera\(reason\)[\s\S]*?Archify\.guidedViews\.pause\(\)/);
+  assert.match(template, /function interruptCamera\(reason\)[\s\S]*?Mirofy\.guidedViews\.pause\(\)/);
   assert.match(template, /clone\.removeAttribute\('data-story-follow'\)/);
   assert.match(template, /!clone\.hasAttribute\('data-story-follow'\)/);
 });

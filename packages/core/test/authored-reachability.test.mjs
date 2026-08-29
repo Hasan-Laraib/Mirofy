@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const template = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-authored-reach-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-authored-reach-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',

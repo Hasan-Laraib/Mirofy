@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/archify/schemas/architecture.schema.json",
-  "title": "Archify Architecture Diagram",
+  "$id": "https://github.com/tt-a1i/mirofy/schemas/architecture.schema.json",
+  "title": "Mirofy Architecture Diagram",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "diagram_type", "meta", "components"],

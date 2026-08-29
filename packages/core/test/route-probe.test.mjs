@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-route-probe-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-route-probe-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -37,7 +37,7 @@ test('all typed renderers inherit one viewer-only Route Probe', () => {
     const html = render(mode, example);
     assert.match(html, /id="route-probe" hidden role="region" aria-labelledby="route-probe-title"/, mode);
     assert.match(html, /id="btn-route-probe"[^>]+aria-label="Trace a directed route"[^>]+aria-pressed="false"[^>]+aria-controls="route-probe"/, mode);
-    assert.match(html, /Archify\.routeProbe = \(function \(\)/, mode);
+    assert.match(html, /Mirofy\.routeProbe = \(function \(\)/, mode);
     assert.match(html, /Route Probe — shortest directed path over compiled semantics/, mode);
     assert.equal((html.match(/<svg\b/g) || []).length, 1, `${mode} keeps one static canonical SVG`);
     assert.doesNotMatch(canonicalSvg(html), /data-route-|route-probe-flow/, mode);
@@ -70,7 +70,7 @@ test('Route Probe turns a two-node question into a readable route receipt and st
   assert.match(html, /clone\.style\.setProperty\('--route-step', String\(step\)\)/);
   assert.match(html, /#route=' \+ encodeURIComponent\(startId\) \+ '~' \+ encodeURIComponent\(endId\)/);
   assert.match(html, /new URLSearchParams\(location\.hash\.replace/);
-  assert.match(html, /Archify\.view\.reveal\(result\.nodes, \{ includeNeighbors: false, reason: 'route' \}\)/);
+  assert.match(html, /Mirofy\.view\.reveal\(result\.nodes, \{ includeNeighbors: false, reason: 'route' \}\)/);
   assert.match(html, /shortest authored route/);
 });
 
@@ -83,7 +83,7 @@ test('Route Probe hands large-diagram endpoint selection to a reachability-aware
   assert.match(html, /kind: 'route-target'/);
   assert.match(html, /Object\.keys\(distances\)\.filter/);
   assert.match(html, /targetBadges\[id\] = viewerCount\('viewer\.route\.hop', distances\[id\]\)/);
-  assert.match(html, /Archify\.finder\.open\(\{ context: context \}\)/);
+  assert.match(html, /Mirofy\.finder\.open\(\{ context: context \}\)/);
   assert.match(html, /findBtn\.textContent = viewerText\('viewer\.route\.destination\.find'\)/);
   assert.match(html, /panel\.setAttribute\('data-finder-open', 'true'\)/);
   assert.match(html, /\.route-probe\[data-finder-open="true"\]/);
@@ -95,14 +95,14 @@ test('Route Probe keeps pointer, keyboard, motion, embed, and export boundaries 
   assert.match(html, /svg\.addEventListener\('keydown', interceptSelection, true\)/);
   assert.match(html, /event\.key !== 'Enter' && event\.key !== ' '/);
   assert.match(html, /e\.key === 'r' \|\| e\.key === 'R'/);
-  assert.match(html, /e\.key === 'Escape' && Archify\.routeProbe\.active\(\)/);
+  assert.match(html, /e\.key === 'Escape' && Mirofy\.routeProbe\.active\(\)/);
   assert.match(html, /html\[data-embed="true"\] \.route-probe/);
   assert.match(html, /html\.getAttribute\('data-embed'\) === 'true'/);
   assert.match(html, /\.route-probe\[data-route-dock="top"\]/);
   assert.match(html, /function overlapArea\(a, b\)/);
   assert.match(html, /score\(topCandidate\) <= score\(bottomCandidate\)/);
   assert.match(html, /container\.addEventListener\('scroll', updateDocking, \{ passive: true \}\)/);
-  assert.match(html, /@keyframes archify-route-probe-flow/);
+  assert.match(html, /@keyframes mirofy-route-probe-flow/);
   assert.match(html, /@media \(prefers-reduced-motion: reduce\)[\s\S]+\.route-probe-flow \{[\s\S]+animation: none !important/);
   assert.match(html, /clone\.removeAttribute\('data-route-picking'\)/);
   assert.match(html, /clone\.removeAttribute\('data-route-active'\)/);

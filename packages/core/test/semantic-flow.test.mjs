@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-semantic-flow-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-semantic-flow-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -65,8 +65,8 @@ test('Semantic Flow has preset identities and motion-safe density boundaries', (
   assert.match(html, /\.semantic-lens-flow\[data-direction="within"\][\s\S]+var\(--messagebus-stroke\)/);
   assert.match(html, /svg\[data-preset="signal-flow"\] \.semantic-lens-flow/);
   assert.match(html, /svg\[data-preset="blueprint"\] \.semantic-lens-flow/);
-  assert.match(html, /@keyframes archify-semantic-lens-flow/);
-  assert.match(html, /animation: archify-semantic-lens-flow 1\.35s linear 1 both/);
+  assert.match(html, /@keyframes mirofy-semantic-lens-flow/);
+  assert.match(html, /animation: mirofy-semantic-lens-flow 1\.35s linear 1 both/);
   assert.match(html, /entries\.length > MAX_LENS_FLOW_EDGES/);
   assert.match(html, /data-lens-flow-density', 'quiet'/);
   assert.match(html, /html\[data-embed="true"\] \.semantic-lens-overlay/);

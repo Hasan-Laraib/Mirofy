@@ -19,71 +19,71 @@
       if (e.defaultPrevented) return;
       var t = e.target;
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      if (Archify.preset && Archify.preset.isOpen() && e.key !== 'Escape' && e.key !== 's' && e.key !== 'S') {
-        Archify.preset.close(false);
+      if (Mirofy.preset && Mirofy.preset.isOpen() && e.key !== 'Escape' && e.key !== 's' && e.key !== 'S') {
+        Mirofy.preset.close(false);
       }
       if (e.key === '?') {
         e.preventDefault();
-        Archify.guide.toggle();
+        Mirofy.guide.toggle();
       } else if (e.key === '/') {
         e.preventDefault();
-        Archify.finder.open();
+        Mirofy.finder.open();
       } else if (e.key === 't' || e.key === 'T') {
         e.preventDefault();
-        Archify.theme.toggle();
+        Mirofy.theme.toggle();
       } else if (e.key === 's' || e.key === 'S') {
         e.preventDefault();
-        Archify.preset.cycle();
+        Mirofy.preset.cycle();
       } else if (e.key === 'e' || e.key === 'E') {
         e.preventDefault();
-        if (!Archify.exportMenu.isOpen()) Archify.exportMenu.open();
+        if (!Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.open();
       } else if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
-        Archify.presentation.toggle();
+        Mirofy.presentation.toggle();
       } else if (e.key === 'm' || e.key === 'M') {
         e.preventDefault();
-        Archify.radar.toggle();
+        Mirofy.radar.toggle();
       } else if (e.key === 'l' || e.key === 'L') {
         e.preventDefault();
-        Archify.semanticLens.toggle();
+        Mirofy.semanticLens.toggle();
       } else if (e.key === 'r' || e.key === 'R') {
         e.preventDefault();
-        Archify.routeProbe.toggle({ focusNode: true });
+        Mirofy.routeProbe.toggle({ focusNode: true });
       } else if (e.key === '+' || e.key === '=') {
         e.preventDefault();
-        Archify.view.zoomIn();
+        Mirofy.view.zoomIn();
       } else if (e.key === '-') {
         e.preventDefault();
-        Archify.view.zoomOut();
+        Mirofy.view.zoomOut();
       } else if (e.key === '0') {
         e.preventDefault();
-        Archify.view.reset();
-      } else if (e.key === 'Escape' && Archify.preset.isOpen()) {
+        Mirofy.view.reset();
+      } else if (e.key === 'Escape' && Mirofy.preset.isOpen()) {
         e.preventDefault();
-        Archify.preset.close(true);
-      } else if (e.key === 'Escape' && Archify.semanticLens.isOpen()) {
+        Mirofy.preset.close(true);
+      } else if (e.key === 'Escape' && Mirofy.semanticLens.isOpen()) {
         e.preventDefault();
-        Archify.semanticLens.close({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.semanticLens.active()) {
+        Mirofy.semanticLens.close({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.semanticLens.active()) {
         e.preventDefault();
-        Archify.semanticLens.clear({ preserveView: true });
-      } else if (e.key === 'Escape' && Archify.guide.isOpen()) {
+        Mirofy.semanticLens.clear({ preserveView: true });
+      } else if (e.key === 'Escape' && Mirofy.guide.isOpen()) {
         e.preventDefault();
-        Archify.guide.close({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.radar.isOpen()) {
+        Mirofy.guide.close({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.radar.isOpen()) {
         e.preventDefault();
-        Archify.radar.close({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.routeProbe.active()) {
+        Mirofy.radar.close({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.routeProbe.active()) {
         e.preventDefault();
-        Archify.routeProbe.escape({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.intentTrace.active()) {
+        Mirofy.routeProbe.escape({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.intentTrace.active()) {
         e.preventDefault();
-        Archify.intentTrace.clear();
-      } else if (e.key === 'Escape' && Archify.focus.active()) {
+        Mirofy.intentTrace.clear();
+      } else if (e.key === 'Escape' && Mirofy.focus.active()) {
         e.preventDefault();
-        Archify.focus.clear({ restoreFocus: true });
-      } else if (e.key === 'Escape' && Archify.presentation.active()) {
+        Mirofy.focus.clear({ restoreFocus: true });
+      } else if (e.key === 'Escape' && Mirofy.presentation.active()) {
         e.preventDefault();
-        Archify.presentation.exit();
+        Mirofy.presentation.exit();
       }
     });

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-v1-compat-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-v1-compat-'));
 
 function render(mode, doc) {
   const input = path.join(tmp, `${mode}.json`);
@@ -31,7 +31,7 @@ function validate(mode, doc) {
   fs.writeFileSync(input, JSON.stringify(doc));
   try {
     execFileSync('node', [
-      path.join(skillRoot, 'bin/archify.mjs'),
+      path.join(skillRoot, 'bin/mirofy.mjs'),
       'validate',
       mode,
       input,

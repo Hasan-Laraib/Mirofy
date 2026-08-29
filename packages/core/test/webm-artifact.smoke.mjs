@@ -9,14 +9,14 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-webm-artifact-'));
-const externalReachSource = process.env.ARCHIFY_REACH_CARD_SOURCE
-  ? path.resolve(process.env.ARCHIFY_REACH_CARD_SOURCE)
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-webm-artifact-'));
+const externalReachSource = process.env.MIROFY_REACH_CARD_SOURCE
+  ? path.resolve(process.env.MIROFY_REACH_CARD_SOURCE)
   : '';
-const externalReachOutput = process.env.ARCHIFY_REACH_CARD_OUTPUT
-  ? path.resolve(process.env.ARCHIFY_REACH_CARD_OUTPUT)
+const externalReachOutput = process.env.MIROFY_REACH_CARD_OUTPUT
+  ? path.resolve(process.env.MIROFY_REACH_CARD_OUTPUT)
   : '';
-assert.equal(Boolean(externalReachSource), Boolean(externalReachOutput), 'ARCHIFY_REACH_CARD_SOURCE and ARCHIFY_REACH_CARD_OUTPUT must be set together');
+assert.equal(Boolean(externalReachSource), Boolean(externalReachOutput), 'MIROFY_REACH_CARD_SOURCE and MIROFY_REACH_CARD_OUTPUT must be set together');
 
 function executable(candidates) {
   for (const candidate of candidates) {
@@ -26,7 +26,7 @@ function executable(candidates) {
       continue;
     }
     try {
-      return execFileSync('sh', ['-c', `command -v "$1"`, 'archify-which', candidate], { encoding: 'utf8' }).trim();
+      return execFileSync('sh', ['-c', `command -v "$1"`, 'mirofy-which', candidate], { encoding: 'utf8' }).trim();
     } catch (_) {
       // Try the next platform-specific name.
     }
@@ -35,17 +35,17 @@ function executable(candidates) {
 }
 
 const chrome = executable([
-  process.env.ARCHIFY_CHROME,
+  process.env.MIROFY_CHROME,
   'google-chrome',
   'google-chrome-stable',
   'chromium',
   'chromium-browser',
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
 ]);
-const ffmpeg = executable([process.env.ARCHIFY_FFMPEG, 'ffmpeg']);
+const ffmpeg = executable([process.env.MIROFY_FFMPEG, 'ffmpeg']);
 
-assert.ok(chrome, 'Chrome/Chromium is required for the WebM artifact smoke test (or set ARCHIFY_CHROME)');
-assert.ok(ffmpeg, 'ffmpeg is required for the WebM artifact smoke test (or set ARCHIFY_FFMPEG)');
+assert.ok(chrome, 'Chrome/Chromium is required for the WebM artifact smoke test (or set MIROFY_CHROME)');
+assert.ok(ffmpeg, 'ffmpeg is required for the WebM artifact smoke test (or set MIROFY_FFMPEG)');
 
 const source = JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples/web-app.architecture.json'), 'utf8'));
 source.meta.animation = 'trace';
@@ -369,7 +369,7 @@ try {
     async function inspectKinds(file, expectedKinds, theme) {
       const url = new URL(pathToFileURL(file).href);
       url.searchParams.set('theme', theme);
-      await navigateReady(url, '!!(window.Archify && Archify.semanticLens)', `legend ${theme}`);
+      await navigateReady(url, '!!(window.Mirofy && Mirofy.semanticLens)', `legend ${theme}`);
       const result = await evaluate(cdp, sessionId, `(() => {
         var svg = document.querySelector('.diagram-container > svg');
         var entries = Array.from(svg.querySelectorAll('[data-legend-semantic-kind]'));
@@ -405,7 +405,7 @@ try {
       assert.equal(lifecycle.bridge, true);
     }
 
-    await navigateReady(outputs.dataflow, '!!(window.Archify && Archify.semanticLens && Archify.exportMenu)', 'Dataflow database legend runtime');
+    await navigateReady(outputs.dataflow, '!!(window.Mirofy && Mirofy.semanticLens && Mirofy.exportMenu)', 'Dataflow database legend runtime');
     const databaseRuntime = await evaluate(cdp, sessionId, String.raw`(async function () {
       var entry = document.querySelector('[data-legend-kind="database"]');
       entry.focus();
@@ -415,16 +415,16 @@ try {
       var captured;
       URL.createObjectURL = function (blob) {
         captured = blob.text();
-        return 'blob:archify-dataflow-legend-smoke';
+        return 'blob:mirofy-dataflow-legend-smoke';
       };
       HTMLAnchorElement.prototype.click = function () {};
       try {
-        await Archify.exportMenu.run('svg');
+        await Mirofy.exportMenu.run('svg');
         var exportedText = await captured;
         var exported = new DOMParser().parseFromString(exportedText, 'image/svg+xml').documentElement;
         return {
-          selected: Archify.semanticLens.active(),
-          lensOpen: Archify.semanticLens.isOpen(),
+          selected: Mirofy.semanticLens.active(),
+          lensOpen: Mirofy.semanticLens.isOpen(),
           exportedKinds: Array.from(exported.querySelectorAll('[data-legend-semantic-kind]')).map(function (item) { return item.getAttribute('data-legend-semantic-kind'); }),
           exportedBridgeResidue: exported.querySelectorAll('[data-legend-bridge], [data-legend-kind], [data-legend-label], [data-legend-count], [data-legend-bridge-runtime]').length
         };
@@ -438,7 +438,7 @@ try {
     assert.deepEqual(databaseRuntime.exportedKinds, ['database', 'default']);
     assert.equal(databaseRuntime.exportedBridgeResidue, 0);
 
-    await navigateReady(outputs.custom, '!!(window.Archify && Archify.semanticLens && Archify.exportMenu)', 'custom legend runtime');
+    await navigateReady(outputs.custom, '!!(window.Mirofy && Mirofy.semanticLens && Mirofy.exportMenu)', 'custom legend runtime');
     const runtime = await evaluate(cdp, sessionId, String.raw`(async function () {
       var svg = document.querySelector('.diagram-container > svg');
       var entries = Array.from(svg.querySelectorAll('[data-legend-semantic-kind]'));
@@ -449,12 +449,12 @@ try {
       first.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
       var arrowMoved = document.activeElement === second;
       second.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
-      var selected = Archify.semanticLens.active();
-      var guidedActivated = Archify.guidedViews.activate('main', { updateUrl: false });
-      var guidedActive = Archify.guidedViews.active();
+      var selected = Mirofy.semanticLens.active();
+      var guidedActivated = Mirofy.guidedViews.activate('main', { updateUrl: false });
+      var guidedActive = Mirofy.guidedViews.active();
       var visualMatrix = [];
       for (var preset of ['classic', 'signal-flow', 'blueprint', 'editorial']) {
-        if (!Archify.preset.apply(preset)) throw new Error('could not apply preset ' + preset);
+        if (!Mirofy.preset.apply(preset)) throw new Error('could not apply preset ' + preset);
         for (var theme of ['dark', 'light']) {
           document.documentElement.setAttribute('data-theme', theme);
           visualMatrix.push({
@@ -471,11 +471,11 @@ try {
       var captured;
       URL.createObjectURL = function (blob) {
         captured = blob.text();
-        return 'blob:archify-legend-smoke';
+        return 'blob:mirofy-legend-smoke';
       };
       HTMLAnchorElement.prototype.click = function () {};
       try {
-        await Archify.exportMenu.run('svg');
+        await Mirofy.exportMenu.run('svg');
         var exportedText = await captured;
         var exported = new DOMParser().parseFromString(exportedText, 'image/svg+xml').documentElement;
         return {
@@ -485,7 +485,7 @@ try {
           tabStops: interactive.filter(function (entry) { return entry.getAttribute('tabindex') === '0'; }).length,
           arrowMoved: arrowMoved,
           selected: selected,
-          lensOpen: Archify.semanticLens.isOpen(),
+          lensOpen: Mirofy.semanticLens.isOpen(),
           guidedActivated: guidedActivated,
           guidedActive: guidedActive,
           visualMatrix: visualMatrix,
@@ -529,7 +529,7 @@ try {
 
     const embedUrl = new URL(pathToFileURL(outputs.custom).href);
     embedUrl.searchParams.set('embed', '1');
-    await navigateReady(embedUrl, '!!(window.Archify && Archify.semanticLens)', 'embedded legend');
+    await navigateReady(embedUrl, '!!(window.Mirofy && Mirofy.semanticLens)', 'embedded legend');
     const embed = await evaluate(cdp, sessionId, `(() => ({
       roles: document.querySelectorAll('[data-legend-kind][role]').length,
       runtime: document.querySelectorAll('[data-legend-bridge-runtime]').length,
@@ -537,7 +537,7 @@ try {
     }))()`);
     assert.deepEqual(embed, { roles: 0, runtime: 0, kinds: ['frontend', 'database', 'external'] });
 
-    await navigateReady(outputs.hidden, '!!(window.Archify && Archify.semanticLens)', 'hidden legend');
+    await navigateReady(outputs.hidden, '!!(window.Mirofy && Mirofy.semanticLens)', 'hidden legend');
     const hidden = await evaluate(cdp, sessionId, `(() => ({
       root: !!document.querySelector('[data-legend]'),
       bridge: !!document.querySelector('[data-legend-bridge]'),
@@ -548,7 +548,7 @@ try {
   }
 
   async function verifySemanticPassportDismissal(file) {
-    await navigateReady(file, '!!(window.Archify && Archify.focus && document.querySelector("#btn-focus-clear"))', 'Semantic Passport dismissal');
+    await navigateReady(file, '!!(window.Mirofy && Mirofy.focus && document.querySelector("#btn-focus-clear"))', 'Semantic Passport dismissal');
     const result = await evaluate(cdp, sessionId, `(() => {
       var chip = document.querySelector('#focus-chip');
       var close = document.querySelector('#btn-focus-clear');
@@ -558,10 +558,10 @@ try {
       var neighbor = svg.querySelector('[data-node-id]:not([data-node-id="clients"])');
       if (!origin || !neighbor) return { ok: false, error: 'missing smoke-test nodes' };
       function state() {
-        return { hidden: chip.hidden, active: Archify.focus.active() };
+        return { hidden: chip.hidden, active: Mirofy.focus.active() };
       }
 
-      Archify.focus.set('clients', { toggle: false, updateUrl: false });
+      Mirofy.focus.set('clients', { toggle: false, updateUrl: false });
       var cardRect = chip.getBoundingClientRect();
       var closeRect = close.getBoundingClientRect();
       var layout = {
@@ -575,13 +575,13 @@ try {
       var afterClose = state();
       var restoredFocus = document.activeElement && document.activeElement.getAttribute('data-node-id');
 
-      Archify.focus.set('clients', { toggle: false, updateUrl: false });
+      Mirofy.focus.set('clients', { toggle: false, updateUrl: false });
       chip.querySelector('.relationship-lens-head').dispatchEvent(new MouseEvent('click', { bubbles: true }));
       var afterInside = state();
       container.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       var afterOutside = state();
 
-      Archify.focus.set('clients', { toggle: false, updateUrl: false });
+      Mirofy.focus.set('clients', { toggle: false, updateUrl: false });
       neighbor.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       var afterNode = state();
       return {
@@ -814,16 +814,16 @@ try {
       var frames = Array.from(document.querySelectorAll('.snapshot-frame'));
       var explorers = frames.map(function (frame) {
         var child = frame.contentWindow;
-        return Boolean(child && child.Archify && child.Archify.focus && child.Archify.routeProbe && child.document.querySelector('#btn-node-finder') && child.document.querySelector('#guided-view-play'));
+        return Boolean(child && child.Mirofy && child.Mirofy.focus && child.Mirofy.routeProbe && child.document.querySelector('#btn-node-finder') && child.document.querySelector('#guided-view-play'));
       });
-      var svgA = Archify.deltaExport.canonicalSvg();
+      var svgA = Mirofy.deltaExport.canonicalSvg();
       document.querySelector('#theme').click();
       document.querySelector('#preset').click();
       document.querySelector('.change-row').click();
-      var svgB = Archify.deltaExport.canonicalSvg();
+      var svgB = Mirofy.deltaExport.canonicalSvg();
       var parsed = new DOMParser().parseFromString(svgB, 'image/svg+xml');
       var exportStyle = parsed.querySelector('style')?.textContent || '';
-      var blob = await Archify.deltaExport.shareCard();
+      var blob = await Mirofy.deltaExport.shareCard();
       var bytes = new Uint8Array(await blob.arrayBuffer());
       return {
         explorers: explorers,
@@ -852,10 +852,10 @@ try {
   }
 
   async function captureShareCard(file, label) {
-    await navigateReady(file, '!!(window.Archify && Archify.exportMenu && Archify.exportMenu.shareCard)', label);
+    await navigateReady(file, '!!(window.Mirofy && Mirofy.exportMenu && Mirofy.exportMenu.shareCard)', label);
     const sharePayload = await withTimeout(evaluate(cdp, sessionId, String.raw`(async function () {
       try {
-        var blob = await Archify.exportMenu.shareCard();
+        var blob = await Mirofy.exportMenu.shareCard();
         var bytes = new Uint8Array(await blob.arrayBuffer());
         var binary = '';
         for (var offset = 0; offset < bytes.length; offset += 32768) {
@@ -901,7 +901,7 @@ try {
   }
 
   async function captureCopiedShareCard(file, label) {
-    await navigateReady(file, '!!(window.Archify && Archify.exportMenu && Archify.exportMenu.copyShareCard)', label);
+    await navigateReady(file, '!!(window.Mirofy && Mirofy.exportMenu && Mirofy.exportMenu.copyShareCard)', label);
     const copiedPayload = await withTimeout(evaluate(cdp, sessionId, String.raw`(async function () {
       try {
         Object.defineProperty(window, 'ClipboardItem', {
@@ -912,14 +912,14 @@ try {
           configurable: true,
           value: {
             write: async function (items) {
-              window.__archifyCopiedShareCard = await Promise.resolve(items[0].items['image/png']);
+              window.__mirofyCopiedShareCard = await Promise.resolve(items[0].items['image/png']);
             }
           }
         });
-        window.alert = function (message) { window.__archifyCopyAlert = message; };
-        await Archify.exportMenu.copyShareCard();
-        var blob = window.__archifyCopiedShareCard;
-        if (!blob) throw new Error(window.__archifyCopyAlert || 'clipboard received no blob');
+        window.alert = function (message) { window.__mirofyCopyAlert = message; };
+        await Mirofy.exportMenu.copyShareCard();
+        var blob = window.__mirofyCopiedShareCard;
+        if (!blob) throw new Error(window.__mirofyCopyAlert || 'clipboard received no blob');
         var bytes = new Uint8Array(await blob.arrayBuffer());
         var binary = '';
         for (var offset = 0; offset < bytes.length; offset += 32768) {
@@ -961,17 +961,17 @@ try {
   }
 
   async function captureRouteShareCard(file, label, sourceId, targetId, options = {}) {
-    await navigateReady(file, '!!(window.Archify && Archify.routeProbe && Archify.exportMenu && Archify.exportMenu.downloadRouteShareCard)', label);
+    await navigateReady(file, '!!(window.Mirofy && Mirofy.routeProbe && Mirofy.exportMenu && Mirofy.exportMenu.downloadRouteShareCard)', label);
     const routePayload = await withTimeout(evaluate(cdp, sessionId, String.raw`(async function () {
       try {
-        window.alert = function (message) { window.__archifyRouteAlert = message; };
-        Archify.routeProbe.begin({ source: ${JSON.stringify(sourceId)}, focusNode: false });
-        if (!Archify.routeProbe.choose(${JSON.stringify(targetId)}, { updateUrl: false })) {
+        window.alert = function (message) { window.__mirofyRouteAlert = message; };
+        Mirofy.routeProbe.begin({ source: ${JSON.stringify(sourceId)}, focusNode: false });
+        if (!Mirofy.routeProbe.choose(${JSON.stringify(targetId)}, { updateUrl: false })) {
           throw new Error('route did not resolve');
         }
-        var snapshot = Archify.routeProbe.exportSnapshot();
+        var snapshot = Mirofy.routeProbe.exportSnapshot();
         if (!snapshot) throw new Error('resolved route exposed no export snapshot');
-        Archify.exportMenu.syncRouteShare();
+        Mirofy.exportMenu.syncRouteShare();
         var routeMenuItem = document.querySelector('[data-action="route-share-card"]');
         var menuResolved = !!routeMenuItem && !routeMenuItem.hidden && !routeMenuItem.disabled;
         var svg = document.querySelector('.diagram-container svg');
@@ -988,9 +988,9 @@ try {
           duplicateGeometry.setAttribute('d', duplicateGeometry.getAttribute('d') + ' M 0 0 L 1 1');
         }
         svg.appendChild(duplicateCarrier);
-        var duplicateGeometryRejected = Archify.routeProbe.exportSnapshot() === null;
+        var duplicateGeometryRejected = Mirofy.routeProbe.exportSnapshot() === null;
         var duplicateExportError = '';
-        try { await Archify.exportMenu.shareCard({ variant: 'route' }); }
+        try { await Mirofy.exportMenu.shareCard({ variant: 'route' }); }
         catch (error) { duplicateExportError = String(error && error.message || error); }
         duplicateCarrier.remove();
         var primaryGeometry = /^(path|line|polyline)$/i.test(primaryCarrier.tagName)
@@ -1000,9 +1000,9 @@ try {
           primaryGeometry.tagName.toLowerCase() === 'polyline' ? 'points' : 'x2';
         var originalGeometry = primaryGeometry.getAttribute(geometryAttribute);
         primaryGeometry.setAttribute(geometryAttribute, '');
-        var emptyGeometryRejected = Archify.routeProbe.exportSnapshot() === null;
+        var emptyGeometryRejected = Mirofy.routeProbe.exportSnapshot() === null;
         var emptyGeometryExportError = '';
-        try { await Archify.exportMenu.shareCard({ variant: 'route' }); }
+        try { await Mirofy.exportMenu.shareCard({ variant: 'route' }); }
         catch (error) { emptyGeometryExportError = String(error && error.message || error); }
         primaryGeometry.setAttribute(geometryAttribute, originalGeometry);
         await new Promise(function (resolve) {
@@ -1048,7 +1048,7 @@ try {
         var ordinaryReceipt;
         var routeFingerprints = [];
         try {
-          blob = await Archify.exportMenu.downloadRouteShareCard();
+          blob = await Mirofy.exportMenu.downloadRouteShareCard();
           routeReceipt = {
             format: document.documentElement.getAttribute('data-last-export-format'),
             variant: document.documentElement.getAttribute('data-last-export-variant'),
@@ -1073,41 +1073,41 @@ try {
             async function captureJourneySource(action) {
               action();
               var captureIndex = captured.length;
-              await Archify.exportMenu.shareCard({ variant: 'route' });
+              await Mirofy.exportMenu.shareCard({ variant: 'route' });
               routeFingerprints.push(fingerprint(await captured[captureIndex]));
             }
-            await captureJourneySource(function () { Archify.routeProbe.selectJourneyIndex(0); });
-            await captureJourneySource(function () { Archify.routeProbe.selectJourneyIndex(Math.floor(snapshot.nodeIds.length / 2)); });
-            await captureJourneySource(function () { Archify.routeProbe.selectJourneyIndex(snapshot.nodeIds.length - 1); });
-            Archify.routeProbe.showOverview({ reveal: false });
-            var started = Archify.routeProbe.playJourney();
+            await captureJourneySource(function () { Mirofy.routeProbe.selectJourneyIndex(0); });
+            await captureJourneySource(function () { Mirofy.routeProbe.selectJourneyIndex(Math.floor(snapshot.nodeIds.length / 2)); });
+            await captureJourneySource(function () { Mirofy.routeProbe.selectJourneyIndex(snapshot.nodeIds.length - 1); });
+            Mirofy.routeProbe.showOverview({ reveal: false });
+            var started = Mirofy.routeProbe.playJourney();
             if (!started) throw new Error('Route Journey could not enter playing state for invariance check');
             await captureJourneySource(function () {});
-            Archify.routeProbe.pauseJourney({ preserveElapsed: false });
+            Mirofy.routeProbe.pauseJourney({ preserveElapsed: false });
             await captureJourneySource(function () {});
             document.documentElement.setAttribute('data-motion', 'still');
             await captureJourneySource(function () {});
             document.documentElement.setAttribute('data-motion', 'live');
-            Archify.routeProbe.showOverview({ reveal: false });
+            Mirofy.routeProbe.showOverview({ reveal: false });
           }
 
           var toBlobError = '';
           var originalToBlob = HTMLCanvasElement.prototype.toBlob;
           HTMLCanvasElement.prototype.toBlob = function (callback) { callback(null); };
-          try { await Archify.exportMenu.shareCard({ variant: 'route' }); }
+          try { await Mirofy.exportMenu.shareCard({ variant: 'route' }); }
           catch (error) { toBlobError = String(error && error.message || error); }
           finally { HTMLCanvasElement.prototype.toBlob = originalToBlob; }
 
           var missingToBlobError = '';
           HTMLCanvasElement.prototype.toBlob = undefined;
-          try { await Archify.exportMenu.shareCard({ variant: 'route' }); }
+          try { await Mirofy.exportMenu.shareCard({ variant: 'route' }); }
           catch (error) { missingToBlobError = String(error && error.message || error); }
           finally { HTMLCanvasElement.prototype.toBlob = originalToBlob; }
 
           var missingContextError = '';
           var originalGetContext = HTMLCanvasElement.prototype.getContext;
           HTMLCanvasElement.prototype.getContext = function () { return null; };
-          try { await Archify.exportMenu.shareCard({ variant: 'route' }); }
+          try { await Mirofy.exportMenu.shareCard({ variant: 'route' }); }
           catch (error) { missingContextError = String(error && error.message || error); }
           finally { HTMLCanvasElement.prototype.getContext = originalGetContext; }
 
@@ -1123,18 +1123,18 @@ try {
             }
           });
           window.Image = FailingImage;
-          try { await Archify.exportMenu.shareCard({ variant: 'route' }); }
+          try { await Mirofy.exportMenu.shareCard({ variant: 'route' }); }
           catch (error) { imageDecodeError = String(error && error.message || error); }
           finally { window.Image = OriginalImage; }
 
           var unknownVariantError = '';
-          try { await Archify.exportMenu.shareCard({ variant: 'unknown' }); }
+          try { await Mirofy.exportMenu.shareCard({ variant: 'unknown' }); }
           catch (error) { unknownVariantError = String(error && error.message || error); }
 
           var canonicalIndex = captured.length;
-          canonicalBlob = await Archify.exportMenu.shareCard();
+          canonicalBlob = await Mirofy.exportMenu.shareCard();
           var canonicalSvgText = captured[canonicalIndex] ? await captured[canonicalIndex] : '';
-          await Archify.exportMenu.run('share-card');
+          await Mirofy.exportMenu.run('share-card');
           ordinaryReceipt = {
             format: document.documentElement.getAttribute('data-last-export-format'),
             variant: document.documentElement.getAttribute('data-last-export-variant'),
@@ -1145,14 +1145,14 @@ try {
             error: document.documentElement.getAttribute('data-last-export-error')
           };
           var svgDownloadIndex = captured.length;
-          await Archify.exportMenu.run('svg');
+          await Mirofy.exportMenu.run('svg');
           var exportedSvgText = captured[svgDownloadIndex] ? await captured[svgDownloadIndex] : '';
           var svgReceipt = {
             format: document.documentElement.getAttribute('data-last-export-format'),
             variant: document.documentElement.getAttribute('data-last-export-variant'),
             canonical: document.documentElement.getAttribute('data-last-export-canonical')
           };
-          await Archify.exportMenu.run('png');
+          await Mirofy.exportMenu.run('png');
           var pngReceipt = {
             format: document.documentElement.getAttribute('data-last-export-format'),
             variant: document.documentElement.getAttribute('data-last-export-variant'),
@@ -1197,16 +1197,16 @@ try {
           }
 
           var asyncClearIndex = captured.length;
-          var asyncClearPromise = Archify.exportMenu.shareCard({ variant: 'route' });
-          Archify.routeProbe.clear({ updateUrl: false, preserveView: true });
+          var asyncClearPromise = Mirofy.exportMenu.shareCard({ variant: 'route' });
+          Mirofy.routeProbe.clear({ updateUrl: false, preserveView: true });
           var asyncClearBlob = await asyncClearPromise;
           var asyncClearFingerprint = fingerprint(await captured[asyncClearIndex]);
           var hiddenAfterClear = routeMenuItem.hidden && routeMenuItem.disabled &&
             getComputedStyle(routeMenuItem).display === 'none';
           var staleError = '';
-          try { await Archify.exportMenu.shareCard({ variant: 'route' }); }
+          try { await Mirofy.exportMenu.shareCard({ variant: 'route' }); }
           catch (error) { staleError = String(error && error.message || error); }
-          await Archify.exportMenu.downloadRouteShareCard();
+          await Mirofy.exportMenu.downloadRouteShareCard();
           var failedReceipt = {
             format: document.documentElement.getAttribute('data-last-export-format'),
             variant: document.documentElement.getAttribute('data-last-export-variant'),
@@ -1255,7 +1255,7 @@ try {
             exportedSvgDualTheme: /prefers-color-scheme:\s*light/.test(Array.from(exportedSvg.querySelectorAll('style')).map(function (style) { return style.textContent; }).join('\n')),
             asyncClearStable: asyncClearBlob && asyncClearBlob.type === 'image/png' && asyncClearFingerprint === routeFingerprints[0],
             hiddenAfterClear: hiddenAfterClear,
-            staleSnapshot: Archify.routeProbe.exportSnapshot(),
+            staleSnapshot: Mirofy.routeProbe.exportSnapshot(),
             staleError: staleError,
             routeFingerprints: routeFingerprints,
             downloads: downloads,
@@ -1362,7 +1362,7 @@ try {
     await cdp.send('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
     }, sessionId);
-    await navigateReady(file, '!!(window.Archify && Archify.routeProbe && Archify.exportMenu && Archify.motionGovernor)', label);
+    await navigateReady(file, '!!(window.Mirofy && Mirofy.routeProbe && Mirofy.exportMenu && Mirofy.motionGovernor)', label);
 
     async function sourceFingerprint() {
       return withTimeout(evaluate(cdp, sessionId, String.raw`(async function () {
@@ -1373,7 +1373,7 @@ try {
           return originalCreateObjectURL(blob);
         };
         try {
-          await Archify.exportMenu.shareCard({ variant: 'route' });
+          await Mirofy.exportMenu.shareCard({ variant: 'route' });
           var source = await sourcePromise;
           var hash = 2166136261;
           for (var index = 0; index < source.length; index++) {
@@ -1388,13 +1388,13 @@ try {
     }
 
     const setup = await evaluate(cdp, sessionId, `(function () {
-      Archify.routeProbe.begin({ source: ${JSON.stringify(sourceId)}, focusNode: false });
-      if (!Archify.routeProbe.choose(${JSON.stringify(targetId)}, { updateUrl: false })) return { resolved: false };
-      Archify.routeProbe.showOverview({ reveal: false });
+      Mirofy.routeProbe.begin({ source: ${JSON.stringify(sourceId)}, focusNode: false });
+      if (!Mirofy.routeProbe.choose(${JSON.stringify(targetId)}, { updateUrl: false })) return { resolved: false };
+      Mirofy.routeProbe.showOverview({ reveal: false });
       return {
         resolved: true,
-        started: Archify.routeProbe.playJourney(),
-        playing: Archify.routeProbe.isJourneyPlaying(),
+        started: Mirofy.routeProbe.playJourney(),
+        playing: Mirofy.routeProbe.isJourneyPlaying(),
         motion: document.documentElement.getAttribute('data-motion')
       };
     })()`);
@@ -1409,7 +1409,7 @@ try {
       reduced = await evaluate(cdp, sessionId, `({
         matches: matchMedia('(prefers-reduced-motion: reduce)').matches,
         motion: document.documentElement.getAttribute('data-motion'),
-        playing: Archify.routeProbe.isJourneyPlaying()
+        playing: Mirofy.routeProbe.isJourneyPlaying()
       })`);
       if (reduced.matches && reduced.motion === 'still' && !reduced.playing) break;
       await delay(20);
@@ -1425,19 +1425,19 @@ try {
   }
 
   async function captureRouteVisualMatrix(file, label, sourceId, targetId) {
-    await navigateReady(file, '!!(window.Archify && Archify.preset && Archify.routeProbe && Archify.exportMenu)', label);
+    await navigateReady(file, '!!(window.Mirofy && Mirofy.preset && Mirofy.routeProbe && Mirofy.exportMenu)', label);
     const matrix = await withTimeout(evaluate(cdp, sessionId, String.raw`(async function () {
-      Archify.routeProbe.begin({ source: ${JSON.stringify(sourceId)}, focusNode: false });
-      if (!Archify.routeProbe.choose(${JSON.stringify(targetId)}, { updateUrl: false })) {
+      Mirofy.routeProbe.begin({ source: ${JSON.stringify(sourceId)}, focusNode: false });
+      if (!Mirofy.routeProbe.choose(${JSON.stringify(targetId)}, { updateUrl: false })) {
         throw new Error('route did not resolve');
       }
-      var identity = JSON.stringify(Archify.routeProbe.exportSnapshot());
+      var identity = JSON.stringify(Mirofy.routeProbe.exportSnapshot());
       var results = [];
       for (var preset of ['classic', 'signal-flow', 'blueprint', 'editorial']) {
-        if (!Archify.preset.apply(preset)) throw new Error('could not apply preset ' + preset);
+        if (!Mirofy.preset.apply(preset)) throw new Error('could not apply preset ' + preset);
         for (var theme of ['dark', 'light']) {
           document.documentElement.setAttribute('data-theme', theme);
-          var blob = await Archify.exportMenu.shareCard({ variant: 'route' });
+          var blob = await Mirofy.exportMenu.shareCard({ variant: 'route' });
           var bytes = new Uint8Array(await blob.arrayBuffer());
           var hash = 2166136261;
           for (var index = 0; index < bytes.length; index++) {
@@ -1453,7 +1453,7 @@ try {
             width: view.getUint32(16),
             height: view.getUint32(20),
             hash: (hash >>> 0).toString(16),
-            identity: JSON.stringify(Archify.routeProbe.exportSnapshot())
+            identity: JSON.stringify(Mirofy.routeProbe.exportSnapshot())
           });
         }
       }
@@ -1473,19 +1473,19 @@ try {
   }
 
   async function captureReachShareCard(file, label, originId, direction, options = {}) {
-    await navigateReady(file, '!!(window.Archify && Archify.focus && Archify.focus.reachabilitySnapshot && Archify.exportMenu && Archify.exportMenu.downloadReachShareCard)', label);
+    await navigateReady(file, '!!(window.Mirofy && Mirofy.focus && Mirofy.focus.reachabilitySnapshot && Mirofy.exportMenu && Mirofy.exportMenu.downloadReachShareCard)', label);
     const reachPayload = await withTimeout(evaluate(cdp, sessionId, String.raw`(async function () {
       try {
-        window.alert = function (message) { window.__archifyReachAlert = String(message); };
-        if (!Archify.focus.set(${JSON.stringify(originId)}, { toggle: false, updateUrl: false })) {
+        window.alert = function (message) { window.__mirofyReachAlert = String(message); };
+        if (!Mirofy.focus.set(${JSON.stringify(originId)}, { toggle: false, updateUrl: false })) {
           throw new Error('focus origin did not resolve');
         }
-        if (!Archify.focus.reach(${JSON.stringify(direction)}, { toggle: false, updateUrl: false, reveal: false })) {
+        if (!Mirofy.focus.reach(${JSON.stringify(direction)}, { toggle: false, updateUrl: false, reveal: false })) {
           throw new Error('authored reach did not resolve');
         }
-        var snapshot = Archify.focus.reachabilitySnapshot();
+        var snapshot = Mirofy.focus.reachabilitySnapshot();
         if (!snapshot) throw new Error('active authored reach exposed no export snapshot');
-        Archify.exportMenu.syncReachShare();
+        Mirofy.exportMenu.syncReachShare();
         var reachMenuItem = document.querySelector('[data-action="reach-share-card"]');
         var menuResolved = !!reachMenuItem && !reachMenuItem.hidden && !reachMenuItem.disabled &&
           getComputedStyle(reachMenuItem).display !== 'none';
@@ -1504,12 +1504,12 @@ try {
           duplicateGeometry.setAttribute('d', duplicateGeometry.getAttribute('d') + ' M 0 0 L 1 1');
         }
         svg.appendChild(duplicateCarrier);
-        var duplicateGeometryRejected = Archify.focus.reachabilitySnapshot() === null;
+        var duplicateGeometryRejected = Mirofy.focus.reachabilitySnapshot() === null;
         var duplicateExportError = '';
-        try { await Archify.exportMenu.shareCard({ variant: 'reach' }); }
+        try { await Mirofy.exportMenu.shareCard({ variant: 'reach' }); }
         catch (error) { duplicateExportError = String(error && error.message || error); }
         duplicateCarrier.remove();
-        snapshot = Archify.focus.reachabilitySnapshot();
+        snapshot = Mirofy.focus.reachabilitySnapshot();
         if (!snapshot) throw new Error('reach snapshot did not recover after geometry restoration');
 
         function stableLiveSnapshot() {
@@ -1540,9 +1540,9 @@ try {
         HTMLAnchorElement.prototype.click = function () { downloads.push(this.download); };
 
         try {
-          var blob = await Archify.exportMenu.shareCard({ variant: 'reach' });
+          var blob = await Mirofy.exportMenu.shareCard({ variant: 'reach' });
           var reachSvgText = captured[0] ? await captured[0] : '';
-          var downloadedBlob = await Archify.exportMenu.downloadReachShareCard();
+          var downloadedBlob = await Mirofy.exportMenu.downloadReachShareCard();
           var reachReceipt = {
             format: document.documentElement.getAttribute('data-last-export-format'),
             variant: document.documentElement.getAttribute('data-last-export-variant'),
@@ -1585,10 +1585,10 @@ try {
           if (${JSON.stringify(options.matrix === true)}) {
             var identity = JSON.stringify(snapshot);
             for (var preset of ['classic', 'signal-flow', 'blueprint', 'editorial']) {
-              if (!Archify.preset.apply(preset)) throw new Error('could not apply preset ' + preset);
+              if (!Mirofy.preset.apply(preset)) throw new Error('could not apply preset ' + preset);
               for (var theme of ['dark', 'light']) {
                 document.documentElement.setAttribute('data-theme', theme);
-                var matrixBlob = await Archify.exportMenu.shareCard({ variant: 'reach' });
+                var matrixBlob = await Mirofy.exportMenu.shareCard({ variant: 'reach' });
                 var matrixBytes = new Uint8Array(await matrixBlob.arrayBuffer());
                 var matrixView = new DataView(matrixBytes.buffer, matrixBytes.byteOffset, matrixBytes.byteLength);
                 matrix.push({
@@ -1599,7 +1599,7 @@ try {
                   width: matrixView.getUint32(16),
                   height: matrixView.getUint32(20),
                   hash: fingerprintBytes(matrixBytes),
-                  identity: JSON.stringify(Archify.focus.reachabilitySnapshot())
+                  identity: JSON.stringify(Mirofy.focus.reachabilitySnapshot())
                 });
               }
             }
@@ -1608,14 +1608,14 @@ try {
             }
           }
 
-          Archify.focus.clearReach({ updateUrl: false });
-          Archify.exportMenu.syncReachShare();
+          Mirofy.focus.clearReach({ updateUrl: false });
+          Mirofy.exportMenu.syncReachShare();
           var hiddenAfterClear = reachMenuItem.hidden && reachMenuItem.disabled &&
             getComputedStyle(reachMenuItem).display === 'none';
           var staleError = '';
-          try { await Archify.exportMenu.shareCard({ variant: 'reach' }); }
+          try { await Mirofy.exportMenu.shareCard({ variant: 'reach' }); }
           catch (error) { staleError = String(error && error.message || error); }
-          await Archify.exportMenu.downloadReachShareCard();
+          await Mirofy.exportMenu.downloadReachShareCard();
           var failedReceipt = {
             format: document.documentElement.getAttribute('data-last-export-format'),
             variant: document.documentElement.getAttribute('data-last-export-variant'),
@@ -1623,7 +1623,7 @@ try {
             error: document.documentElement.getAttribute('data-last-export-error')
           };
           var canonicalIndex = captured.length;
-          var canonicalBlob = await Archify.exportMenu.shareCard();
+          var canonicalBlob = await Mirofy.exportMenu.shareCard();
           var canonicalSvgText = captured[canonicalIndex] ? await captured[canonicalIndex] : '';
           var canonicalSvg = parser.parseFromString(canonicalSvgText, 'image/svg+xml').documentElement;
           var canonicalReachResidue = canonicalSvg.hasAttribute('data-share-reach') ||
@@ -1662,7 +1662,7 @@ try {
             downloads: downloads,
             reachReceipt: reachReceipt,
             hiddenAfterClear: hiddenAfterClear,
-            staleSnapshot: Archify.focus.reachabilitySnapshot(),
+            staleSnapshot: Mirofy.focus.reachabilitySnapshot(),
             staleError: staleError,
             failedReceipt: failedReceipt,
             canonicalSize: canonicalBlob.size,
@@ -1766,18 +1766,18 @@ try {
     await captureReachShareCard(
       externalReachSource,
       'external-reach',
-      process.env.ARCHIFY_REACH_CARD_ORIGIN || 'router',
-      process.env.ARCHIFY_REACH_CARD_DIRECTION || 'downstream',
+      process.env.MIROFY_REACH_CARD_ORIGIN || 'router',
+      process.env.MIROFY_REACH_CARD_DIRECTION || 'downstream',
       { outputPath: externalReachOutput },
     );
     console.log(`ok external Reach Card artifact: ${externalReachOutput}`);
   }
   await verifyDynamicReducedMotionRoute(routeOutputs.architecture, 'architecture-route reduced motion', 'users', 'api');
-  await navigateReady(output, '!!(window.Archify && Archify.motion && Archify.motion.canRecord())', 'motion artifact');
+  await navigateReady(output, '!!(window.Mirofy && Mirofy.motion && Mirofy.motion.canRecord())', 'motion artifact');
 
   const payload = await withTimeout(evaluate(cdp, sessionId, String.raw`(async function () {
     try {
-      var blob = await Archify.motion.recordWebm({ duration: 1400, fps: 12 });
+      var blob = await Mirofy.motion.recordWebm({ duration: 1400, fps: 12 });
       var bytes = new Uint8Array(await blob.arrayBuffer());
       var binary = '';
       for (var offset = 0; offset < bytes.length; offset += 32768) {

@@ -10,8 +10,8 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
-const assetPath = path.join(repoRoot, 'docs', 'assets', 'archify-live-proof.gif');
-const receiptPath = path.join(repoRoot, 'docs', 'assets', 'archify-live-proof.json');
+const assetPath = path.join(repoRoot, 'docs', 'assets', 'mirofy-live-proof.gif');
+const receiptPath = path.join(repoRoot, 'docs', 'assets', 'mirofy-live-proof.json');
 
 function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -100,7 +100,7 @@ test('README motion proof is compact, looping, and backed by current gallery art
   assert.ok(buffer.byteLength <= 3 * 1024 * 1024, `README GIF is too large: ${buffer.byteLength} bytes`);
   assert.equal(receipt.schemaVersion, 1);
   assert.equal(receipt.generator, 'scripts/build-readme-showcase.mjs');
-  assert.equal(receipt.output, 'docs/assets/archify-live-proof.gif');
+  assert.equal(receipt.output, 'docs/assets/mirofy-live-proof.gif');
   assert.equal(receipt.width, inspected.width);
   assert.equal(receipt.height, inspected.height);
   assert.equal(receipt.frameCount, inspected.frameCount);
@@ -119,14 +119,14 @@ test('README motion proof is compact, looping, and backed by current gallery art
 test('all README languages keep the product hero and retain the verified animated proof', () => {
   for (const filename of ['README.md', 'README_EN.md', 'README_ZH.md']) {
     const readme = fs.readFileSync(path.join(repoRoot, filename), 'utf8');
-    const heroIndex = readme.indexOf('docs/assets/archify-readme-hero.png');
-    const titleIndex = readme.indexOf('# Archify');
-    const proofIndex = readme.indexOf('docs/assets/archify-live-proof.gif');
-    const demosIndex = Math.max(readme.indexOf('## See Archify in action'), readme.indexOf('## 看看 Archify 能做什么'));
+    const heroIndex = readme.indexOf('docs/assets/mirofy-readme-hero.png');
+    const titleIndex = readme.indexOf('# Mirofy');
+    const proofIndex = readme.indexOf('docs/assets/mirofy-live-proof.gif');
+    const demosIndex = Math.max(readme.indexOf('## See Mirofy in action'), readme.indexOf('## 看看 Mirofy 能做什么'));
     assert.ok(heroIndex >= 0 && heroIndex < titleIndex, `${filename}: product hero is not above the title`);
     assert.ok(proofIndex > demosIndex, `${filename}: animated proof must live in the demo section`);
-    assert.match(readme, /docs\/assets\/archify-live-proof\.gif/);
-    assert.match(readme, /https:\/\/tt-a1i\.github\.io\/archify\/gallery\.html/);
+    assert.match(readme, /docs\/assets\/mirofy-live-proof\.gif/);
+    assert.match(readme, /https:\/\/tt-a1i\.github\.io\/mirofy\/gallery\.html/);
   }
   assert.equal(
     fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8'),
@@ -138,15 +138,15 @@ test('all README languages keep the product hero and retain the verified animate
 test('README demos use checked-in captures and live deep links below the existing hero', () => {
   const demos = [
     {
-      asset: 'archify-demo-story.png',
+      asset: 'mirofy-demo-story.png',
       link: 'agent-tool-call.workflow.html?theme=dark&present=1&play=1#view=happy-path',
     },
     {
-      asset: 'archify-demo-route.png',
+      asset: 'mirofy-demo-route.png',
       link: 'cache-miss.sequence.html?theme=dark&present=1#route=web~db',
     },
     {
-      asset: 'archify-demo-lens.png',
+      asset: 'mirofy-demo-lens.png',
       link: 'production-deployment.architecture.html?theme=dark&present=1#lens=backend~database',
     },
   ];
@@ -161,10 +161,10 @@ test('README demos use checked-in captures and live deep links below the existin
 
   for (const filename of ['README.md', 'README_EN.md', 'README_ZH.md']) {
     const readme = fs.readFileSync(path.join(repoRoot, filename), 'utf8');
-    const heroIndex = readme.indexOf('docs/assets/archify-readme-hero.png');
-    const proofIndex = readme.indexOf('docs/assets/archify-live-proof.gif');
+    const heroIndex = readme.indexOf('docs/assets/mirofy-readme-hero.png');
+    const proofIndex = readme.indexOf('docs/assets/mirofy-live-proof.gif');
     const previewIndex = Math.max(readme.indexOf('## Preview'), readme.indexOf('## 预览'));
-    const demosIndex = Math.max(readme.indexOf('## See Archify in action'), readme.indexOf('## 看看 Archify 能做什么'));
+    const demosIndex = Math.max(readme.indexOf('## See Mirofy in action'), readme.indexOf('## 看看 Mirofy 能做什么'));
     const quickStartIndex = Math.max(readme.indexOf('## Quick start'), readme.indexOf('## 快速开始'));
     assert.ok(heroIndex >= 0 && heroIndex < demosIndex, `${filename}: existing hero proof moved`);
     assert.ok(demosIndex < previewIndex && previewIndex < quickStartIndex, `${filename}: demo section is misplaced`);
@@ -178,19 +178,19 @@ test('README demos use checked-in captures and live deep links below the existin
 
 test('README stays scannable without deleting the visual proof set', () => {
   const commonAssets = [
-    'archify-readme-hero.png',
-    'archify-live-proof.gif',
-    'archify-demo-story.png',
-    'archify-demo-route.png',
-    'archify-demo-lens.png',
+    'mirofy-readme-hero.png',
+    'mirofy-live-proof.gif',
+    'mirofy-demo-story.png',
+    'mirofy-demo-route.png',
+    'mirofy-demo-lens.png',
     'mco-runtime-share-card.png',
-    'archify-dark.png',
-    'archify-light.png',
-    'archify-menu.png',
-    'archify-workflow.png',
-    'archify-sequence.png',
-    'archify-dataflow.png',
-    'archify-lifecycle.png',
+    'mirofy-dark.png',
+    'mirofy-light.png',
+    'mirofy-menu.png',
+    'mirofy-workflow.png',
+    'mirofy-sequence.png',
+    'mirofy-dataflow.png',
+    'mirofy-lifecycle.png',
   ];
 
   for (const filename of ['README.md', 'README_EN.md', 'README_ZH.md']) {
@@ -213,8 +213,8 @@ test('README stays scannable without deleting the visual proof set', () => {
 });
 
 test('all README languages end with the self-hosted star history chart', () => {
-  const lightChart = 'https://raw.githubusercontent.com/tt-a1i/archify/star-history/assets/star-history-light.svg';
-  const darkChart = 'https://raw.githubusercontent.com/tt-a1i/archify/star-history/assets/star-history-dark.svg';
+  const lightChart = 'https://raw.githubusercontent.com/tt-a1i/mirofy/star-history/assets/star-history-light.svg';
+  const darkChart = 'https://raw.githubusercontent.com/tt-a1i/mirofy/star-history/assets/star-history-dark.svg';
   const workflow = fs.readFileSync(path.join(repoRoot, '.github', 'workflows', 'star-history.yml'), 'utf8');
 
   for (const filename of ['README.md', 'README_EN.md', 'README_ZH.md']) {
@@ -238,7 +238,7 @@ test('all README languages end with the self-hosted star history chart', () => {
 });
 
 test('Star History publishing advances the data branch without a force push', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-star-history-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-star-history-'));
   const remote = path.join(fixture, 'remote.git');
   const firstCheckout = path.join(fixture, 'first');
   const secondCheckout = path.join(fixture, 'second');

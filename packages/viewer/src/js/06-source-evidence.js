@@ -3,8 +3,8 @@
        the authored GitHub revision, source blobs, and optional line ranges
        against the explicit --repo-root. It remains outside the SVG so every
        canonical visual export stays free of repository paths. */
-    Archify.sourceEvidence = (function () {
-      var element = document.getElementById('archify-source-evidence-data');
+    Mirofy.sourceEvidence = (function () {
+      var element = document.getElementById('mirofy-source-evidence-data');
       var payload = null;
       var svgNamespace = 'http://www.w3.org/2000/svg';
       if (element) {
@@ -68,5 +68,5 @@
         installBeacons: installBeacons
       };
     })();
-    Archify.sourceEvidence.installBeacons();
+    Mirofy.sourceEvidence.installBeacons();
 

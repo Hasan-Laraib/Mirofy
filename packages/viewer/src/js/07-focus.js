@@ -3,7 +3,7 @@
        Renderer IDs become deep-linkable semantic hooks without turning the
        standalone artifact into a canvas editor.
        ============================================================ */
-    Archify.focus = (function () {
+    Mirofy.focus = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector('svg');
@@ -140,8 +140,8 @@
         resetReachabilityButtons();
         reachStatus.textContent = '';
         reachStatus.hidden = true;
-        if (Archify.exportMenu && typeof Archify.exportMenu.syncReachShare === 'function') {
-          Archify.exportMenu.syncReachShare();
+        if (Mirofy.exportMenu && typeof Mirofy.exportMenu.syncReachShare === 'function') {
+          Mirofy.exportMenu.syncReachShare();
         }
         if (options.updateUrl === true && activeIds.length === 1) {
           try {
@@ -175,8 +175,8 @@
         }
         var result = reachabilityFor(activeIds[0], direction);
         if (!result || result.nodeIds.length <= 1) return false;
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false, resetView: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false, resetView: false });
         }
         clearRelationshipPreview({ clearPin: true });
         clearReachability({ updateUrl: false });
@@ -219,8 +219,8 @@
           hops: result.maxDepth
         });
         reachStatus.hidden = false;
-        if (Archify.exportMenu && typeof Archify.exportMenu.syncReachShare === 'function') {
-          Archify.exportMenu.syncReachShare();
+        if (Mirofy.exportMenu && typeof Mirofy.exportMenu.syncReachShare === 'function') {
+          Mirofy.exportMenu.syncReachShare();
         }
         if (options.updateUrl !== false) {
           try {
@@ -228,8 +228,8 @@
               encodeURIComponent(activeIds[0]) + '&reach=' + direction);
           } catch (_) {}
         }
-        if (options.reveal !== false && Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal(result.nodeIds, { includeNeighbors: false, reason: 'reachability' });
+        if (options.reveal !== false && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal(result.nodeIds, { includeNeighbors: false, reason: 'reachability' });
         }
         requestLensPlacement();
         return true;
@@ -335,8 +335,8 @@
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
         repositoryLink.textContent = '';
-        var sources = Archify.sourceEvidence.node(id);
-        var repository = Archify.sourceEvidence.repository();
+        var sources = Mirofy.sourceEvidence.node(id);
+        var repository = Mirofy.sourceEvidence.repository();
         if (!repository || !sources.length) {
           evidence.hidden = true;
           return;
@@ -629,7 +629,7 @@
         );
         return relationshipTokenGeometry(shape, relationshipTokenKind(edge), key, options);
       }
-      Archify.flowTokens = {
+      Mirofy.flowTokens = {
         create: createSemanticFlowToken,
         kind: function (edge) { return relationshipTokenKind(edge); },
         path: relationshipTokenPath
@@ -637,7 +637,7 @@
       function renderRelationshipPulse(key) {
         removeRelationshipPulse();
         if (!key || document.documentElement.getAttribute('data-embed') === 'true') return false;
-        if (document.hidden || (Archify.motionGovernor && Archify.motionGovernor.isPaused())) return false;
+        if (document.hidden || (Mirofy.motionGovernor && Mirofy.motionGovernor.isPaused())) return false;
         if (reducedMotionQuery && reducedMotionQuery.matches) return false;
         var matchingEdges = edges().filter(function (edge) {
           return edge.getAttribute('data-edge-key') === key;
@@ -768,8 +768,8 @@
       function revealPinnedRelationship(record) {
         function reveal() {
           if (!record || pinnedRelationshipKey !== record.key) return true;
-          if (!Archify.view || typeof Archify.view.reveal !== 'function') return false;
-          Archify.view.reveal([record.from, record.to], { reason: 'relationship-direct' });
+          if (!Mirofy.view || typeof Mirofy.view.reveal !== 'function') return false;
+          Mirofy.view.reveal([record.from, record.to], { reason: 'relationship-direct' });
           return true;
         }
         if (!reveal()) requestAnimationFrame(reveal);
@@ -788,8 +788,8 @@
         }
         var record = relationshipRecordForKey(key);
         if (!record) return false;
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
         set(record.from, { toggle: false, updateUrl: false });
         var row = Array.prototype.slice.call(relationshipList.querySelectorAll('[data-relationship-key]')).find(function (candidate) {
@@ -828,7 +828,7 @@
         relationshipHitOverlay.setAttribute('role', 'group');
         relationshipHitOverlay.setAttribute('aria-label', viewerText('viewer.passport.relationship.explorer'));
         var relationshipHelp = document.createElementNS(svgNamespace, 'desc');
-        relationshipHelp.id = 'archify-relationship-help';
+        relationshipHelp.id = 'mirofy-relationship-help';
         relationshipHelp.textContent = viewerText('viewer.passport.relationship.help');
         relationshipHitOverlay.appendChild(relationshipHelp);
         records.forEach(function (record, index) {
@@ -1090,7 +1090,7 @@
           if (valid.length) top = valid[0];
         }
         chip.style.top = Math.round(top) + 'px';
-        if (Archify.radar && typeof Archify.radar.sync === 'function') Archify.radar.sync();
+        if (Mirofy.radar && typeof Mirofy.radar.sync === 'function') Mirofy.radar.sync();
       }
       function requestLensPlacement() {
         if (lensFrame) return;
@@ -1102,8 +1102,8 @@
           ? svg.querySelector('[data-node-id="' + activeIds[0] + '"]')
           : null;
         clearReachability({ updateUrl: false });
-        if (Archify.intentTrace && typeof Archify.intentTrace.clear === 'function') {
-          Archify.intentTrace.clear({ announce: false });
+        if (Mirofy.intentTrace && typeof Mirofy.intentTrace.clear === 'function') {
+          Mirofy.intentTrace.clear({ announce: false });
         }
         hoveredRelationship = null;
         focusedRelationship = null;
@@ -1146,8 +1146,8 @@
         relationsBtn.setAttribute('aria-expanded', 'false');
         chip.removeAttribute('data-relations-expanded');
         chip.style.removeProperty('top');
-        if (options.preserveView !== true && Archify.view && typeof Archify.view.reset === 'function') {
-          Archify.view.reset({ automatic: true });
+        if (options.preserveView !== true && Mirofy.view && typeof Mirofy.view.reset === 'function') {
+          Mirofy.view.reset({ automatic: true });
         }
         if (options.updateUrl !== false) {
           try { history.replaceState(null, '', location.pathname + location.search); } catch (_) {}
@@ -1160,12 +1160,12 @@
 
       function setMany(ids, options) {
         options = options || {};
-        if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
-        if (Archify.semanticLens && Archify.semanticLens.active()) {
-          Archify.semanticLens.clear({ updateUrl: false, preserveView: true, closePanel: true });
+        if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
+        if (Mirofy.semanticLens && Mirofy.semanticLens.active()) {
+          Mirofy.semanticLens.clear({ updateUrl: false, preserveView: true, closePanel: true });
         }
-        if (options.preserveRoute !== true && Archify.routeProbe && typeof Archify.routeProbe.clear === 'function') {
-          Archify.routeProbe.clear({ updateUrl: false, restoreFocus: false });
+        if (options.preserveRoute !== true && Mirofy.routeProbe && typeof Mirofy.routeProbe.clear === 'function') {
+          Mirofy.routeProbe.clear({ updateUrl: false, restoreFocus: false });
         }
         var nodeList = nodes();
         var byId = {};
@@ -1273,8 +1273,8 @@
         if (node) {
           var id = node.getAttribute('data-node-id');
           set(id);
-          if (activeIds.indexOf(id) !== -1 && Archify.view && typeof Archify.view.reveal === 'function') {
-            Archify.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
+          if (activeIds.indexOf(id) !== -1 && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+            Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
           }
         }
         else if (activeIds.length) clear();
@@ -1285,8 +1285,8 @@
         event.preventDefault();
         var id = node.getAttribute('data-node-id');
         set(id);
-        if (activeIds.indexOf(id) !== -1 && Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
+        if (activeIds.indexOf(id) !== -1 && Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'focus' });
         }
       });
       clearBtn.addEventListener('click', function () { clear({ restoreFocus: true }); });
@@ -1307,12 +1307,12 @@
         var button = event.target.closest('[data-relationship-target]');
         if (!button) return;
         var id = button.getAttribute('data-relationship-target');
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
         set(id, { toggle: false });
-        if (Archify.view && typeof Archify.view.reveal === 'function') {
-          Archify.view.reveal([id], { includeNeighbors: true, reason: 'relationship' });
+        if (Mirofy.view && typeof Mirofy.view.reveal === 'function') {
+          Mirofy.view.reveal([id], { includeNeighbors: true, reason: 'relationship' });
         }
         var node = svg.querySelector('[data-node-id="' + id + '"]');
         if (node) {

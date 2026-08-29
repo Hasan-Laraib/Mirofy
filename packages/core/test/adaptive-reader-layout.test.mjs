@@ -19,18 +19,18 @@ const template = fs.readFileSync(path.join(skillRoot, 'assets', 'template.html')
 const skill = fs.readFileSync(path.join(skillRoot, 'SKILL.md'), 'utf8');
 const reader = template.slice(
   template.indexOf('Adaptive Reader Shell'),
-  template.indexOf('Archify.view = (function ()'),
+  template.indexOf('Mirofy.view = (function ()'),
 );
 
 test('wide desktop diagrams use one height-budgeted reader shell instead of breakpoint jumps', () => {
-  assert.match(template, /max-width: var\(--archify-reader-width, 1440px\)/);
+  assert.match(template, /max-width: var\(--mirofy-reader-width, 1440px\)/);
   assert.doesNotMatch(template, /@media \(min-width: 1680px\)[\s\S]{0,180}\.container/);
   assert.doesNotMatch(template, /@media \(min-width: 1920px\)[\s\S]{0,180}\.container/);
   assert.match(reader, /var WIDE_RATIO = 1\.55/);
   assert.match(reader, /var MAX_READER_WIDTH = 1920/);
   assert.match(reader, /var availableSvgHeight = Math\.max\(1, window\.innerHeight - fixedHeight\)/);
   assert.match(reader, /var desiredWidth = availableSvgHeight \* ratio \+ chrome\.diagramX/);
-  assert.match(reader, /html\.style\.setProperty\('--archify-reader-width', rounded \+ 'px'\)/);
+  assert.match(reader, /html\.style\.setProperty\('--mirofy-reader-width', rounded \+ 'px'\)/);
 });
 
 test('desktop readability budget matches the minimum adaptive reader at 1440 by 900', () => {
@@ -40,7 +40,7 @@ test('desktop readability budget matches the minimum adaptive reader at 1440 by 
   assert.equal(DESKTOP_READER_DIAGRAM_WIDTH, 930);
   assert.match(reader, new RegExp(`var MIN_READER_WIDTH = ${DESKTOP_READER_MIN_WIDTH}`));
   assert.match(template, /html\[data-nav-stage-rail="true"\] body \{ padding-block: 0\.375rem; \}/);
-  assert.match(template, /@media \(min-width: 768px\) and \(max-height: 1100px\)[\s\S]*?\.diagram-container \{[\s\S]*?padding: 0\.875rem;[\s\S]*?padding-bottom: calc\(0\.875rem \+ var\(--archify-nav-reserve\)\);/);
+  assert.match(template, /@media \(min-width: 768px\) and \(max-height: 1100px\)[\s\S]*?\.diagram-container \{[\s\S]*?padding: 0\.875rem;[\s\S]*?padding-bottom: calc\(0\.875rem \+ var\(--mirofy-nav-reserve\)\);/);
   assert.match(template, /@media \(min-width: 768px\) and \(max-height: 920px\)[\s\S]*?body \{ padding-block: 1\.25rem; \}/);
   assert.match(template, /\.diagram-container \{[\s\S]*?border: 1px solid var\(--panel-border\)/);
 });
