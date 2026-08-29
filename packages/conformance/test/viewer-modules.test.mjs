@@ -9,6 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { PARTS } from '../../viewer/src/parts.mjs';
 import { SRC_ROOT } from '../../viewer/build.mjs';
+import { emitPalette } from '../../viewer/src/tokens/emit.mjs';
 
 const jsParts = PARTS.filter((p) => p.kind === 'file' && p.path.startsWith('js/') && p.path !== 'js/boot.js');
 
@@ -45,7 +46,11 @@ test('every part listed in the manifest is a file that exists, and every file is
 });
 
 test('the palette file holds exactly the eight preset/theme blocks (4.12)', () => {
-  const css = fs.readFileSync(path.join(SRC_ROOT, 'css/00-palette.css'), 'utf8');
+  // Task 6 replaced the hand-written css/00-palette.css with a generated
+  // emitter (see packages/viewer/src/tokens/); this test now reads the
+  // emitter's output rather than a file on disk, but keeps every original
+  // assertion -- it is the only check that all eight blocks still exist.
+  const css = emitPalette();
   // Palette selectors carry the 4-space base indentation every part file
   // keeps from the monolith's <style> tag (see js/01-preamble.js), so the
   // match is anchored to that indentation rather than column 0 -- an
