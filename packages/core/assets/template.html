@@ -348,6 +348,85 @@
       --toolbar-menu-bg: #fbf8f1;
     }
 
+    /* ==========================================================
+       OKABE-ITO — an opt-in, colour-vision-deficiency-aware preset.
+       Swaps only the seven semantic component hues for the published
+       Okabe-Ito qualitative palette (distinguishable under deuteranopia,
+       protanopia, and tritanopia); every other token matches classic.
+       Light-mode strokes are darkened for contrast against a light
+       surface -- the same hue, not a different one -- mirroring how
+       blueprint and editorial already adapt hues per theme.
+       ========================================================== */
+    [data-preset="okabe-ito"][data-theme="dark"] {
+      --bg: #020617;
+      --grid: #1e293b;
+      --panel: rgba(15, 23, 42, 0.5);
+      --panel-border: #1e293b;
+      --lane-fill: rgba(15, 23, 42, 0.22);
+      --lane-stroke: #334155;
+      --text: #ffffff;
+      --text-muted: #94a3b8;
+      --text-dim: #475569;
+      --text-faint: #7d8da1;
+      --mask: #0f172a;
+      --frontend-fill: rgba(22, 45, 58, 0.4);
+      --frontend-stroke: #56b4e9;
+      --backend-fill: rgba(0, 40, 29, 0.4);
+      --backend-stroke: #009e73;
+      --database-fill: rgba(51, 30, 42, 0.4);
+      --database-stroke: #cc79a7;
+      --cloud-fill: rgba(58, 40, 0, 0.3);
+      --cloud-stroke: #e69f00;
+      --security-fill: rgba(53, 24, 0, 0.4);
+      --security-stroke: #d55e00;
+      --messagebus-fill: rgba(60, 57, 17, 0.3);
+      --messagebus-stroke: #f0e442;
+      --external-fill: rgba(0, 29, 45, 0.5);
+      --external-stroke: #0072b2;
+      --arrow: #64748b;
+      --arrow-emphasis: #34d399;
+      --toolbar-bg: rgba(15, 23, 42, 0.8);
+      --toolbar-border: #334155;
+      --toolbar-text: #e2e8f0;
+      --toolbar-hover: rgba(15, 23, 42, 0.95);
+      --toolbar-menu-bg: #0f172a;
+    }
+
+    [data-preset="okabe-ito"][data-theme="light"] {
+      --bg: #f8fafc;
+      --grid: #e2e8f0;
+      --panel: #ffffff;
+      --panel-border: #e2e8f0;
+      --lane-fill: rgba(248, 250, 252, 0.65);
+      --lane-stroke: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --text-faint: #64748b;
+      --mask: #ffffff;
+      --frontend-fill: rgba(86, 180, 233, 0.15);
+      --frontend-stroke: #0d6fa5;
+      --backend-fill: rgba(0, 158, 115, 0.18);
+      --backend-stroke: #007052;
+      --database-fill: rgba(204, 121, 167, 0.2);
+      --database-stroke: #8f245f;
+      --cloud-fill: rgba(230, 159, 0, 0.18);
+      --cloud-stroke: #996a00;
+      --security-fill: rgba(213, 94, 0, 0.15);
+      --security-stroke: #a34800;
+      --messagebus-fill: rgba(240, 228, 66, 0.15);
+      --messagebus-stroke: #746d06;
+      --external-fill: rgba(0, 114, 178, 0.18);
+      --external-stroke: #0072b2;
+      --arrow: #94a3b8;
+      --arrow-emphasis: #059669;
+      --toolbar-bg: rgba(255, 255, 255, 0.92);
+      --toolbar-border: #cbd5e1;
+      --toolbar-text: #334155;
+      --toolbar-hover: #ffffff;
+      --toolbar-menu-bg: #ffffff;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -3317,6 +3396,19 @@
       background: #c9502d;
       transform: rotate(45deg);
     }
+    .preset-option-swatch.okabe-ito {
+      border-color: #0072b2;
+      background: linear-gradient(90deg, #56b4e9 0 33%, #009e73 33% 66%, #e69f00 66% 100%);
+    }
+    .preset-option-swatch.okabe-ito::before {
+      top: 0.42rem;
+      right: 0.35rem;
+      bottom: 0.42rem;
+      left: 0.35rem;
+      border: 1px solid #0f172a;
+      border-radius: 0.16rem;
+      background: rgba(15, 23, 42, 0.35);
+    }
     .preset-option-copy { min-width: 0; }
     .preset-option-copy strong,
     .preset-option-copy small { display: block; }
@@ -4894,6 +4986,11 @@
           <span class="preset-option-copy"><strong>{{i18n:viewer.preset.editorial}}</strong><small>{{i18n:viewer.preset.editorial.hint}}</small></span>
           <span class="preset-option-check" aria-hidden="true"></span>
         </button>
+        <button class="preset-option" data-preset-value="okabe-ito" type="button" role="menuitemradio" aria-checked="false" tabindex="-1">
+          <span class="preset-option-swatch okabe-ito" aria-hidden="true"></span>
+          <span class="preset-option-copy"><strong>{{i18n:viewer.preset.okabeIto}}</strong><small>{{i18n:viewer.preset.okabeIto.hint}}</small></span>
+          <span class="preset-option-check" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
     <button id="btn-motion" type="button" hidden
@@ -5443,12 +5540,13 @@
        URL, or a later diagram's authored default.
        ============================================================ */
     Mirofy.preset = (function () {
-      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];
+      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'];
       var LABELS = {
         classic: viewerText('viewer.preset.classic.short'),
         'signal-flow': viewerText('viewer.preset.flow.short'),
         blueprint: viewerText('viewer.preset.blueprint'),
-        editorial: viewerText('viewer.preset.editorial')
+        editorial: viewerText('viewer.preset.editorial'),
+        'okabe-ito': viewerText('viewer.preset.okabeIto')
       };
       var html = document.documentElement;
       var svg = document.querySelector('.diagram-container svg');

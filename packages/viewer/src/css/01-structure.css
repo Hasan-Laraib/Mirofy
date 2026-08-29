@@ -2967,6 +2967,19 @@
       background: #c9502d;
       transform: rotate(45deg);
     }
+    .preset-option-swatch.okabe-ito {
+      border-color: #0072b2;
+      background: linear-gradient(90deg, #56b4e9 0 33%, #009e73 33% 66%, #e69f00 66% 100%);
+    }
+    .preset-option-swatch.okabe-ito::before {
+      top: 0.42rem;
+      right: 0.35rem;
+      bottom: 0.42rem;
+      left: 0.35rem;
+      border: 1px solid #0f172a;
+      border-radius: 0.16rem;
+      background: rgba(15, 23, 42, 0.35);
+    }
     .preset-option-copy { min-width: 0; }
     .preset-option-copy strong,
     .preset-option-copy small { display: block; }
