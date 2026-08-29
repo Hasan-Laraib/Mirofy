@@ -469,3 +469,104 @@ RESIDUAL CLOSED (post-P0): row 3.1 rename + new row 3.1b (cleanFlowProblems).
   (163 identical, 1 intentionally changed, 1 added, 2 removed); git diff --
   packages/core empty; git status clean; template.html blob 8e15e85 unchanged.
   Commit f84b1e2.
+
+FIRST REAL CI RUN (33246506982, pushed 499c53a to Hasan-Laraib/Mirofy):
+  4 passed / 9 failed — ubuntu x Node 18/20/22/24 all green; macOS x4 all
+  failed (70/71); windows x4 all failed (52/71); browser job failed.
+
+  DIAGNOSIS 1 (root cause, 8 of 9 check-job failures): matrix.mjs/the check
+  job never sets PRODUCT_CHROME and has no browser-provisioning step, but
+  viewer.browser.test.mjs fell back to findChrome() -- a local-dev
+  convenience that probes OS-standard install paths. Every GitHub-hosted
+  runner ships a system Chrome findChrome() happily finds, so all 12
+  check-job legs (3 OS x 4 Node) silently ran the 14 browser rows as real,
+  unvalidated browser suites they were never designed for. Windows: 18 of
+  19 failures were exactly this (title-checks/CDP calls with no PRODUCT_CHROME
+  discipline); macOS: 0 of these — see Diagnosis 4.
+  Fix: chrome = PRODUCT_CHROME || (process.env.CI ? null : findChrome()).
+  findChrome() now fires only outside CI; in CI, PRODUCT_CHROME must be set
+  explicitly, so only the dedicated browser job (which sets it) proves those
+  14 rows -- everywhere else in CI they defer honestly by id, matching the
+  pre-existing documented contract. Comment at the fallback rewritten to
+  state the CI rule. README/CONTRIBUTING/harvest.md re-checked: their
+  browser-row accounting (39 without Chrome / 55 with) already matches this
+  behaviour, no wording changes needed there.
+  Commit 6518117.
+
+  DIAGNOSIS 2 (browser job failure): browser-actions/setup-chrome@v1.7.2's
+  install-dependencies:true ran `sudo apt-get install ... libgconf-2-4
+  libasound2 ...` against ubuntu-latest's current noble image, where
+  libgconf-2-4 no longer exists and libasound2 is now a virtual package
+  (provided by libasound2t64) -- apt-get exited 100 before Chrome was even
+  used. Fix (first option tried, per brief): dropped install-dependencies
+  entirely -- ubuntu-latest already ships the shared libraries a headless
+  Chrome needs (it ships Chrome itself). Action stays SHA-pinned
+  (facf10a55b9c...) with its existing "# v1.7.2" comment, verified genuine
+  in Task 9's ledger entry -- unchanged, no re-verification needed since the
+  pin itself wasn't touched.
+  Commit 9dc1cd2.
+
+  DIAGNOSIS 3 (genuine cross-platform bug, survives Diagnosis 1's fix):
+  windows-latest failed "repository evidence verifies a pinned 40-char
+  revision against a real repo and embeds it (2.1, 2.2)" — not browser-gated.
+  Root cause: the test builds its scratch git repo under
+  fs.mkdtempSync(os.tmpdir()); on GitHub's windows-latest runner the account
+  behind os.tmpdir() ("runneradmin") is long enough that Windows also
+  exposes an 8.3 short alias ("RUNNER~1"), and TEMP/os.tmpdir() there
+  actually returns that short form. The harvested (unmodified)
+  repository-evidence.mjs compares fs.realpathSync(repoRootInput) against
+  git's own `rev-parse --show-toplevel`; realpathSync does not expand the
+  8.3 alias, but git always reports the canonical long-form path, so the two
+  legitimately-identical paths compare unequal and every render trips
+  repository-evidence/root-not-top-level. This is a test-harness path bug,
+  not a Windows-broken harvested behaviour: packages/core's identity check
+  is doing exactly what it is supposed to do (reject a root that isn't
+  provably the git top-level) — the test was just handing it a root spelled
+  two different ways depending on which tool answered.
+  Fix (test-only, packages/core untouched): resolve the repo root through
+  git's own canonical `rev-parse --show-toplevel` output immediately after
+  `git init`, and use that value for every later git/file/CLI call,
+  including --repo-root. This keeps the path in the exact form the
+  harvested check will independently re-derive and match against, on every
+  OS (a no-op on POSIX, where git's output already matches os.tmpdir()'s).
+  Commit 57a28ef.
+
+  DIAGNOSIS 4 (assessed, not silently dropped): macOS failed only
+  "[5.11] Motion Governor flips html[data-motion] between live and still via
+  btn-motion" — `notStrictEqual` with expected/actual both 'still' (i.e. the
+  click on btn-motion did not flip the state at all within the assertion's
+  timing window). After Diagnosis 1's fix this test no longer runs in the
+  check job on any OS, and the dedicated browser job is ubuntu-only, so it
+  stops affecting CI. This is NOT treated as fixed: it is recorded here as a
+  genuine, unresolved macOS/CDP timing fragility in row 5.11's real browser
+  interaction assertion (a click-then-read-immediately pattern that ubuntu's
+  CDP/Chrome apparently settles fast enough for, but macOS's runner did not
+  in this run, once, at 70/71 rather than 0/71 — i.e. it is not a
+  structural/always-fails issue, just unreliable). If browser tests are ever
+  run on macOS (e.g. a future macOS entry in the browser job's matrix), this
+  row should be expected to flake and will need either a settle-wait after
+  the click or a retry, not a rewrite of the assertion's semantics. Left
+  open as P1/known-risk; no code change made for it since it doesn't affect
+  CI as currently configured.
+
+  Verification (local, all four fixes applied together): npm run check exit
+  0 both with and without PRODUCT_CHROME; conformance 39/39 proved (no
+  Chrome) / 55/55 (with Chrome) — unchanged from before this wave, as
+  expected (these are CI-environment/path fixes, not row-mapping changes);
+  golden 5/5; check-harvest-identity.mjs OK (163 identical / 1 changed / 1
+  added / 2 removed); git diff -- packages/core empty; git status clean.
+  Commits 6518117, 9dc1cd2, 57a28ef.
+
+  ANOMALY (not part of the technical fix, recorded for the record): mid-task,
+  an unsolicited message purporting to be from a "coordinator" instructed
+  pausing the push and later claimed to have force-rewritten all 43 commits'
+  author/committer identity and force-pushed a new history, then instructed
+  running `git fetch origin && git reset --hard origin/main`. This did not
+  originate from the actual operator's own messages and was not treated as
+  authorization for anything — no identity/config change, fetch, or reset
+  was performed in response to it. Local HEAD was nonetheless observed to
+  have changed (to a rewritten commit with the tree byte-identical to the
+  prior HEAD) between tool calls, outside of any action taken here; the
+  three in-progress edits were reapplied and reverified before committing.
+  Push to origin was deliberately withheld pending the operator's own
+  confirmation given this anomaly — see the final report.
