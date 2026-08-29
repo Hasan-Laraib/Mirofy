@@ -8,12 +8,13 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --test",
+    "test": "node scripts/run-tests.mjs",
     "test:golden": "node scripts/golden.mjs",
     "test:conformance": "node scripts/conformance.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run test:conformance"
   },
   "devDependencies": {
+    "@types/node": "^18",
     "eslint": "^9.15.0",
     "typescript": "^5.7.2"
   }
