@@ -1,6 +1,8 @@
 // One entry per harvested (H) row in analysis/future/32-PARITY-AND-FEATURE-MATRIX.md,
 // as extracted mechanically into
-// .superpowers/sdd/2026-08-29-p0-foundation/harvested-rows.md: 55 pure-H rows.
+// .superpowers/sdd/2026-08-29-p0-foundation/harvested-rows.md: 55 pure-H rows,
+// plus row 3.1b (added post-P0 to close the mislabelled-row-plus-coverage-gap
+// residual recorded in docs/P0-BUILD-LEDGER.md) -- 56 rows total.
 // Row 1.10 is H->R (rebuilt in P1) and is intentionally absent from this list.
 //
 // `proof` names the test file (or script) that guarantees the row.
@@ -145,8 +147,19 @@ export const HARVESTED_ROWS = [
   // Phase 3 — Layout validation gates
   {
     id: '3.1',
-    name: 'Clean Flow (no edge across unrelated node)',
+    name: 'Proper Crossing Gate (edge-vs-edge, showcase-only)',
     proof: 'negative-fixtures.test.mjs',
+    // Renamed from "Clean Flow (no edge across unrelated node)": that name
+    // was inherited from doc 32's row definition, but every test below it
+    // actually proves edge-vs-edge crossing (cleanCrossingProblems /
+    // composition/proper-crossing), which is showcase-only. The genuinely
+    // named "no edge across unrelated node" capability is
+    // cleanFlowProblems / clean-flow/edge-through-node, an always-on
+    // correctness invariant with its own row below (3.1b) -- it was
+    // uncovered entirely until now (see docs/P0-BUILD-LEDGER.md's
+    // "RESIDUAL PARKED" entry). The tests and testTitles here are
+    // unchanged and remain sound for what they actually test.
+    //
     // Three independent proofs: the standalone checker fires on the
     // authored violation; the real CLI's `validate` under --quality
     // showcase blocks delivery of the same unmodified fixture; and the real
@@ -161,6 +174,36 @@ export const HARVESTED_ROWS = [
       'relationship_crossings fires on a genuine proper-crossing (3.1)',
       'CLI: showcase validate blocks delivery of a genuine proper-crossing (3.1)',
       'CLI: showcase render rejects a genuine proper-crossing with composition/proper-crossing (3.1)',
+    ],
+  },
+  {
+    id: '3.1b',
+    name: 'Clean Flow Gate (no edge across unrelated node)',
+    proof: 'negative-fixtures.test.mjs',
+    // The row 3.1 was originally named for -- and was uncovered by the
+    // matrix until now. cleanFlowProblems (clean-flow/edge-through-node) is
+    // an always-on correctness invariant, active regardless of
+    // quality_profile (unlike 3.1-3.5, which are showcase- or
+    // enforced-marker-gated) and used by all five renderers.
+    //
+    // It has no equivalent in scripts/check-render-output.mjs (the
+    // standalone post-render checker models only the nine checks named in
+    // validation-gates.test.mjs's EXPECTED_CHECKS -- crossing, corridor,
+    // label clearance, border run, route rhythm, etc -- clean-flow is not
+    // among them), so the checker-reimplementation leg the other five rows
+    // use does not exist for this gate, and packages/core (which the
+    // checker lives under) may not be modified to add one. Three
+    // independent proofs stand in its place instead: a direct, in-process
+    // unit test of cleanFlowProblems itself (the only "independent
+    // detector" this gate has); the real CLI's `validate` under --quality
+    // showcase blocking delivery of the unmodified fixture; and the real
+    // CLI's `render` rejecting it on the strength of the render-time gate
+    // alone, with the specific clean-flow/edge-through-node code. All three
+    // are gutting-proven independently of 3.1's cleanCrossingProblems proofs.
+    testTitle: [
+      'cleanFlowProblems fires on an edge routed through an unrelated node (3.1b)',
+      'CLI: showcase validate blocks delivery of an edge routed through an unrelated node (3.1b)',
+      'CLI: showcase render rejects an edge routed through an unrelated node with clean-flow/edge-through-node (3.1b)',
     ],
   },
   {
