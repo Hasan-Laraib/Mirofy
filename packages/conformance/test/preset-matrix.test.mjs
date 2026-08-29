@@ -37,3 +37,21 @@ test('both colour modes are defined in every rendered artifact', () => {
   assert.ok(html.includes('[data-preset="blueprint"]'), 'blueprint palette block missing');
   assert.ok(html.includes('[data-preset="editorial"]'), 'editorial palette block missing');
 });
+
+test('the "S" key cycles the visual style via Archify.preset.cycle (4.5)', () => {
+  const out = path.join(tmp, 'style-picker.html');
+  renderFixture('architecture', 'web-app.architecture.json', out);
+  const html = fs.readFileSync(out, 'utf8');
+
+  // The cycle function itself: preset.mjs's public surface, called by both
+  // the "S" keyboard shortcut and the on-screen style-picker menu.
+  assert.match(html, /function cycle\(\)\s*\{\s*return apply\(nextAfter\(current\(\)\)\);\s*\}/, 'Archify.preset.cycle implementation missing');
+  assert.match(html, /return\s*\{[^}]*\bcycle:\s*cycle\b/, 'cycle is not exposed on the Archify.preset public surface');
+
+  // The keyboard branch: "S" must be wired to call it, not just be reserved
+  // in the help text.
+  const branchIndex = html.search(/e\.key === ['"]s['"] \|\| e\.key === ['"]S['"]/);
+  assert.notEqual(branchIndex, -1, '"S" key branch missing from the keyboard handler');
+  const branchBody = html.slice(branchIndex, branchIndex + 200);
+  assert.match(branchBody, /Archify\.preset\.cycle\(\)/, '"S" key branch does not call Archify.preset.cycle()');
+});
