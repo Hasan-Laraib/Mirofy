@@ -426,3 +426,46 @@ P0 COMPLETE. 35 commits. Final: npm run check exit 0 both ways; golden 5/5;
   conformance 38 proved / 16 browser-deferred / 1 UNPROVEN (no Chrome), 54/0/1 (with Chrome);
   harvest-identity 163/163 vs ancestor; tracked tree 6.5 MB / 10 MB; 0 advisories;
   template.html blob 8e15e85 unchanged throughout.
+
+RESIDUAL CLOSED (post-P0): row 3.1 rename + new row 3.1b (cleanFlowProblems).
+  Renamed row 3.1 to "Proper Crossing Gate (edge-vs-edge, showcase-only)" --
+  id, tests, and testTitles unchanged, since its proof was sound for what it
+  actually tests. Added row 3.1b "Clean Flow Gate (no edge across unrelated
+  node)", the capability 3.1's old name described, covering cleanFlowProblems
+  / clean-flow/edge-through-node with a new fixture
+  (fixtures/negative/edge-through-node-violation.architecture.json) and three
+  proofs: a direct in-process unit test of cleanFlowProblems, CLI validate,
+  and CLI render. No post-render-checker leg exists for 3.1b (unlike
+  3.1-3.5): scripts/check-render-output.mjs has no equivalent check and
+  packages/core cannot be modified to add one -- documented in
+  negative-fixtures.test.mjs's header comment. Totals updated in README,
+  CONTRIBUTING, harvest.md: 55->56 rows, 38->39 proved (no Chrome), 54->55
+  proved (with PRODUCT_CHROME).
+
+  Attribution proof 1 -- gut cleanFlowProblems (`return [];` inserted at its
+  top), run `node scripts/conformance.mjs`:
+    title-check failed: 1 (proof file exited but the row's own named test did not pass -- never counted as proved)
+      3.1b — Clean Flow Gate (no edge across unrelated node)
+        missing passing test: cleanFlowProblems fires on an edge routed through an unrelated node (3.1b)
+        missing passing test: CLI: showcase validate blocks delivery of an edge routed through an unrelated node (3.1b)
+        missing passing test: CLI: showcase render rejects an edge routed through an unrelated node with clean-flow/edge-through-node (3.1b)
+  Raw TAP confirmed only these 3 lines read "not ok" (out of 43 tests across
+  all suites); every 3.1/3.2-3.5 test and every other row's test still read
+  "ok". Reverted (git checkout -- packages/core/renderers/shared/geometry.mjs);
+  tree clean; check-harvest-identity.mjs OK afterward.
+
+  Attribution proof 2 -- gut cleanCrossingProblems (`return [];` inserted at
+  its top, same file), run `node scripts/conformance.mjs`:
+    title-check failed: 1 (proof file exited but the row's own named test did not pass -- never counted as proved)
+      3.1 — Proper Crossing Gate (edge-vs-edge, showcase-only)
+        missing passing test: CLI: showcase render rejects a genuine proper-crossing with composition/proper-crossing (3.1)
+  Exactly one "not ok" line; all three 3.1b tests, and every other row,
+  stayed "ok" -- 3.1 and 3.1b are independently attributed in both
+  directions. Reverted; tree clean; check-harvest-identity.mjs OK.
+
+  Afterward: npm run check exit 0 with and without PRODUCT_CHROME; golden
+  5/5; conformance 39/39 proved (no Chrome) / 55/55 (with Chrome), 16
+  browser-deferred, 1 UNPROVEN (6.10); check-harvest-identity.mjs OK
+  (163 identical, 1 intentionally changed, 1 added, 2 removed); git diff --
+  packages/core empty; git status clean; template.html blob 8e15e85 unchanged.
+  Commit f84b1e2.
