@@ -148,6 +148,24 @@ export function validateGuidedViews(diagramType, diagram) {
 }
 
 // Accessible name for the generated diagram SVG.
+//
+// KNOWN GAP (Task 8 fix round 1, 2026): this statically emits role="img"
+// below, while focusNodeAttrs() (this file) statically emits real,
+// focusable tabindex="0" role="button" nodes on every component -- an
+// element declaring its own children presentational while containing real
+// interactive controls is a WCAG 4.1.2 defect (axe-core: nested-interactive).
+// That conflict is corrected only at viewer BOOT time
+// (packages/viewer/src/js/07-focus.js sets role="graphics-document" once
+// Mirofy.focus runs), not here. This function's own static output is still
+// wrong on its own terms: with JavaScript disabled, before boot completes,
+// or for any consumer of this markup other than the shipped viewer runtime,
+// the static role="img" over interactive descendants persists uncorrected.
+// packages/conformance/test/accessibility.browser.test.mjs's gate cannot
+// see this either, because it only ever scans the post-boot DOM. Recorded
+// as P1b debt (task-8-report.md): fix it here, in the renderer, so the
+// static markup itself is correct -- deliberately not done in Task 8,
+// since that would move every renderer's output and all 25 golden
+// digests, a change that deserves its own task and its own review.
 export function svgRootAttrs(meta, kind) {
   const animation = meta.animation === 'trace' ? ' data-animation="trace"' : '';
   const preset = ` data-preset="${esc(meta.visual_preset || 'classic')}"`;
