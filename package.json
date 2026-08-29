@@ -15,7 +15,8 @@
     "check:artifacts": "node scripts/build-artifacts.mjs --check",
     "check:size": "node scripts/check-size-budget.mjs",
     "check:audit": "npm audit --audit-level=high",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
+    "check:harvest": "node scripts/check-harvest-identity.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:harvest && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
   },
   "devDependencies": {
     "@types/node": "^18",
