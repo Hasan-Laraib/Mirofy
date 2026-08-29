@@ -12,10 +12,14 @@
 2. **Small conventional commits.** `<type>(<scope>): <subject>`, one behaviour
    per commit, `Refs: <row>` where a matrix row applies. A task is many
    commits.
-3. **Every check green before merge.** `npm run check` locally; CI is the
-   gate. Run it once more with `PRODUCT_CHROME` set to a Chrome executable so
-   the 14 browser-only conformance rows are exercised too — CI's `browser`
-   job does this on every push and pull request.
+3. **Every check green before merge.** `npm run check` locally. The CI
+   workflow (`.github/workflows/ci.yml`) defines this same gate and its
+   steps pass locally, but as of P0 the workflow has not yet executed on a
+   runner — until it has, a clean local `npm run check` is the actual bar,
+   not "CI is the gate". Run it once more with `PRODUCT_CHROME` set to a
+   Chrome executable so the 16 browser-only conformance rows are exercised
+   too — CI's `browser` job is intended to do this on every push and pull
+   request once it runs for real.
 4. **A skipped test is skipped.** Never reported as passing, in a PR or a
    receipt. A browser row deferred for lack of `PRODUCT_CHROME` is reported
    by id, not folded into the proved count. A row with no real proof is
@@ -39,8 +43,9 @@ npm run lint              # eslint .
 npm run typecheck         # tsc --noEmit
 npm run test              # node:test suites outside the conformance matrix
 npm run test:golden       # digest parity against the ancestor's renders
+npm run check:harvest     # packages/core/ byte-identity vs the ancestor manifest
 npm run test:conformance  # the 55-row parity matrix
-npm run check:artifacts   # deterministic rebuild, --check mode
+npm run check:artifacts   # npm run build's own output reproduces the golden digests
 npm run check:size        # 10 MB tracked-tree budget
 npm run check:audit       # npm audit --audit-level=high
 npm run check             # all of the above, in order

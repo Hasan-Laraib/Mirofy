@@ -34,10 +34,24 @@ which is untracked in both repositories):
    entries invoke repo-root build scripts (`../scripts/*`, `docs/` output)
    that don't exist in this workspace. `devDependencies` is unchanged.
 
-**Every other file — all 164 remaining tracked files in `packages/core/`,
+**Every other file — all 163 remaining tracked files in `packages/core/`,
 including every renderer, schema, template, test, and script — is byte-for-byte
 identical to the ancestor at `12106be` (matching git blob hash).** Not a
-single renderer, schema, or template byte was touched.
+single renderer, schema, or template byte was touched. (163, not 164: of the
+164 ancestor files carried over unremoved, only 163 — everything except
+`package.json` — are identical; `package.json` is the one whose content was
+deliberately changed, above. `packages/core/` holds 165 tracked files in
+total once the added `README.md`, which has no ancestor counterpart to be
+"identical" to, is counted back in: 163 identical + 1 changed + 1 added.)
+
+This is enforced in CI, not just asserted here: `npm run check:harvest`
+(`scripts/check-harvest-identity.mjs`) recomputes the git blob hash of every
+file on disk under `packages/core/` and compares it against a manifest of
+these 163 ancestor hashes plus the four deviations above, committed at
+`scripts/harvest-manifest.json`. It runs offline and fails on any drift — a
+changed byte, a reappeared removed file, or an untracked file dropped in —
+that a later change might otherwise introduce without moving a golden
+digest.
 
 ## How parity is proved
 
@@ -46,7 +60,7 @@ endings, and compares SHA-256 digests against `fixtures/golden/manifest.json`
 — the digests the ancestor produces at `12106be`. `npm run test:conformance`
 (`scripts/conformance.mjs`) additionally proves the 55-row harvested
 capability matrix (`packages/conformance/src/matrix.mjs`) still holds after
-the move: 54 of 55 rows are provable (40 without a browser, 14 more with
+the move: 54 of 55 rows are provable (38 without a browser, 16 more with
 `PRODUCT_CHROME`); row 6.10 (deterministic ZIP packaging) is UNPROVEN because
 its source — `scripts/build-zip.sh`, `scripts/package-smoke.mjs`,
 `.github/workflows/release.yml` in the ancestor — was never part of this
@@ -82,3 +96,25 @@ its 10 MB budget even with them included).
 with something generated on demand, not committed) during the P1 viewer
 refactor, once `packages/core/` is no longer required to match the ancestor
 byte-for-byte.
+
+## Known debt: inherited, uninvoked `test/` directory
+
+`packages/core/test/` carries 92 files (~933 KB: 82 `*.test.mjs` suites plus
+8 JSON fixtures they load), harvested unmodified along with everything else.
+None of it is excluded from `check:harvest`'s or `test:golden`'s scope, but
+none of it is *run* by anything in this workspace either — `npm run test`
+(`scripts/run-tests.mjs`) only discovers suites under
+`packages/conformance/test/`, and nothing in `package.json` or
+`packages/core/package.json` invokes `node --test packages/core/test`. It is
+excluded from every gate and every run by nothing: not by design, just by
+absence of wiring.
+
+This mirrors the `examples/` debt above in cause (kept for byte-identity, not
+because it is used) and is disclosed here for the same reason: `packages/core/`
+carries real weight — 3.4 MB of generated HTML plus 933 KB of unrun tests,
+together over half the tracked tree — that this harvest did not need and does
+not exercise. **This is also explicit P1 debt.** Either wire
+`packages/core/test/` into a real gate (proving the ancestor's own test
+suite still passes post-harvest, which today's conformance matrix does not
+claim to do) or remove it during the P1 refactor, once `packages/core/` is no
+longer required to match the ancestor byte-for-byte.
