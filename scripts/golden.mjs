@@ -8,6 +8,13 @@ import { MODES, renderFixture, canonicalise } from '../packages/conformance/src/
 const here = path.dirname(fileURLToPath(import.meta.url));
 const manifestPath = path.resolve(here, '../fixtures/golden/manifest.json');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-golden-'));
+// Only clean up on a passing run: a failure prints "fresh render: <path>"
+// above so a human can inspect the mismatching output. Cleaning up
+// unconditionally would delete that path out from under the very message
+// that just told the reader to go look at it.
+process.on('exit', (code) => {
+  if (code === 0) fs.rmSync(tmp, { recursive: true, force: true });
+});
 const writeMode = process.argv.includes('--update');
 
 if (writeMode && process.env.CI) {
