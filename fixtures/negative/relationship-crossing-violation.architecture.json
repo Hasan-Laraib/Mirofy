@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "Relationship crossing violation" },
+  "components": [
+    { "id": "a", "type": "backend", "label": "A", "pos": [70, 10], "size": [60, 40] },
+    { "id": "b", "type": "backend", "label": "B", "pos": [70, 260], "size": [60, 40] },
+    { "id": "c", "type": "backend", "label": "C", "pos": [10, 130], "size": [60, 40] },
+    { "id": "d", "type": "backend", "label": "D", "pos": [210, 130], "size": [60, 40] }
+  ],
+  "connections": [
+    { "id": "a-b", "from": "a", "to": "b", "fromSide": "bottom", "toSide": "top" },
+    { "id": "c-d", "from": "c", "to": "d", "fromSide": "right", "toSide": "left" }
+  ]
+}

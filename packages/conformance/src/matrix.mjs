@@ -27,11 +27,11 @@ export const HARVESTED_ROWS = [
   { id: '2.2', name: 'Verified Source Beacon (SRC n)', proof: 'validation-gates.test.mjs' },
 
   // Phase 3 — Layout validation gates
-  { id: '3.1', name: 'Clean Flow (no edge across unrelated node)', proof: 'validation-gates.test.mjs' },
-  { id: '3.2', name: 'Clean Label Gate (≥4 px)', proof: 'validation-gates.test.mjs' },
-  { id: '3.3', name: 'Ambiguous Corridor Gate (≥8 px lane)', proof: 'validation-gates.test.mjs' },
-  { id: '3.4', name: 'Clear Container Corridor', proof: 'validation-gates.test.mjs' },
-  { id: '3.5', name: 'Readable Route Rhythm (8/16 px)', proof: 'validation-gates.test.mjs' },
+  { id: '3.1', name: 'Clean Flow (no edge across unrelated node)', proof: 'negative-fixtures.test.mjs' },
+  { id: '3.2', name: 'Clean Label Gate (≥4 px)', proof: 'negative-fixtures.test.mjs' },
+  { id: '3.3', name: 'Ambiguous Corridor Gate (≥8 px lane)', proof: 'negative-fixtures.test.mjs' },
+  { id: '3.4', name: 'Clear Container Corridor', proof: 'negative-fixtures.test.mjs' },
+  { id: '3.5', name: 'Readable Route Rhythm (8/16 px)', proof: 'negative-fixtures.test.mjs' },
   { id: '3.6', name: 'Endpoint side contract', proof: 'validation-gates.test.mjs' },
   { id: '3.7', name: 'Automatic Port Spread', proof: 'validation-gates.test.mjs' },
   { id: '3.8', name: 'Grid placement validation', proof: 'validation-gates.test.mjs' },

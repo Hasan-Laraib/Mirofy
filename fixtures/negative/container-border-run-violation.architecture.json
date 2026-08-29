@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "Container border run violation" },
+  "components": [
+    { "id": "inside", "type": "backend", "label": "Inside", "pos": [100, 100], "size": [100, 60] },
+    { "id": "outside", "type": "backend", "label": "Outside", "pos": [400, 100], "size": [100, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Region", "wraps": ["inside"] }
+  ],
+  "connections": [
+    { "id": "inside-outside", "from": "inside", "to": "outside", "fromSide": "top", "toSide": "left", "via": [[150, 70], [220, 70], [220, 130]] }
+  ]
+}
