@@ -67,7 +67,17 @@ test('deliver never clobbers a previously delivered artifact when given invalid 
 
 test('the preview server keeps serving the last verified artifact when a later edit becomes invalid (6.2)', async () => {
   const previewModule = await import(pathToFileURL(path.join(coreRoot, 'bin/preview.mjs')).href);
-  const previewTmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-preview-'));
+  // os.tmpdir() on a Windows CI runner is an 8.3 short path -- the user
+  // component comes back as RUNNER~1, not the full account name. preview.mjs
+  // watches this directory with fs.watch, and libuv's Windows fs-event backend
+  // asserts that the long-form filename the OS hands it starts with the watched
+  // directory string (src/win/fs-event.c:72). A short-path watch root makes the
+  // two forms disagree, the assert fires, and the process *aborts* -- a native
+  // crash, not a test failure, so it takes the whole file down with it (Node 24
+  // only; 18/20/22 bundle a libuv that does not reach the assert). Resolving to
+  // the real long path first keeps both strings in one form. Same short-path
+  // hazard, different symptom: validation-gates.test.mjs:401.
+  const previewTmp = fs.realpathSync.native(fs.mkdtempSync(path.join(os.tmpdir(), 'product-preview-')));
   const inputPath = path.join(previewTmp, 'input.architecture.json');
   const outputPath = path.join(previewTmp, 'output.html');
   fs.copyFileSync(path.join(fixturesRoot, 'web-app.architecture.json'), inputPath);
