@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 
 function renderOutcome(doc) {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-column-fit-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-column-fit-'));
   const input = path.join(tmp, 'input.json');
   const output = path.join(tmp, 'output.html');
   fs.writeFileSync(input, JSON.stringify(doc));

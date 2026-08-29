@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const template = fs.readFileSync(path.join(skillRoot, 'assets', 'template.html'), 'utf8');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-story-beat-navigator-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-story-beat-navigator-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -78,8 +78,8 @@ test('one generation-owned scheduler resumes remaining dwell and finite exact-ed
   assert.match(template, /preserveElapsed: options\.complete !== true/);
   assert.match(template, /storyBeatDwellMs - storyBeatElapsedMs/);
   assert.match(template, /afterHandoff\(function \(\)[\s\S]*scheduleStoryPlayback\(\)/);
-  assert.match(template, /animation: archify-story-flow 0\.78s linear 1 both/);
-  assert.doesNotMatch(template, /archify-story-flow 0\.78s linear infinite/);
+  assert.match(template, /animation: mirofy-story-flow 0\.78s linear 1 both/);
+  assert.doesNotMatch(template, /mirofy-story-flow 0\.78s linear infinite/);
   assert.match(template, /svg\[data-preset="blueprint"\]\[data-story-beat\] \[data-story-step\]\[data-story-beat-state="active"\] \{\s*filter: none;\s*animation: none;/);
   assert.match(template, /step\.relation !== 'forward' && step\.relation !== 'reverse'/);
   assert.match(template, /step\.edges\.length !== 1/);

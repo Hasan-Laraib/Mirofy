@@ -15,12 +15,12 @@ const artifactPath = path.join(repoRoot, 'docs', 'cases', 'mco-runtime.architect
 const shareCardPath = path.join(repoRoot, 'docs', 'assets', 'mco-runtime-share-card.png');
 const experimentSourcePath = path.join(repoRoot, 'experiments', 'mco-showcase', 'mco-runtime.architecture.json');
 const experimentArtifactPath = path.join(repoRoot, 'experiments', 'mco-showcase', 'mco-runtime.html');
-const cli = path.join(skillRoot, 'bin', 'archify.mjs');
+const cli = path.join(skillRoot, 'bin', 'mirofy.mjs');
 const pinnedSource = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
 const pinnedRepository = pinnedSource.meta.repository;
 
 function evidencePayload(html) {
-  const match = html.match(/<script id="archify-source-evidence-data" type="application\/json">([\s\S]*?)<\/script>/);
+  const match = html.match(/<script id="mirofy-source-evidence-data" type="application\/json">([\s\S]*?)<\/script>/);
   assert.ok(match, 'checked-in MCO proof is missing verified repository evidence');
   return JSON.parse(match[1]);
 }
@@ -42,12 +42,12 @@ function automaticMcoRoot() {
   }
 }
 
-const pinnedMcoRoot = process.env.ARCHIFY_MCO_REPO_ROOT
-  ? path.resolve(process.env.ARCHIFY_MCO_REPO_ROOT)
+const pinnedMcoRoot = process.env.MIROFY_MCO_REPO_ROOT
+  ? path.resolve(process.env.MIROFY_MCO_REPO_ROOT)
   : automaticMcoRoot();
 
 test('MCO showcase preserves checked-in connection-label geometry', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-mco-showcase-layout-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-mco-showcase-layout-'));
   try {
     const source = JSON.parse(fs.readFileSync(experimentSourcePath, 'utf8'));
     assert.deepEqual(
@@ -90,9 +90,9 @@ test('MCO showcase preserves checked-in connection-label geometry', () => {
 test('checked-in MCO artifacts are byte-reproducible from the pinned repository revision', {
   skip: pinnedMcoRoot
     ? false
-    : `Set ARCHIFY_MCO_REPO_ROOT to a matching ${pinnedRepository.url} clone containing revision ${pinnedRepository.revision.slice(0, 7)}.`,
+    : `Set MIROFY_MCO_REPO_ROOT to a matching ${pinnedRepository.url} clone containing revision ${pinnedRepository.revision.slice(0, 7)}.`,
 }, () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-mco-byte-reproduction-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-mco-byte-reproduction-'));
   try {
     const experimentOutput = path.join(tmp, 'mco-runtime.experiment.html');
     const experiment = spawnSync(process.execPath, [
@@ -167,10 +167,10 @@ test('MCO public proof is source-backed, valid, and linked from every README', (
   assert.equal(evidence.repository.revision, source.meta.repository.revision);
   assert.equal(evidence.repository.shortRevision, source.meta.repository.revision.slice(0, 7));
   assert.equal(evidence.referenceCount, references);
-  assert.match(checkedInHtml, /Archify\.sourceEvidence\.installBeacons\(\)/);
+  assert.match(checkedInHtml, /Mirofy\.sourceEvidence\.installBeacons\(\)/);
   execFileSync(process.execPath, [cli, 'check', artifactPath], { encoding: 'utf8' });
 
-  const noRootTmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-mco-proof-no-root-'));
+  const noRootTmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-mco-proof-no-root-'));
   try {
     const output = path.join(noRootTmp, 'mco-runtime.html');
     const result = spawnSync(process.execPath, [

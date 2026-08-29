@@ -11,8 +11,8 @@ import { MIN_PROJECTED_NODE_TEXT_PX } from '../renderers/shared/desktop-readabil
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-viewer-chrome-layout-'));
-const chromePath = process.env.ARCHIFY_CHROME ? findChrome() : null;
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-viewer-chrome-layout-'));
+const chromePath = process.env.MIROFY_CHROME ? findChrome() : null;
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -25,7 +25,7 @@ const CASES = {
 function render(mode, example) {
   const output = path.join(tmp, `${mode}.html`);
   execFileSync(process.execPath, [
-    path.join(skillRoot, 'bin', 'archify.mjs'),
+    path.join(skillRoot, 'bin', 'mirofy.mjs'),
     'render',
     mode,
     path.join(skillRoot, 'examples', example),
@@ -44,7 +44,7 @@ function renderWithoutLegend() {
   const output = path.join(tmp, 'architecture-no-legend.html');
   fs.writeFileSync(input, `${JSON.stringify(source, null, 2)}\n`);
   execFileSync(process.execPath, [
-    path.join(skillRoot, 'bin', 'archify.mjs'),
+    path.join(skillRoot, 'bin', 'mirofy.mjs'),
     'render',
     'architecture',
     input,
@@ -98,7 +98,7 @@ async function waitForLayout(browser, sessionId) {
             rect(document.querySelector('[data-legend]')),
             rect(document.getElementById('semantic-lens')),
             rect(document.getElementById('overview-map')),
-            container ? getComputedStyle(container).getPropertyValue('--archify-nav-reserve') : ''
+            container ? getComputedStyle(container).getPropertyValue('--mirofy-nav-reserve') : ''
           ].join('|');
           if (current === previous) stableFrames += 1;
           else {
@@ -138,9 +138,9 @@ async function finalGeometry(browser, sessionId) {
     var lens = document.getElementById('semantic-lens');
     var radar = document.getElementById('overview-map');
     var passport = document.getElementById('focus-chip');
-    var chromeReceipt = window.Archify && Archify.viewerChromeLayout
-      && typeof Archify.viewerChromeLayout.receipt === 'function'
-      ? Archify.viewerChromeLayout.receipt()
+    var chromeReceipt = window.Mirofy && Mirofy.viewerChromeLayout
+      && typeof Mirofy.viewerChromeLayout.receipt === 'function'
+      ? Mirofy.viewerChromeLayout.receipt()
       : null;
     var viewBox = svg && svg.viewBox && svg.viewBox.baseVal;
     var projectedScale = svg && viewBox && viewBox.width > 0
@@ -160,9 +160,9 @@ async function finalGeometry(browser, sessionId) {
     }
     var legendRect = legend && getComputedStyle(legend).display !== 'none' ? legend.getBoundingClientRect() : null;
     var navRect = nav && getComputedStyle(nav).display !== 'none' ? nav.getBoundingClientRect() : null;
-    var stageRect = window.Archify && Archify.viewerChromeLayout
-      && typeof Archify.viewerChromeLayout.stageRect === 'function'
-      ? Archify.viewerChromeLayout.stageRect()
+    var stageRect = window.Mirofy && Mirofy.viewerChromeLayout
+      && typeof Mirofy.viewerChromeLayout.stageRect === 'function'
+      ? Mirofy.viewerChromeLayout.stageRect()
       : null;
     var lensRect = lens && !lens.hidden && getComputedStyle(lens).display !== 'none' ? lens.getBoundingClientRect() : null;
     var radarRect = radar && !radar.hidden && getComputedStyle(radar).display !== 'none' ? radar.getBoundingClientRect() : null;
@@ -174,7 +174,7 @@ async function finalGeometry(browser, sessionId) {
         }, 0)
       : 0;
     return {
-      reserve: parseFloat(getComputedStyle(container).getPropertyValue('--archify-nav-reserve')) || 0,
+      reserve: parseFloat(getComputedStyle(container).getPropertyValue('--mirofy-nav-reserve')) || 0,
       receiptReserve: chromeReceipt ? chromeReceipt.reserve : null,
       receiptEligible: chromeReceipt ? chromeReceipt.eligible : null,
       receiptStageIntersectionArea: chromeReceipt ? chromeReceipt.stageIntersectionArea : null,
@@ -261,8 +261,8 @@ test('the public CLI gives all typed renderers one final Viewer contract', () =>
     assert.match(html, /data-legend/, mode);
     assert.match(html, directChildSvg, `${mode} keeps the SVG as a direct child`);
     assert.doesNotMatch(html, /class="diagram-stage"/, `${mode} does not re-nest the exported SVG`);
-    assert.doesNotMatch(canonicalSvg(html), /nav-safe-rail|archify-nav-reserve|viewerChromeLayout/, mode);
-    execFileSync(process.execPath, [path.join(skillRoot, 'bin', 'archify.mjs'), 'check', output]);
+    assert.doesNotMatch(canonicalSvg(html), /nav-safe-rail|mirofy-nav-reserve|viewerChromeLayout/, mode);
+    execFileSync(process.execPath, [path.join(skillRoot, 'bin', 'mirofy.mjs'), 'check', output]);
   }
 });
 
@@ -274,7 +274,7 @@ test('Viewer chrome remains outside the canonical SVG export boundary', () => {
 });
 
 test('Dock Safe Rail keeps typed renderers clear across themes, Presentation, and low-height desktops', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   const matrix = Object.keys(CASES).flatMap((mode) => [
@@ -310,7 +310,7 @@ test('Dock Safe Rail keeps typed renderers clear across themes, Presentation, an
 });
 
 test('an artifact with no Legend still receives the desktop stage rail', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -327,7 +327,7 @@ test('an artifact with no Legend still receives the desktop stage rail', {
 });
 
 test('Dock Safe Rail resolves a forced Legend collision across the shared diagram viewer', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -367,11 +367,11 @@ test('Dock Safe Rail resolves a forced Legend collision across the shared diagra
 });
 
 test('Maka remains collision-free at the reported Retina-equivalent viewport', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const output = path.join(tmp, 'maka-architecture.html');
   execFileSync(process.execPath, [
-    path.join(skillRoot, 'bin', 'archify.mjs'),
+    path.join(skillRoot, 'bin', 'mirofy.mjs'),
     'render',
     'architecture',
     path.resolve(skillRoot, '..', 'examples', 'maka-architecture.architecture.json'),
@@ -400,7 +400,7 @@ test('Maka remains collision-free at the reported Retina-equivalent viewport', {
 });
 
 test('a real 5px Legend gap keeps the stage rail and Legend clear', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -428,7 +428,7 @@ test('a real 5px Legend gap keeps the stage rail and Legend clear', {
 });
 
 test('Presentation keeps its visible Dock clear of a colliding Legend', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -456,7 +456,7 @@ test('Presentation keeps its visible Dock clear of a colliding Legend', {
 });
 
 test('manual zoom and pan reschedules Legend and Dock collision measurement', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -486,7 +486,7 @@ test('manual zoom and pan reschedules Legend and Dock collision measurement', {
 });
 
 test('camera pan clips authored relationship paint at the protected stage boundary', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -518,7 +518,7 @@ test('camera pan clips authored relationship paint at the protected stage bounda
 });
 
 test('live camera transitions keep authored relationship paint outside the Dock on every frame', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   const artifact = render('architecture', CASES.architecture);
@@ -596,7 +596,7 @@ test('live camera transitions keep authored relationship paint outside the Dock 
 });
 
 test('zoom keeps the desktop rail stable and reports protected stage geometry', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -627,7 +627,7 @@ test('zoom keeps the desktop rail stable and reports protected stage geometry', 
 });
 
 test('Reset followed immediately by zoom and pan retains a collision-free desktop rail', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -659,7 +659,7 @@ test('Reset followed immediately by zoom and pan retains a collision-free deskto
 });
 
 test('zoomed camera restores its bounded desktop rail after crossing the mobile breakpoint', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -701,7 +701,7 @@ test('zoomed camera restores its bounded desktop rail after crossing the mobile 
 });
 
 test('localized multiline Legends remain clear across required viewports, themes, and presets', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   const viewports = [[1440, 900], [1600, 1000], [1920, 1080], [2048, 1320]];
@@ -778,7 +778,7 @@ test('localized multiline Legends remain clear across required viewports, themes
 });
 
 test('Semantic Lens and Radar protect the final Legend and Dock rectangles', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -803,7 +803,7 @@ test('Semantic Lens and Radar protect the final Legend and Dock rectangles', {
 });
 
 test('Radar, Passport, Legend, and Dock remain mutually clear on desktop and narrow viewports', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -816,8 +816,8 @@ test('Radar, Passport, Legend, and Dock remain mutually clear on desktop and nar
       await evaluate(browser, sessionId, `(function () {
         var container = document.querySelector('.diagram-container');
         window.scrollTo(0, Math.max(0, container.offsetTop));
-        Archify.focus.set('lb', { toggle: false });
-        Archify.radar.open();
+        Mirofy.focus.set('lb', { toggle: false });
+        Mirofy.radar.open();
         window.dispatchEvent(new Event('resize'));
       })()`);
       await waitForLayout(browser, sessionId);
@@ -837,7 +837,7 @@ test('Radar, Passport, Legend, and Dock remain mutually clear on desktop and nar
 });
 
 test('mobile, embed, and print keep zero reserve while hidden Legends retain the stage rail', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {

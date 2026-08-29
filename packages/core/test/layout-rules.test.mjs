@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-rules-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-rules-'));
 
 const EXAMPLES = {
   workflow: 'agent-tool-call.workflow.json',
@@ -56,7 +56,7 @@ function validateCli(mode, doc, quality = 'showcase') {
   fs.writeFileSync(input, JSON.stringify(doc));
   try {
     const stdout = execFileSync('node', [
-      path.join(skillRoot, 'bin', 'archify.mjs'),
+      path.join(skillRoot, 'bin', 'mirofy.mjs'),
       'validate',
       mode,
       input,

@@ -16,7 +16,7 @@ test('showcase intake requires reproducible proof, redaction, and explicit publi
 
   for (const field of [
     'id: diagram_type',
-    'id: archify_version',
+    'id: mirofy_version',
     'id: agent',
     'id: model',
     'id: prompt',
@@ -35,7 +35,7 @@ test('showcase intake requires reproducible proof, redaction, and explicit publi
   assert.match(template, /repository, documentation, gallery, and project website/i);
   assert.match(template, /required:\s*true/g);
 
-  const submissionUrl = 'https://github.com/tt-a1i/archify/issues/new?template=showcase.yml';
+  const submissionUrl = 'https://github.com/Hasan-Laraib/Mirofy/issues/new?template=showcase.yml';
   for (const readme of ['README.md', 'README_EN.md', 'README_ZH.md']) {
     assert.match(read(readme), new RegExp(submissionUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${readme}: direct showcase link`);
   }
@@ -45,7 +45,7 @@ test('bug intake captures a minimal deterministic reproduction before visual dia
   const template = read('.github/ISSUE_TEMPLATE/bug-report.yml');
 
   for (const field of [
-    'id: archify_version',
+    'id: mirofy_version',
     'id: install_method',
     'id: diagram_type',
     'id: command',
@@ -84,7 +84,7 @@ test('contributor and pull-request guides keep proof changes reproducible and st
   }
   assert.match(
     contributing,
-    /(?:^|\n)scripts\/build-zip\.sh \/tmp\/archify-contrib\.zip(?:\n|$)/,
+    /(?:^|\n)scripts\/build-zip\.sh \/tmp\/mirofy-contrib\.zip(?:\n|$)/,
     'the archive builder must be documented as an executable shell script',
   );
   assert.doesNotMatch(

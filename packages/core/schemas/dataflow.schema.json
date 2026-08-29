@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/archify/schemas/dataflow.schema.json",
-  "title": "Archify Data Flow Diagram",
+  "$id": "https://github.com/Hasan-Laraib/Mirofy/schemas/dataflow.schema.json",
+  "title": "Mirofy Data Flow Diagram",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -50,7 +50,8 @@
             "classic",
             "signal-flow",
             "blueprint",
-            "editorial"
+            "editorial",
+            "okabe-ito"
           ]
         },
         "quality_profile": {

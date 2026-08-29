@@ -15,7 +15,7 @@ const chinese = fs.readFileSync(path.join(repoRoot, 'README_ZH.md'), 'utf8');
 const roadmap = fs.readFileSync(path.join(repoRoot, 'ROADMAP.md'), 'utf8');
 
 test('preview contract: the skill keeps live preview explicit, desktop-only, and last-good', () => {
-  assert.match(delivery, /archify\.mjs preview <type> <input>\.json <output>\.html/);
+  assert.match(delivery, /mirofy\.mjs preview <type> <input>\.json <output>\.html/);
   assert.match(delivery, /active desktop authoring loop/i);
   assert.match(delivery, /previous verified revision on screen and on disk/i);
   assert.match(delivery, /never start it by default/i);
@@ -26,11 +26,11 @@ test('preview contract: the skill keeps live preview explicit, desktop-only, and
 test('preview contract: all README languages document the same optional command without changing the hero', () => {
   assert.equal(readme, english);
   for (const text of [readme, chinese]) {
-    assert.match(text, /bin\/archify\.mjs preview workflow/);
+    assert.match(text, /bin\/mirofy\.mjs preview workflow/);
     assert.match(text, /--no-open/);
     assert.match(text, /127\.0\.0\.1/);
     assert.match(text, /Ctrl-C/);
-    assert.match(text, /docs\/assets\/archify-readme-hero\.png/);
+    assert.match(text, /docs\/assets\/mirofy-readme-hero\.png/);
   }
 });
 

@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
 const artifactRoots = [
-  'archify/examples',
+  'mirofy/examples',
   'docs',
   'examples',
   'experiments',

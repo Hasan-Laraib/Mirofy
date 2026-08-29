@@ -5,3 +5,6 @@ build/
 *.log
 .DS_Store
 .env
+
+# Rendered examples are build output; regenerate with `npm run build`.
+packages/core/examples/*.html

@@ -55,7 +55,7 @@ function rawRequest(url, { method = 'GET', pathname = '/', hostHeader } = {}) {
 }
 
 test('preview: rejects destructive or unsupported startup targets before watching', async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-startup-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-startup-'));
   const input = path.join(tmp, 'diagram.json');
   fs.writeFileSync(input, '{}');
   await assert.rejects(
@@ -84,11 +84,11 @@ test('preview: rejects destructive or unsupported startup targets before watchin
     }),
     /must not replace its JSON input/i,
   );
-  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.archify-preview-')), []);
+  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.mirofy-preview-')), []);
 });
 
 test('preview: invalid candidates preserve the last verified artifact and repair automatically', { timeout: 30000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-last-good-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-last-good-'));
   const input = path.join(tmp, 'diagram.architecture.json');
   const output = path.join(tmp, 'diagram.html');
   const source = JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples/web-app.architecture.json'), 'utf8'));
@@ -150,7 +150,7 @@ test('preview: invalid candidates preserve the last verified artifact and repair
 
     const page = await rawRequest(preview.url);
     assert.equal(page.status, 200);
-    assert.match(page.body, /Archify Live Preview/);
+    assert.match(page.body, /Mirofy Live Preview/);
     assert.match(page.body, /<summary role="button" aria-controls="diagnostic-panel">View diagnostic<\/summary>/);
     assert.match(page.headers['content-security-policy'], /default-src 'none'/);
     const script = page.body.match(/<script>\n([\s\S]*?)\n  <\/script>/)?.[1];
@@ -164,11 +164,11 @@ test('preview: invalid candidates preserve the last verified artifact and repair
   }
 
   await assert.rejects(fetch(preview.url));
-  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.archify-preview-')), []);
+  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.mirofy-preview-')), []);
 });
 
 test('preview: content digests suppress identical writes and a burst publishes only its stable tail', { timeout: 30000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-burst-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-burst-'));
   const input = path.join(tmp, 'diagram.workflow.json');
   const output = path.join(tmp, 'diagram.html');
   const source = JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples/agent-tool-call.workflow.json'), 'utf8'));
@@ -214,7 +214,7 @@ test('preview: content digests suppress identical writes and a burst publishes o
 });
 
 test('preview: a superseded slow candidate can never become a published revision', { timeout: 30000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-latest-wins-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-latest-wins-'));
   const input = path.join(tmp, 'diagram.json');
   const output = path.join(tmp, 'diagram.html');
   const deliveryCli = path.join(tmp, 'fake-delivery.mjs');
@@ -259,7 +259,7 @@ console.log(JSON.stringify({
 });
 
 test('preview: each delivery reads the immutable bytes bound to its observed digest', { timeout: 30000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-snapshot-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-snapshot-'));
   const input = path.join(tmp, 'diagram.json');
   const output = path.join(tmp, 'diagram.html');
   const deliveryCli = path.join(tmp, 'snapshot-delivery.mjs');
@@ -313,7 +313,7 @@ console.log(JSON.stringify({
 });
 
 test('preview: commit rechecks the live digest when watcher and poll have not seen a newer save', { timeout: 10000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-commit-race-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-commit-race-'));
   const input = path.join(tmp, 'diagram.json');
   const output = path.join(tmp, 'diagram.html');
   const deliveryCli = path.join(tmp, 'commit-race-delivery.mjs');
@@ -365,7 +365,7 @@ console.log(JSON.stringify({
 });
 
 test('preview: stopping drains an active delivery without publishing it', { timeout: 30000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-stop-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-stop-'));
   const input = path.join(tmp, 'diagram.json');
   const output = path.join(tmp, 'diagram.html');
   const deliveryCli = path.join(tmp, 'slow-delivery.mjs');
@@ -401,11 +401,11 @@ console.log(JSON.stringify({
   await preview.stop();
   assert.ok(Date.now() - stoppedAt >= 250, 'preview did not drain the active delivery');
   assert.equal(fs.readFileSync(output, 'utf8'), prior);
-  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.archify-preview-')), []);
+  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.mirofy-preview-')), []);
 });
 
 test('preview: stopping has a bounded kill path for a delivery that never exits', { timeout: 5000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-hung-stop-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-hung-stop-'));
   const input = path.join(tmp, 'diagram.json');
   const output = path.join(tmp, 'diagram.html');
   const deliveryCli = path.join(tmp, 'hung-delivery.mjs');
@@ -435,11 +435,11 @@ setInterval(() => {}, 1000);
   assert.ok(Date.now() - stoppedAt < 1000, 'hung delivery kept preview shutdown open');
   assert.equal(fs.readFileSync(output, 'utf8'), prior);
   await assert.rejects(fetch(preview.url));
-  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.archify-preview-')), []);
+  assert.deepEqual(fs.readdirSync(tmp).filter((name) => name.startsWith('.mirofy-preview-')), []);
 });
 
 test('preview: checker failures keep their actionable detail instead of a generic stage only', { timeout: 30000 }, async () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-preview-checker-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-checker-'));
   const input = path.join(tmp, 'diagram.json');
   const output = path.join(tmp, 'diagram.html');
   const deliveryCli = path.join(tmp, 'checker-failure.mjs');
@@ -482,7 +482,7 @@ test('preview: all five typed renderers reach a verified first revision', { time
   };
 
   for (const [type, example] of Object.entries(cases)) {
-    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), `archify-preview-${type}-`));
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), `mirofy-preview-${type}-`));
     const input = path.join(tmp, example);
     const output = path.join(tmp, `${type}.html`);
     fs.copyFileSync(path.join(skillRoot, 'examples', example), input);

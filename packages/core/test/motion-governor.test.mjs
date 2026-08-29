@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-motion-governor-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-motion-governor-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -40,7 +40,7 @@ test('all renderers inherit one viewer-only Live/Still Motion Governor', () => {
   for (const [mode, example] of Object.entries(CASES)) {
     const html = render(mode, example);
     assert.match(html, /id="btn-motion"[^>]+hidden[^>]+aria-label="Pause motion"/, mode);
-    assert.match(html, /Archify\.motionGovernor = \(function \(\)/, mode);
+    assert.match(html, /Mirofy\.motionGovernor = \(function \(\)/, mode);
     assert.match(html, /var capable = !!\(svg && svg\.getAttribute\('data-animation'\) === 'trace'\)/, mode);
     assert.match(svgBlock(html), /data-animation="trace"/, mode);
     assert.doesNotMatch(svgBlock(html), /data-motion-(?:capable|owner)|motion-control/, mode);
@@ -60,7 +60,7 @@ test('static artifacts stay truly still while trace artifacts opt into ambient m
 
 test('reader pause is persistent, explicit, and reduced-motion aware', () => {
   const html = render('workflow', CASES.workflow);
-  assert.match(html, /var STORAGE_KEY = 'archify-motion'/);
+  assert.match(html, /var STORAGE_KEY = 'mirofy-motion'/);
   assert.match(html, /localStorage\.setItem\(STORAGE_KEY, 'still'\)/);
   assert.match(html, /localStorage\.removeItem\(STORAGE_KEY\)/);
   assert.match(html, /html\.setAttribute\('data-motion', paused \? 'still' : 'live'\)/);
@@ -68,7 +68,7 @@ test('reader pause is persistent, explicit, and reduced-motion aware', () => {
   assert.match(html, /Motion paused by reduced-motion preference/);
   assert.match(html, /motionQuery\.addEventListener\('change', render\)/);
   assert.match(html, /document\.addEventListener\('visibilitychange', syncVisibility\)/);
-  assert.match(html, /Archify\.guidedViews\.isPlaying\(\)[\s\S]*?Archify\.guidedViews\.pause\(\)/);
+  assert.match(html, /Mirofy\.guidedViews\.isPlaying\(\)[\s\S]*?Mirofy\.guidedViews\.pause\(\)/);
   assert.match(html, /play\.disabled = !playing && !automaticPlaybackAllowed/);
   assert.match(html, /Story playback unavailable while motion is Still/);
   assert.match(html, /\.pulse-dot \{ animation: none !important; \}/);
@@ -91,8 +91,8 @@ test('strong semantic intent receives the single motion budget', () => {
   assert.match(html, /function release\(token\)[\s\S]*?token !== ownerToken/);
   assert.match(html, /function clearClaim\(preempted\)[\s\S]*?try \{ cleanup\(\); \} catch/);
   assert.match(html, /function claim\(next, cleanup\)[\s\S]*?clearClaim\(true\)/);
-  assert.match(html, /animation: archify-route-probe-flow 1\.1s[\s\S]*?1 both/);
-  assert.doesNotMatch(html, /archify-route-probe-flow[^;]*infinite/);
+  assert.match(html, /animation: mirofy-route-probe-flow 1\.1s[\s\S]*?1 both/);
+  assert.doesNotMatch(html, /mirofy-route-probe-flow[^;]*infinite/);
 });
 
 test('motion control is mobile-contained, embed-safe, and export-neutral', () => {

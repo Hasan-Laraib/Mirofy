@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-semantic-camera-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-semantic-camera-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -58,7 +58,7 @@ test('semantic camera follows reader intent but yields to manual navigation', ()
   assert.match(html, /reveal\(\[id\], \{ includeNeighbors: true, reason: 'relationship' \}\)/);
   assert.match(html, /reveal\(\[id\], \{ includeNeighbors: true, reason: 'finder' \}\)/);
   assert.match(html, /function interruptCamera\(reason\)/);
-  assert.match(html, /Archify\.guidedViews\.pause\(\)/);
+  assert.match(html, /Mirofy\.guidedViews\.pause\(\)/);
   assert.match(html, /container\.addEventListener\('pointerdown',[\s\S]+interruptCamera\(\)/);
   assert.match(html, /\.overview-map, \.route-probe, \.semantic-lens/);
   assert.match(html, /window\.innerWidth <= 720 && container\.hasAttribute\('data-wide-diagram'\) && Date\.now\(\) > autoScrollUntil/);

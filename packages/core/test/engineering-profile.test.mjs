@@ -14,7 +14,7 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const cli = path.join(skillRoot, 'bin', 'archify.mjs');
+const cli = path.join(skillRoot, 'bin', 'mirofy.mjs');
 const examplePath = path.join(skillRoot, 'examples', 'production-deployment.architecture.json');
 const example = JSON.parse(fs.readFileSync(examplePath, 'utf8'));
 
@@ -125,7 +125,7 @@ test('other diagram modes reject the architecture-only engineering profile', () 
     ['dataflow', 'product-analytics.dataflow.json'],
     ['lifecycle', 'agent-run.lifecycle.json'],
   ];
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-engineering-schema-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-engineering-schema-'));
   try {
     for (const [mode, fixture] of fixtures) {
       const candidate = JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples', fixture), 'utf8'));
@@ -146,7 +146,7 @@ test('other diagram modes reject the architecture-only engineering profile', () 
 });
 
 test('validate and deliver expose one truthful engineering-profile receipt', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-engineering-profile-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-engineering-profile-'));
   try {
     const invalidPath = path.join(tmp, 'invalid.architecture.json');
     const invalid = clone(example);

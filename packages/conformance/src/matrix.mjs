@@ -8,7 +8,7 @@
 // `proof` names the test file (or script) that guarantees the row.
 // `browser: true` means the proof runs only in the CI browser job (Task 9),
 // against packages/conformance/test/viewer.browser.test.mjs. Such rows are
-// never counted as passing by scripts/conformance.mjs until PRODUCT_CHROME
+// never counted as passing by scripts/conformance.mjs until MIROFY_CHROME
 // is set.
 // `proof: null` marks a row P0 genuinely cannot prove yet; `note` says why.
 // A row with no real proof is never silently listed as covered.
@@ -21,7 +21,7 @@
 // exit 0.
 //
 // History: fix-round-1 (Task 9) added this for the 14 browser rows after
-// file-level accounting let all 14 read "proved" once PRODUCT_CHROME was
+// file-level accounting let all 14 read "proved" once MIROFY_CHROME was
 // set, though only 4 had a real assertion (see viewer.browser.test.mjs's
 // header comment). fix-round-2 extended it to the remaining 40 rows after
 // the coordinator proved the same defect at file scale: deleting
@@ -318,7 +318,7 @@ export const HARVESTED_ROWS = [
     id: '4.5',
     name: 'Style Picker + S cycle',
     proof: 'preset-matrix.test.mjs',
-    testTitle: 'the "S" key cycles the visual style via Archify.preset.cycle (4.5)',
+    testTitle: 'the "S" key cycles the visual style via Mirofy.preset.cycle (4.5)',
   },
   {
     id: '4.6',
@@ -353,6 +353,30 @@ export const HARVESTED_ROWS = [
     name: 'Zero SVG filters/gradients',
     proof: 'validation-gates.test.mjs',
     testTitle: 'no rendered mode emits an SVG filter or gradient element (4.10)',
+  },
+  {
+    id: '4.12',
+    name: 'Generated design tokens',
+    // check-template.mjs (byte-identity of the rebuilt template against
+    // packages/core/assets/template.html) is the real proof that the
+    // generated palette reproduces the hand-written blocks exactly; it
+    // isn't a node:test file, so it can't be named here. This row's
+    // testTitle instead asserts the token *model* is coherent -- 10 blocks
+    // (grew from 8 in P1a Task 7's okabe-ito dark/light pair), 32 distinct
+    // properties -- which the byte check alone can't show.
+    proof: 'tokens.test.mjs',
+    testTitle: 'the token model covers 10 blocks and 32 distinct properties (4.12)',
+  },
+  {
+    id: '4.13',
+    name: 'Okabe-Ito colour-blind-safe preset',
+    // Upstream declined this preset on maintenance grounds: the palette was
+    // eight duplicated hand-written CSS blocks. Task 6's generated token
+    // model turned it into a data change; this row proves the published
+    // Okabe-Ito hues actually land in the token model, not merely that
+    // "some colour" is set.
+    proof: 'tokens.test.mjs',
+    testTitle: 'the Okabe-Ito palette uses the published CVD-safe hues (4.13)',
   },
 
   // Phase 5 — Viewer (interactive; proved only in the CI browser job, Task 9).
@@ -468,6 +492,34 @@ export const HARVESTED_ROWS = [
       '[5.14b] print media emulation hides the toolbar chrome',
     ],
   },
+  {
+    id: '5.17',
+    name: 'data-* contract (renderer -> viewer/validator/tooling consumers)',
+    // Not harvested from the ancestor: added in P1a to close a gap the
+    // harvest never covered -- nothing previously checked that renderer-
+    // emitted data-* attributes agree with what the viewer, the post-render
+    // validator, and the delta/visual-check tooling actually read.
+    origin: 'N',
+    phase: 'P1',
+    proof: 'contract.test.mjs',
+    testTitle: 'every data-* a renderer emits has a declared consumer (5.17)',
+  },
+  {
+    id: '5.19',
+    name: 'axe-core accessibility gate (all five visual presets)',
+    // Not harvested from the ancestor: added in P1a (Task 8) to prove
+    // 37-ENGINEERING-STANDARDS.md's accessibility-floor commitment against a
+    // real rendered artifact in real Chrome, rather than leaving it a
+    // restated promise. browser: true for the same reason as the 14 rows
+    // above -- accessibility.browser.test.mjs needs a real browser to run
+    // axe-core, and is deferred-by-id (never silently "passing") without
+    // MIROFY_CHROME.
+    origin: 'N',
+    phase: 'P1',
+    proof: 'accessibility.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.19] axe-core reports no serious or critical violations in the classic preset',
+  },
 
   // Phase 6 — Delivery
   {
@@ -492,7 +544,7 @@ export const HARVESTED_ROWS = [
     name: 'visual-check (4 viewports, pending)',
     proof: 'delivery.test.mjs',
     // Its proof file is delivery.test.mjs (a non-browser suite most of the
-    // time), but the row's own test spawns the real `archify visual-check`
+    // time), but the row's own test spawns the real `mirofy visual-check`
     // CLI, which needs a real Chrome/Chromium to inspect anything -- without
     // one, the test calls t.skip() rather than asserting. That makes 6.3
     // browser-dependent exactly like the 14 Phase-5 rows, even though it
@@ -500,9 +552,9 @@ export const HARVESTED_ROWS = [
     // treats a `browser: true` row inside a shared suite the same way it
     // treats one in a browser-only suite (deferred by id, never silently
     // counted as passing, and never a title-check failure while deferred).
-    // See scripts/conformance.mjs's ARCHIFY_CHROME/PRODUCT_CHROME mapping
-    // comment for how this row's Chrome discovery is wired to the same
-    // PRODUCT_CHROME switch as the other 14.
+    // The harvested visual-check CLI reads MIROFY_CHROME directly, which is
+    // the same switch the other 14 gate on, so this row's Chrome discovery
+    // needs no wiring of its own.
     browser: true,
     testTitle: 'visual-check inspects 4 viewports and reports its review as pending, never as passed (6.3)',
   },

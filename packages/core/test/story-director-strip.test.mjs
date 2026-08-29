@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const template = fs.readFileSync(path.join(skillRoot, 'assets', 'template.html'), 'utf8');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-story-director-strip-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-story-director-strip-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -67,7 +67,7 @@ test('playback announcements and motion remain reader-controlled', () => {
   assert.match(template, /storyCaption\.setAttribute\('aria-live', playing \? 'off' : 'polite'\)/);
   assert.match(template, /html\[data-motion="still"\] \.guided-story-caption/);
   assert.match(template, /@media \(prefers-reduced-motion: reduce\) \{\s*\.guided-story-caption \{ animation: none !important; \}/);
-  assert.match(template, /animation: archify-story-caption-in 140ms/);
+  assert.match(template, /animation: mirofy-story-caption-in 140ms/);
 });
 
 test('Presentation playback removes secondary chrome without hiding Pause or navigation', () => {

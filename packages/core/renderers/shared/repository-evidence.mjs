@@ -112,7 +112,7 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     });
   }
   if (!repoRootInput) {
-    evidenceFailure('repository-evidence/root-required', 'This diagram declares source evidence. Pass --repo-root <repository> so Archify can verify it before rendering.', {
+    evidenceFailure('repository-evidence/root-required', 'This diagram declares source evidence. Pass --repo-root <repository> so Mirofy can verify it before rendering.', {
       subject: { path: '/meta/repository' },
       supportedFixes: ['pass --repo-root with the matching local Git checkout'],
     });

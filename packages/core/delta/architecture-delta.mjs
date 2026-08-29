@@ -230,7 +230,7 @@ export function compareArchitecture(base, head, evidence = {}) {
   const headComponents = stableIndex(head.components, 'components', 'head');
   const shared = sorted([...baseComponents.keys()].filter((id) => headComponents.has(id)));
   if (!shared.length) {
-    fail('delta/no-shared-component-id', 'The snapshots share no component id, so Archify cannot prove that they describe the same system.', {
+    fail('delta/no-shared-component-id', 'The snapshots share no component id, so Mirofy cannot prove that they describe the same system.', {
       supportedFixes: ['preserve at least one authored component id across snapshots'],
     });
   }
@@ -724,7 +724,7 @@ html[data-theme="dark"] body{background:#071019!important;background-image:none!
 <section class="canvas" data-view="base" hidden>${baseView}</section><section class="canvas" data-view="delta">${deltaSvg}</section><section class="canvas" data-view="head" hidden>${headView}</section>
 <details${rows.length <= 10 ? ' open' : ''}><summary>Exact authored changes · ${rows.length}</summary><ul class="changes">${rowHtml}</ul></details>
 <footer class="proof-foot"><span>Stable IDs only · completeness: complete · ${proof}</span><span>Authored IR only · no risk or mergeability inference</span></footer></main>
-<script id="archify-compare-receipt" type="application/json">${safeJson(receipt)}</script>
+<script id="mirofy-compare-receipt" type="application/json">${safeJson(receipt)}</script>
 <script>(()=>{
   const REVIEW_DWELL_MS = 1400;
   const tabs = [...document.querySelectorAll('[role="tab"]')];
@@ -736,7 +736,7 @@ html[data-theme="dark"] body{background:#071019!important;background-image:none!
   const playButton = document.querySelector('#review-play');
   const nextButton = document.querySelector('#review-next');
   const status = document.querySelector('#review-status');
-  const receiptNode = document.querySelector('#archify-compare-receipt');
+  const receiptNode = document.querySelector('#mirofy-compare-receipt');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const exportCss = ${safeJson(artifactCss)};
   let activeIndex = -1;
@@ -828,7 +828,7 @@ html[data-theme="dark"] body{background:#071019!important;background-image:none!
 
   function validateReview() {
     try {
-      if (document.querySelectorAll('#archify-compare-receipt').length !== 1 || !receiptNode) return false;
+      if (document.querySelectorAll('#mirofy-compare-receipt').length !== 1 || !receiptNode) return false;
       if (!deltaCanvas || !['base', 'delta', 'head'].every((id) => document.querySelectorAll('[data-view="' + id + '"]').length === 1)) return false;
       if (deltaCanvas.children.length !== 1 || deltaCanvas.firstElementChild?.tagName.toLowerCase() !== 'svg') return false;
       const receipt = JSON.parse(receiptNode.textContent);
@@ -971,7 +971,7 @@ html[data-theme="dark"] body{background:#071019!important;background-image:none!
   }
 
   function recordExport(format, blob, dimensions) {
-    document.documentElement.dataset.archifyDeltaExport = JSON.stringify({
+    document.documentElement.dataset.mirofyDeltaExport = JSON.stringify({
       ok: true,
       format,
       bytes: blob.size,
@@ -1072,9 +1072,9 @@ html[data-theme="dark"] body{background:#071019!important;background-image:none!
     return blob;
   }
 
-  window.Archify = window.Archify || {};
-  window.Archify.deltaExport = { canonicalSvg: canonicalDeltaSvg, shareCard, exportSvg: exportCanonicalSvg, downloadShareCard };
-  window.Archify.exportMenu = {
+  window.Mirofy = window.Mirofy || {};
+  window.Mirofy.deltaExport = { canonicalSvg: canonicalDeltaSvg, shareCard, exportSvg: exportCanonicalSvg, downloadShareCard };
+  window.Mirofy.exportMenu = {
     shareCard,
     run(format) {
       if (format === 'svg') return exportCanonicalSvg();
@@ -1177,11 +1177,11 @@ export function validateArchitectureDeltaHtml(html, receipt) {
     failures.push('Before and After must preserve one complete architecture explorer each');
   }
   if (!svgBalanced || svgDepth !== 0 || svgRoots !== 1 || deltaMarkup.slice(0, rootStart).trim() || deltaMarkup.slice(rootEnd).trim()) failures.push('expected exactly one root SVG in the Delta canvas');
-  if ((html.match(/id="archify-compare-receipt"/g) || []).length !== 1) failures.push('expected exactly one embedded compare receipt');
+  if ((html.match(/id="mirofy-compare-receipt"/g) || []).length !== 1) failures.push('expected exactly one embedded compare receipt');
   if (!html.includes('aria-label="Authored change review"')) failures.push('missing exact-ID change navigator');
   if ((html.match(/class="change-row"/g) || []).length !== rows.length) failures.push('change navigator row count does not match the receipt');
   if (!html.includes('id="export-svg"') || !html.includes('id="share-card"')
-    || !html.includes('window.Archify.deltaExport = { canonicalSvg: canonicalDeltaSvg, shareCard')) {
+    || !html.includes('window.Mirofy.deltaExport = { canonicalSvg: canonicalDeltaSvg, shareCard')) {
     failures.push('missing canonical Delta SVG or Share Card export contract');
   }
   for (const [index, row] of rows.entries()) {

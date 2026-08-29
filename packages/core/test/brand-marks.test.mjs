@@ -12,8 +12,8 @@ import { isPrivateBrandAddress, prepareDiagramBrandMarks } from '../renderers/sh
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
-const cli = path.join(skillRoot, 'bin', 'archify.mjs');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-brand-marks-'));
+const cli = path.join(skillRoot, 'bin', 'mirofy.mjs');
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-brand-marks-'));
 const cases = {
   architecture: ['web-app.architecture.json', 'components'],
   workflow: ['agent-tool-call.workflow.json', 'nodes'],
@@ -211,7 +211,7 @@ test('branded lifecycle states move the semantic stamp left and keep the brand a
 });
 
 test('known-brand URLs use the bundled vector instead of the network', () => {
-  const input = writeFixture('architecture', 'known-domain', 'https://github.com/tt-a1i/archify');
+  const input = writeFixture('architecture', 'known-domain', 'https://github.com/Hasan-Laraib/Mirofy');
   const { result, html } = renderSync('architecture', input, 'known-domain');
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(html, /data-brand-mark="github"[^>]+data-brand-status="preset"/);
@@ -251,7 +251,7 @@ test('capture command returns a digest-pinned brand object that renders reproduc
   try {
     const address = server.address();
     const url = `http://127.0.0.1:${address.port}/studio`;
-    const capture = await runCliAsync(['brands', 'capture', url, '--json'], { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
+    const capture = await runCliAsync(['brands', 'capture', url, '--json'], { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
     assert.equal(capture.status, 0, capture.stderr || capture.stdout);
     const receipt = JSON.parse(capture.stdout);
     assert.equal(receipt.ok, true);
@@ -261,7 +261,7 @@ test('capture command returns a digest-pinned brand object that renders reproduc
     });
 
     const input = writeFixture('architecture', 'captured-link', receipt.brand);
-    const rendered = await renderAsync('architecture', input, 'captured-link', { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
+    const rendered = await renderAsync('architecture', input, 'captured-link', { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
     assert.equal(rendered.status, 0, rendered.stderr || rendered.stdout);
     assert.equal(pageHits, 2);
     assert.equal(iconHits, 2);
@@ -293,11 +293,11 @@ test('a pinned brand fails closed when the remote icon digest changes', async ()
   try {
     const address = server.address();
     const url = `http://127.0.0.1:${address.port}/`;
-    const capture = await runCliAsync(['brands', 'capture', url, '--json'], { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
+    const capture = await runCliAsync(['brands', 'capture', url, '--json'], { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
     assert.equal(capture.status, 0, capture.stderr || capture.stdout);
     const brand = JSON.parse(capture.stdout).brand;
     const input = writeFixture('architecture', 'changed-digest', brand);
-    const result = await runCliAsync(['validate', 'architecture', input, '--json'], { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
+    const result = await runCliAsync(['validate', 'architecture', input, '--json'], { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
     assert.equal(result.status, 1, result.stderr || result.stdout);
     const receipt = JSON.parse(result.stdout);
     assert.equal(receipt.diagnostics.filter((entry) => entry.code === 'brand/digest-mismatch').length, 1);
@@ -323,11 +323,11 @@ test('a pinned brand keeps identical artifact metadata when the remote page titl
   try {
     const address = server.address();
     const url = `http://127.0.0.1:${address.port}/`;
-    const capture = await runCliAsync(['brands', 'capture', url, '--json'], { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
+    const capture = await runCliAsync(['brands', 'capture', url, '--json'], { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
     assert.equal(capture.status, 0, capture.stderr || capture.stdout);
     const input = writeFixture('architecture', 'stable-title', JSON.parse(capture.stdout).brand);
-    const first = await renderAsync('architecture', input, 'stable-title-first', { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
-    const second = await renderAsync('architecture', input, 'stable-title-second', { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
+    const first = await renderAsync('architecture', input, 'stable-title-first', { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
+    const second = await renderAsync('architecture', input, 'stable-title-second', { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
     assert.equal(first.status, 0, first.stderr || first.stdout);
     assert.equal(second.status, 0, second.stderr || second.stdout);
     assert.equal(first.html, second.html);
@@ -353,8 +353,8 @@ test('each prepare call rechecks pinned remote bytes instead of trusting a proce
     response.end('<!doctype html><title>Changing site</title><link rel="icon" type="image/png" href="/mark.png">');
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const priorAllowPrivate = process.env.ARCHIFY_BRAND_ALLOW_PRIVATE;
-  process.env.ARCHIFY_BRAND_ALLOW_PRIVATE = '1';
+  const priorAllowPrivate = process.env.MIROFY_BRAND_ALLOW_PRIVATE;
+  process.env.MIROFY_BRAND_ALLOW_PRIVATE = '1';
   try {
     const address = server.address();
     const diagram = {
@@ -374,8 +374,8 @@ test('each prepare call rechecks pinned remote bytes instead of trusting a proce
     );
     assert.equal(iconHits, 2);
   } finally {
-    if (priorAllowPrivate === undefined) delete process.env.ARCHIFY_BRAND_ALLOW_PRIVATE;
-    else process.env.ARCHIFY_BRAND_ALLOW_PRIVATE = priorAllowPrivate;
+    if (priorAllowPrivate === undefined) delete process.env.MIROFY_BRAND_ALLOW_PRIVATE;
+    else process.env.MIROFY_BRAND_ALLOW_PRIVATE = priorAllowPrivate;
     await new Promise((resolve) => server.close(resolve));
   }
 });
@@ -457,7 +457,7 @@ test('rendering many pinned brands limits concurrent remote capture work', async
         };
       });
     });
-    const rendered = await renderAsync('architecture', input, 'bounded-capture', { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' });
+    const rendered = await renderAsync('architecture', input, 'bounded-capture', { MIROFY_BRAND_ALLOW_PRIVATE: '1' });
     assert.equal(rendered.status, 0, rendered.stderr || rendered.stdout);
     assert.ok(maximumActive <= 3, `expected at most 3 concurrent requests, observed ${maximumActive}`);
   } finally {
@@ -486,8 +486,8 @@ test('rendering many pinned brands shares one diagram capture deadline', async (
       });
     });
     const rendered = await renderAsync('architecture', input, 'diagram-deadline', {
-      ARCHIFY_BRAND_ALLOW_PRIVATE: '1',
-      ARCHIFY_BRAND_CAPTURE_TIMEOUT_MS: '100',
+      MIROFY_BRAND_ALLOW_PRIVATE: '1',
+      MIROFY_BRAND_CAPTURE_TIMEOUT_MS: '100',
     });
     assert.notEqual(rendered.status, 0, rendered.stdout);
     assert.match(rendered.stderr, /abort|timed? ?out|timeout/i);
@@ -515,8 +515,8 @@ test('capture applies one total deadline across the page and icon requests', asy
     const capture = await runCliAsync(
       ['brands', 'capture', `http://127.0.0.1:${address.port}/`, '--json'],
       {
-        ARCHIFY_BRAND_ALLOW_PRIVATE: '1',
-        ARCHIFY_BRAND_CAPTURE_TIMEOUT_MS: '150',
+        MIROFY_BRAND_ALLOW_PRIVATE: '1',
+        MIROFY_BRAND_CAPTURE_TIMEOUT_MS: '150',
       },
     );
     assert.notEqual(capture.status, 0, capture.stdout);
@@ -546,7 +546,7 @@ test('capture rejects remote SVG even when the document appears passive', async 
     const address = server.address();
     const capture = await runCliAsync(
       ['brands', 'capture', `http://127.0.0.1:${address.port}/studio`, '--json'],
-      { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' },
+      { MIROFY_BRAND_ALLOW_PRIVATE: '1' },
     );
     assert.notEqual(capture.status, 0, capture.stdout);
     assert.match(capture.stderr, /unsupported brand image type image\/svg\+xml/i);
@@ -581,7 +581,7 @@ test('unsupported SVG declarations cannot crowd out the favicon fallback', async
     const address = server.address();
     const capture = await runCliAsync(
       ['brands', 'capture', `http://127.0.0.1:${address.port}/`, '--json'],
-      { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' },
+      { MIROFY_BRAND_ALLOW_PRIVATE: '1' },
     );
     assert.equal(capture.status, 0, capture.stderr || capture.stdout);
     const receipt = JSON.parse(capture.stdout);
@@ -602,7 +602,7 @@ test('capture rejects an image whose bytes do not match its declared media type'
     const address = server.address();
     const capture = await runCliAsync(
       ['brands', 'capture', `http://127.0.0.1:${address.port}/mark.png`, '--json'],
-      { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' },
+      { MIROFY_BRAND_ALLOW_PRIVATE: '1' },
     );
     assert.notEqual(capture.status, 0, capture.stdout);
     assert.match(capture.stderr, /do(?:es)? not match image\/png/i);
@@ -621,7 +621,7 @@ test('capture rejects a truncated PNG that contains only its signature', async (
     const address = server.address();
     const capture = await runCliAsync(
       ['brands', 'capture', `http://127.0.0.1:${address.port}/mark.png`, '--json'],
-      { ARCHIFY_BRAND_ALLOW_PRIVATE: '1' },
+      { MIROFY_BRAND_ALLOW_PRIVATE: '1' },
     );
     assert.notEqual(capture.status, 0, capture.stdout);
     assert.match(capture.stderr, /do(?:es)? not match image\/png/i);
@@ -640,7 +640,7 @@ test('unknown preset names fail with a repairable public CLI diagnostic', () => 
   const receipt = JSON.parse(result.stdout);
   assert.equal(receipt.ok, false);
   assert.ok(receipt.diagnostics.some((entry) => entry.code === 'brand/unknown'));
-  assert.ok(receipt.diagnostics.some((entry) => entry.supportedFixes.some((fix) => fix.includes('archify brands'))));
+  assert.ok(receipt.diagnostics.some((entry) => entry.supportedFixes.some((fix) => fix.includes('mirofy brands'))));
 });
 
 test('viewer exposes brand identity to Passport and Finder while keeping source beacons clear', () => {

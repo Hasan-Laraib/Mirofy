@@ -11,7 +11,7 @@ import { pathsAlias } from '../renderers/shared/output-path.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
-const cli = path.join(skillRoot, 'bin/archify.mjs');
+const cli = path.join(skillRoot, 'bin/mirofy.mjs');
 const workflowFixture = path.join(skillRoot, 'examples/agent-tool-call.workflow.json');
 const baseFixture = path.join(skillRoot, 'examples/checkout-platform.base.architecture.json');
 const headFixture = path.join(skillRoot, 'examples/checkout-platform.head.architecture.json');
@@ -57,12 +57,12 @@ function directoryAliasesNames(directory, authoredName, lookupName) {
 }
 
 test('future-path aliases follow the containing directory case and Unicode semantics', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-semantics-'));
-  const caseInsensitive = directoryAliasesNames(cwd, 'ArchifyCaseProbe', 'archifycaseprobe');
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-semantics-'));
+  const caseInsensitive = directoryAliasesNames(cwd, 'MirofyCaseProbe', 'mirofycaseprobe');
   const normalizationInsensitive = directoryAliasesNames(
     cwd,
-    'archify-norm-\u00e9-probe',
-    'archify-norm-e\u0301-probe',
+    'mirofy-norm-\u00e9-probe',
+    'mirofy-norm-e\u0301-probe',
   );
 
   assert.equal(
@@ -76,8 +76,8 @@ test('future-path aliases follow the containing directory case and Unicode seman
 });
 
 test('compare rejects case-only future targets before input work when the directory aliases case', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-compare-case-'));
-  const caseInsensitive = directoryAliasesNames(cwd, 'ArchifyCaseProbe', 'archifycaseprobe');
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-case-'));
+  const caseInsensitive = directoryAliasesNames(cwd, 'MirofyCaseProbe', 'mirofycaseprobe');
   const output = path.join(cwd, 'Future.HTML');
   const receiptPath = path.join(cwd, 'future.html');
 
@@ -100,7 +100,7 @@ test('compare rejects case-only future targets before input work when the direct
 });
 
 test('render reports an output symlink cycle as a structured output diagnostic', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-cycle-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-cycle-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'cycle-a.html');
   const otherLink = path.join(cwd, 'cycle-b.html');
@@ -114,7 +114,7 @@ test('render reports an output symlink cycle as a structured output diagnostic',
     {
       cwd,
       encoding: 'utf8',
-      env: { ...process.env, ARCHIFY_DIAGNOSTIC_FORMAT: 'json' },
+      env: { ...process.env, MIROFY_DIAGNOSTIC_FORMAT: 'json' },
     },
   );
 
@@ -126,7 +126,7 @@ test('render reports an output symlink cycle as a structured output diagnostic',
 });
 
 test('render rejects an output symlink that aliases its JSON input', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-render-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-render-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'diagram.html');
   const source = fs.readFileSync(workflowFixture);
@@ -141,7 +141,7 @@ test('render rejects an output symlink that aliases its JSON input', () => {
 });
 
 test('render rejects an existing output hard link to its JSON input', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-render-hardlink-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-render-hardlink-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'diagram.html');
   const source = fs.readFileSync(workflowFixture);
@@ -156,7 +156,7 @@ test('render rejects an existing output hard link to its JSON input', () => {
 });
 
 test('render rejects an absolute meta.output when no CLI output is provided', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-meta-absolute-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-meta-absolute-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'authored.html');
   const source = JSON.parse(fs.readFileSync(workflowFixture, 'utf8'));
@@ -171,7 +171,7 @@ test('render rejects an absolute meta.output when no CLI output is provided', ()
 });
 
 test('render rejects a relative meta.output that escapes the working directory', () => {
-  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-meta-parent-'));
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-meta-parent-'));
   const cwd = path.join(parent, 'work');
   fs.mkdirSync(cwd);
   const input = path.join(cwd, 'diagram.workflow.json');
@@ -188,7 +188,7 @@ test('render rejects a relative meta.output that escapes the working directory',
 });
 
 test('render rejects a meta.output that escapes through a directory symlink', () => {
-  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-meta-link-'));
+  const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-meta-link-'));
   const cwd = path.join(parent, 'work');
   const outside = path.join(parent, 'outside');
   fs.mkdirSync(cwd);
@@ -208,7 +208,7 @@ test('render rejects a meta.output that escapes through a directory symlink', ()
 });
 
 test('render requires a meta.output target with an html extension', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-meta-extension-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-meta-extension-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'authored.json');
   const source = JSON.parse(fs.readFileSync(workflowFixture, 'utf8'));
@@ -223,7 +223,7 @@ test('render requires a meta.output target with an html extension', () => {
 });
 
 test('render rejects a meta.output symlink that resolves to a non-html target', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-meta-extension-link-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-meta-extension-link-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const target = path.join(cwd, 'authored.json');
   const output = path.join(cwd, 'authored.html');
@@ -241,7 +241,7 @@ test('render rejects a meta.output symlink that resolves to a non-html target', 
 });
 
 test('deliver rejects a future-path alias of its JSON input with a structured diagnostic', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-deliver-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-deliver-'));
   const realDirectory = path.join(cwd, 'real');
   const linkedDirectory = path.join(cwd, 'linked');
   fs.mkdirSync(realDirectory);
@@ -261,7 +261,7 @@ test('deliver rejects a future-path alias of its JSON input with a structured di
 });
 
 test('deliver rechecks aliases immediately before committing a verified candidate', { timeout: 10000 }, async () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-deliver-race-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-deliver-race-'));
   const installedRoot = path.join(cwd, 'skill');
   const installedBin = path.join(installedRoot, 'bin');
   const installedShared = path.join(installedRoot, 'renderers/shared');
@@ -271,7 +271,7 @@ test('deliver rechecks aliases immediately before committing a verified candidat
   fs.mkdirSync(installedShared, { recursive: true });
   fs.mkdirSync(installedRenderer, { recursive: true });
   fs.mkdirSync(installedScripts, { recursive: true });
-  fs.copyFileSync(cli, path.join(installedBin, 'archify.mjs'));
+  fs.copyFileSync(cli, path.join(installedBin, 'mirofy.mjs'));
   fs.copyFileSync(
     path.join(skillRoot, 'renderers/shared/output-path.mjs'),
     path.join(installedShared, 'output-path.mjs'),
@@ -279,7 +279,7 @@ test('deliver rechecks aliases immediately before committing a verified candidat
   fs.writeFileSync(path.join(installedRenderer, 'render-workflow.mjs'), `
 import fs from 'node:fs';
 const [, output] = process.argv.slice(2);
-fs.writeFileSync(process.env.ARCHIFY_TEST_RENDER_STARTED, output);
+fs.writeFileSync(process.env.MIROFY_TEST_RENDER_STARTED, output);
 await new Promise((resolve) => setTimeout(resolve, 500));
 fs.writeFileSync(output, '<!doctype html><title>verified candidate</title><svg></svg>');
 `);
@@ -308,12 +308,12 @@ console.log(JSON.stringify({
   const marker = path.join(cwd, 'renderer-started');
 
   const child = spawn(process.execPath, [
-    path.join(installedBin, 'archify.mjs'),
+    path.join(installedBin, 'mirofy.mjs'),
     'deliver', 'workflow', input, output, '--json',
   ], {
     cwd,
     encoding: 'utf8',
-    env: { ...process.env, ARCHIFY_TEST_RENDER_STARTED: marker },
+    env: { ...process.env, MIROFY_TEST_RENDER_STARTED: marker },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let stdout = '';
@@ -344,7 +344,7 @@ console.log(JSON.stringify({
 });
 
 test('compare rejects an artifact path that aliases either architecture input', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-compare-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-'));
   const realDirectory = path.join(cwd, 'real');
   const linkedDirectory = path.join(cwd, 'linked');
   fs.mkdirSync(realDirectory);
@@ -364,7 +364,7 @@ test('compare rejects an artifact path that aliases either architecture input', 
 });
 
 test('compare rejects a receipt path that aliases either architecture input', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-compare-receipt-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-receipt-'));
   const base = path.join(cwd, 'base.json');
   const output = path.join(cwd, 'delta.html');
   const baseSource = fs.readFileSync(baseFixture);
@@ -384,7 +384,7 @@ test('compare rejects a receipt path that aliases either architecture input', ()
 });
 
 test('compare rejects a dangling receipt symlink to the future artifact path', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-compare-pair-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-pair-'));
   const output = path.join(cwd, 'delta.html');
   const receiptPath = path.join(cwd, 'delta.receipt.json');
   fs.symlinkSync(output, receiptPath, 'file');
@@ -403,7 +403,7 @@ test('compare rejects a dangling receipt symlink to the future artifact path', (
 });
 
 test('preview applies the meta.output relative-path boundary before starting a server', async () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-preview-meta-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-preview-meta-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'authored.html');
   const source = JSON.parse(fs.readFileSync(workflowFixture, 'utf8'));
@@ -427,7 +427,7 @@ test('preview applies the meta.output relative-path boundary before starting a s
 });
 
 test('the shared renderer rechecks its guarded output immediately before writing', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-render-race-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-render-race-'));
   const inputDirectory = path.join(cwd, 'input');
   const initialOutputDirectory = path.join(cwd, 'safe-output');
   const linkedDirectory = path.join(cwd, 'linked-output');
@@ -463,7 +463,7 @@ test('the shared renderer rechecks its guarded output immediately before writing
 });
 
 test('compare rechecks every target immediately before committing the artifact pair', { timeout: 10000 }, async () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-compare-race-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-race-'));
   const installedRoot = path.join(cwd, 'skill');
   const installedBin = path.join(installedRoot, 'bin');
   const installedShared = path.join(installedRoot, 'renderers/shared');
@@ -473,7 +473,7 @@ test('compare rechecks every target immediately before committing the artifact p
   for (const directory of [installedBin, installedShared, installedRenderer, installedScripts, installedDelta]) {
     fs.mkdirSync(directory, { recursive: true });
   }
-  fs.copyFileSync(cli, path.join(installedBin, 'archify.mjs'));
+  fs.copyFileSync(cli, path.join(installedBin, 'mirofy.mjs'));
   fs.copyFileSync(
     path.join(skillRoot, 'renderers/shared/output-path.mjs'),
     path.join(installedShared, 'output-path.mjs'),
@@ -483,7 +483,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const [, output] = process.argv.slice(2);
 if (path.basename(output) === 'head.html') {
-  const marker = process.env.ARCHIFY_TEST_RENDER_STARTED;
+  const marker = process.env.MIROFY_TEST_RENDER_STARTED;
   const markerCandidate = marker + '.tmp';
   fs.writeFileSync(markerCandidate, output);
   fs.renameSync(markerCandidate, marker);
@@ -536,12 +536,12 @@ export const validateArchitectureDeltaHtml = () => ({ checksPassed: 1, checkCoun
   const marker = path.join(cwd, 'renderer-started');
 
   const child = spawn(process.execPath, [
-    path.join(installedBin, 'archify.mjs'),
+    path.join(installedBin, 'mirofy.mjs'),
     'compare', 'architecture', base, head, output, '--json',
   ], {
     cwd,
     encoding: 'utf8',
-    env: { ...process.env, ARCHIFY_TEST_RENDER_STARTED: marker },
+    env: { ...process.env, MIROFY_TEST_RENDER_STARTED: marker },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   let stdout = '';
@@ -572,12 +572,12 @@ export const validateArchitectureDeltaHtml = () => ({ checksPassed: 1, checkCoun
 });
 
 test('doctor reports a missing output-path safety runtime in an installed skill', () => {
-  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-output-doctor-'));
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-doctor-'));
   const installedRoot = path.join(cwd, 'skill');
   copyInstalledSkill(installedRoot);
   fs.rmSync(path.join(installedRoot, 'renderers/shared/output-path.mjs'));
 
-  const result = spawnSync(process.execPath, [path.join(installedRoot, 'bin/archify.mjs'), 'doctor'], {
+  const result = spawnSync(process.execPath, [path.join(installedRoot, 'bin/mirofy.mjs'), 'doctor'], {
     cwd: installedRoot,
     encoding: 'utf8',
   });

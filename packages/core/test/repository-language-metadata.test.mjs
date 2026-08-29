@@ -17,7 +17,7 @@ function linguistGenerated(relativePath) {
 
 test('repository language metadata separates generated artifacts from implementation source', () => {
   for (const generatedPath of [
-    'archify/examples/web-app-rendered.html',
+    'mirofy/examples/web-app-rendered.html',
     'examples/web-app.html',
     'docs/cases/mco-runtime.architecture.html',
     'docs/gallery.html',
@@ -25,8 +25,8 @@ test('repository language metadata separates generated artifacts from implementa
     'docs/guide.html',
     'docs/start.html',
     'experiments/mco-showcase/mco-runtime.html',
-    'archify/renderers/shared/generated-brand-marks.mjs',
-    'archify/renderers/shared/generated-validators.mjs',
+    'mirofy/renderers/shared/generated-brand-marks.mjs',
+    'mirofy/renderers/shared/generated-validators.mjs',
   ]) {
     assert.equal(
       linguistGenerated(generatedPath),
@@ -36,12 +36,12 @@ test('repository language metadata separates generated artifacts from implementa
   }
 
   for (const sourcePath of [
-    'archify/assets/template.html',
+    'mirofy/assets/template.html',
     'scripts/gallery-template.html',
     'scripts/guide-template.html',
     'scripts/start-template.html',
     'docs/index.html',
-    'archify/renderers/shared/geometry.mjs',
+    'mirofy/renderers/shared/geometry.mjs',
   ]) {
     assert.equal(
       linguistGenerated(sourcePath),

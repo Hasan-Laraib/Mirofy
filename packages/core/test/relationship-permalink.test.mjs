@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-relationship-permalink-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-relationship-permalink-'));
 
 const CASES = {
   architecture: { example: 'web-app.architecture.json', collection: 'connections' },

@@ -45,14 +45,14 @@ test('release smokes the exact archive built for the release before freshness an
   assert.ok(workflow.indexOf(smoke) < workflow.indexOf(freshness), 'release smoke must inspect the built archive before comparison');
   assert.ok(workflow.indexOf(freshness) < workflow.indexOf(upload), 'freshness must pass before release upload');
 
-  assert.match(tagGate, /require\('\.\/archify\/package\.json'\)\.version/);
+  assert.match(tagGate, /require\('\.\/mirofy\/package\.json'\)\.version/);
   assert.match(tagGate, /GITHUB_REF_NAME#v/);
-  assert.match(build, /run: scripts\/build-zip\.sh \/tmp\/archify-built\.zip/);
-  assert.match(smoke, /unzip -q \/tmp\/archify-built\.zip -d "\$package_root"/);
-  assert.match(smoke, /node scripts\/package-smoke\.mjs "\$package_root\/archify"/);
+  assert.match(build, /run: scripts\/build-zip\.sh \/tmp\/mirofy-built\.zip/);
+  assert.match(smoke, /unzip -q \/tmp\/mirofy-built\.zip -d "\$package_root"/);
+  assert.match(smoke, /node scripts\/package-smoke\.mjs "\$package_root\/mirofy"/);
   assert.doesNotMatch(smoke, /\bnpm\s+(?:ci|install)\b/);
-  assert.match(freshness, /cmp -s \/tmp\/archify-built\.zip archify\.zip/);
-  assert.match(upload, /files: archify\.zip/);
+  assert.match(freshness, /cmp -s \/tmp\/mirofy-built\.zip mirofy\.zip/);
+  assert.match(upload, /files: mirofy\.zip/);
 });
 
 test('release tags with a SemVer prerelease are marked prerelease and never become latest', () => {
@@ -83,10 +83,10 @@ test('package smoke rejects every dependency or repository-only artifact', () =>
   ];
 
   for (const { relative, kind } of forbidden) {
-    const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-package-gate-'));
+    const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-package-gate-'));
     try {
       fs.mkdirSync(path.join(fixture, 'bin'), { recursive: true });
-      fs.writeFileSync(path.join(fixture, 'bin', 'archify.mjs'), '');
+      fs.writeFileSync(path.join(fixture, 'bin', 'mirofy.mjs'), '');
       const target = path.join(fixture, relative);
       if (kind === 'directory') fs.mkdirSync(target, { recursive: true });
       else {
@@ -108,9 +108,9 @@ test('package smoke rejects every dependency or repository-only artifact', () =>
 });
 
 canonicalZipTest('package smoke rejects every dependency metadata field in a built package', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-built-package-gate-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-built-package-gate-'));
   try {
-    const archive = path.join(fixture, 'archify.zip');
+    const archive = path.join(fixture, 'mirofy.zip');
     const build = spawnSync(path.join(repoRoot, 'scripts', 'build-zip.sh'), [archive], {
       cwd: repoRoot,
       encoding: 'utf8',
@@ -121,7 +121,7 @@ canonicalZipTest('package smoke rejects every dependency metadata field in a bui
     fs.mkdirSync(extracted);
     const unzip = spawnSync('unzip', ['-q', archive, '-d', extracted], { encoding: 'utf8' });
     assert.equal(unzip.status, 0, `${unzip.stdout}\n${unzip.stderr}`);
-    const builtPackage = path.join(extracted, 'archify');
+    const builtPackage = path.join(extracted, 'mirofy');
     const dependencyFields = {
       dependencies: { runtime: '1.0.0' },
       devDependencies: { build: '1.0.0' },
@@ -152,12 +152,12 @@ canonicalZipTest('package smoke rejects every dependency metadata field in a bui
 
 canonicalZipTest('archive build excludes untracked files and external symlinks from the live working tree', () => {
   const marker = `.package-negative-${process.pid}-${Date.now()}`;
-  const untracked = path.join(repoRoot, 'archify', `${marker}.txt`);
-  const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-package-external-'));
+  const untracked = path.join(repoRoot, 'mirofy', `${marker}.txt`);
+  const externalRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-package-external-'));
   const externalTarget = path.join(externalRoot, 'secret.txt');
-  const externalLink = path.join(repoRoot, 'archify', `${marker}.link`);
-  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-package-negative-'));
-  const archive = path.join(outputRoot, 'archify.zip');
+  const externalLink = path.join(repoRoot, 'mirofy', `${marker}.link`);
+  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-package-negative-'));
+  const archive = path.join(outputRoot, 'mirofy.zip');
 
   try {
     fs.writeFileSync(untracked, 'must not ship\n');
@@ -182,9 +182,9 @@ canonicalZipTest('archive build excludes untracked files and external symlinks f
 });
 
 canonicalZipTest('archive build rejects an unmerged index and preserves an existing archive', () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-package-unmerged-'));
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-package-unmerged-'));
   const scripts = path.join(fixture, 'scripts');
-  const skill = path.join(fixture, 'archify');
+  const skill = path.join(fixture, 'mirofy');
   const license = path.join(skill, 'LICENSE');
   const archive = path.join(fixture, 'trusted.zip');
   const trusted = Buffer.from('trusted archive bytes');
@@ -203,7 +203,7 @@ canonicalZipTest('archive build rejects an unmerged index and preserves an exist
       path.join(scripts, 'write-deterministic-zip.mjs'),
     );
     fs.writeFileSync(path.join(skill, 'renderers', 'shared', 'generated-validators.mjs'), 'export default {};\n');
-    fs.writeFileSync(path.join(skill, 'package.json'), '{"name":"archify"}\n');
+    fs.writeFileSync(path.join(skill, 'package.json'), '{"name":"mirofy"}\n');
     fs.writeFileSync(license, 'base\n');
     assert.equal(git(['init']).status, 0);
     assert.equal(git(['add', '.']).status, 0);
@@ -213,9 +213,9 @@ canonicalZipTest('archive build rejects an unmerged index and preserves an exist
     const theirs = git(['hash-object', '-w', '--stdin'], { input: 'theirs\n' });
     for (const result of [base, ours, theirs]) assert.equal(result.status, 0, result.stderr);
     const indexInfo = [
-      `100644 ${base.stdout.trim()} 1\tarchify/LICENSE`,
-      `100644 ${ours.stdout.trim()} 2\tarchify/LICENSE`,
-      `100644 ${theirs.stdout.trim()} 3\tarchify/LICENSE`,
+      `100644 ${base.stdout.trim()} 1\tmirofy/LICENSE`,
+      `100644 ${ours.stdout.trim()} 2\tmirofy/LICENSE`,
+      `100644 ${theirs.stdout.trim()} 3\tmirofy/LICENSE`,
       '',
     ].join('\n');
     assert.equal(git(['update-index', '--index-info'], { input: indexInfo }).status, 0);
@@ -239,9 +239,9 @@ test('archive build rejects non-canonical Node versions before publishing output
     ? `requires a Node major other than ${canonicalZipNodeMajor}`
     : false,
 }, () => {
-  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-package-node-version-'));
+  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-package-node-version-'));
   try {
-    const archive = path.join(outputRoot, 'archify.zip');
+    const archive = path.join(outputRoot, 'mirofy.zip');
     const trusted = Buffer.from('existing canonical archive');
     fs.writeFileSync(archive, trusted);
     const build = spawnSync(path.join(repoRoot, 'scripts', 'build-zip.sh'), [archive], {
@@ -249,7 +249,7 @@ test('archive build rejects non-canonical Node versions before publishing output
       encoding: 'utf8',
     });
     assert.notEqual(build.status, 0, `${build.stdout}\n${build.stderr}`);
-    assert.match(build.stderr, /canonical archify\.zip builds require Node 22/);
+    assert.match(build.stderr, /canonical mirofy\.zip builds require Node 22/);
     assert.ok(fs.readFileSync(archive).equals(trusted), 'version rejection must preserve the canonical archive');
   } finally {
     fs.rmSync(outputRoot, { recursive: true, force: true });
@@ -257,7 +257,7 @@ test('archive build rejects non-canonical Node versions before publishing output
 });
 
 canonicalZipTest('archive build is byte-for-byte reproducible across caller time zones without system zip', () => {
-  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-package-reproducible-'));
+  const outputRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-package-reproducible-'));
   const utcArchive = path.join(outputRoot, 'utc.zip');
   const honoluluArchive = path.join(outputRoot, 'honolulu.zip');
 
@@ -279,7 +279,7 @@ canonicalZipTest('archive build is byte-for-byte reproducible across caller time
       'identical tracked inputs must produce identical archive bytes',
     );
     assert.ok(
-      fs.readFileSync(utcArchive).equals(fs.readFileSync(path.join(repoRoot, 'archify.zip'))),
+      fs.readFileSync(utcArchive).equals(fs.readFileSync(path.join(repoRoot, 'mirofy.zip'))),
       'the canonical archive toolchain must reproduce the committed archive bytes',
     );
     assert.deepEqual(
@@ -293,7 +293,7 @@ canonicalZipTest('archive build is byte-for-byte reproducible across caller time
 });
 
 test('CI tests the declared Node floor plus every maintained current lane', () => {
-  const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'archify', 'package.json'), 'utf8'));
+  const packageJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'mirofy', 'package.json'), 'utf8'));
   assert.equal(packageJson.engines?.node, '>=18');
 
   const workflow = fs.readFileSync(path.join(repoRoot, '.github', 'workflows', 'ci.yml'), 'utf8');

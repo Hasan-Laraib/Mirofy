@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/archify/schemas/architecture.schema.json",
-  "title": "Archify Architecture Diagram",
+  "$id": "https://github.com/Hasan-Laraib/Mirofy/schemas/architecture.schema.json",
+  "title": "Mirofy Architecture Diagram",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "diagram_type", "meta", "components"],
@@ -18,7 +18,7 @@
         "subtitle": { "type": "string" },
         "output": { "type": "string" },
         "animation": { "enum": ["trace", "none"] },
-        "visual_preset": { "enum": ["classic", "signal-flow", "blueprint", "editorial"] },
+        "visual_preset": { "enum": ["classic", "signal-flow", "blueprint", "editorial", "okabe-ito"] },
         "quality_profile": { "enum": ["standard", "showcase"] },
         "engineering_profile": { "enum": ["deployment-ownership"] },
         "repository": {

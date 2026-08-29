@@ -8,7 +8,7 @@
 //   guided-views boot check, then relied on matrix.mjs's pre-existing
 //   mapping of ALL 14 browser rows (5.1-5.14) to this one file. Because
 //   scripts/conformance.mjs counted a row "proved" whenever its proof FILE
-//   exited 0, all 14 rows read as proved once PRODUCT_CHROME was set, even
+//   exited 0, all 14 rows read as proved once MIROFY_CHROME was set, even
 //   though 10 of them had no assertion behind them at all. That is a false
 //   proof -- the exact failure this suite exists to catch -- and it was
 //   introduced by this task, not inherited from one.
@@ -47,70 +47,26 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { renderFixture, coreRoot } from '../src/render.mjs';
+import { chromeAvailable, launch } from './helpers/browser.mjs';
 
-// Imported with a non-literal specifier (deliberately, not for style) so
-// that tsc --noEmit does not pull packages/core/bin/visual-check.mjs into
-// its checked-files program: the root tsconfig.json excludes packages/core
-// (it is ancestor code, imported unmodified, and is not itself typechecked
-// by this project), but TypeScript's "exclude" only governs root-file
-// discovery -- a statically-resolvable relative import from an included
-// file still drags the target file into the program and its ancestor-only
-// type errors would then fail our typecheck gate. A dynamically-computed
-// specifier is invisible to that static resolution, so the module is loaded
-// at runtime exactly as before with no change to behaviour, while the
-// typecheck gate stays scoped to this project's own code.
-const visualCheckUrl = new URL('../../core/bin/visual-check.mjs', import.meta.url).href;
-const { ChromeVisualBrowser, findChrome } = await import(visualCheckUrl);
-
-// PRODUCT_CHROME is the CI-provided path (set by the browser job from
-// browser-actions/setup-chrome's output); findChrome() is a local-dev
-// convenience that probes OS-standard install locations.
-//
-// CI rule: every GitHub-hosted runner ships a system Chrome (it is what
-// findChrome() would happily find), but the `check` job's 12-way OS/Node
-// matrix was never designed or validated to drive a real browser -- it has
-// no PRODUCT_CHROME of its own and no browser-provisioning step. Falling
-// back to findChrome() there silently turned every `check` matrix leg into
-// an unvalidated browser run. So findChrome() is used ONLY when
-// process.env.CI is unset (i.e. a developer's own machine); when CI is set,
-// this file requires PRODUCT_CHROME to be explicit -- absent that, it is
-// unset here and the suite defers every browser row by id, on every OS,
-// exactly as documented. The dedicated `browser` job is the only CI job
-// that sets PRODUCT_CHROME, so it is the only place these rows are proved.
-const chrome = process.env.PRODUCT_CHROME || (process.env.CI ? null : findChrome());
-const skip = chrome ? false : 'set PRODUCT_CHROME to run the real browser regression';
+// Chrome discovery (MIROFY_CHROME / findChrome() / the CI rule) and the CDP
+// evaluate/navigate helpers used to live here directly; they were lifted
+// unchanged into ./helpers/browser.mjs (Task 8) so
+// accessibility.browser.test.mjs can drive the exact same launcher instead
+// of a second, independently written one -- one launcher, one skip rule to
+// audit. See that file for the full CI rule this file used to state.
+const skip = chromeAvailable() ? false : 'set MIROFY_CHROME to run the real browser regression';
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-browser-'));
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
 let browser;
 let sessionId;
+let evaluate;
+let navigate;
 let watcher;
 let fileUrl;
 let evidenceFileUrl;
 let evidenceNodeId;
-
-async function evaluate(expression, awaitPromise = false) {
-  const response = await browser.cdp.send('Runtime.evaluate', {
-    expression,
-    awaitPromise,
-    returnByValue: true,
-  }, sessionId);
-  if (response.exceptionDetails) {
-    throw new Error(response.exceptionDetails.exception?.description
-      || response.exceptionDetails.text
-      || 'Runtime.evaluate failed');
-  }
-  return response.result?.value;
-}
-
-async function navigate(url) {
-  const loaded = browser.cdp.waitFor('Page.loadEventFired', sessionId, 20000);
-  const navigation = await browser.cdp.send('Page.navigate', { url }, sessionId);
-  if (navigation.errorText) throw new Error(`Chrome navigation failed: ${navigation.errorText}`);
-  await loaded;
-  // Let boot-time module IIFEs (Archify.guidedViews et al.) finish running.
-  await evaluate(`new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))`, true);
-}
 
 // Watches for uncaught exceptions and console.error calls for the whole
 // run. Built on the same cdp.waitFor primitive visual-check.mjs exposes,
@@ -146,14 +102,14 @@ function watchPageErrors() {
 }
 
 before(async () => {
-  if (!chrome) return;
+  if (!chromeAvailable()) return;
   const out = path.join(tmp, 'architecture.html');
   renderFixture('architecture', 'production-deployment.architecture.json', out);
   fileUrl = pathToFileURL(out).href;
 
   // A second, purpose-built artifact for [2.2]: the Verified Source Beacon
-  // is installed by runtime JS (Archify.sourceEvidence.installBeacons(),
-  // template.html) that reads an <script id="archify-source-evidence-data">
+  // is installed by runtime JS (Mirofy.sourceEvidence.installBeacons(),
+  // template.html) that reads an <script id="mirofy-source-evidence-data">
   // payload the renderer only embeds when given a real --repo-root whose
   // pinned revision verifies -- see validation-gates.test.mjs's 2.1/2.2 test
   // for the non-browser half (the evidence data itself). None of that runs
@@ -199,32 +155,11 @@ before(async () => {
   fs.writeFileSync(evidenceInput, JSON.stringify(evidenceDoc));
   const evidenceOut = path.join(tmp, 'beacon.html');
   execFileSync(process.execPath, [
-    path.join(coreRoot, 'bin/archify.mjs'), 'render', 'architecture', evidenceInput, evidenceOut, '--repo-root', evidenceRepo,
+    path.join(coreRoot, 'bin/mirofy.mjs'), 'render', 'architecture', evidenceInput, evidenceOut, '--repo-root', evidenceRepo,
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
   evidenceFileUrl = pathToFileURL(evidenceOut).href;
 
-  browser = new ChromeVisualBrowser(chrome);
-  sessionId = await browser.sessionPromise;
-  // A headless target does not dispatch real focus/focusin events to page
-  // content until it has been brought to the front -- document.activeElement
-  // updates regardless, but Intent Trace's focusin listener (row 5.4) never
-  // fires without this, which silently looks like "the feature is broken"
-  // rather than "the harness never gave the page real focus". Verified by
-  // hand: identical focus() call, no bringToFront -> focusin never fires;
-  // with bringToFront -> it fires every time.
-  const targets = await browser.cdp.send('Target.getTargets');
-  const page = targets.targetInfos?.find((target) => target.type === 'page');
-  if (page) await browser.cdp.send('Target.activateTarget', { targetId: page.targetId });
-  await browser.cdp.send('Page.bringToFront', {}, sessionId).catch(() => {});
-  // A generous fixed viewport makes the space-dependent surfaces (the
-  // radar minimap, which degrades to "compact" or "unavailable" under
-  // tight space) deterministic across CI runners and local dev alike.
-  await browser.cdp.send('Emulation.setDeviceMetricsOverride', {
-    width: 1600,
-    height: 1000,
-    deviceScaleFactor: 1,
-    mobile: false,
-  }, sessionId);
+  ({ browser, sessionId, evaluate, navigate } = await launch());
   watcher = watchPageErrors();
 });
 
@@ -337,7 +272,7 @@ test('[5.1] Pan/zoom/reset (Semantic Camera) actually changes the rendered svg s
 
 test('[5.11] Motion Governor flips html[data-motion] between live and still via btn-motion', { skip }, async () => {
   // production-deployment.architecture.json sets meta.animation:"trace",
-  // which is Motion Governor's capability gate (Archify.motionGovernor
+  // which is Motion Governor's capability gate (Mirofy.motionGovernor
   // hides btn-motion entirely otherwise) -- this is why this row needs a
   // different fixture than the plain toggle-panel rows above.
   const capable = await evaluate(`document.getElementById('btn-motion').hidden === false`);
