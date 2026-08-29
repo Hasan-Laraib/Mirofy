@@ -26,6 +26,18 @@
 // exercises the real, unmodified checker script both ways; it does not
 // invent new detection logic.
 //
+// A second, stronger proof sits below: the real CLI, invoked on each
+// unmodified fixture under --quality showcase, does reject it outright
+// (render/validate/deliver all exit non-zero with a diagnostic naming this
+// gate's own composition/* code) -- confirming the claim this project
+// actually makes (showcase acceptance blocks a violating delivery), not
+// just that the checker script's severity logic works on a doctored
+// artifact. Both proofs are kept: the CLI proof shows the pipeline blocks
+// delivery; the patched-checker proof above is what row 1.7 needs to show
+// the standard-vs-showcase severity distinction on the very same artifact,
+// which the CLI proof alone cannot do (a showcase CLI run of a violating
+// fixture never produces an artifact to compare against its standard twin).
+//
 // container_border_runs (3.4) is gated differently: enforced whenever any
 // quality profile is requested at all (not "showcase" specifically), and
 // advisory only when the artifact was rendered with none. Its patch removes
@@ -115,4 +127,57 @@ test('container_border_runs fires on a relationship that runs along a boundary b
 
 test('route_rhythm fires on a cramped sub-16px interior turn (3.5)', () => {
   assertAdvisoryThenEnforced('route-rhythm-violation.architecture.json', 'route_rhythm', toShowcase);
+});
+
+// ---------------------------------------------------------------------------
+// Direct proof: the real CLI, run on each unmodified fixture under
+// --quality showcase, actually blocks delivery -- not just that a doctored
+// artifact's checks[] entry can be made to read false. `validate --json`
+// gives the richest structured diagnostic (code, severity, subject,
+// evidence, supportedFixes); asserting the specific composition/* code (not
+// merely a nonzero exit) keeps a fixture that starts failing on some other
+// gate from being silently accepted as proof of this one.
+// ---------------------------------------------------------------------------
+
+const cli = path.join(coreRoot, 'bin/archify.mjs');
+
+function validateShowcaseExpectFailure(fixtureName) {
+  const input = path.join(negativeFixturesRoot, fixtureName);
+  try {
+    execFileSync(process.execPath, [
+      cli, 'validate', 'architecture', input, '--quality', 'showcase', '--json',
+    ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    assert.fail(`validate --quality showcase unexpectedly succeeded for ${fixtureName}`);
+  } catch (err) {
+    if (err.name === 'AssertionError') throw err;
+    assert.notEqual(err.status, 0, `${fixtureName}: expected a nonzero exit under showcase quality`);
+    return JSON.parse(String(err.stdout));
+  }
+}
+
+function assertCliBlocksDelivery(fixtureName, expectedCode) {
+  const receipt = validateShowcaseExpectFailure(fixtureName);
+  assert.equal(receipt.ok, false);
+  const codes = (receipt.diagnostics || []).map((d) => d.code);
+  assert.ok(codes.includes(expectedCode), `expected diagnostic code ${expectedCode}, got [${codes.join(', ')}]`);
+}
+
+test('CLI: showcase validate blocks delivery of a genuine proper-crossing (3.1)', () => {
+  assertCliBlocksDelivery('relationship-crossing-violation.architecture.json', 'composition/proper-crossing');
+});
+
+test('CLI: showcase validate blocks delivery of a sub-4px label/route clearance (3.2)', () => {
+  assertCliBlocksDelivery('label-route-clearance-violation.architecture.json', 'composition/label-route-clearance');
+});
+
+test('CLI: showcase validate blocks delivery of an ambiguous >=8px corridor (3.3)', () => {
+  assertCliBlocksDelivery('ambiguous-corridor-violation.architecture.json', 'composition/ambiguous-corridor');
+});
+
+test('CLI: showcase validate blocks delivery of a container border run (3.4)', () => {
+  assertCliBlocksDelivery('container-border-run-violation.architecture.json', 'composition/container-border-run');
+});
+
+test('CLI: showcase validate blocks delivery of a cramped sub-16px interior turn (3.5)', () => {
+  assertCliBlocksDelivery('route-rhythm-violation.architecture.json', 'composition/short-interior-segment');
 });
