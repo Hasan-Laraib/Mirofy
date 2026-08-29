@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "Edge through unrelated node violation" },
+  "components": [
+    { "id": "a", "type": "backend", "label": "A", "pos": [20, 100], "size": [60, 40] },
+    { "id": "b", "type": "backend", "label": "B", "pos": [400, 100], "size": [60, 40] },
+    { "id": "obstacle", "type": "backend", "label": "Obstacle", "pos": [200, 90], "size": [80, 60] }
+  ],
+  "connections": [
+    { "id": "a-b", "from": "a", "to": "b", "fromSide": "right", "toSide": "left", "via": [[240, 120]] }
+  ]
+}

@@ -17,8 +17,8 @@ npm run build      # render every fixture into .artifacts/ (gitignored)
 
 ## What is proved today
 
-The harvested conformance matrix has 55 rows. 38 are proved without a browser;
-16 more require headless Chrome (`PRODUCT_CHROME`) and bring the total to 54.
+The harvested conformance matrix has 56 rows. 39 are proved without a browser;
+16 more require headless Chrome (`PRODUCT_CHROME`) and bring the total to 55.
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this harvest's scope, so there is nothing here to prove parity
 against. See `docs/harvest.md` for the full accounting.

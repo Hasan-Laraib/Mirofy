@@ -58,9 +58,9 @@ digest.
 `scripts/golden.mjs` renders all five v1-baseline fixtures, canonicalises line
 endings, and compares SHA-256 digests against `fixtures/golden/manifest.json`
 — the digests the ancestor produces at `12106be`. `npm run test:conformance`
-(`scripts/conformance.mjs`) additionally proves the 55-row harvested
+(`scripts/conformance.mjs`) additionally proves the 56-row harvested
 capability matrix (`packages/conformance/src/matrix.mjs`) still holds after
-the move: 54 of 55 rows are provable (38 without a browser, 16 more with
+the move: 55 of 56 rows are provable (39 without a browser, 16 more with
 `PRODUCT_CHROME`); row 6.10 (deterministic ZIP packaging) is UNPROVEN because
 its source — `scripts/build-zip.sh`, `scripts/package-smoke.mjs`,
 `.github/workflows/release.yml` in the ancestor — was never part of this
