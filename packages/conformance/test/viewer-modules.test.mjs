@@ -45,11 +45,13 @@ test('every part listed in the manifest is a file that exists, and every file is
   }
 });
 
-test('the palette file holds exactly the eight preset/theme blocks (4.12)', () => {
+test('the palette file holds exactly the ten preset/theme blocks (4.12)', () => {
   // Task 6 replaced the hand-written css/00-palette.css with a generated
   // emitter (see packages/viewer/src/tokens/); this test now reads the
   // emitter's output rather than a file on disk, but keeps every original
-  // assertion -- it is the only check that all eight blocks still exist.
+  // assertion -- it is the only check that all ten blocks still exist.
+  // Grew from eight to ten in P1a Task 7 (the okabe-ito preset's dark/light
+  // pair).
   const css = emitPalette();
   // Palette selectors carry the 4-space base indentation every part file
   // keeps from the monolith's <style> tag (see js/01-preamble.js), so the
@@ -57,7 +59,7 @@ test('the palette file holds exactly the eight preset/theme blocks (4.12)', () =
   // unanchored [a-z:] start would also catch mid-comment continuation
   // lines like "so the arrows drawn underneath...".
   const selectors = css.match(/^ {4}\[?[a-z:][^{]*\{/gm) ?? [];
-  assert.equal(selectors.length, 8, `expected 8 palette blocks, found ${selectors.length}`);
+  assert.equal(selectors.length, 10, `expected 10 palette blocks, found ${selectors.length}`);
   for (const needle of [
     ':root',
     '[data-theme="light"]',
@@ -67,6 +69,8 @@ test('the palette file holds exactly the eight preset/theme blocks (4.12)', () =
     '[data-preset="blueprint"][data-theme="light"]',
     '[data-preset="editorial"][data-theme="dark"]',
     '[data-preset="editorial"][data-theme="light"]',
+    '[data-preset="okabe-ito"][data-theme="dark"]',
+    '[data-preset="okabe-ito"][data-theme="light"]',
   ]) {
     assert.ok(css.includes(needle), `palette block missing: ${needle}`);
   }

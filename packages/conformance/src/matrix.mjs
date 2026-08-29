@@ -366,6 +366,17 @@ export const HARVESTED_ROWS = [
     proof: 'tokens.test.mjs',
     testTitle: 'the token model covers 8 blocks and 32 distinct properties (4.12)',
   },
+  {
+    id: '4.13',
+    name: 'Okabe-Ito colour-blind-safe preset',
+    // Upstream declined this preset on maintenance grounds: the palette was
+    // eight duplicated hand-written CSS blocks. Task 6's generated token
+    // model turned it into a data change; this row proves the published
+    // Okabe-Ito hues actually land in the token model, not merely that
+    // "some colour" is set.
+    proof: 'tokens.test.mjs',
+    testTitle: 'the Okabe-Ito palette uses the published CVD-safe hues (4.13)',
+  },
 
   // Phase 5 — Viewer (interactive; proved only in the CI browser job, Task 9).
   // Each row's testTitle is verified individually against the TAP output of

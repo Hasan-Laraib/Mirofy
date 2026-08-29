@@ -7,7 +7,7 @@ import { MODES, renderFixture, fixturesRoot } from '../src/render.mjs';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-preset-'));
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
-const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];
+const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'];
 
 function renderWithPreset(mode, fixture, preset, outPath) {
   const source = JSON.parse(fs.readFileSync(path.join(fixturesRoot, fixture), 'utf8'));
