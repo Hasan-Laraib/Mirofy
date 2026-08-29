@@ -10,6 +10,7 @@ import { coreRoot, fixturesRoot, repoRoot } from '../src/render.mjs';
 
 const cli = path.join(coreRoot, 'bin/archify.mjs');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-delivery-'));
+process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
 function sha256(buffer) {
   return createHash('sha256').update(buffer).digest('hex');
@@ -174,11 +175,54 @@ test('compare produces a Before/After delta receipt whose hashes match the real 
 // 6.8 — CLI subcommand surface
 // ---------------------------------------------------------------------------
 
+// A usage-banner grep cannot tell "the subcommand dispatches" from "the
+// subcommand's name is merely mentioned in a help string" -- renaming
+// `case 'doctor':` in the switch (bin/archify.mjs) while leaving `archify
+// doctor` in the printed usage() text left the old version of this test
+// green. Each subcommand below is actually invoked instead. The CLI's
+// `default:` branch (an unrecognised command) always prints `Unknown
+// command "<name>".` before the usage banner; no real subcommand's own
+// code path ever emits that string. So a real dispatch is distinguished
+// from a silently-fallen-through one even for the four subcommands
+// (render/validate/deliver/check) that are invoked here with no further
+// arguments and therefore also fail -- what is asserted for them is that
+// they fail via *their own* "missing argument" usage error, not via the
+// unknown-command fallback. The other four (guide/brands/doctor/demo) run
+// to completion with no arguments and are asserted against a real,
+// command-specific marker in their output.
 test('the CLI exposes render, validate, deliver, check, guide, brands, doctor, and demo (6.8)', () => {
-  const result = spawnSync(process.execPath, [cli], { encoding: 'utf8' });
-  const usage = result.stdout + result.stderr;
-  for (const subcommand of ['render', 'validate', 'deliver', 'check', 'guide', 'brands', 'doctor', 'demo']) {
-    assert.match(usage, new RegExp(`archify ${subcommand}\\b`), `usage text is missing the "${subcommand}" subcommand`);
+  const unknownCommand = (name) => new RegExp(`Unknown command "${name}"`);
+
+  function assertDispatches(subcommand, args, { expectStatus, mustMatch }) {
+    const result = spawnSync(process.execPath, [cli, subcommand, ...args], { encoding: 'utf8' });
+    const output = `${result.stdout}${result.stderr}`;
+    assert.doesNotMatch(
+      output, unknownCommand(subcommand),
+      `"archify ${subcommand}" fell through to the unknown-command handler -- it is no longer wired in the switch`,
+    );
+    if (expectStatus !== undefined) {
+      assert.equal(result.status, expectStatus, `"archify ${subcommand}": unexpected exit status\n${output}`);
+    }
+    assert.match(output, mustMatch, `"archify ${subcommand}": output did not match the expected command-specific marker\n${output}`);
+  }
+
+  // Dispatched into their own function, then fail fast on missing
+  // arguments via that function's own usage error (not the CLI-wide
+  // unknown-command fallback).
+  for (const subcommand of ['render', 'validate', 'deliver', 'check']) {
+    assertDispatches(subcommand, [], { expectStatus: 2, mustMatch: /^Usage:/ });
+  }
+
+  assertDispatches('guide', [], { expectStatus: 0, mustMatch: /Archify scenario recipes/ });
+  assertDispatches('brands', [], { expectStatus: 0, mustMatch: /collaboration:.*airtable/ });
+  assertDispatches('doctor', [], { expectStatus: 0, mustMatch: /Archify doctor/ });
+
+  const demoTmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-demo-'));
+  try {
+    assertDispatches('demo', [demoTmp], { expectStatus: 0, mustMatch: /Demo ready:/ });
+    assert.ok(fs.existsSync(path.join(demoTmp, 'archify-demo.html')), 'demo did not actually render an artifact');
+  } finally {
+    fs.rmSync(demoTmp, { recursive: true, force: true });
   }
 });
 
