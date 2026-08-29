@@ -1,0 +1,22 @@
+{
+  "name": "@product/core",
+  "version": "2.16.0",
+  "private": true,
+  "type": "module",
+  "description": "Harvested renderers and validators. Imported unmodified from tt-a1i/archify@12106be.",
+  "license": "MIT",
+  "bin": { "product": "./bin/archify.mjs" },
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "generate:brand-marks": "node scripts/generate-brand-marks.mjs",
+    "check:brand-marks": "node scripts/generate-brand-marks.mjs --check",
+    "generate:validators": "node scripts/generate-validators.mjs",
+    "check:validators": "node scripts/generate-validators.mjs --check"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "parse5": "7.3.0",
+    "saxes": "6.0.0",
+    "simple-icons": "16.28.0"
+  }
+}
