@@ -27,10 +27,11 @@ const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'
 
 // meta.visual_preset is the only render-time visual input; theme is a
 // runtime toggle the viewer applies from localStorage, so it is covered by
-// the browser suite rather than here. All eight palette blocks are embedded
-// in every artifact regardless of preset, so these 20 digests do byte-cover
-// all eight palettes -- what the extra presets add is coverage of the
-// renderer's own preset-conditional branches.
+// the browser suite rather than here. All ten palette blocks (grew from
+// eight in P1a Task 7's okabe-ito dark/light pair) are embedded in every
+// artifact regardless of preset, so these 25 digests do byte-cover all ten
+// palettes -- what the extra presets add is coverage of the renderer's own
+// preset-conditional branches.
 function renderWithPreset(mode, fixture, preset, outPath) {
   const source = JSON.parse(fs.readFileSync(path.join(fixturesRoot, fixture), 'utf8'));
   source.meta = { ...source.meta, visual_preset: preset };
