@@ -11,6 +11,8 @@
     "test": "node scripts/run-tests.mjs",
     "test:golden": "node scripts/golden.mjs",
     "test:conformance": "node scripts/conformance.mjs",
+    "build": "node scripts/build-artifacts.mjs",
+    "check:artifacts": "node scripts/build-artifacts.mjs --check",
     "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run test:conformance"
   },
   "devDependencies": {
