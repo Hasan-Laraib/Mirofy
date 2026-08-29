@@ -17,6 +17,21 @@ const defaultStopGraceMs = 3000;
 const defaultStopKillMs = 750;
 const diagramTypes = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
 
+// libuv's Windows fs-event backend asserts that the long-form filename it
+// receives from the OS starts with the watched directory string
+// (src/win/fs-event.c:72). If the watch root is an 8.3 short path -- which
+// os.tmpdir() returns on a Windows CI runner, and which any user can hit --
+// the two forms disagree and the process abort()s. That is a native crash,
+// not a catchable error, so the only defence is to never hand fs.watch an
+// unresolved path.
+export function resolveWatchRoot(dir) {
+  try {
+    return fs.realpathSync.native(dir);
+  } catch {
+    return dir;
+  }
+}
+
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
 }
@@ -588,7 +603,7 @@ export async function startPreview(options) {
 
   if (options.watch !== false) {
     try {
-      watcher = fs.watch(path.dirname(inputPath), (event, filename) => {
+      watcher = fs.watch(resolveWatchRoot(path.dirname(inputPath)), (event, filename) => {
         if (!filename || filename.toString() === path.basename(inputPath)) observeSource();
       });
     } catch (error) {
