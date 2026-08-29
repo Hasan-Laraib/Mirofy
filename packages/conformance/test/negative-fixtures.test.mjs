@@ -44,13 +44,14 @@
 // the `data-quality-gates="advisory"` marker instead of changing a value.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { coreRoot, repoRoot } from '../src/render.mjs';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-negative-'));
+process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 const negativeFixturesRoot = path.join(repoRoot, 'fixtures/negative');
 const checker = path.join(coreRoot, 'scripts/check-render-output.mjs');
 const renderer = path.join(coreRoot, 'renderers/architecture/render-architecture.mjs');
@@ -180,4 +181,74 @@ test('CLI: showcase validate blocks delivery of a container border run (3.4)', (
 
 test('CLI: showcase validate blocks delivery of a cramped sub-16px interior turn (3.5)', () => {
   assertCliBlocksDelivery('route-rhythm-violation.architecture.json', 'composition/short-interior-segment');
+});
+
+// ---------------------------------------------------------------------------
+// Third, independent proof: `archify render` (not `validate`). `validate`
+// always runs the standalone checker (scripts/check-render-output.mjs) as
+// its second stage whenever the renderer itself exits 0 -- so a CLI test
+// built on `validate` can pass on the strength of the checker alone and
+// never actually exercise the render-time gate in geometry.mjs's
+// clean*Problems functions (commandValidate only reaches "render" stage
+// failure when the renderer itself throws). `render` has no such second
+// stage: commandRender in bin/archify.mjs only spawns the renderer and
+// forwards its exit code, so this is the one CLI path whose result depends
+// solely on the render-time gate.
+//
+// Proof this closes the gap: gutting all six clean*Problems functions
+// (`if (1) return [];` at the top of each) leaves every test above green --
+// the checker independently re-detects the same violation via its own,
+// separate implementation -- while these five fail, because `render`
+// --quality showcase now writes the violating artifact instead of exiting
+// non-zero. See docs/harvest.md-adjacent conformance notes / the fix report
+// for the captured before/after output.
+//
+// The renderer has no --json diagnostic mode wired through `render` (that
+// flag is only threaded through `validate`/`deliver` via rendererEnv's
+// diagnosticJson parameter), so the diagnostic is read off the plain-text
+// uncaught-exception message the renderer prints to stderr when it throws --
+// asserting the specific bracketed `[composition/*]` code embedded in that
+// message, not just the nonzero exit. A bare exit-code assertion would not
+// be enough: under full gutting the crossing fixture still exits non-zero
+// from a *different* codepath in some configurations (e.g. if a caller adds
+// `validate` alongside `render`), so the code must be the specific one this
+// gate emits.
+// ---------------------------------------------------------------------------
+
+function renderShowcaseExpectFailure(fixtureName) {
+  const input = path.join(negativeFixturesRoot, fixtureName);
+  const output = path.join(tmp, `render-showcase-${fixtureName}.html`);
+  return spawnSync(process.execPath, [
+    cli, 'render', 'architecture', input, output, '--quality', 'showcase',
+  ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+}
+
+function assertRenderBlocksDelivery(fixtureName, expectedCode) {
+  const result = renderShowcaseExpectFailure(fixtureName);
+  assert.notEqual(result.status, 0, `${fixtureName}: expected a nonzero exit from 'archify render --quality showcase'`);
+  const output = `${result.stdout || ''}${result.stderr || ''}`;
+  assert.ok(
+    output.includes(`[${expectedCode}]`),
+    `${fixtureName}: expected render output to name ${expectedCode}, got:\n${output}`,
+  );
+}
+
+test('CLI: showcase render rejects a genuine proper-crossing with composition/proper-crossing (3.1)', () => {
+  assertRenderBlocksDelivery('relationship-crossing-violation.architecture.json', 'composition/proper-crossing');
+});
+
+test('CLI: showcase render rejects a sub-4px label/route clearance with composition/label-route-clearance (3.2)', () => {
+  assertRenderBlocksDelivery('label-route-clearance-violation.architecture.json', 'composition/label-route-clearance');
+});
+
+test('CLI: showcase render rejects an ambiguous >=8px corridor with composition/ambiguous-corridor (3.3)', () => {
+  assertRenderBlocksDelivery('ambiguous-corridor-violation.architecture.json', 'composition/ambiguous-corridor');
+});
+
+test('CLI: showcase render rejects a container border run with composition/container-border-run (3.4)', () => {
+  assertRenderBlocksDelivery('container-border-run-violation.architecture.json', 'composition/container-border-run');
+});
+
+test('CLI: showcase render rejects a cramped sub-16px interior turn with composition/short-interior-segment (3.5)', () => {
+  assertRenderBlocksDelivery('route-rhythm-violation.architecture.json', 'composition/short-interior-segment');
 });
