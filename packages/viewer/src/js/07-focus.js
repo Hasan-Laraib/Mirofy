@@ -1,5 +1,3 @@
-    Archify.sourceEvidence.installBeacons();
-
     /* ============================================================
        Explore — stable-ID neighborhood focus + dependency-free pan/zoom.
        Renderer IDs become deep-linkable semantic hooks without turning the
