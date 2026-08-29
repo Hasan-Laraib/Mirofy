@@ -4,6 +4,7 @@
   "ancestorRevision": "12106be58b34f94b108ab30f6ac0eb37c16a8f71",
   "ancestorSubtree": "archify/",
   "provenanceAnchor": "54a130780cb41d6096b337f23f2c7cb933cbcf0d",
+  "provenanceTag": "provenance-anchor",
   "identical": [
     {
       "path": "LICENSE",
