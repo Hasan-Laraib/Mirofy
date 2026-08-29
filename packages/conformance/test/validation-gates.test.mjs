@@ -18,6 +18,7 @@ const EXPECTED_CHECKS = [
 ];
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-gates-'));
+process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
 function cliPath() {
   return path.join(coreRoot, 'bin/archify.mjs');
@@ -384,6 +385,7 @@ test('node text shrinks toward a legible minimum instead of overflowing (4.9)', 
 
 test('repository evidence verifies a pinned 40-char revision against a real repo and embeds it (2.1, 2.2)', () => {
   const evidenceRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'product-evidence-repo-'));
+  process.on('exit', () => fs.rmSync(evidenceRepo, { recursive: true, force: true }));
   const git = (args) => {
     const result = spawnSync('git', args, { cwd: evidenceRepo, encoding: 'utf8' });
     assert.equal(result.status, 0, `git ${args.join(' ')} failed: ${result.stderr}`);

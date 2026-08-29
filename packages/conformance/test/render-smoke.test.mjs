@@ -6,6 +6,7 @@ import path from 'node:path';
 import { MODES, renderFixture } from '../src/render.mjs';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-smoke-'));
+process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
 test('all five diagram modes render from their v1-baseline fixture', () => {
   assert.equal(MODES.length, 5);
