@@ -1,7 +1,7 @@
 export default [
   {
     files: ['**/*.mjs', '**/*.js'],
-    ignores: ['packages/core/**', 'node_modules/**'],
+    ignores: ['packages/core/**', 'packages/viewer/src/js/**', 'node_modules/**'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',
