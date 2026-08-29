@@ -27,7 +27,7 @@ which is untracked in both repositories):
    `archify/` subtree. States the harvest rules for this directory (see
    `packages/core/README.md`).
 4. **`package.json` — content differs.** Verified diff, not just "scripts
-   rewritten": `name` (`archify` → `@product/core`), `version`
+   rewritten": `name` (`archify` → `@mirofy/core`), `version`
    (`2.16.0-dev.0` → `2.16.0`), `description`, and `bin` (`archify` →
    `product`) were all changed to fit the workspace's placeholder naming
    convention, in addition to `scripts` being rewritten because the ancestor's
@@ -44,14 +44,36 @@ deliberately changed, above. `packages/core/` holds 165 tracked files in
 total once the added `README.md`, which has no ancestor counterpart to be
 "identical" to, is counted back in: 163 identical + 1 changed + 1 added.)
 
-This is enforced in CI, not just asserted here: `npm run check:harvest`
-(`scripts/check-harvest-identity.mjs`) recomputes the git blob hash of every
-file on disk under `packages/core/` and compares it against a manifest of
-these 163 ancestor hashes plus the four deviations above, committed at
-`scripts/harvest-manifest.json`. It runs offline and fails on any drift — a
-changed byte, a reappeared removed file, or an untracked file dropped in —
-that a later change might otherwise introduce without moving a golden
-digest.
+This is enforced in CI, not just asserted here: `npm run check:provenance`
+(`scripts/check-provenance.mjs`) recomputes the git blob hash of every one of
+these 163 files and compares it against the manifest of ancestor hashes plus
+the four deviations above, committed at `scripts/harvest-manifest.json`. It
+runs offline and fails if the recorded history stops supporting the claim.
+
+### The provenance anchor
+
+The check reads its bytes from a pinned commit rather than from the working
+tree, because the working tree no longer holds them.
+
+`packages/core/` was byte-identical to the ancestor, as described above, up to
+and including commit `54a130780cb41d6096b337f23f2c7cb933cbcf0d` — recorded as
+`provenanceAnchor` in `scripts/harvest-manifest.json`. From the very next
+commit the code carries this product's own identifiers: the ancestor's
+namespace, CSS prefixes, custom properties, environment variables and CLI
+binary name were all replaced with `Mirofy`/`mirofy`/`MIROFY_` equivalents.
+That change was proved identifier-only — a fixture rendered on either side of
+it is byte-identical once the identifiers are substituted back — but it does
+move every one of the 163 blob hashes, so present-tense byte-identity is
+deliberately no longer true and is no longer what the check asserts.
+
+The code remains MIT-derived from the ancestor named at the top of this
+document, and the attribution required by that licence is retained verbatim in
+`/LICENSE`, `/NOTICE` and `packages/core/LICENSE`. The anchor makes the
+historical claim permanently checkable by hand:
+
+```bash
+git show 54a1307:packages/core/renderers/shared/utils.mjs | git hash-object --stdin
+```
 
 ## How parity is proved
 
@@ -101,7 +123,7 @@ byte-for-byte.
 
 `packages/core/test/` carries 92 files (~933 KB: 82 `*.test.mjs` suites plus
 8 JSON fixtures they load), harvested unmodified along with everything else.
-None of it is excluded from `check:harvest`'s or `test:golden`'s scope, but
+None of it is excluded from `check:provenance`'s or `test:golden`'s scope, but
 none of it is *run* by anything in this workspace either — `npm run test`
 (`scripts/run-tests.mjs`) only discovers suites under
 `packages/conformance/test/`, and nothing in `package.json` or
