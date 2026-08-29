@@ -6,6 +6,7 @@ import path from 'node:path';
 import { MODES, renderFixture, fixturesRoot } from '../src/render.mjs';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-preset-'));
+process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];
 
 function renderWithPreset(mode, fixture, preset, outPath) {
