@@ -13,6 +13,7 @@
     "test:conformance": "node scripts/conformance.mjs",
     "build": "node scripts/build-artifacts.mjs",
     "check:artifacts": "node scripts/build-artifacts.mjs --check",
+    "check:size": "node scripts/check-size-budget.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run test:conformance"
   },
   "devDependencies": {
