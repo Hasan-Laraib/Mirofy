@@ -132,6 +132,12 @@ the anchor is recorded here, with why:
   long path via `resolveWatchRoot()`. The ancestor passes an unresolved
   directory, which aborts the process under libuv on Windows when the watch
   root is an 8.3 short path.
+- `examples/dataflow-product-analytics.html`, `examples/lifecycle-agent-run.html`,
+  `examples/sequence-cache-miss-request.html`, `examples/web-app-rendered.html`,
+  `examples/workflow-agent-tool-call-rendered.html` — **removed** in P1a
+  Task 9 (see "Known debt: inherited generated HTML in `examples/`" above).
+  Committed build output, regenerable with `npm run build`; nothing read
+  their contents.
 
 ## How parity is proved
 
@@ -176,6 +182,17 @@ its 10 MB budget even with them included).
 with something generated on demand, not committed) during the P1 viewer
 refactor, once `packages/core/` is no longer required to match the ancestor
 byte-for-byte.
+
+**Resolved in P1a Task 9.** The five files are removed (`git rm`) and
+`packages/core/examples/*.html` is now gitignored — regenerate with
+`npm run build` (`mirofy examples`) on demand. Nothing referenced their
+contents: `fixtures/sources/*.json`'s `meta.output` fields name a default
+output path, not a dependency; `packages/core/scripts/render-examples.mjs`
+is the generator that produced them; and the two `bin/mirofy.mjs` call
+sites either run that generator (`mirofy examples`) or check that the
+generator script exists (`mirofy doctor`), never the generated output. The
+tracked tree drops from ~7.3 MB to ~3.9 MB; the size budget is lowered from
+10 MB to 6 MB in the same task to hold the reduction.
 
 ## Known debt: inherited, uninvoked `test/` directory
 
