@@ -1,5 +1,6 @@
-// Proves rows 3.1-3.5 (the five "clean gate" rows) actually detect the
-// violation they are named for, not merely that a clean fixture stays clean.
+// Proves rows 3.1-3.5 and 3.1b (the six "clean gate" rows) actually detect
+// the violation they are named for, not merely that a clean fixture stays
+// clean.
 //
 // Why this exists: `validation-gates.test.mjs`'s Step-1 tests render one
 // known-good fixture and assert all nine checks report ok:true. A gate whose
@@ -42,13 +43,33 @@
 // quality profile is requested at all (not "showcase" specifically), and
 // advisory only when the artifact was rendered with none. Its patch removes
 // the `data-quality-gates="advisory"` marker instead of changing a value.
+//
+// 3.1b (clean-flow/edge-through-node, cleanFlowProblems) does not fit the
+// assertAdvisoryThenEnforced shape above at all: unlike the other five
+// gates, it is not quality-profile-gated -- it is an always-on correctness
+// invariant (see geometry.mjs's own comment on cleanFlowProblems), so
+// rendering its violating fixture throws immediately under ANY profile,
+// including the default. There is never an "advisory" artifact to hand the
+// checker, and scripts/check-render-output.mjs has no check for this
+// violation at all (see validation-gates.test.mjs's EXPECTED_CHECKS -- nine
+// checks, none of them clean-flow). packages/core may not be modified to
+// add one. So 3.1b's three proofs are, instead: a direct in-process unit
+// test of cleanFlowProblems itself (below, near the bottom of this file,
+// with its own fixture-free synthetic input -- the only "independent
+// detector" this gate has), plus the same CLI validate/render proofs the
+// other five use.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { coreRoot, repoRoot } from '../src/render.mjs';
+
+function coreModule(relativePath) {
+  return import(pathToFileURL(path.join(coreRoot, relativePath)).href);
+}
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-negative-'));
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
@@ -112,6 +133,33 @@ function assertAdvisoryThenEnforced(name, checkName, enforce) {
 
 test('relationship_crossings fires on a genuine proper-crossing (3.1)', () => {
   assertAdvisoryThenEnforced('relationship-crossing-violation.architecture.json', 'relationship_crossings', toShowcase);
+});
+
+// 3.1b — direct, in-process unit proof of cleanFlowProblems. Synthetic
+// input rather than a rendered fixture: a straight two-segment path from
+// "a" to "b" whose middle segment sits squarely inside an unrelated
+// obstacle's rect (with room to spare on all sides, well past the 2px
+// default clearance), exactly mirroring the geometry authored into
+// fixtures/negative/edge-through-node-violation.architecture.json (see the
+// CLI proofs below). "a" and "b" are excluded from obstacle candidates by
+// cleanFlowProblems itself (their own endpoints are always exempt); the
+// third id is the only one left standing to be hit.
+test('cleanFlowProblems fires on an edge routed through an unrelated node (3.1b)', async () => {
+  const { cleanFlowProblems } = await coreModule('renderers/shared/geometry.mjs');
+  const points = [[80, 120], [240, 120], [400, 120]];
+  const problems = cleanFlowProblems({
+    relations: [{ id: 'a-b', from: 'a', to: 'b' }],
+    obstacles: [{ id: 'a' }, { id: 'b' }, { id: 'obstacle', x: 200, y: 90, width: 80, height: 60 }],
+    pathFor: () => ({ points }),
+    diagramType: 'architecture',
+    relationCollection: 'connections',
+    obstacleKind: 'component',
+  });
+  assert.equal(problems.length, 1, `expected exactly one clean-flow violation, got: ${JSON.stringify(problems)}`);
+  assert.ok(
+    problems[0].includes('[clean-flow/edge-through-node]'),
+    `expected the clean-flow/edge-through-node diagnostic, got: ${problems[0]}`,
+  );
 });
 
 test('label_route_clearance fires on a label sitting under 4px from an unrelated route (3.2)', () => {
@@ -183,6 +231,14 @@ test('CLI: showcase validate blocks delivery of a cramped sub-16px interior turn
   assertCliBlocksDelivery('route-rhythm-violation.architecture.json', 'composition/short-interior-segment');
 });
 
+// 3.1b — cleanFlowProblems is not profile-gated (see the header comment),
+// so this fires under --quality showcase exactly as it would with no
+// --quality flag at all; showcase is kept here only for consistency with
+// the other five rows' CLI proofs.
+test('CLI: showcase validate blocks delivery of an edge routed through an unrelated node (3.1b)', () => {
+  assertCliBlocksDelivery('edge-through-node-violation.architecture.json', 'clean-flow/edge-through-node');
+});
+
 // ---------------------------------------------------------------------------
 // Third, independent proof: `archify render` (not `validate`). `validate`
 // always runs the standalone checker (scripts/check-render-output.mjs) as
@@ -251,4 +307,8 @@ test('CLI: showcase render rejects a container border run with composition/conta
 
 test('CLI: showcase render rejects a cramped sub-16px interior turn with composition/short-interior-segment (3.5)', () => {
   assertRenderBlocksDelivery('route-rhythm-violation.architecture.json', 'composition/short-interior-segment');
+});
+
+test('CLI: showcase render rejects an edge routed through an unrelated node with clean-flow/edge-through-node (3.1b)', () => {
+  assertRenderBlocksDelivery('edge-through-node-violation.architecture.json', 'clean-flow/edge-through-node');
 });
