@@ -19,7 +19,7 @@
     "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:harvest && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
   },
   "devDependencies": {
-    "@types/node": "^18",
+    "@types/node": "^26",
     "eslint": "^9.15.0",
     "typescript": "^5.7.2"
   }
