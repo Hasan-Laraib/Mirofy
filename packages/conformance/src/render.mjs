@@ -16,9 +16,10 @@ export const MODES = [
 ];
 
 export function renderFixture(mode, fixture, outPath) {
+  const input = path.isAbsolute(fixture) ? fixture : path.join(fixturesRoot, fixture);
   execFileSync(process.execPath, [
     path.join(coreRoot, `renderers/${mode}/render-${mode}.mjs`),
-    path.join(fixturesRoot, fixture),
+    input,
     outPath,
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
 }
