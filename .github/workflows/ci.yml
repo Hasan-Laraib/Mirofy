@@ -40,7 +40,8 @@ jobs:
           cache: npm
       - run: npm ci
       # The full gate chain (lint -> typecheck -> test -> test:golden ->
-      # check:provenance -> test:conformance -> check:artifacts -> check:size ->
+      # check:provenance -> check:drift -> test:conformance -> check:artifacts ->
+      # check:size ->
       # check:audit) is wired into the single "check" script in package.json.
       # Running it once here keeps this workflow from drifting out of sync
       # with that list instead of duplicating each step as its own `run:`

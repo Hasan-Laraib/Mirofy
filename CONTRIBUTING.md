@@ -44,6 +44,7 @@ npm run typecheck         # tsc --noEmit
 npm run test              # node:test suites outside the conformance matrix
 npm run test:golden       # digest parity against the ancestor's renders
 npm run check:provenance  # the harvest claim, verified at the recorded anchor
+npm run check:drift       # packages/core/ matches its reviewed manifest
 npm run test:conformance  # the 56-row parity matrix
 npm run check:artifacts   # npm run build's own output reproduces the golden digests
 npm run check:size        # 10 MB tracked-tree budget
