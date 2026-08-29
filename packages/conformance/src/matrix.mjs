@@ -354,6 +354,18 @@ export const HARVESTED_ROWS = [
     proof: 'validation-gates.test.mjs',
     testTitle: 'no rendered mode emits an SVG filter or gradient element (4.10)',
   },
+  {
+    id: '4.12',
+    name: 'Generated design tokens',
+    // check-template.mjs (byte-identity of the rebuilt template against
+    // packages/core/assets/template.html) is the real proof that the
+    // generated palette reproduces the eight hand-written blocks exactly;
+    // it isn't a node:test file, so it can't be named here. This row's
+    // testTitle instead asserts the token *model* is coherent -- 8 blocks,
+    // 32 distinct properties -- which the byte check alone can't show.
+    proof: 'tokens.test.mjs',
+    testTitle: 'the token model covers 8 blocks and 32 distinct properties (4.12)',
+  },
 
   // Phase 5 — Viewer (interactive; proved only in the CI browser job, Task 9).
   // Each row's testTitle is verified individually against the TAP output of
