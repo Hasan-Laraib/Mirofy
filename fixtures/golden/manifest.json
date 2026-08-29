@@ -4,27 +4,122 @@
     {
       "mode": "architecture",
       "fixture": "web-app.architecture.json",
+      "preset": "classic",
       "sha256": "290d36ba6acd927cd55bc226fe61e4cc8113a6b6f1d082cde0f4d0299155b9ec"
+    },
+    {
+      "mode": "architecture",
+      "fixture": "web-app.architecture.json",
+      "preset": "signal-flow",
+      "sha256": "1fcc0bc234f1cb2f4ce7df3679fce4f3f5eb2c0148c8523918969f1e8b808d17"
+    },
+    {
+      "mode": "architecture",
+      "fixture": "web-app.architecture.json",
+      "preset": "blueprint",
+      "sha256": "1f417302c23e5fdda9acd6fc4b8e4b235d29ea2afc0a640350bcd19ccb5dcb71"
+    },
+    {
+      "mode": "architecture",
+      "fixture": "web-app.architecture.json",
+      "preset": "editorial",
+      "sha256": "1195d57a4f5b00db5f8b54913355b168f79904eb0d6e36503b1992caa28c86e9"
     },
     {
       "mode": "workflow",
       "fixture": "agent-tool-call.workflow.json",
+      "preset": "classic",
       "sha256": "1b2db98b1e3b1dd0cd618aecf8573705b44693e1ee84147cee9c05034b1b22a8"
+    },
+    {
+      "mode": "workflow",
+      "fixture": "agent-tool-call.workflow.json",
+      "preset": "signal-flow",
+      "sha256": "739f21f53752f447d4a117b24d3952624adc63317738e8d13ff6112f0a084388"
+    },
+    {
+      "mode": "workflow",
+      "fixture": "agent-tool-call.workflow.json",
+      "preset": "blueprint",
+      "sha256": "691693859a2fe8d4d2b66106076b56e5e190584d8ec4d6a078b40d3f5a945d93"
+    },
+    {
+      "mode": "workflow",
+      "fixture": "agent-tool-call.workflow.json",
+      "preset": "editorial",
+      "sha256": "b7bcef27132cf98898d930683f2232fea349a1f13a58befbc26e56c91618a9c7"
     },
     {
       "mode": "sequence",
       "fixture": "cache-miss-request.sequence.json",
+      "preset": "classic",
       "sha256": "d354087b6e0fa1dcb2ff46c28b7d82af64eb68fba35d5f49b31d5b5201f74557"
+    },
+    {
+      "mode": "sequence",
+      "fixture": "cache-miss-request.sequence.json",
+      "preset": "signal-flow",
+      "sha256": "a7eb535720f5e67a1b1d5d3996cb479f2dc7f0a72c52e3dccd79d33a3b2dd558"
+    },
+    {
+      "mode": "sequence",
+      "fixture": "cache-miss-request.sequence.json",
+      "preset": "blueprint",
+      "sha256": "9a677b7c3e3d5b28078bb636cc830c9b81edc69b36d75c81f2c2a49a5b06c088"
+    },
+    {
+      "mode": "sequence",
+      "fixture": "cache-miss-request.sequence.json",
+      "preset": "editorial",
+      "sha256": "f6993599f9e2556c391a9448fc0ce68b876966932e9ab5389fe932936699a820"
     },
     {
       "mode": "dataflow",
       "fixture": "product-analytics.dataflow.json",
+      "preset": "classic",
       "sha256": "2a89979d9c5677b58edd56a2512755d8c2aa3987303d71c3ae4256f396ce1b29"
+    },
+    {
+      "mode": "dataflow",
+      "fixture": "product-analytics.dataflow.json",
+      "preset": "signal-flow",
+      "sha256": "6d7d00c9edd0765fb37b077fa1e6254745a563e1dcf0f74f6d740ee35b9ff87e"
+    },
+    {
+      "mode": "dataflow",
+      "fixture": "product-analytics.dataflow.json",
+      "preset": "blueprint",
+      "sha256": "40e5701ff49367c56efce40f5174a6250f2a30b1e3f86558773070e399a6a947"
+    },
+    {
+      "mode": "dataflow",
+      "fixture": "product-analytics.dataflow.json",
+      "preset": "editorial",
+      "sha256": "ff302af0e0dcb9f9a3ff54e82690209ae878885a8ed5358740bd25e569ce71e4"
     },
     {
       "mode": "lifecycle",
       "fixture": "agent-run.lifecycle.json",
+      "preset": "classic",
       "sha256": "ad3329ecddd67dbc06e6a6cf7783e6fbdf1cf781f353a9f54104d9c4f164dc35"
+    },
+    {
+      "mode": "lifecycle",
+      "fixture": "agent-run.lifecycle.json",
+      "preset": "signal-flow",
+      "sha256": "c0aeee3f9700eb006dc38749ee8663ae35ec723ae5afd4d7d6a33ff5c6d66074"
+    },
+    {
+      "mode": "lifecycle",
+      "fixture": "agent-run.lifecycle.json",
+      "preset": "blueprint",
+      "sha256": "4ce61a026775f50c341064bde003cc8211ec01871d5a5659b535422c2d6a495f"
+    },
+    {
+      "mode": "lifecycle",
+      "fixture": "agent-run.lifecycle.json",
+      "preset": "editorial",
+      "sha256": "8e2b7a21f60d1b334f9847f45dde59484a2e8e7a16565796b5de5d3b7dbc4ee7"
     }
   ]
 }
