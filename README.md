@@ -41,12 +41,14 @@ output path is still reproducible, rather than re-proving renderer parity a
 second time.
 
 `npm run check` runs the full gate chain in order: `lint → typecheck → test →
-test:golden → check:harvest → test:conformance → check:artifacts → check:size
-→ check:audit`. `check:harvest` (`scripts/check-harvest-identity.mjs`) proves
-the founding claim in CI: it compares every file under `packages/core/`
-against a committed manifest of the ancestor's blob hashes, offline, so a
-drive-by change to `packages/core/` that doesn't happen to move a golden
-digest can no longer land unnoticed. Run
+test:golden → check:provenance → test:conformance → check:artifacts →
+check:size → check:audit`. `check:provenance`
+(`scripts/check-provenance.mjs`) proves the founding claim in CI. It no longer
+compares the working tree — since the identifier rename the code carries this
+product's own names, so byte-identity with the ancestor is deliberately no
+longer true. Instead it verifies the *historical* claim against an immutable
+anchor commit recorded in `scripts/harvest-manifest.json`: that all 163 files
+were byte-identical to the ancestor at that commit. Run
 `PRODUCT_CHROME=/path/to/chrome npm run check` to also exercise the 16
 browser-only rows.
 
