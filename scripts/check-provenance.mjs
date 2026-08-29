@@ -41,6 +41,7 @@ const manifestPath = path.join(here, 'harvest-manifest.json');
 
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 const anchor = manifest.provenanceAnchor;
+const anchorTag = manifest.provenanceTag;
 const ancestorRepo = manifest.ancestorRepo;
 const ancestorRev = manifest.ancestorRevision.slice(0, 7);
 
@@ -84,18 +85,57 @@ if (typeof anchor !== 'string' || !/^[0-9a-f]{40}$/.test(anchor)) {
   process.exit(1);
 }
 
-// The anchor must still be reachable. If it is not -- history rewritten, or a
-// shallow clone -- the claim below cannot be checked, and silently passing
-// would be worse than failing.
-try {
-  execFileSync('git', ['rev-parse', '--verify', '--quiet', `${anchor}^{commit}`], {
-    cwd: repoRoot,
-    stdio: 'pipe',
-  });
-} catch {
+/**
+ * Resolve a revision to a commit SHA, or null when it is not reachable here.
+ * @param {string} rev
+ * @returns {string | null}
+ */
+function resolveCommit(rev) {
+  try {
+    return execFileSync('git', ['rev-parse', '--verify', '--quiet', `${rev}^{commit}`], {
+      cwd: repoRoot,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
+// The anchor commit has to survive as a commit, not just as a SHA written down
+// in a JSON file. A squash- or rebase-merge of the branch that introduced it
+// leaves it unreferenced, and deleting that branch makes it collectable -- at
+// which point this gate fails forever and the only *apparent* remedy is to
+// edit the manifest. A gate that teaches people to edit the evidence it checks
+// is worse than no gate, so the anchor is also pinned by an annotated tag.
+//
+// The tag is resolved first, because it is the thing that keeps the commit
+// reachable; the raw SHA is the fallback for a checkout that has the history
+// but not the tags. If both resolve and disagree, the tag has been moved off
+// the recorded anchor, and that is a hard failure rather than something to
+// paper over: one of the two records of the claim is now wrong.
+const taggedAnchor = typeof anchorTag === 'string' && anchorTag ? resolveCommit(anchorTag) : null;
+const directAnchor = resolveCommit(anchor);
+
+if (taggedAnchor && taggedAnchor !== anchor) {
+  console.error(`provenance: FAILED -- tag ${anchorTag} points at ${taggedAnchor}`);
+  console.error(`  but harvest-manifest.json records the anchor as ${anchor}.`);
+  console.error('  The tag has been moved. Do not reconcile this by editing the manifest --');
+  console.error('  work out which record is wrong first.');
+  process.exit(1);
+}
+
+if (!taggedAnchor && !directAnchor) {
   console.error(`provenance: FAILED -- anchor commit ${anchor} is not present in this repository.`);
   console.error('  The historical claim cannot be verified from a shallow clone or a rewritten history.');
-  console.error('  Fetch full history (`git fetch --unshallow`) and re-run.');
+  console.error('');
+  console.error('  Do NOT "fix" this by editing scripts/harvest-manifest.json. The anchor is');
+  console.error('  evidence, and rewriting it to whatever is reachable proves nothing at all.');
+  console.error('');
+  console.error('  If this is a shallow clone:  git fetch --unshallow --tags');
+  console.error(`  If the tag was never pushed: git push origin ${anchorTag}`);
+  console.error(`  (The tag is what keeps ${anchor.slice(0, 7)} reachable after a squash or`);
+  console.error('  rebase merge. It must never be deleted.)');
   process.exit(1);
 }
 
@@ -141,7 +181,7 @@ for (const [label, paths, mustExist] of deviationChecks) {
 
 const total = manifest.identical.length;
 console.log(`provenance: verifying the harvest claim at anchor ${anchor.slice(0, 7)}`);
-console.log(`  anchor:   ${anchor}`);
+console.log(`  anchor:   ${anchor} (${taggedAnchor ? `tag ${anchorTag}` : 'SHA only -- tag not present, run `git fetch --tags`'})`);
 console.log(`  ancestor: ${ancestorRepo}@${ancestorRev} (subtree ${manifest.ancestorSubtree})`);
 
 if (problems.length) {

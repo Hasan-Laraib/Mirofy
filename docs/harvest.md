@@ -66,6 +66,32 @@ it is byte-identical once the identifiers are substituted back — but it does
 move every one of the 163 blob hashes, so present-tense byte-identity is
 deliberately no longer true and is no longer what the check asserts.
 
+### The anchor tag must be pushed, and must never be deleted
+
+The anchor is pinned twice: as a SHA in `scripts/harvest-manifest.json`, and
+as an annotated tag, `provenance-anchor`, recorded there as `provenanceTag`.
+
+The tag is not decoration. A SHA in a JSON file does not keep a commit alive —
+squash-merging or rebase-merging the branch that introduced it leaves the
+commit unreferenced, and deleting that branch makes it collectable. The gate
+would then fail permanently, and the only *apparent* remedy would be to edit
+the anchor in the manifest. That would be the wrong move every time: the
+anchor is the evidence the check exists to verify, and rewriting it to
+whatever happens to be reachable proves nothing.
+
+So:
+
+```bash
+git push origin provenance-anchor
+```
+
+The tag must be pushed with the branch, must never be deleted, and must never
+be moved. `check:provenance` resolves it first and falls back to the raw SHA
+for a checkout that has the history but not the tags; if both resolve and
+disagree, it fails rather than picking one. CI checks out with
+`fetch-depth: 0` for the same reason — a shallow clone cannot see the anchor,
+and the gate refuses to pass vacuously when it cannot find its evidence.
+
 The code remains MIT-derived from the ancestor named at the top of this
 document, and the attribution required by that licence is retained verbatim in
 `/LICENSE`, `/NOTICE` and `packages/core/LICENSE`. The anchor makes the
