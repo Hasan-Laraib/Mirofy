@@ -116,18 +116,30 @@ export const HARVESTED_ROWS = [
     id: '2.1',
     name: 'Repository evidence (revision-pinned)',
     proof: 'validation-gates.test.mjs',
-    // Shared with 2.2: one test proves both the pinned-revision
-    // verification (2.1) and the evidence data the Verified Source Beacon
-    // reads (2.2) -- see the file's own comment above this test for why
-    // the beacon's on-screen affordance itself is 5.3/browser-deferred
-    // while the data behind it is proved here, non-browser.
+    // This proves the pinned-revision verification and the embedded
+    // evidence payload the Verified Source Beacon (2.2) reads at runtime --
+    // it does not touch the beacon's own on-screen affordance. See 2.2
+    // below, which used to (wrongly) claim this same test covered it too:
+    // the beacon is a runtime-installed SVG element (installBeacons() in
+    // template.html, gated on real getBBox() layout), so it needs an
+    // actual browser and has its own dedicated browser test now.
     testTitle: 'repository evidence verifies a pinned 40-char revision against a real repo and embeds it (2.1, 2.2)',
   },
   {
     id: '2.2',
     name: 'Verified Source Beacon (SRC n)',
-    proof: 'validation-gates.test.mjs',
-    testTitle: 'repository evidence verifies a pinned 40-char revision against a real repo and embeds it (2.1, 2.2)',
+    proof: 'viewer.browser.test.mjs',
+    // Previously shared 2.1's title with a comment claiming the on-screen
+    // affordance was covered by row 5.3 -- it was not: 5.3 is Focus +
+    // Semantic Passport, which never touches `.source-evidence-beacon` or
+    // asserts anything about it. That was an unproved affordance
+    // misdescribed as proved. It now has its own real, browser-verified
+    // assertion: navigates to an artifact rendered with real repository
+    // evidence and checks the runtime-installed beacon's marker text
+    // ("SRC 1"), its absence on a node with no sources, and the aria-label
+    // update -- see viewer.browser.test.mjs's "[2.2]" test.
+    browser: true,
+    testTitle: '[2.2] Verified Source Beacon renders "SRC n" on a node with verified repository evidence, and stays off a node without it',
   },
 
   // Phase 3 — Layout validation gates
@@ -135,12 +147,20 @@ export const HARVESTED_ROWS = [
     id: '3.1',
     name: 'Clean Flow (no edge across unrelated node)',
     proof: 'negative-fixtures.test.mjs',
-    // Two independent proofs: the standalone checker fires on the
-    // authored violation, and the real CLI under --quality showcase
-    // actually blocks delivery of the same unmodified fixture.
+    // Three independent proofs: the standalone checker fires on the
+    // authored violation; the real CLI's `validate` under --quality
+    // showcase blocks delivery of the same unmodified fixture; and the real
+    // CLI's `render` -- the one path with no checker fallback -- rejects it
+    // on the strength of the render-time gate (geometry.mjs's
+    // clean*Problems) alone. The third is required: `validate` always runs
+    // the checker as a second stage, so a `validate`-only proof cannot tell
+    // "the render-time gate works" from "the render-time gate was deleted
+    // and the checker caught it anyway" (see negative-fixtures.test.mjs's
+    // comment above the render-proof block for the gutting proof).
     testTitle: [
       'relationship_crossings fires on a genuine proper-crossing (3.1)',
       'CLI: showcase validate blocks delivery of a genuine proper-crossing (3.1)',
+      'CLI: showcase render rejects a genuine proper-crossing with composition/proper-crossing (3.1)',
     ],
   },
   {
@@ -150,6 +170,7 @@ export const HARVESTED_ROWS = [
     testTitle: [
       'label_route_clearance fires on a label sitting under 4px from an unrelated route (3.2)',
       'CLI: showcase validate blocks delivery of a sub-4px label/route clearance (3.2)',
+      'CLI: showcase render rejects a sub-4px label/route clearance with composition/label-route-clearance (3.2)',
     ],
   },
   {
@@ -159,6 +180,7 @@ export const HARVESTED_ROWS = [
     testTitle: [
       'relationship_corridors fires on two unrelated relationships sharing a >=8px corridor (3.3)',
       'CLI: showcase validate blocks delivery of an ambiguous >=8px corridor (3.3)',
+      'CLI: showcase render rejects an ambiguous >=8px corridor with composition/ambiguous-corridor (3.3)',
     ],
   },
   {
@@ -168,6 +190,7 @@ export const HARVESTED_ROWS = [
     testTitle: [
       'container_border_runs fires on a relationship that runs along a boundary border instead of crossing it (3.4)',
       'CLI: showcase validate blocks delivery of a container border run (3.4)',
+      'CLI: showcase render rejects a container border run with composition/container-border-run (3.4)',
     ],
   },
   {
@@ -177,6 +200,7 @@ export const HARVESTED_ROWS = [
     testTitle: [
       'route_rhythm fires on a cramped sub-16px interior turn (3.5)',
       'CLI: showcase validate blocks delivery of a cramped sub-16px interior turn (3.5)',
+      'CLI: showcase render rejects a cramped sub-16px interior turn with composition/short-interior-segment (3.5)',
     ],
   },
   {
@@ -424,27 +448,53 @@ export const HARVESTED_ROWS = [
     id: '6.3',
     name: 'visual-check (4 viewports, pending)',
     proof: 'delivery.test.mjs',
+    // Its proof file is delivery.test.mjs (a non-browser suite most of the
+    // time), but the row's own test spawns the real `archify visual-check`
+    // CLI, which needs a real Chrome/Chromium to inspect anything -- without
+    // one, the test calls t.skip() rather than asserting. That makes 6.3
+    // browser-dependent exactly like the 14 Phase-5 rows, even though it
+    // does not live in viewer.browser.test.mjs; scripts/conformance.mjs
+    // treats a `browser: true` row inside a shared suite the same way it
+    // treats one in a browser-only suite (deferred by id, never silently
+    // counted as passing, and never a title-check failure while deferred).
+    // See scripts/conformance.mjs's ARCHIFY_CHROME/PRODUCT_CHROME mapping
+    // comment for how this row's Chrome discovery is wired to the same
+    // PRODUCT_CHROME switch as the other 14.
+    browser: true,
     testTitle: 'visual-check inspects 4 viewports and reports its review as pending, never as passed (6.3)',
   },
   {
     id: '6.4',
     name: 'Exports: PNG·JPEG·WebP·SVG·WebM',
     proof: 'export-surface.test.mjs',
-    testTitle: 'every rendered artifact exposes all six export formats',
+    // Partial coverage: the test asserts the six `<button data-format="…">`
+    // elements are present in every rendered artifact's markup. It does not
+    // click a button and does not prove the export dispatcher (template.
+    // html's `menu.addEventListener('click', ...)` handler) actually runs --
+    // no-opping that handler leaves this test green, because the buttons
+    // are rendered regardless of whether anything listens for clicks on
+    // them. Proving the click path would need a real browser; no test
+    // anywhere in this repo does that today for exports. The test title
+    // says "declares markup", not "exposes" or "wired", for this reason.
+    note: 'Proves the six export-format buttons are present in markup, not that clicking one actually triggers an export. See export-surface.test.mjs\'s header comment.',
+    testTitle: 'every rendered artifact declares markup for all six export formats (data-format buttons present; click dispatch not exercised)',
   },
   {
     id: '6.5',
     name: 'Share Card + Route + Reach cards',
     proof: 'export-surface.test.mjs',
-    // Shared with 6.6: the same test wires and checks every action button,
-    // share-card and clipboard alike, in one pass.
-    testTitle: 'share-card and clipboard actions are wired in every artifact',
+    // Shared with 6.6: the same test checks every action button, share-card
+    // and clipboard alike, in one pass -- markup presence only, same caveat
+    // as 6.4 above (no-opping the click dispatcher leaves this green too).
+    note: 'Proves the route/reach/copy share-card buttons carry the expected data-action markup, not that clicking one actually builds or copies a share card. See export-surface.test.mjs\'s header comment.',
+    testTitle: 'share-card and clipboard action buttons carry the expected data-action markup in every artifact (present; click dispatch not exercised)',
   },
   {
     id: '6.6',
     name: 'Clipboard copy (PNG, share card)',
     proof: 'export-surface.test.mjs',
-    testTitle: 'share-card and clipboard actions are wired in every artifact',
+    note: 'Proves the copy/copy-share-card buttons carry the expected data-action markup, not that clicking one actually writes to the clipboard. See export-surface.test.mjs\'s header comment.',
+    testTitle: 'share-card and clipboard action buttons carry the expected data-action markup in every artifact (present; click dispatch not exercised)',
   },
   {
     id: '6.7',
