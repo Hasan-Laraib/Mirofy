@@ -10,7 +10,7 @@ export const PARTS = [
   { kind: 'literal', text: '  </script>\n' },
   { kind: 'file', path: 'html/01-head-tail.html' },
   { kind: 'literal', text: '  <style>\n' },
-  { kind: 'file', path: 'css/00-palette.css' },
+  { kind: 'generated', source: 'tokens' },
   { kind: 'file', path: 'css/01-structure.css' },
   { kind: 'literal', text: '  </style>\n' },
   { kind: 'file', path: 'html/02-markup.html' },
