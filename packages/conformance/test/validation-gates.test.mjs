@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { coreRoot, fixturesRoot } from '../src/render.mjs';
+import { coreRoot, fixturesRoot, repoRoot } from '../src/render.mjs';
 
 function coreModule(relativePath) {
   return import(pathToFileURL(path.join(coreRoot, relativePath)).href);
@@ -261,7 +261,7 @@ test('guided views round-trip into the rendered artifact and are capped at 5 (1.
 // 1.7 — quality_profile standard/showcase
 // ---------------------------------------------------------------------------
 
-test('the --quality flag selects a distinct, reported composition profile (1.7)', () => {
+test('the --quality flag is echoed as the reported composition profile on a clean fixture (1.7)', () => {
   for (const quality of ['standard', 'showcase']) {
     const receipt = validate('architecture', 'web-app.architecture.json', ['--quality', quality]);
     assert.equal(receipt.ok, true);
@@ -277,6 +277,46 @@ test('the --quality flag selects a distinct, reported composition profile (1.7)'
   const showcase = deliverJson('showcase', outputShowcase);
   assert.equal(standard.validation.compositionProfile, 'standard');
   assert.equal(showcase.validation.compositionProfile, 'showcase');
+});
+
+test('quality_profile actually escalates a real violation from warning to error, not just an echoed label (1.7)', () => {
+  // Echoing the flag (above) proves nothing about behaviour. This proves the
+  // distinction that is the entire point of quality_profile: the exact same
+  // authored violation (from the label-route-clearance negative fixture,
+  // clearance 1px) is tolerated as a warning under standard and rejected as
+  // an error under showcase — using the real, unmodified checker script both
+  // times. See negative-fixtures.test.mjs for why the showcase run patches
+  // the baked-in quality marker rather than re-rendering with --quality
+  // showcase: that would reject the document at the render stage before any
+  // checks[] array existed to compare against.
+  const checker = path.join(coreRoot, 'scripts/check-render-output.mjs');
+  const renderer = path.join(coreRoot, 'renderers/architecture/render-architecture.mjs');
+  const negativeFixture = path.join(repoRoot, 'fixtures/negative/label-route-clearance-violation.architecture.json');
+  const output = path.join(tmp, 'quality-escalation.html');
+  execFileSync(process.execPath, [renderer, negativeFixture, output], { stdio: ['ignore', 'ignore', 'pipe'] });
+
+  const runChecker = (htmlPath) => {
+    try {
+      return JSON.parse(execFileSync(process.execPath, [checker, htmlPath], { encoding: 'utf8' }));
+    } catch (err) {
+      return JSON.parse(String(err.stdout));
+    }
+  };
+
+  const underStandard = runChecker(output);
+  assert.equal(underStandard.ok, true, 'standard quality must tolerate this violation');
+  assert.equal(underStandard.checks.find((c) => c.name === 'label_route_clearance').ok, true);
+  assert.ok(underStandard.composition.summary.warnings > 0, 'standard quality must still record it as a warning');
+  assert.equal(underStandard.composition.summary.errors, 0);
+
+  const showcaseHtml = fs.readFileSync(output, 'utf8').replace('data-quality-profile="standard"', 'data-quality-profile="showcase"');
+  const showcasePath = `${output}.showcase.html`;
+  fs.writeFileSync(showcasePath, showcaseHtml);
+  const underShowcase = runChecker(showcasePath);
+  assert.equal(underShowcase.ok, false, 'showcase quality must reject this violation');
+  assert.equal(underShowcase.checks.find((c) => c.name === 'label_route_clearance').ok, false);
+  assert.ok(underShowcase.composition.summary.errors > 0, 'showcase quality must record it as an error');
+  assert.equal(underShowcase.composition.summary.warnings, 0);
 });
 
 // ---------------------------------------------------------------------------
