@@ -10,6 +10,20 @@ full transcript (30 rulings, 9 plan defects found by implementers/reviewers
 rather than by the plan's author); this document pulls forward what a later
 reader needs without re-deriving it.
 
+## Merge precondition — read before merging
+
+`check-provenance.mjs` resolves the `provenance-anchor` tag first and falls
+back to the raw SHA `54a1307`. The tag is currently **local-only**
+(`git ls-remote --tags origin` is empty). Two things must happen at merge:
+
+1. Push the tag: `git push origin provenance-anchor`.
+2. Merge with a **real merge commit — not squash or rebase**.
+
+A squash-merge followed by branch deletion makes `54a1307` unreachable,
+`check:provenance` then fails permanently on `main`, and the only apparent
+remedy is editing the evidence the gate exists to protect. Full detail:
+`docs/harvest.md:69-88`.
+
 ## Pre-flight rulings (selected)
 
 **Ruling 1 — work on a branch, not `main`.** P0 ran on `main` by explicit
@@ -222,7 +236,17 @@ has no bearing). **Ruling 14** fixed one misplaced module boundary
 Task 3 deleted the extractor and the module files became the sole source of
 truth.
 
-**Task 3** — CSS split, extractor retired. Reviewed clean, 1 Minor deferred.
+**Task 3** — CSS split, extractor retired. Reviewed clean, 1 Minor deferred:
+the palette-leak assertion (`viewer-modules.test.mjs:80`) checks only for the
+literal string `[data-preset="editorial"][data-theme="light"] {` leaking into
+`01-structure.css`, not all ten blocks. It was recorded at the time as
+backstopped by "the count assertion" (`viewer-modules.test.mjs:59`,
+`selectors.length === 10` against `emitPalette()`'s own output) —
+**that claim is false, corrected here:** the count assertion reads only the
+emitter's output, so it cannot see a palette block that never left
+`01-structure.css` in the first place. The two checks look at different
+files; neither backstops the other. There is a standing counter-example —
+see **P1b debt: the print-media palette block**, below.
 **Plan defect found by the implementer:** `PALETTE_END` was specified as 319;
 the true seam is 308 (an 11-line error from an unverified closing-brace
 guess). Two further brief snippets needed re-anchoring for the same root
@@ -264,6 +288,15 @@ editing `props` alone was caught by *nothing*. Fixed by deriving `props` from
 `body` at load time, deleting 249 pasted lines, making disagreement
 impossible by construction rather than tested-for. Review clean after one
 fix round.
+
+**This is not deduplication, and the ledger should not read as if it were.**
+`tokens.mjs` still stores each of the ten blocks' CSS verbatim, and
+`emit.mjs` still concatenates all ten in full — no bytes were removed from
+what gets written out. `props` is a read-only parse used for assertions, not
+the source `emit.mjs` emits from. What Task 6 actually bought: one edit
+surface instead of a hand-written file, machine-checkable assertions over
+the palette, and a structure where `props` and the emitted bytes cannot
+disagree.
 
 **The sharper point this surfaced, and it generalises past this one task:**
 `check-template.mjs` is a **staleness check, not a correctness oracle.**
@@ -334,6 +367,59 @@ already states this; recorded here too so a later reader does not mistake
 "8/8 green" for evidence that short-path resolution works, rather than
 evidence that the export exists and returns *something*.
 
+## P1b debt: the print-media palette block (`01-structure.css:2618-2650`)
+
+An eleventh palette block, entirely outside the Task 6 token model: a
+`@media print` rule in `01-structure.css` setting 27 custom properties —
+including all seven semantic component hues — hardcoded to the
+classic-light values, with no representation in `tokens.mjs`. Neither the
+count assertion nor the leak-string assertion (above) can see it: both look
+at `emitPalette()`'s output or a single literal needle, and this block never
+went near either. It is pre-existing — present at `fed9236`
+(`packages/core/assets/template.html`) and at the `provenance-anchor`
+`54a1307` (`01-structure.css`) — so it is not a P1a regression.
+
+Task 7 flagged only one of its twenty-seven lines, `--external-stroke`
+(deferred minor, `01-structure.css:2649`), not the block as a whole.
+
+**Its own comment is wrong about what it does.** The comment reads: "Force
+the FULL light palette ... so printing from dark theme doesn't put neon
+strokes and translucent dark fills on white paper." It does not. The
+block's selector is `:root, [data-theme="dark"], [data-theme="light"]` —
+specificity (0,1,0) per branch. The preset selectors it needs to beat,
+`[data-preset="X"][data-theme="Y"]`, carry two attribute selectors —
+specificity (0,2,0) — and `@media` contributes no specificity of its own.
+The higher-specificity preset selector wins regardless of print, for every
+property this block sets without `!important` (all of them except the
+plain `body` background, which is forced separately). So printing from dark
+theme while signal-flow, blueprint, editorial, or okabe-ito is active keeps
+that preset's **dark** component fills and strokes on white paper — the
+exact failure this block exists to prevent.
+
+Recorded as P1b debt: fold this block into the token model (or fix the
+selector and re-verify it wins), and widen the leak/count assertions so a
+block already sitting in structural CSS cannot go unseen again.
+
+## Bisectability
+
+Six of the 36 commits on this branch leave `npm run check` red, reproduced
+from clean detached checkouts (not a working-tree artefact):
+
+| Commit | Failure |
+|---|---|
+| `cbe6d0c` | `check:template` fails — palette added, template not yet rebuilt |
+| `618911c` | `check:drift` fails on 8 files (`template.html`, `generated-validators.mjs`, `i18n.mjs`, 4 schemas); resolved at `31f5b18` |
+| `2aaca68`, `ee56e27`, `a470a18`, `faf41b4`, `121ebd9` | `check:drift` fails on `renderers/shared/cli.mjs` (`1bb6b2f8…` vs `835bd657…`) — a CRLF-poisoned baseline entry |
+
+The CRLF poisoning is **5 commits wide in committed history** (`2aaca68`
+through `121ebd9`), not merely a local working-tree problem — each of those
+five, checked out fresh, fails `check:drift` with the exact same one-file
+diff. It was fixed at `18bc34a` (re-baseline off the correct LF hash) and
+hardened at `245907f` (refuse to hash a CR byte at all). `git bisect run npm
+run check` will produce false positives across both windows above — a
+bisect landing on any of these six commits reports the wrong thing broken.
+The tip, `245907f`, is green.
+
 ## Verification (measured at the close of Task 9, before push)
 
 - `check:template`: byte-identical, 683,160 bytes.
@@ -366,8 +452,14 @@ evidence that the export exists and returns *something*.
   **met**.
 - `contract.mjs` checks all three consumer surfaces, observed to fail on a
   canary — **met** (see above).
-- Palette generated from 32 tokens; `signal-flow`'s partial blocks (30/27)
-  preserved and encoded as intentional — **met**.
+- Palette held as one token model, not deduplicated: `tokens.mjs` stores
+  each of the ten blocks' CSS verbatim as a string, and `emit.mjs`
+  concatenates them — all ten are still written out in full, byte for byte.
+  What the model bought is one edit surface, machine-checkable assertions
+  over the palette (`props`, a read-only parse derived from `body` at load
+  time), and a structure where `props` and the emitted bytes cannot
+  disagree; `signal-flow`'s partial blocks (30/27) are preserved and encoded
+  as intentional within it — **met**.
 - Okabe–Ito preset renders, cycles, appears in the style picker, uses the
   published CVD-safe hues (re-derived per Ruling 23) — **met**.
 - axe-core: no serious/critical violations in any of 5 presets, every
