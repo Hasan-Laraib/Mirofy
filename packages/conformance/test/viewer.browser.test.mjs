@@ -63,10 +63,21 @@ const visualCheckUrl = new URL('../../core/bin/visual-check.mjs', import.meta.ur
 const { ChromeVisualBrowser, findChrome } = await import(visualCheckUrl);
 
 // PRODUCT_CHROME is the CI-provided path (set by the browser job from
-// browser-actions/setup-chrome's output); findChrome() is the local-dev
-// fallback that probes OS-standard install locations when the variable
-// is not set.
-const chrome = process.env.PRODUCT_CHROME || findChrome();
+// browser-actions/setup-chrome's output); findChrome() is a local-dev
+// convenience that probes OS-standard install locations.
+//
+// CI rule: every GitHub-hosted runner ships a system Chrome (it is what
+// findChrome() would happily find), but the `check` job's 12-way OS/Node
+// matrix was never designed or validated to drive a real browser -- it has
+// no PRODUCT_CHROME of its own and no browser-provisioning step. Falling
+// back to findChrome() there silently turned every `check` matrix leg into
+// an unvalidated browser run. So findChrome() is used ONLY when
+// process.env.CI is unset (i.e. a developer's own machine); when CI is set,
+// this file requires PRODUCT_CHROME to be explicit -- absent that, it is
+// unset here and the suite defers every browser row by id, on every OS,
+// exactly as documented. The dedicated `browser` job is the only CI job
+// that sets PRODUCT_CHROME, so it is the only place these rows are proved.
+const chrome = process.env.PRODUCT_CHROME || (process.env.CI ? null : findChrome());
 const skip = chrome ? false : 'set PRODUCT_CHROME to run the real browser regression';
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-browser-'));
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
