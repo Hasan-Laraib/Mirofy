@@ -50,7 +50,8 @@
             "classic",
             "signal-flow",
             "blueprint",
-            "editorial"
+            "editorial",
+            "okabe-ito"
           ]
         },
         "quality_profile": {
