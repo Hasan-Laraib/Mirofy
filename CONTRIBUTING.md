@@ -29,6 +29,13 @@
    Import unmodified, prove parity, refactor in P1 — never both at once.
 6. **`MIROFY_*` is the environment-variable namespace.** The ancestor's
    prefix was retired in P1; do not reintroduce it.
+7. **`packages/core/assets/template.html` is generated, never hand-edited.**
+   It is built from `packages/viewer/`; `npm run check:template` enforces
+   this by rebuilding from source and failing on drift. Edit design-token
+   values in `packages/viewer/src/tokens/tokens.mjs`, never in palette CSS —
+   the palette itself is generated from the token model. Run
+   `npm run build:template` after any change under `packages/viewer/` so the
+   committed template stays in sync with its source.
 
 ## Test types
 
