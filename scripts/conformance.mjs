@@ -28,6 +28,21 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
 const includeBrowser = process.env.PRODUCT_CHROME ? true : false;
 
+// The project's own signal for "is a browser available" is PRODUCT_CHROME
+// (see the honesty rules above and CONTRIBUTING.md). The harvested
+// packages/core/bin/visual-check.mjs -- which row 6.3's proof (delivery.
+// test.mjs) drives through the real `archify visual-check` CLI -- reads
+// ARCHIFY_CHROME instead, and must not be modified (it is inside
+// packages/core). Rather than duplicate visual-check's Chrome-discovery
+// logic, map the one signal onto the other for every suite this script
+// spawns, so 6.3 gates on the same PRODUCT_CHROME switch as every other
+// browser row instead of silently falling back to whatever Chrome (if any)
+// happens to be on PATH. Never overrides an ARCHIFY_CHROME the environment
+// already set explicitly.
+if (process.env.PRODUCT_CHROME && !process.env.ARCHIFY_CHROME) {
+  process.env.ARCHIFY_CHROME = process.env.PRODUCT_CHROME;
+}
+
 const unproven = HARVESTED_ROWS.filter((row) => row.proof === null);
 const browserRows = HARVESTED_ROWS.filter((row) => row.browser);
 const deferredBrowserRows = browserRows.filter(() => !includeBrowser);
@@ -96,6 +111,11 @@ for (const suite of suites) {
   const passedTitles = passingTapTitles(tapOutput);
   for (const row of HARVESTED_ROWS) {
     if (row.proof !== suite || !row.testTitle) continue;
+    // A browser row sharing a suite with non-browser rows (e.g. 6.3 inside
+    // delivery.test.mjs) is expected to skip -- not pass -- when no browser
+    // is available; it is already reported once as browser-deferred below
+    // and must not also be flagged here as a title-check failure.
+    if (row.browser && !includeBrowser) continue;
     const requiredTitles = Array.isArray(row.testTitle) ? row.testTitle : [row.testTitle];
     const missing = requiredTitles.filter((title) => !passedTitles.has(title));
     if (missing.length) titleFailures.push({ id: row.id, name: row.name, missing });
