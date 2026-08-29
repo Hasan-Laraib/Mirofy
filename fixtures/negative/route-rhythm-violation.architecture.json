@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "Route rhythm violation" },
+  "components": [
+    { "id": "a", "type": "backend", "label": "A", "pos": [20, 20], "size": [60, 40] },
+    { "id": "b", "type": "backend", "label": "B", "pos": [300, 32], "size": [60, 40] }
+  ],
+  "connections": [
+    { "id": "a-b", "from": "a", "to": "b", "fromSide": "right", "toSide": "left", "via": [[120, 40], [120, 52]] }
+  ]
+}

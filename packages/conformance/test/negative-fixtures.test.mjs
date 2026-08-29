@@ -1,0 +1,118 @@
+// Proves rows 3.1-3.5 (the five "clean gate" rows) actually detect the
+// violation they are named for, not merely that a clean fixture stays clean.
+//
+// Why this exists: `validation-gates.test.mjs`'s Step-1 tests render one
+// known-good fixture and assert all nine checks report ok:true. A gate whose
+// detector was deleted entirely (`return []`) also reports ok:true on a
+// clean fixture — that assertion cannot tell "the gate works" from "the gate
+// is gone". Each test below instead authors a minimal fixture that commits
+// a real, specific violation, then asserts the *named* check catches it.
+//
+// Why the quality-profile is patched rather than passed as --quality
+// showcase end-to-end: four of these five gates (crossing, corridor, label
+// clearance, route rhythm) are enforced identically at two points —
+// once during rendering (geometry.mjs's clean*Problems, which *rejects* the
+// document outright under `--quality showcase`) and once by the standalone
+// post-render checker (scripts/check-render-output.mjs, which *reports* a
+// checks[] entry). Both read the same "is this showcase?" decision, so
+// asking the renderer itself for a showcase artifact of a genuinely-violating
+// document throws before a checks[] array ever exists — there would be
+// nothing to assert `checks[].ok === false` against. So each violation is
+// rendered once under the default (standard) profile, where the render-time
+// gate is inactive and the checker treats the finding as advisory, and the
+// checker is then run a second time against a copy whose baked-in quality
+// marker is flipped to "showcase" — exactly the marker the real `deliver`
+// pipeline bakes in when it does render under `--quality showcase`. This
+// exercises the real, unmodified checker script both ways; it does not
+// invent new detection logic.
+//
+// container_border_runs (3.4) is gated differently: enforced whenever any
+// quality profile is requested at all (not "showcase" specifically), and
+// advisory only when the artifact was rendered with none. Its patch removes
+// the `data-quality-gates="advisory"` marker instead of changing a value.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { coreRoot, repoRoot } from '../src/render.mjs';
+
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-negative-'));
+const negativeFixturesRoot = path.join(repoRoot, 'fixtures/negative');
+const checker = path.join(coreRoot, 'scripts/check-render-output.mjs');
+const renderer = path.join(coreRoot, 'renderers/architecture/render-architecture.mjs');
+
+function renderNegative(name) {
+  const input = path.join(negativeFixturesRoot, name);
+  const output = path.join(tmp, name.replace('.json', '.html'));
+  execFileSync(process.execPath, [renderer, input, output], { stdio: ['ignore', 'ignore', 'pipe'] });
+  return output;
+}
+
+function runChecker(htmlPath) {
+  try {
+    const stdout = execFileSync(process.execPath, [checker, htmlPath], { encoding: 'utf8' });
+    return JSON.parse(stdout);
+  } catch (err) {
+    assert.ok(err.stdout, `checker produced no stdout to parse: ${err.stderr}`);
+    return JSON.parse(String(err.stdout));
+  }
+}
+
+function patched(htmlPath, suffix, transform) {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const result = transform(html);
+  assert.notEqual(result, html, `patch had no effect on ${htmlPath} — the marker this test relies on may have moved`);
+  const outPath = `${htmlPath}.${suffix}.html`;
+  fs.writeFileSync(outPath, result);
+  return outPath;
+}
+
+function toShowcase(htmlPath) {
+  return patched(htmlPath, 'showcase', (html) => html.replace('data-quality-profile="standard"', 'data-quality-profile="showcase"'));
+}
+
+function toEnforced(htmlPath) {
+  return patched(htmlPath, 'enforced', (html) => html.replace(' data-quality-gates="advisory"', ''));
+}
+
+function assertAdvisoryThenEnforced(name, checkName, enforce) {
+  const output = renderNegative(name);
+  const advisory = runChecker(output);
+  assert.equal(advisory.ok, true, `${checkName}: standard-quality artifact should still validate ok overall`);
+  const advisoryCheck = advisory.checks.find((c) => c.name === checkName);
+  assert.ok(advisoryCheck, `${checkName}: check missing from the nine`);
+  assert.equal(advisoryCheck.ok, true, `${checkName}: must be advisory (ok:true) under standard quality`);
+  assert.ok(advisoryCheck.details.length > 0, `${checkName}: the authored violation was not even detected as a warning`);
+  assert.ok(advisory.composition.summary.warnings > 0, `${checkName}: expected a composition warning under standard quality`);
+
+  const enforcedPath = enforce(output);
+  const enforced = runChecker(enforcedPath);
+  assert.equal(enforced.ok, false, `${checkName}: must fail once this gate is enforced`);
+  const enforcedCheck = enforced.checks.find((c) => c.name === checkName);
+  assert.ok(enforcedCheck, `${checkName}: check missing from the nine`);
+  assert.equal(enforcedCheck.ok, false, `${checkName} must be the check reporting the failure`);
+  assert.equal(enforced.composition.status, 'fail');
+  assert.ok(enforced.composition.summary.errors > 0);
+}
+
+test('relationship_crossings fires on a genuine proper-crossing (3.1)', () => {
+  assertAdvisoryThenEnforced('relationship-crossing-violation.architecture.json', 'relationship_crossings', toShowcase);
+});
+
+test('label_route_clearance fires on a label sitting under 4px from an unrelated route (3.2)', () => {
+  assertAdvisoryThenEnforced('label-route-clearance-violation.architecture.json', 'label_route_clearance', toShowcase);
+});
+
+test('relationship_corridors fires on two unrelated relationships sharing a >=8px corridor (3.3)', () => {
+  assertAdvisoryThenEnforced('ambiguous-corridor-violation.architecture.json', 'relationship_corridors', toShowcase);
+});
+
+test('container_border_runs fires on a relationship that runs along a boundary border instead of crossing it (3.4)', () => {
+  assertAdvisoryThenEnforced('container-border-run-violation.architecture.json', 'container_border_runs', toEnforced);
+});
+
+test('route_rhythm fires on a cramped sub-16px interior turn (3.5)', () => {
+  assertAdvisoryThenEnforced('route-rhythm-violation.architecture.json', 'route_rhythm', toShowcase);
+});
