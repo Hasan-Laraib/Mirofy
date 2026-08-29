@@ -19,7 +19,7 @@ const CAPTURE_VIEWPORTS = Object.freeze([
 ]);
 const THEMES = Object.freeze(['light', 'dark']);
 const EXIT = Object.freeze({ pass: 0, fail: 1, skipped: 2 });
-export const CHROME_NO_SANDBOX_ENV = 'ARCHIFY_CHROME_NO_SANDBOX';
+export const CHROME_NO_SANDBOX_ENV = 'MIROFY_CHROME_NO_SANDBOX';
 
 function sha256(buffer) {
   return createHash('sha256').update(buffer).digest('hex');
@@ -102,8 +102,8 @@ function findOnPath(command, env, platform) {
 }
 
 export function findChrome({ env = process.env, platform = process.platform } = {}) {
-  if (Object.prototype.hasOwnProperty.call(env, 'ARCHIFY_CHROME')) {
-    return executable(env.ARCHIFY_CHROME, platform);
+  if (Object.prototype.hasOwnProperty.call(env, 'MIROFY_CHROME')) {
+    return executable(env.MIROFY_CHROME, platform);
   }
 
   const fixed = [];
@@ -292,7 +292,7 @@ export class ChromeVisualBrowser {
     getuid = typeof process.getuid === 'function' ? () => process.getuid() : null,
     spawnImpl = spawn,
   } = {}) {
-    this.profileRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-visual-check-profile-'));
+    this.profileRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-visual-check-profile-'));
     this.stderr = '';
     const args = chromeVisualBrowserArgs(this.profileRoot, { env, getuid });
     this.child = spawnImpl(chromePath, args, { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'] });
@@ -357,20 +357,20 @@ export class ChromeVisualBrowser {
         ? document.fonts.ready.catch(function () {})
         : Promise.resolve();
       return fontsReady.then(function () {
-        if (window.Archify && Archify.readerLayout && typeof Archify.readerLayout.whenStable === 'function') {
-          return Archify.readerLayout.whenStable();
+        if (window.Mirofy && Mirofy.readerLayout && typeof Mirofy.readerLayout.whenStable === 'function') {
+          return Mirofy.readerLayout.whenStable();
         }
       }).then(function () {
-        if (window.Archify && Archify.viewerChromeLayout && typeof Archify.viewerChromeLayout.whenStable === 'function') {
-          return Archify.viewerChromeLayout.whenStable();
+        if (window.Mirofy && Mirofy.viewerChromeLayout && typeof Mirofy.viewerChromeLayout.whenStable === 'function') {
+          return Mirofy.viewerChromeLayout.whenStable();
         }
       }).then(function () {
-        if (window.Archify && Archify.readerLayout && typeof Archify.readerLayout.whenStable === 'function') {
-          return Archify.readerLayout.whenStable();
+        if (window.Mirofy && Mirofy.readerLayout && typeof Mirofy.readerLayout.whenStable === 'function') {
+          return Mirofy.readerLayout.whenStable();
         }
       }).then(function () {
-        if (window.Archify && Archify.viewerChromeLayout && typeof Archify.viewerChromeLayout.whenStable === 'function') {
-          return Archify.viewerChromeLayout.whenStable();
+        if (window.Mirofy && Mirofy.viewerChromeLayout && typeof Mirofy.viewerChromeLayout.whenStable === 'function') {
+          return Mirofy.viewerChromeLayout.whenStable();
         }
         return new Promise(function (resolve) {
           requestAnimationFrame(function () { requestAnimationFrame(resolve); });
@@ -419,15 +419,15 @@ export class ChromeVisualBrowser {
         return width * height;
       }
       var legendRect = legend ? legend.getBoundingClientRect() : null;
-      var stageRect = window.Archify && Archify.viewerChromeLayout
-        && typeof Archify.viewerChromeLayout.stageRect === 'function'
-        ? Archify.viewerChromeLayout.stageRect()
+      var stageRect = window.Mirofy && Mirofy.viewerChromeLayout
+        && typeof Mirofy.viewerChromeLayout.stageRect === 'function'
+        ? Mirofy.viewerChromeLayout.stageRect()
         : (stage ? stage.getBoundingClientRect() : null);
       var navigationDockRect = navigationDock ? navigationDock.getBoundingClientRect() : null;
       var stageDockIntersectionArea = intersectionArea(stageRect, navigationDockRect);
-      var viewerChromeReceipt = window.Archify && Archify.viewerChromeLayout
-        && typeof Archify.viewerChromeLayout.receipt === 'function'
-        ? Archify.viewerChromeLayout.receipt()
+      var viewerChromeReceipt = window.Mirofy && Mirofy.viewerChromeLayout
+        && typeof Mirofy.viewerChromeLayout.receipt === 'function'
+        ? Mirofy.viewerChromeLayout.receipt()
         : null;
       return {
         innerWidth: window.innerWidth,
@@ -561,13 +561,13 @@ function contactSheetHtml({ artifactPath, receipt, screenshots }) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Archify visual-check · ${htmlEscape(path.basename(artifactPath))}</title>
+<title>Mirofy visual-check · ${htmlEscape(path.basename(artifactPath))}</title>
 <style>
 *{box-sizing:border-box}body{margin:0;padding:24px;background:#e9eef5;color:#172033;font:14px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}header{max-width:1500px;margin:0 auto 18px}h1{margin:0 0 6px;font-size:20px}p{margin:0;color:#526176}.grid{max-width:1500px;margin:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}figure{margin:0;padding:10px;background:white;border:1px solid #c9d4e3;border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,.08)}img{display:block;width:100%;height:auto;border:1px solid #e2e8f0}figcaption{padding:9px 4px 2px;color:#526176}@media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><h1>Archify visual-check</h1><p>${htmlEscape(path.basename(artifactPath))} · automated containment ${htmlEscape(receipt.containment.status)} · visual review pending</p></header>
+<header><h1>Mirofy visual-check</h1><p>${htmlEscape(path.basename(artifactPath))} · automated containment ${htmlEscape(receipt.containment.status)} · visual review pending</p></header>
 <main class="grid">${cards}
 </main>
 </body>
@@ -717,14 +717,14 @@ export async function runVisualCheck({
     receipt.readability.status = 'skipped';
     receipt.viewerChrome.status = 'skipped';
     receipt.captures.status = 'skipped';
-    receipt.error = 'Chrome or Chromium is unavailable. Set ARCHIFY_CHROME to its executable path.';
+    receipt.error = 'Chrome or Chromium is unavailable. Set MIROFY_CHROME to its executable path.';
     receipt.diagnostics = [failureDiagnostic({
       code: 'viewer/chrome-unavailable',
       severity: 'warning',
       message: receipt.error,
       subject: { artifact },
       evidence: { executable: null },
-      supportedFixes: ['set ARCHIFY_CHROME to a Chrome or Chromium executable and rerun visual-check'],
+      supportedFixes: ['set MIROFY_CHROME to a Chrome or Chromium executable and rerun visual-check'],
     })];
     persistReceipt(outputs, receipt);
     return { exitCode: EXIT.skipped, receipt };

@@ -164,8 +164,8 @@ function probeDirectorySemantics(directory) {
 
   semanticsProbeSequence += 1;
   const suffix = `${process.pid}-${Date.now().toString(36)}-${semanticsProbeSequence}`;
-  const caseAuthored = `.archify-Case-Probe-${suffix}`;
-  const normalizationAuthored = `.archify-norm-\u00e9-probe-${suffix}`;
+  const caseAuthored = `.mirofy-Case-Probe-${suffix}`;
+  const normalizationAuthored = `.mirofy-norm-\u00e9-probe-${suffix}`;
   const semantics = {
     caseInsensitive: probeNamesAlias(
       directory.path,
@@ -237,7 +237,7 @@ export class OutputPathError extends Error {
   constructor(message, diagnostic) {
     super(message);
     this.name = 'OutputPathError';
-    this.archifyDiagnostics = [{
+    this.mirofyDiagnostics = [{
       severity: 'error',
       subject: {},
       evidence: {},

@@ -9,13 +9,28 @@ import { openLoopbackUrl } from './open-artifact.mjs';
 import { resolveOutputPath } from '../renderers/shared/output-path.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const cliPath = path.join(here, 'archify.mjs');
+const cliPath = path.join(here, 'mirofy.mjs');
 const loopbackHost = '127.0.0.1';
 const defaultDebounceMs = 400;
 const defaultPollMs = 800;
 const defaultStopGraceMs = 3000;
 const defaultStopKillMs = 750;
 const diagramTypes = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
+
+// libuv's Windows fs-event backend asserts that the long-form filename it
+// receives from the OS starts with the watched directory string
+// (src/win/fs-event.c:72). If the watch root is an 8.3 short path -- which
+// os.tmpdir() returns on a Windows CI runner, and which any user can hit --
+// the two forms disagree and the process abort()s. That is a native crash,
+// not a catchable error, so the only defence is to never hand fs.watch an
+// unresolved path.
+export function resolveWatchRoot(dir) {
+  try {
+    return fs.realpathSync.native(dir);
+  } catch {
+    return dir;
+  }
+}
 
 function sha256(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -49,7 +64,7 @@ function previewPage() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Archify Live Preview</title>
+  <title>Mirofy Live Preview</title>
   <style>
     :root { color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
     * { box-sizing: border-box; }
@@ -77,7 +92,7 @@ function previewPage() {
 </head>
 <body data-state="checking" data-has-artifact="false">
   <header>
-    <span class="brand">Archify Preview</span>
+    <span class="brand">Mirofy Preview</span>
     <details id="failure" hidden>
       <summary role="button" aria-controls="diagnostic-panel">View diagnostic</summary>
       <div class="diagnostic" id="diagnostic-panel"><pre id="diagnostic"></pre><button id="copy" type="button">Copy diagnostic</button></div>
@@ -86,7 +101,7 @@ function previewPage() {
   </header>
   <main>
     <div id="empty">Waiting for the first verified diagram. Invalid input will stay here with an exact diagnostic.</div>
-    <iframe id="artifact" title="Verified Archify diagram"></iframe>
+    <iframe id="artifact" title="Verified Mirofy diagram"></iframe>
   </main>
   <script>
     (function () {
@@ -202,7 +217,7 @@ export async function startPreview(options) {
   const shouldOpen = options.open !== false;
 
   fs.mkdirSync(outputDirectory, { recursive: true });
-  const stagingDirectory = fs.mkdtempSync(path.join(outputDirectory, '.archify-preview-'));
+  const stagingDirectory = fs.mkdtempSync(path.join(outputDirectory, '.mirofy-preview-'));
 
   let port = 0;
   let watcher;
@@ -430,7 +445,7 @@ export async function startPreview(options) {
           [snapshotPath, '<input.json>'],
           [candidatePath, '<candidate.html>'],
           [stagingDirectory, '<preview-staging>'],
-          [path.resolve(here, '..'), '<archify-skill>'],
+          [path.resolve(here, '..'), '<mirofy-skill>'],
           [path.resolve(options.cwd || process.cwd()), '<working-directory>'],
           ...(options.repoRoot ? [[path.resolve(options.repoRoot), '<repo-root>']] : []),
         ],
@@ -588,7 +603,7 @@ export async function startPreview(options) {
 
   if (options.watch !== false) {
     try {
-      watcher = fs.watch(path.dirname(inputPath), (event, filename) => {
+      watcher = fs.watch(resolveWatchRoot(path.dirname(inputPath)), (event, filename) => {
         if (!filename || filename.toString() === path.basename(inputPath)) observeSource();
       });
     } catch (error) {

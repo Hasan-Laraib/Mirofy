@@ -10,7 +10,7 @@ import { animateAttr } from '../renderers/shared/cli.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const template = fs.readFileSync(path.join(skillRoot, 'assets', 'template.html'), 'utf8');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-settled-flow-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-settled-flow-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -38,17 +38,17 @@ test('all five renderers inherit one finite running-to-settled ambient contract'
     assert.match(html, /data-ambient-motion/, mode);
     assert.match(html, /function startAmbient\(\)/, mode);
     assert.match(html, /function settleAmbient\(reason\)/, mode);
-    assert.match(html, /animation: archify-edge-flow [^;]+ 1;/, mode);
-    assert.match(html, /animation: archify-node-pulse [^;]+ 1;/, mode);
-    assert.doesNotMatch(html, /animation: archify-edge-flow [^;]+ infinite/, mode);
-    assert.doesNotMatch(html, /animation: archify-node-pulse [^;]+ infinite/, mode);
+    assert.match(html, /animation: mirofy-edge-flow [^;]+ 1;/, mode);
+    assert.match(html, /animation: mirofy-node-pulse [^;]+ 1;/, mode);
+    assert.doesNotMatch(html, /animation: mirofy-edge-flow [^;]+ infinite/, mode);
+    assert.doesNotMatch(html, /animation: mirofy-node-pulse [^;]+ infinite/, mode);
   }
 });
 
 test('settled flow restores authored security and async dash semantics', () => {
   assert.match(template, /\.a-security\s*\{[^}]*stroke-dasharray:\s*5,5/);
   assert.match(template, /\.a-dashed\s*\{[^}]*stroke-dasharray:\s*4,4/);
-  assert.match(template, /@keyframes archify-edge-flow\s*\{[\s\S]*?stroke-dasharray:\s*10 8/);
+  assert.match(template, /@keyframes mirofy-edge-flow\s*\{[\s\S]*?stroke-dasharray:\s*10 8/);
   assert.match(template, /100%\s*\{\s*stroke-dashoffset:\s*0;\s*opacity:\s*1;\s*\}/);
   const runningRule = template.match(/html\[data-ambient-motion="running"\][^{]+\[data-animate="edge"\][^{]*\{([^}]*)\}/)?.[1] || '';
   assert.ok(runningRule, 'running edge rule missing');

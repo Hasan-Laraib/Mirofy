@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-route-share-card-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-route-share-card-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -50,8 +50,8 @@ test('Route Share Card menu lifecycle excludes hidden state from keyboard naviga
   const html = render('workflow', CASES.workflow);
   assert.match(html, /function open\(focusLast\)[\s\S]*?syncRouteShareItem\(\);/);
   assert.match(html, /items\(\)\.filter\(function \(i\) \{ return !i\.hidden && !i\.disabled; \}\)/);
-  assert.match(html, /function clear\(options\)[\s\S]*?Archify\.exportMenu\.syncRouteShare\(\)/);
-  assert.match(html, /function showResult\(result, options\)[\s\S]*?Archify\.exportMenu\.syncRouteShare\(\)/);
+  assert.match(html, /function clear\(options\)[\s\S]*?Mirofy\.exportMenu\.syncRouteShare\(\)/);
+  assert.match(html, /function showResult\(result, options\)[\s\S]*?Mirofy\.exportMenu\.syncRouteShare\(\)/);
   assert.match(html, /html\[data-embed="true"\] \.toolbar/);
   assert.match(html, /@media print[\s\S]*?\.toolbar/);
 });
@@ -123,7 +123,7 @@ test('Route Share Card reuses one 1200x630 variant seam and publishes a truthful
   const html = render('architecture', CASES.architecture);
   assert.match(html, /function rasterizeShareCard\(options\)/);
   assert.match(html, /options\.variant !== 'route'/);
-  assert.match(html, /var snapshot = Archify\.routeProbe && Archify\.routeProbe\.exportSnapshot\(\)/);
+  assert.match(html, /var snapshot = Mirofy\.routeProbe && Mirofy\.routeProbe\.exportSnapshot\(\)/);
   assert.match(html, /renderShareCard\(\{ routeSnapshot: snapshot \}\)/);
   assert.doesNotMatch(html, /function rasterizeRouteShareCard|routeShareCard:/);
   assert.match(html, /var title = titleNode \? titleNode\.textContent : document\.title;/);
@@ -134,7 +134,7 @@ test('Route Share Card reuses one 1200x630 variant seam and publishes a truthful
   assert.match(html, /diagramFilename\(\) \+ '-route-share-card\.png'/);
   assert.match(html, /data-last-export-variant/);
   assert.match(html, /data-last-export-route-state-clean/);
-  assert.match(html, /clearExportReceipt\(\);[\s\S]*?var snapshot = Archify\.routeProbe/);
+  assert.match(html, /clearExportReceipt\(\);[\s\S]*?var snapshot = Mirofy\.routeProbe/);
   assert.match(html, /function runExport\(format\)[\s\S]*?clearExportReceipt\(\);/);
   assert.match(html, /var ctx = canvas2dOrThrow\(canvas, viewerText\('viewer\.export\.shareCard'\)\)/);
 });
@@ -150,10 +150,10 @@ test('skill and READMEs describe the optional Export variant and show one real c
   for (const readme of ['README.md', 'README_EN.md', 'README_ZH.md']) {
     const text = fs.readFileSync(path.join(repoRoot, readme), 'utf8');
     assert.match(text, /Export → Route Share Card/, readme);
-    assert.match(text, /docs\/assets\/archify-route-share-card\.png/, readme);
+    assert.match(text, /docs\/assets\/mirofy-route-share-card\.png/, readme);
   }
 
-  const png = fs.readFileSync(path.join(repoRoot, 'docs/assets/archify-route-share-card.png'));
+  const png = fs.readFileSync(path.join(repoRoot, 'docs/assets/mirofy-route-share-card.png'));
   assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
   assert.equal(png.readUInt32BE(16), 1200);
   assert.equal(png.readUInt32BE(20), 630);

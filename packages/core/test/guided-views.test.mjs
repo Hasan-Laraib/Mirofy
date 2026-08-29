@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-guided-views-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-guided-views-'));
 
 const CASES = {
   architecture: { example: 'web-app.architecture.json', collection: 'components' },
@@ -55,7 +55,7 @@ for (const [mode, config] of Object.entries(CASES)) {
     assert.equal(plain.result.status, 0, plain.result.stderr);
     assert.equal(svg(guided.html), svg(plain.html));
     assert.match(guided.html, /id="guided-views" hidden/);
-    assert.match(guided.html, /Archify\.guidedViews = \(function \(\)/);
+    assert.match(guided.html, /Mirofy\.guidedViews = \(function \(\)/);
     assert.match(guided.html, /#view=/);
     assert.match(guided.html, /addEventListener\('hashchange', syncViewFromHash\)/);
     assert.match(guided.html, /id="guided-view-play"/);
@@ -94,7 +94,7 @@ for (const [mode, config] of Object.entries(CASES)) {
     assert.match(guided.html, /min-width: 720px/);
     assert.match(guided.html, /reveal: reveal/);
     assert.match(guided.html, /container\.addEventListener\('scroll', onScroll, \{ passive: true \}\)/);
-    assert.match(guided.html, /--archify-scroll-x/);
+    assert.match(guided.html, /--mirofy-scroll-x/);
     assert.match(guided.html, /focus: function \(\) \{ return activeIndex < 0 \? \[\] : views\[activeIndex\]\.focus\.slice\(\); \}/);
     assert.doesNotMatch(guided.html, /<p class="footer">/);
     assert.doesNotMatch(guided.html, /<kbd>P<\/kbd> play story/);

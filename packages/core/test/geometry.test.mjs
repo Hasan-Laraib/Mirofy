@@ -692,9 +692,9 @@ test('applyTemplate preserves dollar sequences in titles', () => {
 <title>[PROJECT NAME] Architecture Diagram</title>
 <h1>[PROJECT NAME] Architecture</h1>
 <p class="subtitle">[Subtitle description]</p>
-<!-- ARCHIFY:GUIDED_VIEWS_DATA -->
-      <!-- ARCHIFY:SVG_SLOT_START --><svg></svg>      <!-- ARCHIFY:SVG_SLOT_END -->
-    <!-- ARCHIFY:CARDS_SLOT_START --><div></div>    <!-- ARCHIFY:CARDS_SLOT_END -->`;
+<!-- MIROFY:GUIDED_VIEWS_DATA -->
+      <!-- MIROFY:SVG_SLOT_START --><svg></svg>      <!-- MIROFY:SVG_SLOT_END -->
+    <!-- MIROFY:CARDS_SLOT_START --><div></div>    <!-- MIROFY:CARDS_SLOT_END -->`;
   const html = applyTemplate(template, {
     title: 'Plan $$50 tier',
     subtitle: 'test',
@@ -710,9 +710,9 @@ test('applyTemplate omits the subtitle row when no subtitle is authored', () => 
 <title>[PROJECT NAME] Architecture Diagram</title>
 <h1>[PROJECT NAME] Architecture</h1>
 <p class="subtitle">[Subtitle description]</p>
-<!-- ARCHIFY:GUIDED_VIEWS_DATA -->
-      <!-- ARCHIFY:SVG_SLOT_START --><svg></svg>      <!-- ARCHIFY:SVG_SLOT_END -->
-    <!-- ARCHIFY:CARDS_SLOT_START --><div></div>    <!-- ARCHIFY:CARDS_SLOT_END -->`;
+<!-- MIROFY:GUIDED_VIEWS_DATA -->
+      <!-- MIROFY:SVG_SLOT_START --><svg></svg>      <!-- MIROFY:SVG_SLOT_END -->
+    <!-- MIROFY:CARDS_SLOT_START --><div></div>    <!-- MIROFY:CARDS_SLOT_END -->`;
   const html = applyTemplate(template, {
     title: 'Focused title',
     subtitle: '   ',
@@ -728,9 +728,9 @@ test('applyTemplate requires the new evidence slot only when evidence is present
 <title>[PROJECT NAME] Architecture Diagram</title>
 <h1>[PROJECT NAME] Architecture</h1>
 <p class="subtitle">[Subtitle description]</p>
-<!-- ARCHIFY:GUIDED_VIEWS_DATA -->
-      <!-- ARCHIFY:SVG_SLOT_START --><svg></svg>      <!-- ARCHIFY:SVG_SLOT_END -->
-    <!-- ARCHIFY:CARDS_SLOT_START --><div></div>    <!-- ARCHIFY:CARDS_SLOT_END -->`;
+<!-- MIROFY:GUIDED_VIEWS_DATA -->
+      <!-- MIROFY:SVG_SLOT_START --><svg></svg>      <!-- MIROFY:SVG_SLOT_END -->
+    <!-- MIROFY:CARDS_SLOT_START --><div></div>    <!-- MIROFY:CARDS_SLOT_END -->`;
   assert.doesNotThrow(() => applyTemplate(legacyTemplate, {
     title: 'Legacy', subtitle: '', svg: '<svg/>', cards: '',
   }));

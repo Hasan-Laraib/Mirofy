@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-relationship-pulse-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-relationship-pulse-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -80,9 +80,9 @@ test('semantic tokens use five distinct inline SVG cues on one finite timing own
   assert.match(html, /kind === 'data'[\s\S]+kind === 'event'[\s\S]+kind === 'security'[\s\S]+kind === 'state'/);
   assert.match(html, /document\.createElementNS\(svgNamespace, 'animateMotion'\)/);
   assert.match(html, /motion\.setAttribute\('dur', options\.duration \|\| '1\.2s'\)/);
-  assert.match(html, /animation: archify-relationship-token-life 1\.2s linear 1 both/);
+  assert.match(html, /animation: mirofy-relationship-token-life 1\.2s linear 1 both/);
   assert.match(html, /semantic-flow-token-halo/);
-  assert.match(html, /Archify\.flowTokens = \{/);
+  assert.match(html, /Mirofy\.flowTokens = \{/);
   assert.match(html, /data-relationship-token-kind', tokenKind/);
   assert.match(html, /var tokenAdded = false/);
   assert.doesNotMatch(html, /relationship-flow-token[^}]+infinite/);
@@ -90,14 +90,14 @@ test('semantic tokens use five distinct inline SVG cues on one finite timing own
 
 test('pulse is finite, event-owned, preset-aware, touch-safe, and motion-safe', () => {
   const html = render('architecture', CASES.architecture);
-  assert.match(html, /animation: archify-relationship-pulse 1\.2s linear 1 both/);
-  assert.match(html, /@keyframes archify-relationship-token-life/);
+  assert.match(html, /animation: mirofy-relationship-pulse 1\.2s linear 1 both/);
+  assert.match(html, /@keyframes mirofy-relationship-token-life/);
   assert.doesNotMatch(html, /relationship-flow-pulse[^}]+infinite/);
   assert.match(html, /var activeRelationshipPreview = null/);
   assert.match(html, /if \(next === activeRelationshipPreview\) return/);
   assert.match(html, /event\.pointerType === 'touch'/);
   assert.match(html, /finePointerQuery && !finePointerQuery\.matches/);
-  assert.match(html, /Archify\.motionGovernor && Archify\.motionGovernor\.isPaused\(\)/);
+  assert.match(html, /Mirofy\.motionGovernor && Mirofy\.motionGovernor\.isPaused\(\)/);
   assert.match(html, /document\.hidden/);
   assert.match(html, /addEventListener\('animationcancel', finishPulse/);
   assert.match(html, /reducedMotionQuery\.addEventListener\('change', syncRelationshipMotionPreference\)/);

@@ -17,10 +17,10 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const cli = path.join(skillRoot, 'bin/archify.mjs');
+const cli = path.join(skillRoot, 'bin/mirofy.mjs');
 const templatePath = path.join(skillRoot, 'assets/template.html');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-i18n-'));
-const chromePath = process.env.ARCHIFY_CHROME ? findChrome() : null;
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-i18n-'));
+const chromePath = process.env.MIROFY_CHROME ? findChrome() : null;
 let sequence = 0;
 
 const EXAMPLES = {
@@ -149,7 +149,7 @@ test('zh-CN localizes renderer-owned output across all five modes without transl
     assert.ok(result.html.includes(`<h1>${authoredTitle}</h1>`), `${type}: authored heading changed`);
     assert.match(result.html, /<text\b[^>]*>\u56fe\u4f8b<\/text>/);
     assert.match(result.html, /aria-label="\u805a\u7126/);
-    assert.match(result.html, new RegExp(`<desc id="archify-diagram-description">\u7531 Archify \u751f\u6210\u7684`));
+    assert.match(result.html, new RegExp(`<desc id="mirofy-diagram-description">\u7531 Mirofy \u751f\u6210\u7684`));
     assert.match(result.html, /"locale":"zh-CN"/);
     assert.match(result.html, />\u5bfc\u51fa\u56fe\u8868</);
     assert.doesNotMatch(result.html, /\{\{i18n:/);
@@ -231,7 +231,7 @@ test('unsupported locale values fail schema validation in every mode', () => {
 });
 
 test('real Chrome keeps zh-CN Finder, Route, Export, and accessibility UI localized in all five modes', {
-  skip: chromePath ? false : 'Set ARCHIFY_CHROME to run the real browser localization regression.',
+  skip: chromePath ? false : 'Set MIROFY_CHROME to run the real browser localization regression.',
 }, async () => {
   const browser = new ChromeVisualBrowser(chromePath);
   try {
@@ -309,14 +309,14 @@ test('real Chrome keeps zh-CN Finder, Route, Export, and accessibility UI locali
       assert.deepEqual(state.presetBadges, {
         'signal-flow': { header: '信号流', plate: 'none' },
         blueprint: { header: '蓝图 / 修订 01', plate: '' },
-        editorial: { header: '编辑风格 / 现场笔记', plate: 'ARCHIFY / 图版 04' },
+        editorial: { header: '编辑风格 / 现场笔记', plate: 'MIROFY / 图版 04' },
       }, type);
 
       const shareCardFailure = await evaluate(browser, sessionId, `(async function () {
         var originalGetContext = HTMLCanvasElement.prototype.getContext;
         HTMLCanvasElement.prototype.getContext = function () { return null; };
         try {
-          await Archify.exportMenu.shareCard();
+          await Mirofy.exportMenu.shareCard();
           return { rejected: false, message: '' };
         } catch (error) {
           return { rejected: true, message: String(error && error.message || error) };
@@ -332,7 +332,7 @@ test('real Chrome keeps zh-CN Finder, Route, Export, and accessibility UI locali
       const visual = spawnSync(process.execPath, [cli, 'visual-check', result.output, '--json'], {
         cwd: skillRoot,
         encoding: 'utf8',
-        env: { ...process.env, ARCHIFY_CHROME: chromePath },
+        env: { ...process.env, MIROFY_CHROME: chromePath },
       });
       assert.ok([0, 1].includes(visual.status), `${type}: ${visual.stderr || visual.stdout}`);
       const receipt = JSON.parse(visual.stdout);

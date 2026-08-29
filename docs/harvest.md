@@ -27,7 +27,7 @@ which is untracked in both repositories):
    `archify/` subtree. States the harvest rules for this directory (see
    `packages/core/README.md`).
 4. **`package.json` — content differs.** Verified diff, not just "scripts
-   rewritten": `name` (`archify` → `@product/core`), `version`
+   rewritten": `name` (`archify` → `@mirofy/core`), `version`
    (`2.16.0-dev.0` → `2.16.0`), `description`, and `bin` (`archify` →
    `product`) were all changed to fit the workspace's placeholder naming
    convention, in addition to `scripts` being rewritten because the ancestor's
@@ -44,14 +44,100 @@ deliberately changed, above. `packages/core/` holds 165 tracked files in
 total once the added `README.md`, which has no ancestor counterpart to be
 "identical" to, is counted back in: 163 identical + 1 changed + 1 added.)
 
-This is enforced in CI, not just asserted here: `npm run check:harvest`
-(`scripts/check-harvest-identity.mjs`) recomputes the git blob hash of every
-file on disk under `packages/core/` and compares it against a manifest of
-these 163 ancestor hashes plus the four deviations above, committed at
-`scripts/harvest-manifest.json`. It runs offline and fails on any drift — a
-changed byte, a reappeared removed file, or an untracked file dropped in —
-that a later change might otherwise introduce without moving a golden
-digest.
+This is enforced in CI, not just asserted here: `npm run check:provenance`
+(`scripts/check-provenance.mjs`) recomputes the git blob hash of every one of
+these 163 files and compares it against the manifest of ancestor hashes plus
+the four deviations above, committed at `scripts/harvest-manifest.json`. It
+runs offline and fails if the recorded history stops supporting the claim.
+
+### The provenance anchor
+
+The check reads its bytes from a pinned commit rather than from the working
+tree, because the working tree no longer holds them.
+
+`packages/core/` was byte-identical to the ancestor, as described above, up to
+and including commit `54a130780cb41d6096b337f23f2c7cb933cbcf0d` — recorded as
+`provenanceAnchor` in `scripts/harvest-manifest.json`. From the very next
+commit the code carries this product's own identifiers: the ancestor's
+namespace, CSS prefixes, custom properties, environment variables and CLI
+binary name were all replaced with `Mirofy`/`mirofy`/`MIROFY_` equivalents.
+That change was proved identifier-only — a fixture rendered on either side of
+it is byte-identical once the identifiers are substituted back — but it does
+move every one of the 163 blob hashes, so present-tense byte-identity is
+deliberately no longer true and is no longer what the check asserts.
+
+### The anchor tag must be pushed, and must never be deleted
+
+The anchor is pinned twice: as a SHA in `scripts/harvest-manifest.json`, and
+as an annotated tag, `provenance-anchor`, recorded there as `provenanceTag`.
+
+The tag is not decoration. A SHA in a JSON file does not keep a commit alive —
+squash-merging or rebase-merging the branch that introduced it leaves the
+commit unreferenced, and deleting that branch makes it collectable. The gate
+would then fail permanently, and the only *apparent* remedy would be to edit
+the anchor in the manifest. That would be the wrong move every time: the
+anchor is the evidence the check exists to verify, and rewriting it to
+whatever happens to be reachable proves nothing.
+
+So:
+
+```bash
+git push origin provenance-anchor
+```
+
+The tag must be pushed with the branch, must never be deleted, and must never
+be moved. `check:provenance` resolves it first and falls back to the raw SHA
+for a checkout that has the history but not the tags; if both resolve and
+disagree, it fails rather than picking one. CI checks out with
+`fetch-depth: 0` for the same reason — a shallow clone cannot see the anchor,
+and the gate refuses to pass vacuously when it cannot find its evidence.
+
+The code remains MIT-derived from the ancestor named at the top of this
+document, and the attribution required by that licence is retained verbatim in
+`/LICENSE`, `/NOTICE` and `packages/core/LICENSE`. The anchor makes the
+historical claim permanently checkable by hand:
+
+```bash
+git show 54a1307:packages/core/renderers/shared/utils.mjs | git hash-object --stdin
+```
+
+### Post-anchor divergence (`check:drift`)
+
+From the anchor commit onward, `packages/core/` is expected to change
+deliberately — a regenerated template, a fix, an added preset — and
+`check:drift` (`scripts/check-core-drift.mjs`, `scripts/core-manifest.json`,
+165 blob hashes) is the present-tense gate that requires each such change to
+be a reviewed re-baseline (`--update`) rather than a silent edit. Unlike
+`check:provenance`, this gate has no anchor: it simply asserts the current
+tree matches the last deliberate baseline. Every file that has diverged since
+the anchor is recorded here, with why:
+
+- `assets/template.html` — carries the `okabe-ito` palette blocks, preset
+  registration, and style-picker option added in P1a Task 7. Generated from
+  `packages/viewer/`; integrity enforced by `check:template` and
+  `check:drift`.
+- `renderers/shared/i18n.mjs` — gained the `viewer.preset.okabeIto` and
+  `viewer.preset.okabeIto.hint` locale pair in every supported locale (P1a
+  Task 7), so the new preset's label and menu hint resolve instead of
+  falling back to the raw key string.
+- `schemas/architecture.schema.json`, `schemas/dataflow.schema.json`,
+  `schemas/lifecycle.schema.json`, `schemas/sequence.schema.json`,
+  `schemas/workflow.schema.json` — each `meta.visual_preset` enum gained
+  `"okabe-ito"` (P1a Task 7), so a document may opt into the preset without
+  failing schema validation.
+- `renderers/shared/generated-validators.mjs` — regenerated from the schemas
+  above via `packages/core`'s `npm run generate:validators`; this file is
+  build output, never hand-edited.
+- `bin/preview.mjs` — **fixed** in P1a Task 9. `fs.watch` is given a resolved
+  long path via `resolveWatchRoot()`. The ancestor passes an unresolved
+  directory, which aborts the process under libuv on Windows when the watch
+  root is an 8.3 short path.
+- `examples/dataflow-product-analytics.html`, `examples/lifecycle-agent-run.html`,
+  `examples/sequence-cache-miss-request.html`, `examples/web-app-rendered.html`,
+  `examples/workflow-agent-tool-call-rendered.html` — **removed** in P1a
+  Task 9 (see "Known debt: inherited generated HTML in `examples/`" above).
+  Committed build output, regenerable with `npm run build`; nothing read
+  their contents.
 
 ## How parity is proved
 
@@ -61,7 +147,7 @@ endings, and compares SHA-256 digests against `fixtures/golden/manifest.json`
 (`scripts/conformance.mjs`) additionally proves the 56-row harvested
 capability matrix (`packages/conformance/src/matrix.mjs`) still holds after
 the move: 55 of 56 rows are provable (39 without a browser, 16 more with
-`PRODUCT_CHROME`); row 6.10 (deterministic ZIP packaging) is UNPROVEN because
+`MIROFY_CHROME`); row 6.10 (deterministic ZIP packaging) is UNPROVEN because
 its source — `scripts/build-zip.sh`, `scripts/package-smoke.mjs`,
 `.github/workflows/release.yml` in the ancestor — was never part of this
 harvest's scope, so there is nothing in this repository to prove parity
@@ -97,11 +183,22 @@ with something generated on demand, not committed) during the P1 viewer
 refactor, once `packages/core/` is no longer required to match the ancestor
 byte-for-byte.
 
+**Resolved in P1a Task 9.** The five files are removed (`git rm`) and
+`packages/core/examples/*.html` is now gitignored — regenerate with
+`npm run build` (`mirofy examples`) on demand. Nothing referenced their
+contents: `fixtures/sources/*.json`'s `meta.output` fields name a default
+output path, not a dependency; `packages/core/scripts/render-examples.mjs`
+is the generator that produced them; and the two `bin/mirofy.mjs` call
+sites either run that generator (`mirofy examples`) or check that the
+generator script exists (`mirofy doctor`), never the generated output. The
+tracked tree drops from ~7.3 MB to ~3.9 MB; the size budget is lowered from
+10 MB to 6 MB in the same task to hold the reduction.
+
 ## Known debt: inherited, uninvoked `test/` directory
 
 `packages/core/test/` carries 92 files (~933 KB: 82 `*.test.mjs` suites plus
 8 JSON fixtures they load), harvested unmodified along with everything else.
-None of it is excluded from `check:harvest`'s or `test:golden`'s scope, but
+None of it is excluded from `check:provenance`'s or `test:golden`'s scope, but
 none of it is *run* by anything in this workspace either — `npm run test`
 (`scripts/run-tests.mjs`) only discovers suites under
 `packages/conformance/test/`, and nothing in `package.json` or

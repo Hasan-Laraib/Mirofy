@@ -630,3 +630,9 @@ that was red in CI); `delivery.test.mjs` 7/7 with 0 skipped; artifacts 5/5
 reproducible; tracked tree 6.6 MB / 10 MB; 0 vulnerabilities. Note the local
 Windows box cannot reproduce the libuv abort — its temp path has no short-form
 component — so CI is the only proof surface for that fix.
+
+**P1a disposition of the P0 debt.** `preview.mjs` watch root — **fixed** (P1a
+Task 9). `packages/core/examples/` ~3.4 MB — **removed** (P1a Task 9); budget
+lowered 10 MB → 6 MB. Row 3.1 rename — **already complete** before P1a began;
+`matrix.mjs:149` and `matrix.mjs:180` carry the corrected names. That item was
+stale when written and required no work.

@@ -1,0 +1,7 @@
+{
+  "name": "@mirofy/viewer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Viewer source of truth. Built into packages/core/assets/template.html."
+}

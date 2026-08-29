@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MODES, renderFixture, canonicalise } from '../packages/conformance/src/render.mjs';
+import { MODES, renderFixture, canonicalise, fixturesRoot } from '../packages/conformance/src/render.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const manifestPath = path.resolve(here, '../fixtures/golden/manifest.json');
@@ -23,17 +23,34 @@ if (writeMode && process.env.CI) {
   process.exit(1);
 }
 
-function digestOf(mode, fixture) {
-  const out = path.join(tmp, `${mode}.html`);
-  renderFixture(mode, fixture, out);
+const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'];
+
+// meta.visual_preset is the only render-time visual input; theme is a
+// runtime toggle the viewer applies from localStorage, so it is covered by
+// the browser suite rather than here. All ten palette blocks (grew from
+// eight in P1a Task 7's okabe-ito dark/light pair) are embedded in every
+// artifact regardless of preset, so these 25 digests do byte-cover all ten
+// palettes -- what the extra presets add is coverage of the renderer's own
+// preset-conditional branches.
+function renderWithPreset(mode, fixture, preset, outPath) {
+  const source = JSON.parse(fs.readFileSync(path.join(fixturesRoot, fixture), 'utf8'));
+  source.meta = { ...source.meta, visual_preset: preset };
+  const patched = path.join(tmp, `${mode}-${preset}.source.json`);
+  fs.writeFileSync(patched, JSON.stringify(source));
+  renderFixture(mode, patched, outPath);
+}
+
+function digestOf(mode, fixture, preset) {
+  const out = path.join(tmp, `${mode}-${preset}.html`);
+  renderWithPreset(mode, fixture, preset, out);
   const html = canonicalise(fs.readFileSync(out, 'utf8'));
   return { sha256: createHash('sha256').update(html).digest('hex'), out };
 }
 
 if (writeMode) {
-  const entries = MODES.map(({ mode, fixture }) => ({
-    mode, fixture, sha256: digestOf(mode, fixture).sha256,
-  }));
+  const entries = MODES.flatMap(({ mode, fixture }) => PRESETS.map((preset) => ({
+    mode, fixture, preset, sha256: digestOf(mode, fixture, preset).sha256,
+  })));
   fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
   fs.writeFileSync(manifestPath, `${JSON.stringify({ schemaVersion: 1, entries }, null, 2)}\n`);
   console.log(`wrote ${entries.length} golden digests`);
@@ -43,12 +60,12 @@ if (writeMode) {
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 let failures = 0;
 for (const entry of manifest.entries) {
-  const { sha256, out } = digestOf(entry.mode, entry.fixture);
+  const { sha256, out } = digestOf(entry.mode, entry.fixture, entry.preset);
   if (sha256 === entry.sha256) {
-    console.log(`  ok    ${entry.mode}`);
+    console.log(`  ok    ${entry.mode}/${entry.preset}`);
   } else {
     failures += 1;
-    console.error(`  FAIL  ${entry.mode}`);
+    console.error(`  FAIL  ${entry.mode}/${entry.preset}: digest mismatch`);
     console.error(`        expected ${entry.sha256}`);
     console.error(`        actual   ${sha256}`);
     console.error(`        fresh render: ${out}`);

@@ -1,13 +1,13 @@
 # Data Flow Renderer
 
-Render `diagram_type: "dataflow"` JSON files into the standard Archify HTML
+Render `diagram_type: "dataflow"` JSON files into the standard Mirofy HTML
 template.
 
 ```bash
-node archify/renderers/dataflow/render-dataflow.mjs input.dataflow.json output.html
+node mirofy/renderers/dataflow/render-dataflow.mjs input.dataflow.json output.html
 ```
 
-The renderer validates input against `archify/schemas/dataflow.schema.json`
+The renderer validates input against `mirofy/schemas/dataflow.schema.json`
 with the bundled standalone validator. No dependency installation is required.
 
 If `output.html` is omitted, the renderer uses `meta.output` from the JSON file
@@ -33,12 +33,12 @@ Data-flow JSON files must set:
 ```
 
 A complete worked example lives at
-`archify/examples/product-analytics.dataflow.json`.
+`mirofy/examples/product-analytics.dataflow.json`.
 
 The schema lives at:
 
 ```text
-archify/schemas/dataflow.schema.json
+mirofy/schemas/dataflow.schema.json
 ```
 
 ## Legend
@@ -47,7 +47,7 @@ The default visual legend derives kinds from `flows[].variant` (omitting
 `variant` means `default`) and adds `database` only when a database node exists.
 Supported `meta.legend.entries` keys, in stable order, are `emphasis`,
 `security`, `dashed`, `database`, and `default`. Flow variants remain
-visual-only because Archify has no compiled edge-kind facts in this slice. A
+visual-only because Mirofy has no compiled edge-kind facts in this slice. A
 present `database` entry is different: it comes from exact
 `nodes[].type: "database"` facts, so it publishes the normal Semantic Legend
 count, accessible name, and keyboard interaction. Forcing `database` visible

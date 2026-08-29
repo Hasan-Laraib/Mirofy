@@ -24,7 +24,7 @@ export function loadDiagram({ rendererDir, diagramType, defaultExample, argv = p
   validateGuidedViews(diagramType, diagram);
   validateRelationshipIds(diagramType, diagram);
   validateEngineeringProfile(diagramType, diagram);
-  const sourceEvidence = verifyRepositoryEvidence(diagramType, diagram, process.env.ARCHIFY_REPO_ROOT);
+  const sourceEvidence = verifyRepositoryEvidence(diagramType, diagram, process.env.MIROFY_REPO_ROOT);
   const template = fs.readFileSync(path.join(skillRoot, 'assets/template.html'), 'utf8');
   // Optional chaining: in degraded mode (no ajv) malformed input must still
   // reach the renderer's friendly layout checks instead of crashing here.
@@ -148,24 +148,42 @@ export function validateGuidedViews(diagramType, diagram) {
 }
 
 // Accessible name for the generated diagram SVG.
+//
+// KNOWN GAP (Task 8 fix round 1, 2026): this statically emits role="img"
+// below, while focusNodeAttrs() (this file) statically emits real,
+// focusable tabindex="0" role="button" nodes on every component -- an
+// element declaring its own children presentational while containing real
+// interactive controls is a WCAG 4.1.2 defect (axe-core: nested-interactive).
+// That conflict is corrected only at viewer BOOT time
+// (packages/viewer/src/js/07-focus.js sets role="graphics-document" once
+// Mirofy.focus runs), not here. This function's own static output is still
+// wrong on its own terms: with JavaScript disabled, before boot completes,
+// or for any consumer of this markup other than the shipped viewer runtime,
+// the static role="img" over interactive descendants persists uncorrected.
+// packages/conformance/test/accessibility.browser.test.mjs's gate cannot
+// see this either, because it only ever scans the post-boot DOM. Recorded
+// as P1b debt (task-8-report.md): fix it here, in the renderer, so the
+// static markup itself is correct -- deliberately not done in Task 8,
+// since that would move every renderer's output and all 25 golden
+// digests, a change that deserves its own task and its own review.
 export function svgRootAttrs(meta, kind) {
   const animation = meta.animation === 'trace' ? ' data-animation="trace"' : '';
   const preset = ` data-preset="${esc(meta.visual_preset || 'classic')}"`;
   const engineeringProfile = meta.engineering_profile
     ? ` data-engineering-profile="${esc(meta.engineering_profile)}"`
     : '';
-  const requestedProfile = process.env.ARCHIFY_QUALITY_PROFILE || meta.quality_profile;
+  const requestedProfile = process.env.MIROFY_QUALITY_PROFILE || meta.quality_profile;
   const qualityProfile = requestedProfile === 'showcase' ? 'showcase' : 'standard';
   const advisory = requestedProfile ? '' : ' data-quality-gates="advisory"';
-  return `role="img" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="archify-diagram-title archify-diagram-description"${animation}${preset}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
+  return `role="img" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="mirofy-diagram-title mirofy-diagram-description"${animation}${preset}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
 }
 
 // Keep the accessible name inside the SVG so it survives standalone SVG
-// export and embedding. The fixed IDs are deterministic because an Archify
+// export and embedding. The fixed IDs are deterministic because an Mirofy
 // artifact intentionally contains one primary diagram SVG.
 export function svgAccessibleText(meta, kind) {
   const description = meta.subtitle || translateMessage(meta.locale, `diagram.description.${kind}`);
-  return `        <title id="archify-diagram-title">${esc(meta.title)}</title>\n        <desc id="archify-diagram-description">${esc(description)}</desc>`;
+  return `        <title id="mirofy-diagram-title">${esc(meta.title)}</title>\n        <desc id="mirofy-diagram-description">${esc(description)}</desc>`;
 }
 
 export function animateAttr(meta, kind, step) {
@@ -203,7 +221,7 @@ export function focusNodeAttrs(id, label, metadata = {}, locale) {
 }
 
 // Native SVG titles preserve a compact details-on-demand fallback when the
-// canonical SVG is embedded inline outside the full Archify viewer.
+// canonical SVG is embedded inline outside the full Mirofy viewer.
 export function focusNodeTitle(label, metadata = {}) {
   const parts = [label, metadata.sublabel, metadata.context, metadata.tag, metadata.brand]
     .filter((value) => value !== undefined && value !== null && String(value).trim() !== '');

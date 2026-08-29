@@ -3,7 +3,7 @@
 // Honesty rules (doc 37 §1 — a skipped test is skipped, never described as
 // passing):
 //   - a browser-deferred row is reported explicitly, by id, and is never
-//     counted toward "proved" unless PRODUCT_CHROME actually ran it;
+//     counted toward "proved" unless MIROFY_CHROME actually ran it;
 //   - a row with proof: null is reported as UNPROVEN, by id and reason, and
 //     is never counted as passing;
 //   - a suite failure fails the whole run;
@@ -26,22 +26,7 @@ import { HARVESTED_ROWS } from '../packages/conformance/src/matrix.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
-const includeBrowser = process.env.PRODUCT_CHROME ? true : false;
-
-// The project's own signal for "is a browser available" is PRODUCT_CHROME
-// (see the honesty rules above and CONTRIBUTING.md). The harvested
-// packages/core/bin/visual-check.mjs -- which row 6.3's proof (delivery.
-// test.mjs) drives through the real `archify visual-check` CLI -- reads
-// ARCHIFY_CHROME instead, and must not be modified (it is inside
-// packages/core). Rather than duplicate visual-check's Chrome-discovery
-// logic, map the one signal onto the other for every suite this script
-// spawns, so 6.3 gates on the same PRODUCT_CHROME switch as every other
-// browser row instead of silently falling back to whatever Chrome (if any)
-// happens to be on PATH. Never overrides an ARCHIFY_CHROME the environment
-// already set explicitly.
-if (process.env.PRODUCT_CHROME && !process.env.ARCHIFY_CHROME) {
-  process.env.ARCHIFY_CHROME = process.env.PRODUCT_CHROME;
-}
+const includeBrowser = process.env.MIROFY_CHROME ? true : false;
 
 const unproven = HARVESTED_ROWS.filter((row) => row.proof === null);
 const browserRows = HARVESTED_ROWS.filter((row) => row.browser);
@@ -163,7 +148,7 @@ if (titleFailures.length) failures += 1;
 
 console.log(`\nconformance: ${HARVESTED_ROWS.length} harvested rows total`);
 console.log(`  proved:            ${failures === 0 ? trulyProvableRows.length : 0} / ${provableRows.length}${failures ? ' (suite or title-check failures below; none counted as passing)' : ''}`);
-console.log(`  browser-deferred:  ${deferredBrowserRows.length} (never counted as passing; set PRODUCT_CHROME to run them)`);
+console.log(`  browser-deferred:  ${deferredBrowserRows.length} (never counted as passing; set MIROFY_CHROME to run them)`);
 if (deferredBrowserRows.length) {
   console.log(`    ids: ${deferredBrowserRows.map((row) => row.id).join(', ')}`);
 }

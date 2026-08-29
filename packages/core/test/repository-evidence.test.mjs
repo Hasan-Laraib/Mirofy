@@ -9,20 +9,20 @@ import { startPreview } from '../bin/preview.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
-const cli = path.join(skillRoot, 'bin', 'archify.mjs');
+const cli = path.join(skillRoot, 'bin', 'mirofy.mjs');
 
 function git(repo, ...args) {
   return execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
 }
 
 function fixture() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-evidence-repo-'));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-evidence-repo-'));
   fs.mkdirSync(path.join(root, 'src'), { recursive: true });
   fs.writeFileSync(path.join(root, 'src', 'router.js'), 'export function route(input) {\n  return input.kind;\n}\n');
   fs.writeFileSync(path.join(root, 'src', 'store.js'), 'export const store = new Map();\n');
   git(root, 'init');
-  git(root, 'config', 'user.name', 'Archify Tests');
-  git(root, 'config', 'user.email', 'archify@example.test');
+  git(root, 'config', 'user.name', 'Mirofy Tests');
+  git(root, 'config', 'user.email', 'mirofy@example.test');
   git(root, 'remote', 'add', 'origin', 'git@github.com:example/evidence-repo.git');
   git(root, 'add', '.');
   git(root, 'commit', '-m', 'fixture');
@@ -50,7 +50,7 @@ function run(args) {
 }
 
 function evidencePayload(html) {
-  const match = html.match(/<script id="archify-source-evidence-data" type="application\/json">([\s\S]*?)<\/script>/);
+  const match = html.match(/<script id="mirofy-source-evidence-data" type="application\/json">([\s\S]*?)<\/script>/);
   assert.ok(match, 'verified evidence payload missing');
   return JSON.parse(match[1]);
 }
@@ -101,13 +101,13 @@ test('repository evidence is revision-verified, receipt-backed, searchable, and 
   assert.equal(evidence.nodes.users.length, 2);
   assert.equal(evidence.nodes.users[0].href, `https://github.com/example/evidence-repo/blob/${data.revision}/src/router.js#L1-L3`);
   assert.match(html, /Verified source/);
-  assert.match(html, /Archify\.sourceEvidence = \(function \(\)/);
+  assert.match(html, /Mirofy\.sourceEvidence = \(function \(\)/);
   assert.match(html, /var sourceSearch = sources\.map/);
   assert.match(html, /renderSourceEvidence\(id\)/);
   assert.match(html, /referrerPolicy = 'no-referrer'/);
   assert.match(html, /classList\.add\('source-evidence-beacon'\)/);
   assert.match(html, /text\.textContent = viewerText\('viewer\.passport\.sourceMarker'\) \+ ' ' \+ count/);
-  assert.match(html, /Archify\.sourceEvidence\.installBeacons\(\)/);
+  assert.match(html, /Mirofy\.sourceEvidence\.installBeacons\(\)/);
   assert.match(html, /querySelectorAll\('\[data-source-evidence-beacon\]'\)/);
   assert.match(html, /data-source-evidence-original-label/);
 
@@ -116,12 +116,12 @@ test('repository evidence is revision-verified, receipt-backed, searchable, and 
 });
 
 test('repository evidence is opt-in and never appears in ordinary artifacts', () => {
-  const output = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'archify-no-evidence-')), 'plain.html');
+  const output = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-no-evidence-')), 'plain.html');
   const input = path.join(skillRoot, 'examples', 'web-app.architecture.json');
   const result = run(['render', 'architecture', input, output]);
   assert.equal(result.status, 0, result.stderr);
   const html = fs.readFileSync(output, 'utf8');
-  assert.doesNotMatch(html, /id="archify-source-evidence-data"/);
+  assert.doesNotMatch(html, /id="mirofy-source-evidence-data"/);
   assert.match(html, /id="focus-evidence" hidden/);
   const svg = html.match(/<svg\b[\s\S]*?<\/svg>/)?.[0] || '';
   assert.doesNotMatch(svg, /source-evidence-beacon|data-source-evidence-count/);

@@ -12,7 +12,7 @@ const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
 
 test('guide page: checked-in HTML is reproducible from the shared recipe source', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-guide-page-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-guide-page-'));
   const generated = path.join(tmp, 'guide.html');
   try {
     execFileSync(process.execPath, [path.join(repoRoot, 'scripts/build-guide.mjs'), generated]);
@@ -30,7 +30,7 @@ test('guide page: ships bilingual recipes and syntactically valid interaction co
   assert.doesNotMatch(html, /\[\[[A-Z0-9_]+\]\]/);
   assert.match(html, /Question-first diagramming/);
   assert.match(html, /先问题，后图表/);
-  assert.match(html, /archify guide &quot;your scenario&quot;|archify guide "your scenario"/);
+  assert.match(html, /mirofy guide &quot;your scenario&quot;|mirofy guide "your scenario"/);
 
   const dataMatch = html.match(/<script id="guide-data" type="application\/json">([\s\S]*?)<\/script>/);
   assert.ok(dataMatch);

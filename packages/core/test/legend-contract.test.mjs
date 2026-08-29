@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const cli = path.join(skillRoot, 'bin/archify.mjs');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-legend-contract-'));
+const cli = path.join(skillRoot, 'bin/mirofy.mjs');
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-legend-contract-'));
 let sequence = 0;
 
 const FIXTURES = {

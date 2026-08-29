@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
-const cursorCommand = 'npx -y skills add tt-a1i/archify --skill archify --agent cursor --global --copy --yes';
+const cursorCommand = 'npx -y skills add Hasan-Laraib/Mirofy --skill mirofy --agent cursor --global --copy --yes';
 
 test('Cursor onboarding stays explicit, bilingual, and backed by the same Skill', () => {
   const english = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
@@ -24,7 +24,7 @@ test('Cursor onboarding stays explicit, bilingual, and backed by the same Skill'
   for (const surface of [english, chinese, landing]) assert.ok(surface.includes(cursorCommand));
   for (const surface of [english, chinese, start, landing]) {
     assert.doesNotMatch(surface, /skills use[^\n<]*--agent cursor/);
-    assert.doesNotMatch(surface, /~\/\.cursor\/skills\/archify/);
+    assert.doesNotMatch(surface, /~\/\.cursor\/skills\/mirofy/);
     assert.doesNotMatch(surface, /all Cursor models|every Cursor model/i);
   }
 
@@ -39,15 +39,15 @@ test('Cursor onboarding stays explicit, bilingual, and backed by the same Skill'
 });
 
 test('the zero-dependency archive works from the canonical Cursor-visible agent path', () => {
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-cursor-package-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-cursor-package-'));
   const agentSkills = path.join(tmp, '.agents', 'skills');
   try {
     fs.mkdirSync(agentSkills, { recursive: true });
-    execFileSync('unzip', ['-q', path.join(repoRoot, 'archify.zip'), '-d', agentSkills]);
-    const installed = path.join(agentSkills, 'archify');
-    const cli = path.join(installed, 'bin', 'archify.mjs');
+    execFileSync('unzip', ['-q', path.join(repoRoot, 'mirofy.zip'), '-d', agentSkills]);
+    const installed = path.join(agentSkills, 'mirofy');
+    const cli = path.join(installed, 'bin', 'mirofy.mjs');
     const doctor = execFileSync(process.execPath, [cli, 'doctor'], { encoding: 'utf8' });
-    assert.match(doctor, /Archify is ready\./);
+    assert.match(doctor, /Mirofy is ready\./);
 
     const fixtures = {
       architecture: 'web-app.architecture.json',

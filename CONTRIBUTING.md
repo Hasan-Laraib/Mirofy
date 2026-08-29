@@ -16,19 +16,26 @@
    workflow (`.github/workflows/ci.yml`) defines this same gate and its
    steps pass locally, but as of P0 the workflow has not yet executed on a
    runner — until it has, a clean local `npm run check` is the actual bar,
-   not "CI is the gate". Run it once more with `PRODUCT_CHROME` set to a
+   not "CI is the gate". Run it once more with `MIROFY_CHROME` set to a
    Chrome executable so the 16 browser-only conformance rows are exercised
    too — CI's `browser` job is intended to do this on every push and pull
    request once it runs for real.
 4. **A skipped test is skipped.** Never reported as passing, in a PR or a
-   receipt. A browser row deferred for lack of `PRODUCT_CHROME` is reported
+   receipt. A browser row deferred for lack of `MIROFY_CHROME` is reported
    by id, not folded into the proved count. A row with no real proof is
    `proof: null` with a `note` explaining why — never silently marked
    covered.
 5. **`packages/core/` is harvested code.** Do not refactor it during P0.
    Import unmodified, prove parity, refactor in P1 — never both at once.
-6. **Do not rename `ARCHIFY_*` environment variables.** The product name is
-   parked; renaming is a P1 task.
+6. **`MIROFY_*` is the environment-variable namespace.** The ancestor's
+   prefix was retired in P1; do not reintroduce it.
+7. **`packages/core/assets/template.html` is generated, never hand-edited.**
+   It is built from `packages/viewer/`; `npm run check:template` enforces
+   this by rebuilding from source and failing on drift. Edit design-token
+   values in `packages/viewer/src/tokens/tokens.mjs`, never in palette CSS —
+   the palette itself is generated from the token model. Run
+   `npm run build:template` after any change under `packages/viewer/` so the
+   committed template stays in sync with its source.
 
 ## Test types
 
@@ -43,7 +50,8 @@ npm run lint              # eslint .
 npm run typecheck         # tsc --noEmit
 npm run test              # node:test suites outside the conformance matrix
 npm run test:golden       # digest parity against the ancestor's renders
-npm run check:harvest     # packages/core/ byte-identity vs the ancestor manifest
+npm run check:provenance  # the harvest claim, verified at the recorded anchor
+npm run check:drift       # packages/core/ matches its reviewed manifest
 npm run test:conformance  # the 56-row parity matrix
 npm run check:artifacts   # npm run build's own output reproduces the golden digests
 npm run check:size        # 10 MB tracked-tree budget
@@ -56,8 +64,10 @@ npm run check             # all of the above, in order
 - Node `>=18`, pure ESM throughout.
 - Zero runtime dependencies (`dependencies` absent from every workspace
   `package.json` — this is itself a proved conformance row, 6.9).
-- The product name is a placeholder (`<PRODUCT>`, scope `@product/*`) pending
-  an owner decision (P0.8, parked). Do not invent or substitute a name.
+- The product name is `Mirofy`, scope `@mirofy/*` (P0.8, decided). The
+  ancestor's name survives only in `LICENSE`, `NOTICE`, `packages/core/LICENSE`,
+  `docs/harvest.md` and `docs/P0-BUILD-LEDGER.md`, where it is attribution or
+  historical record rather than product identity — do not rename it there.
 - Nothing under `packages/core/` is modified as part of ordinary feature
   work. If a fix there is genuinely required, it needs its own explicit,
   reviewed exception — not a drive-by edit alongside unrelated work.

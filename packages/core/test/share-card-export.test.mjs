@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
 const repoRoot = path.resolve(skillRoot, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-share-card-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-share-card-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -58,8 +58,8 @@ test('Share Card uses contain-only canonical geometry with fixed safe areas', ()
   assert.match(html, /function rasterizeShareCard\(options\)[\s\S]*?if \(!options\.variant\) return renderShareCard\(\);/);
   assert.match(html, /function renderShareCard\(options\)[\s\S]*?serializeSvg\(sourceScale, \{ routeSnapshot: routeSnapshot, reachSnapshot: reachSnapshot \}\)/);
   assert.match(html, /fitCanvasText\(ctx, title, [^)]+\)/);
-  assert.match(html, /ARCHIFY ·/);
-  assert.doesNotMatch(svgBlock(html), /share-card|Share Card|ARCHIFY ·/);
+  assert.match(html, /MIROFY ·/);
+  assert.doesNotMatch(svgBlock(html), /share-card|Share Card|MIROFY ·/);
 });
 
 test('Share Card is a canonical PNG with exact receipt dimensions and filename', () => {

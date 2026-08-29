@@ -18,7 +18,7 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-visual-check-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-visual-check-'));
 const png = Buffer.from('89504e470d0a1a0a', 'hex');
 
 function artifact(name = 'diagram.html') {
@@ -94,7 +94,7 @@ test('visual-check disables the Chrome sandbox only for root or an explicit envi
   const profileRoot = path.join(tmp, 'chrome-profile');
   const ordinary = chromeVisualBrowserArgs(profileRoot, { env: {}, getuid: () => 1001 });
   const optedIn = chromeVisualBrowserArgs(profileRoot, {
-    env: { ARCHIFY_CHROME_NO_SANDBOX: '1' },
+    env: { MIROFY_CHROME_NO_SANDBOX: '1' },
     getuid: () => 1001,
   });
   const root = chromeVisualBrowserArgs(profileRoot, { env: {}, getuid: () => 0 });
@@ -113,7 +113,7 @@ test('visual-check converts a Chrome DevTools pipe reset and captured stderr int
     chromePath: '/fake/chrome',
     browserFactory: async () => {
       const browser = new ChromeVisualBrowser('/fake/chrome', {
-        env: { ARCHIFY_CHROME_NO_SANDBOX: '1' },
+        env: { MIROFY_CHROME_NO_SANDBOX: '1' },
         getuid: () => 1001,
         spawnImpl: () => child,
       });
@@ -146,7 +146,7 @@ test('visual-check reports Chrome early exit status and stderr without an uncaug
     chromePath: '/fake/chrome',
     browserFactory: async () => {
       const browser = new ChromeVisualBrowser('/fake/chrome', {
-        env: { ARCHIFY_CHROME_NO_SANDBOX: '1' },
+        env: { MIROFY_CHROME_NO_SANDBOX: '1' },
         getuid: () => 1001,
         spawnImpl: () => child,
       });
@@ -390,7 +390,7 @@ test('visual-check returns 2 with a truthful skipped receipt when Chrome is unav
   assert.equal(result.receipt.captures.status, 'skipped');
   assert.equal(result.receipt.visualReview, 'pending');
   assert.equal(result.receipt.diagnostics[0]?.code, 'viewer/chrome-unavailable');
-  assert.ok(result.receipt.diagnostics[0]?.supportedFixes.some((fix) => fix.includes('ARCHIFY_CHROME')));
+  assert.ok(result.receipt.diagnostics[0]?.supportedFixes.some((fix) => fix.includes('MIROFY_CHROME')));
   assert.equal(fs.existsSync(sidecarPaths(input).receipt), true);
 });
 

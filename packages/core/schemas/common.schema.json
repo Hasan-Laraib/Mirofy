@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/archify/schemas/common.schema.json",
-  "title": "Archify Shared Definitions",
+  "$id": "https://github.com/Hasan-Laraib/Mirofy/schemas/common.schema.json",
+  "title": "Mirofy Shared Definitions",
   "$defs": {
     "id": {
       "type": "string",

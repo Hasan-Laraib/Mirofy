@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-story-trail-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-story-trail-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
