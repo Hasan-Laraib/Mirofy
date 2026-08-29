@@ -10,6 +10,12 @@ const manifestPath = path.resolve(here, '../fixtures/golden/manifest.json');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-golden-'));
 const writeMode = process.argv.includes('--update');
 
+if (writeMode && process.env.CI) {
+  console.error('refusing to regenerate golden digests in CI: --update must be a deliberate local action');
+  console.error('a re-baseline hides real rendering regressions; run it locally and commit the manifest diff for review');
+  process.exit(1);
+}
+
 function digestOf(mode, fixture) {
   const out = path.join(tmp, `${mode}.html`);
   renderFixture(mode, fixture, out);
