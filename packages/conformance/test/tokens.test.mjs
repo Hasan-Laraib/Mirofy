@@ -119,15 +119,6 @@ test('the viewer offers okabe-ito in the preset cycle (4.13)', () => {
 
 const SEMANTIC_ROLES = ['frontend', 'backend', 'database', 'cloud', 'security', 'messagebus', 'external'];
 
-// WCAG 1.4.11 (non-text, 3:1) vs 1.4.3 (text, 4.5:1): a stroke only needs
-// the stricter text floor if something in the viewer actually paints text
-// with it. Verified by reading every `color: var(--X-stroke)` rule in
-// packages/viewer/src/css/01-structure.css: six of the seven roles are used
-// for real inline text (labels, status text, em/strong elements); external
-// is used only as SVG/graphical paint (fill/stroke, a `currentColor` icon,
-// a decorative swatch dot) and never as a literal CSS `color` on text.
-const TEXT_ROLES = new Set(['frontend', 'backend', 'database', 'cloud', 'security', 'messagebus']);
-
 function strokesOf(block) {
   const strokes = {};
   for (const [name, value] of block.props) {
@@ -175,14 +166,68 @@ test('every pair of Okabe-Ito semantic hues stays separated under simulated colo
   }
 });
 
-test('every Okabe-Ito light-mode stroke clears its applicable WCAG contrast floor (4.13)', () => {
-  const strokes = strokesOf(okabeItoBlock('light'));
+// --- Fix round 2 (4.13): every role needs the 4.5:1 text floor ---
+//
+// Fix round 1's TEXT_ROLES split (six roles at WCAG 1.4.3's 4.5:1 text
+// floor, `external` alone relaxed to 1.4.11's 3:1 non-text floor) rested on
+// a comment claiming external is "never a literal CSS `color` on text". That
+// claim was false: `external` IS used as text colour in two places --
+// `.t-external { fill: var(--external-stroke); }`
+// (packages/viewer/src/css/01-structure.css:3622), a "Text helpers" rule
+// applied to real SVG `<text class="t-external">` labels via the
+// `componentText` map (packages/core/renderers/shared/geometry.mjs:1274,
+// consumed by render-architecture.mjs, render-dataflow.mjs and
+// render-workflow.mjs for a component's "tag" text) -- and
+// `.semantic-lens-kind { --lens-color: var(--external-stroke); }` /
+// `.semantic-lens-kind em { color: var(--lens-color); }`
+// (01-structure.css:1027, :1084), a literal CSS `color` on an `<em>`.
+//
+// The fix is not to add external back to a two-tier split: it is to drop
+// the split entirely. `#0072b2` clears 4.5:1 against every surface these
+// tests check (see panelSurfaceOf below), so holding all seven roles to the
+// one, stricter floor costs nothing and removes the latent hole a future
+// edit to `external` could otherwise fall through.
+const REQUIRED_TEXT_CONTRAST = 4.5;
+
+// The contrast floor is only meaningful against the surface the text
+// actually renders on. Traced every real text usage of the seven roles in
+// packages/viewer/src/css/01-structure.css and packages/core/renderers/:
+//   - The SVG canvas itself (componentText / t-X labels, boundary labels,
+//     connection labels) sits on `.diagram-container { background:
+//     var(--panel); }` (01-structure.css:379) -- the grid pattern
+//     (packages/core/renderers/shared/utils.mjs's <pattern id="grid">) only
+//     draws grid lines, no fill, so `--panel` is what actually shows through.
+//   - Every floating panel that colours text with one of these roles --
+//     .route-probe (:1137), .node-finder (:1856), .semantic-lens (:961),
+//     .focus-chip/.semantic-passport (:1307), .diagram-guide (:1663),
+//     .guided-views (:2039) -- paints `var(--toolbar-menu-bg)` or
+//     `var(--toolbar-bg)` as its own background, not `--bg`.
+//   - `--bg` (packages/viewer/src/css/01-structure.css:5) is used only on
+//     `body`, whose own text colour is `--text`, never one of these seven;
+//     `.toolbar`'s background is transparent (:2712), but no role's text
+//     colour is set on a bare toolbar child -- every such rule is scoped
+//     under one of the panels above, each of which paints its own opaque
+//     (or near-opaque) background first.
+// So the operative surface for all seven roles, in every case found, is
+// `--panel` (or a token that resolves to the same value in this block) --
+// never the bare page `--bg`. Read from the block's own token rather than
+// hardcoded, so a future edit to `--panel` cannot silently invalidate this.
+function panelSurfaceOf(block) {
+  const panel = block.props.find(([name]) => name === '--panel');
+  assert.ok(panel, `${block.selector} has no --panel token`);
+  return panel[1];
+}
+
+test('every Okabe-Ito light-mode stroke clears the WCAG text contrast floor against the panel surface (4.13)', () => {
+  const lightBlock = okabeItoBlock('light');
+  const strokes = strokesOf(lightBlock);
+  const surface = panelSurfaceOf(lightBlock);
   for (const role of SEMANTIC_ROLES) {
-    const required = TEXT_ROLES.has(role) ? 4.5 : 3.0;
-    const ratio = contrastRatio(strokes[role], '#ffffff');
+    const ratio = contrastRatio(strokes[role], surface);
     assert.ok(
-      ratio >= required,
-      `okabe-ito light ${role}-stroke (${strokes[role]}) contrast ${ratio.toFixed(2)}:1 is below the required ${required}:1`
+      ratio >= REQUIRED_TEXT_CONTRAST,
+      `okabe-ito light ${role}-stroke (${strokes[role]}) contrast ${ratio.toFixed(2)}:1 against panel `
+        + `(${surface}) is below the required ${REQUIRED_TEXT_CONTRAST}:1`
     );
   }
 });
