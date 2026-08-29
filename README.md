@@ -41,14 +41,24 @@ output path is still reproducible, rather than re-proving renderer parity a
 second time.
 
 `npm run check` runs the full gate chain in order: `lint → typecheck → test →
-test:golden → check:provenance → test:conformance → check:artifacts →
-check:size → check:audit`. `check:provenance`
+test:golden → check:provenance → check:drift → test:conformance →
+check:artifacts → check:size → check:audit`. `check:provenance`
 (`scripts/check-provenance.mjs`) proves the founding claim in CI. It no longer
 compares the working tree — since the identifier rename the code carries this
 product's own names, so byte-identity with the ancestor is deliberately no
 longer true. Instead it verifies the *historical* claim against an immutable
 anchor commit recorded in `scripts/harvest-manifest.json`: that all 163 files
-were byte-identical to the ancestor at that commit. Run
+were byte-identical to the ancestor at that commit.
+
+Because that claim is a constant function of immutable history, it can never
+fail on a code change — so it is paired with `check:drift`
+(`scripts/check-core-drift.mjs`), which makes the present-tense claim instead:
+every file under `packages/core/` still matches `scripts/core-manifest.json`,
+the last state someone deliberately re-baselined. `test:golden` renders only
+five fixtures, so an edit on a path no fixture exercises moves no digest;
+`check:drift` is what catches it. It is re-baselineable on purpose —
+`packages/core/` is expected to change — with `node scripts/check-core-drift.mjs
+--update`, which refuses to run in CI. Run
 `MIROFY_CHROME=/path/to/chrome npm run check` to also exercise the 16
 browser-only rows.
 
