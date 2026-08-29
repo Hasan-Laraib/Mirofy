@@ -43,3 +43,30 @@ test('every part listed in the manifest is a file that exists, and every file is
     assert.ok(listed.has(rel), `${rel} exists under src/ but no PARTS entry consumes it`);
   }
 });
+
+test('the palette file holds exactly the eight preset/theme blocks (4.12)', () => {
+  const css = fs.readFileSync(path.join(SRC_ROOT, 'css/00-palette.css'), 'utf8');
+  // Palette selectors carry the 4-space base indentation every part file
+  // keeps from the monolith's <style> tag (see js/01-preamble.js), so the
+  // match is anchored to that indentation rather than column 0 -- an
+  // unanchored [a-z:] start would also catch mid-comment continuation
+  // lines like "so the arrows drawn underneath...".
+  const selectors = css.match(/^ {4}\[?[a-z:][^{]*\{/gm) ?? [];
+  assert.equal(selectors.length, 8, `expected 8 palette blocks, found ${selectors.length}`);
+  for (const needle of [
+    ':root',
+    '[data-theme="light"]',
+    '[data-preset="signal-flow"][data-theme="dark"]',
+    '[data-preset="signal-flow"][data-theme="light"]',
+    '[data-preset="blueprint"][data-theme="dark"]',
+    '[data-preset="blueprint"][data-theme="light"]',
+    '[data-preset="editorial"][data-theme="dark"]',
+    '[data-preset="editorial"][data-theme="light"]',
+  ]) {
+    assert.ok(css.includes(needle), `palette block missing: ${needle}`);
+  }
+  // 01-structure.css must not have absorbed any custom-property block, or
+  // Task 6's generator would silently stop covering part of the palette.
+  const structure = fs.readFileSync(path.join(SRC_ROOT, 'css/01-structure.css'), 'utf8');
+  assert.ok(!structure.includes('[data-preset="editorial"][data-theme="light"] {'), 'a palette block leaked into 01-structure.css');
+});
