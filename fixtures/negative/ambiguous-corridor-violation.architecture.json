@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": { "title": "Ambiguous corridor violation" },
+  "components": [
+    { "id": "a", "type": "backend", "label": "A", "pos": [20, 130], "size": [60, 40] },
+    { "id": "b", "type": "backend", "label": "B", "pos": [400, 130], "size": [60, 40] },
+    { "id": "c", "type": "backend", "label": "C", "pos": [150, 20], "size": [60, 30] },
+    { "id": "d", "type": "backend", "label": "D", "pos": [250, 20], "size": [60, 30] }
+  ],
+  "connections": [
+    { "id": "a-b", "from": "a", "to": "b" },
+    { "id": "c-d", "from": "c", "to": "d", "fromSide": "bottom", "toSide": "bottom", "via": [[180, 150], [280, 150]] }
+  ]
+}
