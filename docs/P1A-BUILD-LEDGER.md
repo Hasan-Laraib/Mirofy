@@ -69,6 +69,22 @@ where the colour is genuinely used as text. Required a pairwise CIEDE2000
 regression test across 4 simulated vision models, demonstrated failing on the
 original values before passing on the fix.
 
+**How it passed every gate on the way in — the part worth carrying forward.**
+Theme (light/dark) is a runtime `localStorage` toggle; golden only ever
+varies the *render-time* preset. So all 25 golden digests, and the 42/42
+green conformance run alongside them, tested exactly zero light-mode
+renders — the preset shipped fully green while two of its seven component
+colours were identical to a deuteranopic viewer. A deuteranopic user picks
+"Accessible" because classic is unreadable, flips to light, and the two
+component types collapse into one — arguably worse than shipping nothing,
+at 42/42 green throughout. The lesson generalises beyond this one preset: a
+feature can satisfy every check in the suite while failing exactly the
+people it exists for, when the suite varies an input orthogonal to the axis
+the failure lives on. Nothing in the existing test surface could have found
+this by reading the code harder; it took building new measurement machinery
+(CIEDE2000 across three simulated CVD types) that did not exist before this
+task, aimed specifically at the axis golden does not vary.
+
 **Ruling 25/26 — Task 9's pre-dispatch size and stop-condition corrections**
 (this task; see below).
 
@@ -249,6 +265,27 @@ editing `props` alone was caught by *nothing*. Fixed by deriving `props` from
 impossible by construction rather than tested-for. Review clean after one
 fix round.
 
+**The sharper point this surfaced, and it generalises past this one task:**
+`check-template.mjs` is a **staleness check, not a correctness oracle.**
+`npm run build:template` regenerates the template from the same emitter the
+committed file was built from, so the comparison it runs is trivially true
+after any rebuild — it only ever catches a committed file that has drifted
+from its own source, never a source that is wrong in a way both sides of the
+comparison share. It had been *acting* as an oracle purely by accident, for
+as long as the palette bytes stayed frozen (Tasks 1–6): with the target
+frozen, "matches source" and "is correct" happened to be the same claim.
+Task 7 is precisely where that stopped being true — the moment
+`packages/core` bytes are deliberately allowed to move, "rebuild and
+compare" stops proving anything about whether the *source* is right, only
+that the committed file agrees with it. This is the limit of every
+regenerate-and-compare gate in this repo (`check:template`,
+`check:artifacts`'s reproducibility check, `check-core-drift.mjs`'s
+re-baseline), not just this one: each proves internal consistency, and none
+of them is a substitute for a test that knows what the *right* answer is
+independently of the generator. The next person leaning on one of these
+gates as if it validates content, rather than merely staleness, needs this
+distinction before they do.
+
 **Task 7** — the Okabe–Ito preset; core's graduation point (`31f5b18`).
 **Ruling 22:** the "exactly one hash may change" instruction was wrong — 8
 hashes moved, all traced and required (schemas needed the new enum value
@@ -280,6 +317,22 @@ Summary: `preview.mjs` watch-root fix landed (`ee56e27`); five committed
 rendered examples removed, tree 7.3 MB → measured **3.9 MB**, budget
 lowered 10 MB → 6 MB (`a470a18`); this document and the P0-ledger closing
 note follow.
+
+**Known limitation of the new Step-1 test.** `resolveWatchRoot`'s own test
+only asserts the function exists, is total, and returns a path that exists —
+it does not assert that resolution actually *occurs*. Revert the function's
+body to `return dir;` (an identity function that never resolves anything)
+and `delivery.test.mjs` still passes 8/8: on this machine, and on any
+platform where `os.tmpdir()` never yields an 8.3 short path, an unresolved
+directory and a resolved one are the same string, so the test cannot tell
+them apart. The failure this guards against is a native libuv `abort()`,
+reproducible only on a Windows runner whose temp path genuinely has a
+short-form component — not a catchable assertion any local test can trigger
+on demand, which is exactly why the fix has to live in the code path itself
+rather than be provable end-to-end by a test. The function's own comment
+already states this; recorded here too so a later reader does not mistake
+"8/8 green" for evidence that short-path resolution works, rather than
+evidence that the export exists and returns *something*.
 
 ## Verification (measured at the close of Task 9, before push)
 
