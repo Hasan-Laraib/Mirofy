@@ -88,10 +88,30 @@ function listCorePaths() {
   return [...paths].sort();
 }
 
-/** @returns {Record<string, string>} */
+// A CRLF working-tree copy of a file `.gitattributes` normalises to LF
+// (eol=lf, which covers all of packages/core/) hashes differently from
+// what a fresh checkout will ever produce -- git rewrites CRLF to LF on
+// checkout and checkin, but this script deliberately reads disk bytes
+// (see the header comment: that is what lets it catch an uncommitted
+// edit the moment it happens). If a baseline is ever taken while such a
+// file sits CRLF on disk, the manifest records a hash no clone can
+// reproduce, and the gate goes red on every fresh checkout while staying
+// green here. Refuse before that can happen, rather than silently
+// trusting whatever --update was handed.
+/**
+ * @param {Buffer} buffer
+ * @returns {boolean}
+ */
+function hasCarriageReturn(buffer) {
+  return buffer.includes(0x0d);
+}
+
+/** @returns {{ files: Record<string, string>, crlfPaths: string[] }} */
 function hashCore() {
   /** @type {Record<string, string>} */
   const files = {};
+  /** @type {string[]} */
+  const crlfPaths = [];
   for (const relPath of listCorePaths()) {
     // A tracked file deleted from the working tree is still listed by
     // `git ls-files`. Skipping it here is what lets the comparison below
@@ -99,12 +119,28 @@ function hashCore() {
     // burying the answer under a stack trace.
     const abs = path.join(coreRoot, relPath);
     if (!fs.existsSync(abs)) continue;
-    files[relPath] = gitBlobSha1(fs.readFileSync(abs));
+    const buffer = fs.readFileSync(abs);
+    if (hasCarriageReturn(buffer)) crlfPaths.push(relPath);
+    files[relPath] = gitBlobSha1(buffer);
   }
-  return files;
+  return { files, crlfPaths };
 }
 
-const current = hashCore();
+const { files: current, crlfPaths } = hashCore();
+
+if (crlfPaths.length) {
+  console.error(`core-drift: REFUSED -- ${crlfPaths.length} file(s) under packages/core/ contain CR bytes on disk`);
+  console.error('');
+  for (const relPath of crlfPaths.sort()) console.error(`  CRLF     ${relPath}`);
+  console.error('');
+  console.error('.gitattributes sets eol=lf for packages/core/, so git stores these files LF-only and');
+  console.error('a fresh checkout (including every CI runner) will never reproduce the CRLF bytes sitting');
+  console.error('in this working tree right now. Hashing them as they are -- for a comparison, and');
+  console.error('especially for --update -- would record a blob hash that only this exact working tree');
+  console.error('can ever match again, so the very next clone would fail this gate for a reason nobody');
+  console.error('here could see. Normalise these files to LF and run this script again.');
+  process.exit(1);
+}
 
 if (writeMode) {
   const entries = Object.keys(current).length;
