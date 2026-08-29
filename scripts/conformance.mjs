@@ -7,13 +7,18 @@
 //   - a row with proof: null is reported as UNPROVEN, by id and reason, and
 //     is never counted as passing;
 //   - a suite failure fails the whole run;
-//   - (fix-round-1) a row whose `testTitle` did not report a passing `ok`
-//     in its proof file's TAP output is never counted as proved, even if
-//     the proof file overall exited 0. Before this, a row was counted
-//     "proved" purely because its proof FILE exited 0 — a suite with 14
-//     rows mapped to it and only 4 real assertions inside it made all 14
-//     read as proved. See viewer.browser.test.mjs's header comment and
-//     matrix.mjs's testTitle doc comment for the full incident.
+//   - a row whose `testTitle` did not report a passing `ok` in its proof
+//     file's TAP output is never counted as proved, even if the proof file
+//     overall exited 0. Before fix-round-1, a row was counted "proved"
+//     purely because its proof FILE exited 0 — a 14-row suite with only 4
+//     real assertions inside it made all 14 read as proved. Fix-round-2
+//     extended `testTitle` from the 14 browser rows to all 54 provable
+//     rows (the 1 exception, 4.3, is a plain script with no TAP output —
+//     see its comment in matrix.mjs) after the coordinator proved the same
+//     defect at file scale by deleting a covering test from
+//     validation-gates.test.mjs (21 rows sharing that one file) and
+//     getting an unchanged "proved" tally. See matrix.mjs's testTitle doc
+//     comment for the full incident and the per-row mapping rules.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

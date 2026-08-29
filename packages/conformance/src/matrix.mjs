@@ -11,58 +11,282 @@
 // `proof: null` marks a row P0 genuinely cannot prove yet; `note` says why.
 // A row with no real proof is never silently listed as covered.
 //
-// `testTitle` (browser rows only, added in Task 9 fix-round-1): the exact
-// node:test title of the ONE test in `proof` that asserts THIS row's
-// mechanism. scripts/conformance.mjs runs the browser suite once with
-// --test-reporter=tap and requires a passing `ok` line matching this exact
-// string before counting the row as proved -- it is not enough for the
-// file to exit 0. This exists because file-level accounting let all 14
-// browser rows read as "proved" once PRODUCT_CHROME was set, even though
-// only 4 had any assertion behind them (see viewer.browser.test.mjs's
-// header comment for the full incident). `testTitle` is what makes a row
-// pointing at a shared proof file individually falsifiable again: add a
-// 15th row here without giving it a real, separately-titled, passing test
-// and the accounting script's own bookkeeping (accounted !== total) fails
-// loudly instead of silently inheriting "proved" from its neighbours.
+// `testTitle`: the exact node:test title (or array of titles, all of which
+// must pass) of the test(s) in `proof` that assert THIS row's mechanism.
+// scripts/conformance.mjs runs that suite once with --test-reporter=tap and
+// requires a passing (non-skipped) `ok` line matching each named title
+// before counting the row as proved -- it is not enough for the file to
+// exit 0.
+//
+// History: fix-round-1 (Task 9) added this for the 14 browser rows after
+// file-level accounting let all 14 read "proved" once PRODUCT_CHROME was
+// set, though only 4 had a real assertion (see viewer.browser.test.mjs's
+// header comment). fix-round-2 extended it to the remaining 40 rows after
+// the coordinator proved the same defect at file scale: deleting
+// validation-gates.test.mjs's "showcase validation reports exactly the
+// nine artifact checks" test left `npm test` and the conformance tally
+// both green, because none of that file's 21 rows were individually
+// falsifiable. Every row below now either names a real, individually
+// verified test, is explicitly `proof: null` (UNPROVEN, with a reason), or
+// -- for the one row backed by a script rather than a node:test file --
+// stays file-level with that exemption spelled out in its own comment.
+//
+// A shared `testTitle` across two rows is legitimate when the same test
+// genuinely asserts both (e.g. 1.1/4.1: one smoke test proves both "five
+// typed domains" and "five typed renderers" by rendering all five). It is
+// never used to paper over a row with no real, distinct coverage.
 export const HARVESTED_ROWS = [
   // Phase 1 — Authoring surface
-  { id: '1.1', name: 'Five typed diagram domains', proof: 'render-smoke.test.mjs' },
-  { id: '1.2', name: 'Typed IR, additionalProperties:false', proof: 'validation-gates.test.mjs' },
-  { id: '1.3', name: 'JSON schemas + pre-generated validators', proof: 'validation-gates.test.mjs' },
-  { id: '1.4', name: 'Grid placement (row/col)', proof: 'validation-gates.test.mjs' },
-  { id: '1.5', name: 'Structural placement (lane/col/stage)', proof: 'validation-gates.test.mjs' },
-  { id: '1.6', name: 'Guided views / chapters (≤5)', proof: 'validation-gates.test.mjs' },
-  { id: '1.7', name: 'quality_profile standard/showcase', proof: 'validation-gates.test.mjs' },
-  { id: '1.8', name: 'Brand marks (107, digest-pinned)', proof: 'validation-gates.test.mjs' },
-  { id: '1.9', name: 'Legend modes (auto/all/hidden)', proof: 'validation-gates.test.mjs' },
+  {
+    id: '1.1',
+    name: 'Five typed diagram domains',
+    proof: 'render-smoke.test.mjs',
+    // Shared with 4.1: the one smoke test renders all five domains through
+    // all five renderers in the same loop -- there is no separate test
+    // that isolates "domain" from "renderer" and none is needed to prove
+    // this row honestly.
+    testTitle: 'all five diagram modes render from their v1-baseline fixture',
+  },
+  {
+    id: '1.2',
+    name: 'Typed IR, additionalProperties:false',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'the IR schema rejects any additional top-level property (1.2)',
+  },
+  {
+    id: '1.3',
+    name: 'JSON schemas + pre-generated validators',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'pre-generated AJV-standalone validators exist for all five types and reject drift (1.3)',
+  },
+  {
+    id: '1.4',
+    name: 'Grid placement (row/col)',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'layout.mode "grid" places components deterministically by row/col (1.4)',
+  },
+  {
+    id: '1.5',
+    name: 'Structural placement (lane/col/stage)',
+    proof: 'validation-gates.test.mjs',
+    // Two distinct diagram types share this row (workflow lane/col,
+    // dataflow stage/row) and each has its own dedicated test; both must
+    // pass for the row's full claim to hold.
+    testTitle: [
+      'workflow lane order drives vertical stacking and col drives horizontal order (1.5)',
+      'dataflow stage/row drives a left-to-right, top-to-bottom grid (1.5)',
+    ],
+  },
+  {
+    id: '1.6',
+    name: 'Guided views / chapters (≤5)',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'guided views round-trip into the rendered artifact and are capped at 5 (1.6)',
+  },
+  {
+    id: '1.7',
+    name: 'quality_profile standard/showcase',
+    proof: 'validation-gates.test.mjs',
+    // The first test only proves the flag is echoed back; the second
+    // proves it actually changes enforcement (warning under standard,
+    // error under showcase, same real violation both times). Both are
+    // required -- echoing alone proves nothing about behaviour.
+    testTitle: [
+      'the --quality flag is echoed as the reported composition profile on a clean fixture (1.7)',
+      'quality_profile actually escalates a real violation from warning to error, not just an echoed label (1.7)',
+    ],
+  },
+  {
+    id: '1.8',
+    name: 'Brand marks (107, digest-pinned)',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'exactly 107 brand marks are catalogued and pinned to one Simple Icons version (1.8)',
+  },
+  {
+    id: '1.9',
+    name: 'Legend modes (auto/all/hidden)',
+    proof: 'validation-gates.test.mjs',
+    // Shared with 4.9: this one test is also the legend half of "text
+    // fitting + legend".
+    testTitle: 'legend mode "hidden" omits the legend; "all" includes kinds absent from the diagram (1.9, 4.9)',
+  },
 
   // Phase 2 — Evidence
-  { id: '2.1', name: 'Repository evidence (revision-pinned)', proof: 'validation-gates.test.mjs' },
-  { id: '2.2', name: 'Verified Source Beacon (SRC n)', proof: 'validation-gates.test.mjs' },
+  {
+    id: '2.1',
+    name: 'Repository evidence (revision-pinned)',
+    proof: 'validation-gates.test.mjs',
+    // Shared with 2.2: one test proves both the pinned-revision
+    // verification (2.1) and the evidence data the Verified Source Beacon
+    // reads (2.2) -- see the file's own comment above this test for why
+    // the beacon's on-screen affordance itself is 5.3/browser-deferred
+    // while the data behind it is proved here, non-browser.
+    testTitle: 'repository evidence verifies a pinned 40-char revision against a real repo and embeds it (2.1, 2.2)',
+  },
+  {
+    id: '2.2',
+    name: 'Verified Source Beacon (SRC n)',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'repository evidence verifies a pinned 40-char revision against a real repo and embeds it (2.1, 2.2)',
+  },
 
   // Phase 3 — Layout validation gates
-  { id: '3.1', name: 'Clean Flow (no edge across unrelated node)', proof: 'negative-fixtures.test.mjs' },
-  { id: '3.2', name: 'Clean Label Gate (≥4 px)', proof: 'negative-fixtures.test.mjs' },
-  { id: '3.3', name: 'Ambiguous Corridor Gate (≥8 px lane)', proof: 'negative-fixtures.test.mjs' },
-  { id: '3.4', name: 'Clear Container Corridor', proof: 'negative-fixtures.test.mjs' },
-  { id: '3.5', name: 'Readable Route Rhythm (8/16 px)', proof: 'negative-fixtures.test.mjs' },
-  { id: '3.6', name: 'Endpoint side contract', proof: 'validation-gates.test.mjs' },
-  { id: '3.7', name: 'Automatic Port Spread', proof: 'validation-gates.test.mjs' },
-  { id: '3.8', name: 'Grid placement validation', proof: 'validation-gates.test.mjs' },
-  { id: '3.9', name: 'deployment-ownership profile', proof: 'validation-gates.test.mjs' },
-  { id: '3.10', name: 'Structured diagnostics + supportedFixes', proof: 'validation-gates.test.mjs' },
+  {
+    id: '3.1',
+    name: 'Clean Flow (no edge across unrelated node)',
+    proof: 'negative-fixtures.test.mjs',
+    // Two independent proofs: the standalone checker fires on the
+    // authored violation, and the real CLI under --quality showcase
+    // actually blocks delivery of the same unmodified fixture.
+    testTitle: [
+      'relationship_crossings fires on a genuine proper-crossing (3.1)',
+      'CLI: showcase validate blocks delivery of a genuine proper-crossing (3.1)',
+    ],
+  },
+  {
+    id: '3.2',
+    name: 'Clean Label Gate (≥4 px)',
+    proof: 'negative-fixtures.test.mjs',
+    testTitle: [
+      'label_route_clearance fires on a label sitting under 4px from an unrelated route (3.2)',
+      'CLI: showcase validate blocks delivery of a sub-4px label/route clearance (3.2)',
+    ],
+  },
+  {
+    id: '3.3',
+    name: 'Ambiguous Corridor Gate (≥8 px lane)',
+    proof: 'negative-fixtures.test.mjs',
+    testTitle: [
+      'relationship_corridors fires on two unrelated relationships sharing a >=8px corridor (3.3)',
+      'CLI: showcase validate blocks delivery of an ambiguous >=8px corridor (3.3)',
+    ],
+  },
+  {
+    id: '3.4',
+    name: 'Clear Container Corridor',
+    proof: 'negative-fixtures.test.mjs',
+    testTitle: [
+      'container_border_runs fires on a relationship that runs along a boundary border instead of crossing it (3.4)',
+      'CLI: showcase validate blocks delivery of a container border run (3.4)',
+    ],
+  },
+  {
+    id: '3.5',
+    name: 'Readable Route Rhythm (8/16 px)',
+    proof: 'negative-fixtures.test.mjs',
+    testTitle: [
+      'route_rhythm fires on a cramped sub-16px interior turn (3.5)',
+      'CLI: showcase validate blocks delivery of a cramped sub-16px interior turn (3.5)',
+    ],
+  },
+  {
+    id: '3.6',
+    name: 'Endpoint side contract',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'an authored endpoint side that the route cannot honour is rejected (3.6)',
+  },
+  {
+    id: '3.7',
+    name: 'Automatic Port Spread',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'automatic fan-out spreads connections onto distinct, symmetric ports (3.7)',
+  },
+  {
+    id: '3.8',
+    name: 'Grid placement validation',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'grid placement validation rejects two components sharing a cell (3.8)',
+  },
+  {
+    id: '3.9',
+    name: 'deployment-ownership profile',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'the deployment-ownership engineering profile requires region and security-group boundaries (3.9)',
+  },
+  {
+    id: '3.10',
+    name: 'Structured diagnostics + supportedFixes',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'every diagnostic carries a code, a message, and a supportedFixes array (3.10)',
+  },
 
   // Phase 4 — Renderers
-  { id: '4.1', name: 'Five typed renderers', proof: 'render-smoke.test.mjs' },
-  { id: '4.2', name: 'geometry.mjs (38 exports)', proof: 'validation-gates.test.mjs' },
-  { id: '4.3', name: 'Deterministic SVG output', proof: 'scripts/golden.mjs' },
-  { id: '4.4', name: '4 presets x 2 themes (8 combos)', proof: 'preset-matrix.test.mjs' },
-  { id: '4.5', name: 'Style Picker + S cycle', proof: 'preset-matrix.test.mjs' },
-  { id: '4.6', name: '23 keyframe animations, 34 transitions', proof: 'validation-gates.test.mjs' },
-  { id: '4.7', name: 'Semantic sigils', proof: 'validation-gates.test.mjs' },
-  { id: '4.8', name: 'Semantic Flow Tokens', proof: 'validation-gates.test.mjs' },
-  { id: '4.9', name: 'Text fitting + legend', proof: 'validation-gates.test.mjs' },
-  { id: '4.10', name: 'Zero SVG filters/gradients', proof: 'validation-gates.test.mjs' },
+  {
+    id: '4.1',
+    name: 'Five typed renderers',
+    proof: 'render-smoke.test.mjs',
+    testTitle: 'all five diagram modes render from their v1-baseline fixture',
+  },
+  {
+    id: '4.2',
+    name: 'geometry.mjs (38 exports)',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'geometry.mjs exposes exactly 38 named exports (4.2)',
+  },
+  {
+    id: '4.3',
+    name: 'Deterministic SVG output',
+    proof: 'scripts/golden.mjs',
+    // scripts/golden.mjs is a plain script (digest comparison against
+    // fixtures/golden/manifest.json), not a node:test file -- there is no
+    // TAP output for a testTitle to match against, and the coordinator's
+    // fix-round-2 instructions explicitly allow leaving a row like this
+    // file-level rather than pretending a title mechanism covers it. Its
+    // exit code IS the whole proof (0/5 vs 5/5 printed by the script), so
+    // file-level accounting is not a weaker signal here the way it was for
+    // a 21-row test file -- one script, one row, one pass/fail.
+  },
+  {
+    id: '4.4',
+    name: '4 presets x 2 themes (8 combos)',
+    proof: 'preset-matrix.test.mjs',
+    // The first test proves the 4-preset half of the matrix, the second
+    // the 2-theme half; together they are the "8 combos" claim.
+    testTitle: [
+      'every preset renders for every mode and declares itself on the document root',
+      'both colour modes are defined in every rendered artifact',
+    ],
+  },
+  {
+    id: '4.5',
+    name: 'Style Picker + S cycle',
+    proof: 'preset-matrix.test.mjs',
+    testTitle: 'the "S" key cycles the visual style via Archify.preset.cycle (4.5)',
+  },
+  {
+    id: '4.6',
+    name: '23 keyframe animations, 34 transitions',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'the shipped template carries 23 keyframe animations and 34 transition declarations (4.6)',
+  },
+  {
+    id: '4.7',
+    name: 'Semantic sigils',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'rendered nodes carry semantic sigils (4.7)',
+  },
+  {
+    id: '4.8',
+    name: 'Semantic Flow Tokens',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'the viewer runtime ships the Semantic Flow Token machinery in every artifact (4.8)',
+  },
+  {
+    id: '4.9',
+    name: 'Text fitting + legend',
+    proof: 'validation-gates.test.mjs',
+    // Legend half shared with 1.9; text-fitting half is its own test.
+    testTitle: [
+      'legend mode "hidden" omits the legend; "all" includes kinds absent from the diagram (1.9, 4.9)',
+      'node text shrinks toward a legible minimum instead of overflowing (4.9)',
+    ],
+  },
+  {
+    id: '4.10',
+    name: 'Zero SVG filters/gradients',
+    proof: 'validation-gates.test.mjs',
+    testTitle: 'no rendered mode emits an SVG filter or gradient element (4.10)',
+  },
 
   // Phase 5 — Viewer (interactive; proved only in the CI browser job, Task 9).
   // Each row's testTitle is verified individually against the TAP output of
@@ -179,15 +403,67 @@ export const HARVESTED_ROWS = [
   },
 
   // Phase 6 — Delivery
-  { id: '6.1', name: 'Atomic deliver + SHA-256 receipts', proof: 'delivery.test.mjs' },
-  { id: '6.2', name: 'Last-good preview server', proof: 'delivery.test.mjs' },
-  { id: '6.3', name: 'visual-check (4 viewports, pending)', proof: 'delivery.test.mjs' },
-  { id: '6.4', name: 'Exports: PNG·JPEG·WebP·SVG·WebM', proof: 'export-surface.test.mjs' },
-  { id: '6.5', name: 'Share Card + Route + Reach cards', proof: 'export-surface.test.mjs' },
-  { id: '6.6', name: 'Clipboard copy (PNG, share card)', proof: 'export-surface.test.mjs' },
-  { id: '6.7', name: 'compare (Before/Delta/After + receipt)', proof: 'delivery.test.mjs' },
-  { id: '6.8', name: 'CLI: render·validate·deliver·check·guide·brands·doctor·demo', proof: 'delivery.test.mjs' },
-  { id: '6.9', name: 'Zero runtime dependencies', proof: 'delivery.test.mjs' },
+  {
+    id: '6.1',
+    name: 'Atomic deliver + SHA-256 receipts',
+    proof: 'delivery.test.mjs',
+    // Two tests: SHA-256 receipt correctness, and atomicity (never
+    // clobbers on a failed delivery). Both are the "Atomic + SHA-256" claim.
+    testTitle: [
+      'deliver writes a receipt whose SHA-256 hashes match the written files exactly (6.1)',
+      'deliver never clobbers a previously delivered artifact when given invalid input, and leaves no staging directory (6.1)',
+    ],
+  },
+  {
+    id: '6.2',
+    name: 'Last-good preview server',
+    proof: 'delivery.test.mjs',
+    testTitle: 'the preview server keeps serving the last verified artifact when a later edit becomes invalid (6.2)',
+  },
+  {
+    id: '6.3',
+    name: 'visual-check (4 viewports, pending)',
+    proof: 'delivery.test.mjs',
+    testTitle: 'visual-check inspects 4 viewports and reports its review as pending, never as passed (6.3)',
+  },
+  {
+    id: '6.4',
+    name: 'Exports: PNG·JPEG·WebP·SVG·WebM',
+    proof: 'export-surface.test.mjs',
+    testTitle: 'every rendered artifact exposes all six export formats',
+  },
+  {
+    id: '6.5',
+    name: 'Share Card + Route + Reach cards',
+    proof: 'export-surface.test.mjs',
+    // Shared with 6.6: the same test wires and checks every action button,
+    // share-card and clipboard alike, in one pass.
+    testTitle: 'share-card and clipboard actions are wired in every artifact',
+  },
+  {
+    id: '6.6',
+    name: 'Clipboard copy (PNG, share card)',
+    proof: 'export-surface.test.mjs',
+    testTitle: 'share-card and clipboard actions are wired in every artifact',
+  },
+  {
+    id: '6.7',
+    name: 'compare (Before/Delta/After + receipt)',
+    proof: 'delivery.test.mjs',
+    testTitle: 'compare produces a Before/After delta receipt whose hashes match the real input files (6.7)',
+  },
+  {
+    id: '6.8',
+    name: 'CLI: render·validate·deliver·check·guide·brands·doctor·demo',
+    proof: 'delivery.test.mjs',
+    testTitle: 'the CLI exposes render, validate, deliver, check, guide, brands, doctor, and demo (6.8)',
+  },
+  {
+    id: '6.9',
+    name: 'Zero runtime dependencies',
+    proof: 'delivery.test.mjs',
+    testTitle: 'every workspace package.json has zero runtime dependencies (6.9)',
+  },
   {
     id: '6.10',
     name: 'Deterministic ZIP packaging',
