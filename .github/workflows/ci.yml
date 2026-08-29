@@ -52,11 +52,18 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # install-dependencies: true previously failed here: it apt-get installs
+      # a hardcoded package list (libgconf-2-4, libasound2, ...) that predates
+      # ubuntu-latest's current noble image, where those exact package names
+      # no longer exist (libasound2 is now a virtual package provided by
+      # libasound2t64; libgconf-2-4 is gone entirely) -- `sudo apt-get install`
+      # exits 100 on the unresolvable name. ubuntu-latest already ships the
+      # shared libraries a headless Chrome needs (it ships Chrome itself), so
+      # the extra apt step is both unnecessary and, on this image, broken.
       - uses: browser-actions/setup-chrome@facf10a55b9caf92e0cc749b4f82bf8220989148 # v1.7.2
         id: chrome
         with:
           chrome-version: stable
-          install-dependencies: true
       - run: npm ci
       - name: Browser conformance
         env:
