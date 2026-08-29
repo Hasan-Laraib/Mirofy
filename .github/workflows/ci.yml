@@ -65,7 +65,21 @@ jobs:
         with:
           chrome-version: stable
       - run: npm ci
+      # setup-chrome unpacks Chrome into the tool cache without making
+      # chrome-sandbox root-owned and setuid (mode 4755), so the SUID sandbox
+      # helper is present but unusable and Chrome refuses to start at all:
+      # "FATAL ... setuid_sandbox_host.cc:166 ... Rather than run without
+      # sandboxing I'm aborting now." Every browser row then fails identically
+      # with ECONNRESET on the DevTools pipe -- that is one launch failure
+      # reported N times, not N separate test failures. visual-check.mjs
+      # already exposes the supported opt-out (CHROME_NO_SANDBOX_ENV,
+      # packages/core/bin/visual-check.mjs:22), which prepends --no-sandbox.
+      # chown+chmod on the tool-cache binary would also work, but that mutates
+      # the runner image instead of using the documented switch. The sandbox
+      # isolates renderers from the host; the host here is a single-use CI VM
+      # rendering our own fixtures.
       - name: Browser conformance
         env:
           PRODUCT_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          ARCHIFY_CHROME_NO_SANDBOX: '1'
         run: npm run test:conformance
