@@ -213,8 +213,8 @@ test('README stays scannable without deleting the visual proof set', () => {
 });
 
 test('all README languages end with the self-hosted star history chart', () => {
-  const lightChart = 'https://raw.githubusercontent.com/tt-a1i/mirofy/star-history/assets/star-history-light.svg';
-  const darkChart = 'https://raw.githubusercontent.com/tt-a1i/mirofy/star-history/assets/star-history-dark.svg';
+  const lightChart = 'https://raw.githubusercontent.com/Hasan-Laraib/Mirofy/star-history/assets/star-history-light.svg';
+  const darkChart = 'https://raw.githubusercontent.com/Hasan-Laraib/Mirofy/star-history/assets/star-history-dark.svg';
   const workflow = fs.readFileSync(path.join(repoRoot, '.github', 'workflows', 'star-history.yml'), 'utf8');
 
   for (const filename of ['README.md', 'README_EN.md', 'README_ZH.md']) {

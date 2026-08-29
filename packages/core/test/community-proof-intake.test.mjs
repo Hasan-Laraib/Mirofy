@@ -35,7 +35,7 @@ test('showcase intake requires reproducible proof, redaction, and explicit publi
   assert.match(template, /repository, documentation, gallery, and project website/i);
   assert.match(template, /required:\s*true/g);
 
-  const submissionUrl = 'https://github.com/tt-a1i/mirofy/issues/new?template=showcase.yml';
+  const submissionUrl = 'https://github.com/Hasan-Laraib/Mirofy/issues/new?template=showcase.yml';
   for (const readme of ['README.md', 'README_EN.md', 'README_ZH.md']) {
     assert.match(read(readme), new RegExp(submissionUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `${readme}: direct showcase link`);
   }
