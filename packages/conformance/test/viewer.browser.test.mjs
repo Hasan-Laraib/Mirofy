@@ -41,11 +41,12 @@
 // failure mode this file exists to avoid.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { renderFixture } from '../src/render.mjs';
+import { renderFixture, coreRoot } from '../src/render.mjs';
 
 // Imported with a non-literal specifier (deliberately, not for style) so
 // that tsc --noEmit does not pull packages/core/bin/visual-check.mjs into
@@ -68,11 +69,14 @@ const { ChromeVisualBrowser, findChrome } = await import(visualCheckUrl);
 const chrome = process.env.PRODUCT_CHROME || findChrome();
 const skip = chrome ? false : 'set PRODUCT_CHROME to run the real browser regression';
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-browser-'));
+process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
 let browser;
 let sessionId;
 let watcher;
 let fileUrl;
+let evidenceFileUrl;
+let evidenceNodeId;
 
 async function evaluate(expression, awaitPromise = false) {
   const response = await browser.cdp.send('Runtime.evaluate', {
@@ -135,6 +139,59 @@ before(async () => {
   const out = path.join(tmp, 'architecture.html');
   renderFixture('architecture', 'production-deployment.architecture.json', out);
   fileUrl = pathToFileURL(out).href;
+
+  // A second, purpose-built artifact for [2.2]: the Verified Source Beacon
+  // is installed by runtime JS (Archify.sourceEvidence.installBeacons(),
+  // template.html) that reads an <script id="archify-source-evidence-data">
+  // payload the renderer only embeds when given a real --repo-root whose
+  // pinned revision verifies -- see validation-gates.test.mjs's 2.1/2.2 test
+  // for the non-browser half (the evidence data itself). None of that runs
+  // in a static HTML parse: installBeacons() calls getBBox() on real SVG
+  // layout, so this is only provable in an actual browser.
+  evidenceNodeId = 'app';
+  const evidenceRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'product-beacon-repo-'));
+  process.on('exit', () => fs.rmSync(evidenceRepo, { recursive: true, force: true }));
+  const git = (args) => {
+    const result = spawnSync('git', args, { cwd: evidenceRepo, encoding: 'utf8' });
+    if (result.status !== 0) throw new Error(`git ${args.join(' ')} failed: ${result.stderr}`);
+    return result.stdout.trim();
+  };
+  git(['init', '-q']);
+  git(['config', 'user.email', 'test@example.com']);
+  git(['config', 'user.name', 'Test']);
+  git(['remote', 'add', 'origin', 'https://github.com/acme/widgets.git']);
+  fs.mkdirSync(path.join(evidenceRepo, 'src'));
+  fs.writeFileSync(
+    path.join(evidenceRepo, 'src', 'app.js'),
+    Array.from({ length: 20 }, (_, i) => `line ${i + 1}`).join('\n') + '\n',
+  );
+  git(['add', '.']);
+  git(['commit', '-q', '-m', 'initial']);
+  const revision = git(['rev-parse', 'HEAD']);
+  const evidenceDoc = {
+    schema_version: 1,
+    diagram_type: 'architecture',
+    meta: {
+      title: 'Beacon test',
+      repository: { url: 'https://github.com/acme/widgets', revision },
+    },
+    components: [
+      {
+        id: evidenceNodeId, type: 'backend', label: 'App', pos: [100, 100], size: [160, 60],
+        sources: [{ path: 'src/app.js', line: 3, end_line: 5 }],
+      },
+      { id: 'db', type: 'database', label: 'DB', pos: [340, 100], size: [160, 60] },
+    ],
+    connections: [{ from: evidenceNodeId, to: 'db' }],
+  };
+  const evidenceInput = path.join(tmp, 'beacon-source.architecture.json');
+  fs.writeFileSync(evidenceInput, JSON.stringify(evidenceDoc));
+  const evidenceOut = path.join(tmp, 'beacon.html');
+  execFileSync(process.execPath, [
+    path.join(coreRoot, 'bin/archify.mjs'), 'render', 'architecture', evidenceInput, evidenceOut, '--repo-root', evidenceRepo,
+  ], { stdio: ['ignore', 'ignore', 'pipe'] });
+  evidenceFileUrl = pathToFileURL(evidenceOut).href;
+
   browser = new ChromeVisualBrowser(chrome);
   sessionId = await browser.sessionPromise;
   // A headless target does not dispatch real focus/focusin events to page
@@ -430,6 +487,30 @@ test('[5.14b] print media emulation hides the toolbar chrome', { skip }, async (
   const toolbarDisplay = await evaluate(`getComputedStyle(document.querySelector('.toolbar')).display`);
   assert.equal(toolbarDisplay, 'none', 'emulated print media did not hide .toolbar');
   await browser.cdp.send('Emulation.setEmulatedMedia', { media: 'screen' }, sessionId);
+});
+
+// ---------------------------------------------------------------------
+// Navigation 5 -- the Verified Source Beacon (2.2), its own artifact
+// (beacon.html, built in before() with real repository evidence) since
+// none of the other fixtures carry sources/repository evidence.
+// ---------------------------------------------------------------------
+
+test('[2.2] Verified Source Beacon renders "SRC n" on a node with verified repository evidence, and stays off a node without it', { skip }, async () => {
+  await navigate(evidenceFileUrl);
+  const beacon = await evaluate(`(function () {
+    var withSource = document.querySelector('[data-node-id="${evidenceNodeId}"] [data-source-evidence-beacon]');
+    var withoutSource = document.querySelector('[data-node-id="db"] [data-source-evidence-beacon]');
+    return {
+      installed: Boolean(withSource),
+      text: withSource ? withSource.querySelector('text').textContent : null,
+      ariaLabel: document.querySelector('[data-node-id="${evidenceNodeId}"]').getAttribute('aria-label'),
+      absentOnUnrelatedNode: !withoutSource,
+    };
+  })()`);
+  assert.equal(beacon.installed, true, 'no [data-source-evidence-beacon] was installed on the node with verified sources');
+  assert.equal(beacon.text, 'SRC 1', 'the beacon did not render the expected "SRC n" marker text');
+  assert.match(beacon.ariaLabel || '', /source/i, 'the node\'s aria-label was not updated to mention the source evidence');
+  assert.equal(beacon.absentOnUnrelatedNode, true, 'a beacon was installed on a node with no sources at all');
 });
 
 test('viewer raised no uncaught exceptions or console.error calls during the whole run', { skip }, async () => {
