@@ -211,7 +211,7 @@ test('branded lifecycle states move the semantic stamp left and keep the brand a
 });
 
 test('known-brand URLs use the bundled vector instead of the network', () => {
-  const input = writeFixture('architecture', 'known-domain', 'https://github.com/tt-a1i/mirofy');
+  const input = writeFixture('architecture', 'known-domain', 'https://github.com/Hasan-Laraib/Mirofy');
   const { result, html } = renderSync('architecture', input, 'known-domain');
   assert.equal(result.status, 0, result.stderr || result.stdout);
   assert.match(html, /data-brand-mark="github"[^>]+data-brand-status="preset"/);

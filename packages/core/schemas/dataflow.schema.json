@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/mirofy/schemas/dataflow.schema.json",
+  "$id": "https://github.com/Hasan-Laraib/Mirofy/schemas/dataflow.schema.json",
   "title": "Mirofy Data Flow Diagram",
   "type": "object",
   "additionalProperties": false,
