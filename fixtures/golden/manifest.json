@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "mode": "architecture",
+      "fixture": "web-app.architecture.json",
+      "sha256": "9929c7a58f80caf7343643e7c717422152372f3303320835bdf97405e5a43fa5"
+    },
+    {
+      "mode": "workflow",
+      "fixture": "agent-tool-call.workflow.json",
+      "sha256": "9b0fecf978657d3b38b4ae2a34c76e856feba6d97c07b4f19b5c1a5aa3dc518c"
+    },
+    {
+      "mode": "sequence",
+      "fixture": "cache-miss-request.sequence.json",
+      "sha256": "df09a2e3f89e058ee6dd5f17221b552e02569ff77caa46ff0cc6f9d3ef2c98d7"
+    },
+    {
+      "mode": "dataflow",
+      "fixture": "product-analytics.dataflow.json",
+      "sha256": "6ce83723e51cfbcd25f2993a4546a2e92d6f8aeb77c8350bcb15c11b85bb2fd2"
+    },
+    {
+      "mode": "lifecycle",
+      "fixture": "agent-run.lifecycle.json",
+      "sha256": "e6479f9c86bc69fd3d5154410dcd05a5826e5c62b29a4185f338acf3198e0fed"
+    }
+  ]
+}
