@@ -10,6 +10,20 @@
 // is set.
 // `proof: null` marks a row P0 genuinely cannot prove yet; `note` says why.
 // A row with no real proof is never silently listed as covered.
+//
+// `testTitle` (browser rows only, added in Task 9 fix-round-1): the exact
+// node:test title of the ONE test in `proof` that asserts THIS row's
+// mechanism. scripts/conformance.mjs runs the browser suite once with
+// --test-reporter=tap and requires a passing `ok` line matching this exact
+// string before counting the row as proved -- it is not enough for the
+// file to exit 0. This exists because file-level accounting let all 14
+// browser rows read as "proved" once PRODUCT_CHROME was set, even though
+// only 4 had any assertion behind them (see viewer.browser.test.mjs's
+// header comment for the full incident). `testTitle` is what makes a row
+// pointing at a shared proof file individually falsifiable again: add a
+// 15th row here without giving it a real, separately-titled, passing test
+// and the accounting script's own bookkeeping (accounted !== total) fails
+// loudly instead of silently inheriting "proved" from its neighbours.
 export const HARVESTED_ROWS = [
   // Phase 1 — Authoring surface
   { id: '1.1', name: 'Five typed diagram domains', proof: 'render-smoke.test.mjs' },
@@ -50,21 +64,119 @@ export const HARVESTED_ROWS = [
   { id: '4.9', name: 'Text fitting + legend', proof: 'validation-gates.test.mjs' },
   { id: '4.10', name: 'Zero SVG filters/gradients', proof: 'validation-gates.test.mjs' },
 
-  // Phase 5 — Viewer (interactive; proved only in the CI browser job, Task 9)
-  { id: '5.1', name: 'Pan / zoom / reset · Semantic Camera', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.2', name: 'Node Finder (search)', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.3', name: 'Focus + Semantic Passport', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.4', name: 'Intent Trace', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.5', name: 'Route Probe + Route Journey', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.6', name: 'Authored Reachability (up/downstream)', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.7', name: 'Semantic Lens', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.8', name: 'Semantic Radar (minimap)', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.9', name: 'Guided Views + Named Chapter Rail', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.10', name: 'Story Beats · Director Strip · Horizon · Follow Camera', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.11', name: 'Motion Governor + Settled Flow', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.12', name: 'Presentation Stage', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.13', name: 'Deep links (view/focus/route/reach/relation/beat)', proof: 'viewer.browser.test.mjs', browser: true },
-  { id: '5.14', name: 'Print + embed modes', proof: 'viewer.browser.test.mjs', browser: true },
+  // Phase 5 — Viewer (interactive; proved only in the CI browser job, Task 9).
+  // Each row's testTitle is verified individually against the TAP output of
+  // viewer.browser.test.mjs -- see the note above and that file's own
+  // header comment. 5.10 and 5.11 assert only the core mechanism named in
+  // their row (chapter activation / Director Strip; the live<->still
+  // switch) -- the fuller "Horizon / Follow Camera" and "Settled Flow"
+  // sub-behaviours named in those rows are not separately asserted; this is
+  // deliberate partial-but-real coverage, not a claim of exhaustive proof.
+  {
+    id: '5.1',
+    name: 'Pan / zoom / reset · Semantic Camera',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.1] Pan/zoom/reset (Semantic Camera) actually changes the rendered svg scale',
+  },
+  {
+    id: '5.2',
+    name: 'Node Finder (search)',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.2] Node Finder toggles open and closed via btn-node-finder',
+  },
+  {
+    id: '5.3',
+    name: 'Focus + Semantic Passport',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.3] Focus + Semantic Passport opens on a real node click and reports the clicked node id',
+  },
+  {
+    id: '5.4',
+    name: 'Intent Trace',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.4] Intent Trace lights up on real keyboard focus of a node',
+  },
+  {
+    id: '5.5',
+    name: 'Route Probe + Route Journey',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.5] Route Probe toggles open and closed via btn-route-probe',
+  },
+  {
+    id: '5.6',
+    name: 'Authored Reachability (up/downstream)',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.6] Authored Reachability (upstream) renders a node/link-count receipt on the focused node',
+  },
+  {
+    id: '5.7',
+    name: 'Semantic Lens',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.7] Semantic Lens toggles open and closed via btn-semantic-lens',
+  },
+  {
+    id: '5.8',
+    name: 'Semantic Radar (minimap)',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.8] Semantic Radar (minimap) toggles open and closed via btn-overview-map',
+  },
+  {
+    id: '5.9',
+    name: 'Guided Views + Named Chapter Rail',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.9] guided views leave their boot-time hidden state once meta.views is populated',
+  },
+  {
+    id: '5.10',
+    name: 'Story Beats · Director Strip · Horizon · Follow Camera',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.10] activating a guided-view chapter sets data-story-active and builds the Director Strip trail',
+  },
+  {
+    id: '5.11',
+    name: 'Motion Governor + Settled Flow',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.11] Motion Governor flips html[data-motion] between live and still via btn-motion',
+  },
+  {
+    id: '5.12',
+    name: 'Presentation Stage',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.12] Presentation Stage sets and clears html[data-present] via btn-present',
+  },
+  {
+    id: '5.13',
+    name: 'Deep links (view/focus/route/reach/relation/beat)',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    testTitle: '[5.13] a hash-based focus deep link restores the Semantic Passport on load',
+  },
+  {
+    id: '5.14',
+    name: 'Print + embed modes',
+    proof: 'viewer.browser.test.mjs',
+    browser: true,
+    // Two mechanisms (embed query-param and print media) share one row;
+    // both titled tests must pass for this row to count. See
+    // scripts/conformance.mjs, which accepts an array here for exactly
+    // this case.
+    testTitle: [
+      '[5.14a] embed mode (?embed=1) sets data-embed and actually hides the toolbar chrome',
+      '[5.14b] print media emulation hides the toolbar chrome',
+    ],
+  },
 
   // Phase 6 — Delivery
   { id: '6.1', name: 'Atomic deliver + SHA-256 receipts', proof: 'delivery.test.mjs' },
