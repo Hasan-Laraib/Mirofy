@@ -384,14 +384,28 @@ test('node text shrinks toward a legible minimum instead of overflowing (4.9)', 
 // ---------------------------------------------------------------------------
 
 test('repository evidence verifies a pinned 40-char revision against a real repo and embeds it (2.1, 2.2)', () => {
-  const evidenceRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'product-evidence-repo-'));
-  process.on('exit', () => fs.rmSync(evidenceRepo, { recursive: true, force: true }));
-  const git = (args) => {
-    const result = spawnSync('git', args, { cwd: evidenceRepo, encoding: 'utf8' });
+  const mkdtempRepo = fs.mkdtempSync(path.join(os.tmpdir(), 'product-evidence-repo-'));
+  process.on('exit', () => fs.rmSync(mkdtempRepo, { recursive: true, force: true }));
+  const git = (args, cwd = evidenceRepo) => {
+    const result = spawnSync('git', args, { cwd, encoding: 'utf8' });
     assert.equal(result.status, 0, `git ${args.join(' ')} failed: ${result.stderr}`);
     return result.stdout.trim();
   };
-  git(['init', '-q']);
+  git(['init', '-q'], mkdtempRepo);
+  // On Windows CI runners the account backing `os.tmpdir()` is long enough
+  // (e.g. "runneradmin") that Windows also exposes an 8.3 short alias for
+  // it (e.g. "RUNNER~1"), and that short form is what TEMP/os.tmpdir()
+  // actually returns there. `fs.realpathSync` (used by the harvested
+  // repository-evidence check below) does not expand that alias, but
+  // `git rev-parse --show-toplevel` always reports the canonical long-form
+  // path -- so passing the raw mkdtemp path as --repo-root makes the two
+  // disagree about "the same directory" even though they are. Resolving
+  // through git's own canonical output up front, and using THAT path for
+  // every later git/file/CLI operation, keeps this test's repo root in the
+  // exact form the harvested check will independently re-derive and match
+  // against, on every OS. This is a test-only path issue, not a bug in
+  // packages/core.
+  const evidenceRepo = git(['rev-parse', '--show-toplevel'], mkdtempRepo).replace(/\//g, path.sep);
   git(['config', 'user.email', 'test@example.com']);
   git(['config', 'user.name', 'Test']);
   git(['remote', 'add', 'origin', 'https://github.com/acme/widgets.git']);
