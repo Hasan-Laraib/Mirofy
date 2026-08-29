@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BUDGET_MB = 20;
+const BUDGET_MB = 10;
 const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
   .split('\n').filter(Boolean);
 
