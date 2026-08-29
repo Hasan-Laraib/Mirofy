@@ -4,27 +4,27 @@
     {
       "mode": "architecture",
       "fixture": "web-app.architecture.json",
-      "sha256": "9929c7a58f80caf7343643e7c717422152372f3303320835bdf97405e5a43fa5"
+      "sha256": "290d36ba6acd927cd55bc226fe61e4cc8113a6b6f1d082cde0f4d0299155b9ec"
     },
     {
       "mode": "workflow",
       "fixture": "agent-tool-call.workflow.json",
-      "sha256": "9b0fecf978657d3b38b4ae2a34c76e856feba6d97c07b4f19b5c1a5aa3dc518c"
+      "sha256": "1b2db98b1e3b1dd0cd618aecf8573705b44693e1ee84147cee9c05034b1b22a8"
     },
     {
       "mode": "sequence",
       "fixture": "cache-miss-request.sequence.json",
-      "sha256": "df09a2e3f89e058ee6dd5f17221b552e02569ff77caa46ff0cc6f9d3ef2c98d7"
+      "sha256": "d354087b6e0fa1dcb2ff46c28b7d82af64eb68fba35d5f49b31d5b5201f74557"
     },
     {
       "mode": "dataflow",
       "fixture": "product-analytics.dataflow.json",
-      "sha256": "6ce83723e51cfbcd25f2993a4546a2e92d6f8aeb77c8350bcb15c11b85bb2fd2"
+      "sha256": "2a89979d9c5677b58edd56a2512755d8c2aa3987303d71c3ae4256f396ce1b29"
     },
     {
       "mode": "lifecycle",
       "fixture": "agent-run.lifecycle.json",
-      "sha256": "e6479f9c86bc69fd3d5154410dcd05a5826e5c62b29a4185f338acf3198e0fed"
+      "sha256": "ad3329ecddd67dbc06e6a6cf7783e6fbdf1cf781f353a9f54104d9c4f164dc35"
     }
   ]
 }
