@@ -15,7 +15,8 @@ test('every rendered artifact exposes all six export formats', () => {
     renderFixture(mode, fixture, out);
     const html = fs.readFileSync(out, 'utf8');
     for (const format of FORMATS) {
-      assert.ok(html.includes(`data-format="${format}"`), `${mode}: export format ${format} missing`);
+      const buttonRe = new RegExp(`<button[^>]*data-format="${format}"`);
+      assert.match(html, buttonRe, `${mode}: export format ${format} missing`);
     }
   }
 });
@@ -25,6 +26,7 @@ test('share-card and clipboard actions are wired in every artifact', () => {
   renderFixture('architecture', 'web-app.architecture.json', out);
   const html = fs.readFileSync(out, 'utf8');
   for (const action of ACTIONS) {
-    assert.ok(html.includes(`data-action="${action}"`), `action ${action} missing`);
+    const buttonRe = new RegExp(`<button[^>]*data-action="${action}"`);
+    assert.match(html, buttonRe, `action ${action} missing`);
   }
 });

@@ -22,8 +22,9 @@ test('every preset renders for every mode and declares itself on the document ro
       const out = path.join(tmp, `${mode}-${preset}.html`);
       renderWithPreset(mode, fixture, preset, out);
       const html = fs.readFileSync(out, 'utf8');
-      assert.match(html, new RegExp(`data-preset="${preset}"`), `${mode}/${preset}: preset not on root`);
-      assert.match(html, /data-theme="dark"/, `${mode}/${preset}: default theme missing`);
+      const rootTag = html.match(/<html\b[^>]*>/)?.[0] ?? '';
+      assert.ok(rootTag.includes(`data-preset="${preset}"`), `${mode}/${preset}: preset not on root (root tag: ${rootTag})`);
+      assert.ok(rootTag.includes('data-theme="dark"'), `${mode}/${preset}: default theme missing`);
     }
   }
 });
