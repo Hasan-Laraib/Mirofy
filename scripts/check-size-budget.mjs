@@ -2,7 +2,12 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const BUDGET_MB = 10;
+// Lowered 10 -> 6 in P1a Task 9, after removing ~3.4 MB of committed
+// rendered examples (packages/core/examples/*.html) brought the tracked
+// tree from 7.3 MB to a measured 3.9 MB. The ~2 MB of headroom below the
+// new budget is reserved for P1b's evidence sources; a budget left at 10 MB
+// after a 3.4 MB reduction would not be a gate.
+const BUDGET_MB = 6;
 const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' })
   .split('\n').filter(Boolean);
 
