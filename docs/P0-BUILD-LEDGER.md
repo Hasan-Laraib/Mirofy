@@ -570,3 +570,63 @@ FIRST REAL CI RUN (33246506982, pushed 499c53a to Hasan-Laraib/Mirofy):
   three in-progress edits were reapplied and reverified before committing.
   Push to origin was deliberately withheld pending the operator's own
   confirmation given this anomaly — see the final report.
+
+### CI green-up wave 2 — run 33247521138 (11/13) -> commits 3fd65ac, 1e5d2d0
+
+Two jobs remained red after wave 1. Both turned out to be single-cause, and
+neither was a product defect — the conformance suite never wrongly passed.
+
+**`check (windows-latest, 24)` — 1 failure, `delivery.test.mjs`.** Not an
+assertion: the log carried `Assertion failed: !_wcsnicmp(filename, dir,
+dirlen), file src\win\fs-event.c, line 72`, a native libuv abort. Node's
+Windows fs-event backend computes an event filename relative to the watched
+directory and asserts the long-form name it receives from the OS shares the
+watched directory's prefix. `os.tmpdir()` on a Windows runner is an 8.3 short
+path (`RUNNER~1`), so the two forms disagree and libuv calls `abort()`. Test
+6.2 is the only fs.watch consumer — it imports `preview.mjs`, which watches
+`path.dirname(inputPath)`. Because the abort kills the process rather than
+failing a test, it took the whole file down: 52 pass / 1 fail where the "1"
+was the file, not a row. Node 18/20/22 bundle a libuv that does not reach the
+assert, which is why only the Node 24 cell was red.
+
+  Ruling: fix in the test (`fs.realpathSync.native` on the mkdtemp root), not
+  in `preview.mjs`. `packages/core` is harvested unmodified and byte-identity
+  is enforced by `check:harvest` over 163 blob hashes; editing core to fix
+  this would trade a test-only symptom for a broken harvest boundary, which
+  is the whole premise of P0. The same short-path hazard is already handled
+  this way at validation-gates.test.mjs:401, so the idiom is established.
+  — Cost if wrong: `archify preview` still aborts for a real user whose own
+  temp path is short-form. Recorded as P1 debt below rather than hidden.
+
+  **P1 debt (core defect, deliberately not fixed here):**
+  `packages/core/bin/preview.mjs:591` passes an unresolved directory to
+  `fs.watch`. Any user whose watch root resolves to an 8.3 short path gets a
+  native abort with no catchable error. Fix during the P1 viewer/CLI refactor,
+  when core stops being byte-frozen: resolve the watch root before watching.
+
+**`browser` — 17 failures, all identical.** Chrome never started:
+`FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166 ... The SUID
+sandbox helper binary was found, but is not configured correctly ... Rather
+than run without sandboxing I'm aborting now.` `setup-chrome` unpacks Chrome
+into the tool cache without making `chrome-sandbox` root-owned and setuid
+4755. Every row then failed with the same `ECONNRESET` on the DevTools write
+pipe. This was one launch failure reported 17 times — the earlier reading of
+it as "8 genuine Linux/Chrome platform differences never before exercised"
+was wrong, and no platform difference has been demonstrated yet.
+
+  Ruling: set `ARCHIFY_CHROME_NO_SANDBOX=1` in the browser job.
+  `visual-check.mjs:22` already defines this as a first-class, supported
+  opt-out (`CHROME_NO_SANDBOX_ENV`) that prepends `--no-sandbox` — the same
+  branch core already takes automatically for root. `sudo chown root:root`
+  plus `chmod 4755` on the tool-cache binary would also work, but mutates the
+  runner image to work around a launcher default rather than using the switch
+  core ships for exactly this case. The sandbox isolates renderers from the
+  host; the host is a single-use CI VM rendering our own fixtures.
+  — Cost if wrong: a renderer exploit reaches the CI VM. Not a credential
+  boundary here — the job holds only `contents: read`.
+
+**Verification:** `npm run check` exit 0 locally on Node 24.13.1 (the version
+that was red in CI); `delivery.test.mjs` 7/7 with 0 skipped; artifacts 5/5
+reproducible; tracked tree 6.6 MB / 10 MB; 0 vulnerabilities. Note the local
+Windows box cannot reproduce the libuv abort — its temp path has no short-form
+component — so CI is the only proof surface for that fix.
