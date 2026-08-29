@@ -101,6 +101,34 @@ historical claim permanently checkable by hand:
 git show 54a1307:packages/core/renderers/shared/utils.mjs | git hash-object --stdin
 ```
 
+### Post-anchor divergence (`check:drift`)
+
+From the anchor commit onward, `packages/core/` is expected to change
+deliberately — a regenerated template, a fix, an added preset — and
+`check:drift` (`scripts/check-core-drift.mjs`, `scripts/core-manifest.json`,
+165 blob hashes) is the present-tense gate that requires each such change to
+be a reviewed re-baseline (`--update`) rather than a silent edit. Unlike
+`check:provenance`, this gate has no anchor: it simply asserts the current
+tree matches the last deliberate baseline. Every file that has diverged since
+the anchor is recorded here, with why:
+
+- `assets/template.html` — carries the `okabe-ito` palette blocks, preset
+  registration, and style-picker option added in P1a Task 7. Generated from
+  `packages/viewer/`; integrity enforced by `check:template` and
+  `check:drift`.
+- `renderers/shared/i18n.mjs` — gained the `viewer.preset.okabeIto` and
+  `viewer.preset.okabeIto.hint` locale pair in every supported locale (P1a
+  Task 7), so the new preset's label and menu hint resolve instead of
+  falling back to the raw key string.
+- `schemas/architecture.schema.json`, `schemas/dataflow.schema.json`,
+  `schemas/lifecycle.schema.json`, `schemas/sequence.schema.json`,
+  `schemas/workflow.schema.json` — each `meta.visual_preset` enum gained
+  `"okabe-ito"` (P1a Task 7), so a document may opt into the preset without
+  failing schema validation.
+- `renderers/shared/generated-validators.mjs` — regenerated from the schemas
+  above via `packages/core`'s `npm run generate:validators`; this file is
+  build output, never hand-edited.
+
 ## How parity is proved
 
 `scripts/golden.mjs` renders all five v1-baseline fixtures, canonicalises line
