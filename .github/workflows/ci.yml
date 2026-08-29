@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: [18, 20, 22, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      # The full gate chain (lint -> typecheck -> test -> test:golden ->
+      # test:conformance -> check:artifacts -> check:size -> check:audit) is
+      # wired into the single "check" script in package.json. Running it
+      # once here keeps this workflow from drifting out of sync with that
+      # list instead of duplicating each step as its own `run:` line.
+      - run: npm run check
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - uses: browser-actions/setup-chrome@facf10a55b9caf92e0cc749b4f82bf8220989148 # v1.7.2
+        id: chrome
+        with:
+          chrome-version: stable
+          install-dependencies: true
+      - run: npm ci
+      - name: Browser conformance
+        env:
+          PRODUCT_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: npm run test:conformance
