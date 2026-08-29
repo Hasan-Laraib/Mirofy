@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/mirofy/schemas/sequence.schema.json",
+  "$id": "https://github.com/Hasan-Laraib/Mirofy/schemas/sequence.schema.json",
   "title": "Mirofy Sequence Diagram",
   "type": "object",
   "additionalProperties": false,

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/tt-a1i/mirofy/schemas/workflow.schema.json",
+  "$id": "https://github.com/Hasan-Laraib/Mirofy/schemas/workflow.schema.json",
   "title": "Mirofy Workflow Diagram",
   "type": "object",
   "additionalProperties": false,

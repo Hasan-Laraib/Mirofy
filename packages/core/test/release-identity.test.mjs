@@ -237,7 +237,7 @@ test('Raven stays a truthful manual ZIP install and never becomes a generated ag
       'docs/start.html': [
         '<span>development · v2.13.0-dev.0 · 开发版</span>',
         '<button data-agent="raven">Raven</button>',
-        '<pre>npx skills add tt-a1i/mirofy --agent raven</pre>',
+        '<pre>npx skills add Hasan-Laraib/Mirofy --agent raven</pre>',
       ].join('\n'),
     });
 

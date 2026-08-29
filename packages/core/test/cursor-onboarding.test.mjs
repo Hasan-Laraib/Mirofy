@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const repoRoot = path.resolve(skillRoot, '..');
-const cursorCommand = 'npx -y skills add tt-a1i/mirofy --skill mirofy --agent cursor --global --copy --yes';
+const cursorCommand = 'npx -y skills add Hasan-Laraib/Mirofy --skill mirofy --agent cursor --global --copy --yes';
 
 test('Cursor onboarding stays explicit, bilingual, and backed by the same Skill', () => {
   const english = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
