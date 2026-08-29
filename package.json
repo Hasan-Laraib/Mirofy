@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=18" },
-  "workspaces": ["packages/*"],
+  "engines": {
+    "node": ">=18"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
@@ -23,6 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "^18",
+    "axe-core": "4.10.2",
     "eslint": "^9.15.0",
     "typescript": "^5.7.2"
   }
