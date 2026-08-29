@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": false,
+    "skipLibCheck": true
+  },
+  "include": ["scripts/**/*.mjs", "packages/conformance/**/*.mjs", "eslint.config.mjs"],
+  "exclude": ["node_modules", "packages/core"]
+}
