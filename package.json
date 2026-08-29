@@ -1,5 +1,5 @@
 {
-  "name": "@product/root",
+  "name": "@mirofy/root",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -15,10 +15,10 @@
     "check:artifacts": "node scripts/build-artifacts.mjs --check",
     "check:size": "node scripts/check-size-budget.mjs",
     "check:audit": "npm audit --audit-level=high",
-    "check:harvest": "node scripts/check-harvest-identity.mjs",
+    "check:provenance": "node scripts/check-provenance.mjs",
     "build:template": "node packages/viewer/build.mjs",
     "check:template": "node scripts/check-template.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:harvest && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:provenance && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
   },
   "devDependencies": {
     "@types/node": "^18",
