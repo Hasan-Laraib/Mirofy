@@ -16,12 +16,12 @@
    workflow (`.github/workflows/ci.yml`) defines this same gate and its
    steps pass locally, but as of P0 the workflow has not yet executed on a
    runner — until it has, a clean local `npm run check` is the actual bar,
-   not "CI is the gate". Run it once more with `PRODUCT_CHROME` set to a
+   not "CI is the gate". Run it once more with `MIROFY_CHROME` set to a
    Chrome executable so the 16 browser-only conformance rows are exercised
    too — CI's `browser` job is intended to do this on every push and pull
    request once it runs for real.
 4. **A skipped test is skipped.** Never reported as passing, in a PR or a
-   receipt. A browser row deferred for lack of `PRODUCT_CHROME` is reported
+   receipt. A browser row deferred for lack of `MIROFY_CHROME` is reported
    by id, not folded into the proved count. A row with no real proof is
    `proof: null` with a `note` explaining why — never silently marked
    covered.

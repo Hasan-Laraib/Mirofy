@@ -19,7 +19,7 @@ npm run build      # render every fixture into .artifacts/ (gitignored)
 ## What is proved today
 
 The harvested conformance matrix has 56 rows. 39 are proved without a browser;
-16 more require headless Chrome (`PRODUCT_CHROME`) and bring the total to 55.
+16 more require headless Chrome (`MIROFY_CHROME`) and bring the total to 55.
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this harvest's scope, so there is nothing here to prove parity
 against. See `docs/harvest.md` for the full accounting.
@@ -49,7 +49,7 @@ product's own names, so byte-identity with the ancestor is deliberately no
 longer true. Instead it verifies the *historical* claim against an immutable
 anchor commit recorded in `scripts/harvest-manifest.json`: that all 163 files
 were byte-identical to the ancestor at that commit. Run
-`PRODUCT_CHROME=/path/to/chrome npm run check` to also exercise the 16
+`MIROFY_CHROME=/path/to/chrome npm run check` to also exercise the 16
 browser-only rows.
 
 ## Layout

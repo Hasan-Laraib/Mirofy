@@ -80,6 +80,6 @@ jobs:
       # rendering our own fixtures.
       - name: Browser conformance
         env:
-          PRODUCT_CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          MIROFY_CHROME: ${{ steps.chrome.outputs.chrome-path }}
           MIROFY_CHROME_NO_SANDBOX: '1'
         run: npm run test:conformance

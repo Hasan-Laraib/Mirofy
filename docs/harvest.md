@@ -83,7 +83,7 @@ endings, and compares SHA-256 digests against `fixtures/golden/manifest.json`
 (`scripts/conformance.mjs`) additionally proves the 56-row harvested
 capability matrix (`packages/conformance/src/matrix.mjs`) still holds after
 the move: 55 of 56 rows are provable (39 without a browser, 16 more with
-`PRODUCT_CHROME`); row 6.10 (deterministic ZIP packaging) is UNPROVEN because
+`MIROFY_CHROME`); row 6.10 (deterministic ZIP packaging) is UNPROVEN because
 its source — `scripts/build-zip.sh`, `scripts/package-smoke.mjs`,
 `.github/workflows/release.yml` in the ancestor — was never part of this
 harvest's scope, so there is nothing in this repository to prove parity

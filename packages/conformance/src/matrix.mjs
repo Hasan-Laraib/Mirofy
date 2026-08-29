@@ -8,7 +8,7 @@
 // `proof` names the test file (or script) that guarantees the row.
 // `browser: true` means the proof runs only in the CI browser job (Task 9),
 // against packages/conformance/test/viewer.browser.test.mjs. Such rows are
-// never counted as passing by scripts/conformance.mjs until PRODUCT_CHROME
+// never counted as passing by scripts/conformance.mjs until MIROFY_CHROME
 // is set.
 // `proof: null` marks a row P0 genuinely cannot prove yet; `note` says why.
 // A row with no real proof is never silently listed as covered.
@@ -21,7 +21,7 @@
 // exit 0.
 //
 // History: fix-round-1 (Task 9) added this for the 14 browser rows after
-// file-level accounting let all 14 read "proved" once PRODUCT_CHROME was
+// file-level accounting let all 14 read "proved" once MIROFY_CHROME was
 // set, though only 4 had a real assertion (see viewer.browser.test.mjs's
 // header comment). fix-round-2 extended it to the remaining 40 rows after
 // the coordinator proved the same defect at file scale: deleting
@@ -500,9 +500,9 @@ export const HARVESTED_ROWS = [
     // treats a `browser: true` row inside a shared suite the same way it
     // treats one in a browser-only suite (deferred by id, never silently
     // counted as passing, and never a title-check failure while deferred).
-    // See scripts/conformance.mjs's MIROFY_CHROME/PRODUCT_CHROME mapping
-    // comment for how this row's Chrome discovery is wired to the same
-    // PRODUCT_CHROME switch as the other 14.
+    // The harvested visual-check CLI reads MIROFY_CHROME directly, which is
+    // the same switch the other 14 gate on, so this row's Chrome discovery
+    // needs no wiring of its own.
     browser: true,
     testTitle: 'visual-check inspects 4 viewports and reports its review as pending, never as passed (6.3)',
   },
