@@ -68,3 +68,5 @@
         installBeacons: installBeacons
       };
     })();
+    Archify.sourceEvidence.installBeacons();
+
