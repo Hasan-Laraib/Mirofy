@@ -4,8 +4,8 @@
        trace yields to the strongest semantic owner; Still also parks bounded
        viewer signals without discarding their static meaning.
        ============================================================ */
-    Archify.motionGovernor = (function () {
-      var STORAGE_KEY = 'archify-motion';
+    Mirofy.motionGovernor = (function () {
+      var STORAGE_KEY = 'mirofy-motion';
       var html = document.documentElement;
       var svg = document.querySelector('.diagram-container svg');
       var btn = document.getElementById('btn-motion');
@@ -97,17 +97,17 @@
         btn.setAttribute('aria-pressed', paused ? 'false' : 'true');
         btn.disabled = systemPaused;
         label.textContent = viewerText(paused ? 'viewer.motion.still' : 'viewer.motion.live');
-        if (paused && lastEffectivePaused !== true && Archify.guidedViews && Archify.guidedViews.isPlaying()) {
-          Archify.guidedViews.pause();
+        if (paused && lastEffectivePaused !== true && Mirofy.guidedViews && Mirofy.guidedViews.isPlaying()) {
+          Mirofy.guidedViews.pause();
         }
-        if (paused && lastEffectivePaused !== true && Archify.guidedViews && Archify.guidedViews.settleHandoff) {
-          Archify.guidedViews.settleHandoff(systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still'));
+        if (paused && lastEffectivePaused !== true && Mirofy.guidedViews && Mirofy.guidedViews.settleHandoff) {
+          Mirofy.guidedViews.settleHandoff(systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still'));
         }
-        if (paused && lastEffectivePaused !== true && Archify.routeProbe && Archify.routeProbe.isJourneyPlaying && Archify.routeProbe.isJourneyPlaying()) {
-          Archify.routeProbe.pauseJourney({ preserveElapsed: true, reason: systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still') });
+        if (paused && lastEffectivePaused !== true && Mirofy.routeProbe && Mirofy.routeProbe.isJourneyPlaying && Mirofy.routeProbe.isJourneyPlaying()) {
+          Mirofy.routeProbe.pauseJourney({ preserveElapsed: true, reason: systemPaused ? 'reduced-motion' : (hasSuspension() ? 'hidden' : 'still') });
         }
         lastEffectivePaused = paused;
-        if (Archify.routeProbe && typeof Archify.routeProbe.syncMotion === 'function') Archify.routeProbe.syncMotion();
+        if (Mirofy.routeProbe && typeof Mirofy.routeProbe.syncMotion === 'function') Mirofy.routeProbe.syncMotion();
         if (systemPaused) {
           btn.setAttribute('aria-label', viewerText('viewer.motion.reduced'));
           btn.title = viewerText('viewer.motion.reduced');

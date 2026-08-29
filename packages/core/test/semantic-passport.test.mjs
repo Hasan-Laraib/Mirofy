@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-semantic-passport-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-semantic-passport-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -82,7 +82,7 @@ test('Relationship Lens renders one Semantic Passport and copyable stable focus 
   assert.match(html, /chip\.hidden \|\| !target \|\| typeof target\.closest !== 'function' \|\| chip\.contains\(target\)/);
   assert.match(html, /target\.closest\('\[data-node-id\], \[data-relationship-hit-key\], \.overview-map'\)/);
   assert.match(html, /document\.addEventListener\('click',[\s\S]+?clear\(\);\s+\}, true\);/);
-  assert.match(html, /Archify\.focus\.clear\(\{ restoreFocus: true \}\)/);
+  assert.match(html, /Mirofy\.focus\.clear\(\{ restoreFocus: true \}\)/);
 });
 
 test('Node Finder searches and presents the same passport facts', () => {

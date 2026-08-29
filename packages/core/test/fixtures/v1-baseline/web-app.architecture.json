@@ -3,7 +3,7 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "Sample Web App",
-    "subtitle": "Classic 3-tier SaaS on AWS — rendered by Archify",
+    "subtitle": "Classic 3-tier SaaS on AWS — rendered by Mirofy",
     "output": "web-app-rendered.html"
   },
   "components": [

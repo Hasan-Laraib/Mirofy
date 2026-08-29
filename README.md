@@ -1,11 +1,12 @@
-# `<PRODUCT>`
+# `Mirofy`
 
 > System intelligence for codebases. Point it at a repository and it builds a
 > living, evidence-backed model of the system.
 
 **Status: P0 Foundation.** The rendering and validation core is harvested from
-[Archify](https://github.com/tt-a1i/archify) (MIT, `12106be`) and proved
-byte-identical. The evidence-first spine lands in P1.
+an MIT-licensed ancestor project — named, with its revision, in `NOTICE` — and
+was proved byte-identical to it at the provenance anchor recorded in
+`docs/harvest.md`. The evidence-first spine lands in P1.
 
 ## Quick start
 
@@ -52,8 +53,9 @@ browser-only rows.
 ## Layout
 
 - `packages/core/` — the harvested rendering and validation core. Imported
-  unmodified; see `docs/harvest.md` for exactly what changed on import and
-  why. Do not modify it during P0 — see `CONTRIBUTING.md`.
+  unmodified and now carrying the product's own identifiers; see
+  `docs/harvest.md` for what changed on import, and for the provenance anchor
+  up to which it was byte-identical to the ancestor.
 - `packages/conformance/` — the parity matrix and its test suites, proving
   each harvested row still works after the move.
 - `fixtures/` — golden, source, and negative fixtures used by the golden and
@@ -62,4 +64,5 @@ browser-only rows.
 
 ## Attribution
 
-Substantial portions derive from Archify under MIT. See `NOTICE`.
+Substantial portions derive from an MIT-licensed ancestor project, named in
+`NOTICE`. See `NOTICE` and `LICENSE`.

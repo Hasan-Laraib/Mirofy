@@ -9,7 +9,7 @@ const RAW_RECIPES = [
       useWhen: 'Onboarding, design reviews, repository orientation, or explaining a service landscape.',
       avoidWhen: 'The audience needs exact call order, state transitions, or row-level data lineage.',
       include: ['8–12 core components', 'one primary path', 'external dependencies', 'trust boundaries'],
-      prompt: 'Analyze this repository, then use Archify to create a high-level architecture diagram. Show 8–12 core runtime components, one primary request or data path, external dependencies, ownership or trust boundaries, and put supporting detail in cards instead of adding more edges.',
+      prompt: 'Analyze this repository, then use Mirofy to create a high-level architecture diagram. Show 8–12 core runtime components, one primary request or data path, external dependencies, ownership or trust boundaries, and put supporting detail in cards instead of adding more edges.',
     },
     zh: {
       title: '系统总览', question: '系统里有什么、归谁负责、彼此如何连接？',
@@ -17,7 +17,7 @@ const RAW_RECIPES = [
       useWhen: '适合新人上手、方案评审、仓库梳理和服务全景说明。',
       avoidWhen: '如果重点是精确调用顺序、状态流转或字段级血缘，请换其他配方。',
       include: ['8–12 个核心组件', '一条主路径', '外部依赖', '归属或信任边界'],
-      prompt: '分析这个仓库，然后用 Archify 生成高层系统架构图。展示 8–12 个核心运行时组件、一条主要请求或数据路径、外部依赖、归属或信任边界；支持性细节放进卡片，不要继续堆连线。',
+      prompt: '分析这个仓库，然后用 Mirofy 生成高层系统架构图。展示 8–12 个核心运行时组件、一条主要请求或数据路径、外部依赖、归属或信任边界；支持性细节放进卡片，不要继续堆连线。',
     },
   },
   {
@@ -30,7 +30,7 @@ const RAW_RECIPES = [
       useWhen: 'Cloud reviews, production readiness, multi-region planning, or infrastructure ownership handoffs.',
       avoidWhen: 'Deployment facts are unknown or the real question is application behavior rather than placement.',
       include: ['regions and networks', 'workload ownership', 'stateful services', 'named boundary crossings'],
-      prompt: 'Use Archify to draw the production deployment topology. Group resources by region, network, cluster, and owner; show workloads and stateful services; label every cross-boundary mechanism. Do not invent deployment facts—mark unknown areas explicitly. If the user wants a fail-closed deployment review, ask before setting meta.engineering_profile to deployment-ownership; otherwise leave the engineering profile unset.',
+      prompt: 'Use Mirofy to draw the production deployment topology. Group resources by region, network, cluster, and owner; show workloads and stateful services; label every cross-boundary mechanism. Do not invent deployment facts—mark unknown areas explicitly. If the user wants a fail-closed deployment review, ask before setting meta.engineering_profile to deployment-ownership; otherwise leave the engineering profile unset.',
     },
     zh: {
       title: '部署与归属', question: '每个工作负载运行在哪里，哪些连接跨越了边界？',
@@ -38,7 +38,7 @@ const RAW_RECIPES = [
       useWhen: '适合云上评审、生产就绪、多区域规划和基础设施交接。',
       avoidWhen: '部署事实不清楚，或真正问题是应用行为而不是资源位置时不要使用。',
       include: ['区域与网络', '工作负载归属', '有状态服务', '明确的跨边界机制'],
-      prompt: '用 Archify 绘制生产部署拓扑。按区域、网络、集群和负责人分组，展示工作负载与有状态服务，并标注每一种跨边界机制。不要编造部署事实，不确定的区域要明确标出。如果用户需要失败即阻断的部署评审，先征得确认，再把 meta.engineering_profile 设为 deployment-ownership；否则不要启用工程画像。',
+      prompt: '用 Mirofy 绘制生产部署拓扑。按区域、网络、集群和负责人分组，展示工作负载与有状态服务，并标注每一种跨边界机制。不要编造部署事实，不确定的区域要明确标出。如果用户需要失败即阻断的部署评审，先征得确认，再把 meta.engineering_profile 设为 deployment-ownership；否则不要启用工程画像。',
     },
   },
   {
@@ -51,7 +51,7 @@ const RAW_RECIPES = [
       useWhen: 'Explaining agent runtimes, MCP/tool orchestration, approvals, retries, or observability.',
       avoidWhen: 'The goal is only to show static agent components or exact API message timing.',
       include: ['request and planning', 'policy or approval gate', 'tool execution', 'exception and evidence paths'],
-      prompt: 'Use Archify workflow mode to explain this agent tool-call loop. Separate user surface, agent runtime, policy boundary, exception handling, tool execution, and observability into lanes. Make the successful path primary and show approval, retry, blocked, and evidence paths explicitly.',
+      prompt: 'Use Mirofy workflow mode to explain this agent tool-call loop. Separate user surface, agent runtime, policy boundary, exception handling, tool execution, and observability into lanes. Make the successful path primary and show approval, retry, blocked, and evidence paths explicitly.',
     },
     zh: {
       title: '智能体工具调用', question: '智能体如何规划、获批、执行、恢复并汇报？',
@@ -59,7 +59,7 @@ const RAW_RECIPES = [
       useWhen: '适合解释 Agent Runtime、MCP/工具编排、审批、重试和可观测性。',
       avoidWhen: '如果只想看静态组件，或重点是精确 API 消息时序，请换其他配方。',
       include: ['请求与规划', '策略或审批门', '工具执行', '异常与证据路径'],
-      prompt: '用 Archify 工作流模式解释这段智能体工具调用。把用户界面、Agent Runtime、策略边界、异常处理、工具执行和可观测性分成泳道；突出成功主路径，并明确展示审批、重试、阻塞和证据路径。',
+      prompt: '用 Mirofy 工作流模式解释这段智能体工具调用。把用户界面、Agent Runtime、策略边界、异常处理、工具执行和可观测性分成泳道；突出成功主路径，并明确展示审批、重试、阻塞和证据路径。',
     },
   },
   {
@@ -72,7 +72,7 @@ const RAW_RECIPES = [
       useWhen: 'CI/CD design, release reviews, deployment governance, or onboarding developers to delivery.',
       avoidWhen: 'The question is where infrastructure runs or what states a deployment object can occupy.',
       include: ['trigger and build', 'blocking checks', 'approval and environments', 'rollback and verification'],
-      prompt: 'Use Archify workflow mode to draw this delivery process from commit to production. Separate developer, CI, approval, environment, and exception lanes; mark blocking checks, smoke tests, ownership, and the rollback path. Keep one unmistakable happy path.',
+      prompt: 'Use Mirofy workflow mode to draw this delivery process from commit to production. Separate developer, CI, approval, environment, and exception lanes; mark blocking checks, smoke tests, ownership, and the rollback path. Keep one unmistakable happy path.',
     },
     zh: {
       title: '研发交付流程', question: '一次变更如何安全地从提交走到生产？',
@@ -80,7 +80,7 @@ const RAW_RECIPES = [
       useWhen: '适合 CI/CD 设计、发布评审、部署治理和研发新人上手。',
       avoidWhen: '如果重点是基础设施位置或部署对象的状态集合，请换架构图或生命周期图。',
       include: ['触发与构建', '阻断检查', '审批与环境', '回滚与验证'],
-      prompt: '用 Archify 工作流模式绘制从代码提交到生产发布的流程。拆分开发者、CI、审批、环境和异常泳道；标出阻断检查、冒烟测试、负责人和回滚路径，并保留一条一眼可见的成功主路径。',
+      prompt: '用 Mirofy 工作流模式绘制从代码提交到生产发布的流程。拆分开发者、CI、审批、环境和异常泳道；标出阻断检查、冒烟测试、负责人和回滚路径，并保留一条一眼可见的成功主路径。',
     },
   },
   {
@@ -93,7 +93,7 @@ const RAW_RECIPES = [
       useWhen: 'Incident playbooks, on-call handoffs, reliability reviews, and tabletop exercises.',
       avoidWhen: 'The audience needs live metrics or a post-incident component topology instead of response actions.',
       include: ['detection signal', 'triage owner', 'mitigation and rollback', 'verification and communication'],
-      prompt: 'Use Archify workflow mode to turn this incident runbook into responder lanes. Show detection, triage, mitigation, escalation, communication, rollback, and recovery verification. Separate decision gates from actions and make missing ownership visible.',
+      prompt: 'Use Mirofy workflow mode to turn this incident runbook into responder lanes. Show detection, triage, mitigation, escalation, communication, rollback, and recovery verification. Separate decision gates from actions and make missing ownership visible.',
     },
     zh: {
       title: '事故处置 Runbook', question: '响应者如何发现、分诊、缓解、验证并升级？',
@@ -101,7 +101,7 @@ const RAW_RECIPES = [
       useWhen: '适合故障预案、On-call 交接、稳定性评审和桌面演练。',
       avoidWhen: '如果受众需要实时指标仪表盘或事故后的组件拓扑，而不是响应动作，请换其他视图。',
       include: ['发现信号', '分诊负责人', '缓解与回滚', '恢复验证与沟通'],
-      prompt: '用 Archify 工作流模式把事故处置预案画成响应者泳道。展示发现、分诊、缓解、升级、沟通、回滚和恢复验证；把决策门与操作分开，并让缺失的负责人清晰可见。',
+      prompt: '用 Mirofy 工作流模式把事故处置预案画成响应者泳道。展示发现、分诊、缓解、升级、沟通、回滚和恢复验证；把决策门与操作分开，并让缺失的负责人清晰可见。',
     },
   },
   {
@@ -114,7 +114,7 @@ const RAW_RECIPES = [
       useWhen: 'API documentation, debugging request latency, auth reviews, or explaining cache fallback.',
       avoidWhen: 'Order is unimportant and the audience only needs the stable service topology.',
       include: ['callers and callees', 'request and return messages', 'fallback or error path', 'async side effects'],
-      prompt: 'Use Archify sequence mode to show this request from caller to final response. Include authentication, cache hit or miss, persistence fallback, return messages, and asynchronous trace or event emission. Keep message labels short and order unambiguous.',
+      prompt: 'Use Mirofy sequence mode to show this request from caller to final response. Include authentication, cache hit or miss, persistence fallback, return messages, and asynchronous trace or event emission. Keep message labels short and order unambiguous.',
     },
     zh: {
       title: 'API 请求链', question: '谁调用谁、顺序如何、最终返回什么？',
@@ -122,7 +122,7 @@ const RAW_RECIPES = [
       useWhen: '适合 API 文档、请求耗时排查、鉴权评审和缓存回退说明。',
       avoidWhen: '如果顺序不重要，受众只需要稳定的服务拓扑，请用架构图。',
       include: ['调用方与被调用方', '请求与返回消息', '回退或错误路径', '异步副作用'],
-      prompt: '用 Archify 时序模式展示从调用方到最终响应的完整请求。包含鉴权、缓存命中或未命中、持久化回退、返回消息，以及异步 Trace 或事件上报；消息标签保持简短，顺序必须明确。',
+      prompt: '用 Mirofy 时序模式展示从调用方到最终响应的完整请求。包含鉴权、缓存命中或未命中、持久化回退、返回消息，以及异步 Trace 或事件上报；消息标签保持简短，顺序必须明确。',
     },
   },
   {
@@ -135,7 +135,7 @@ const RAW_RECIPES = [
       useWhen: 'Webhooks, jobs, queues, payment callbacks, eventual consistency, or async API contracts.',
       avoidWhen: 'The primary question is topic topology and consumer ownership rather than time order.',
       include: ['initial acknowledgement', 'queue or scheduler', 'background work', 'callback, retry, and timeout'],
-      prompt: 'Use Archify sequence mode to explain this asynchronous roundtrip. Show the initial acknowledgement, enqueue or scheduling step, background processing, callback or polling, retry and timeout behavior, and the point where the caller can observe final consistency.',
+      prompt: 'Use Mirofy sequence mode to explain this asynchronous roundtrip. Show the initial acknowledgement, enqueue or scheduling step, background processing, callback or polling, retry and timeout behavior, and the point where the caller can observe final consistency.',
     },
     zh: {
       title: '异步往返链路', question: '初始请求返回之后，后台还会发生什么？',
@@ -143,7 +143,7 @@ const RAW_RECIPES = [
       useWhen: '适合 Webhook、后台任务、队列、支付回调、最终一致和异步 API 契约。',
       avoidWhen: '如果重点是 Topic 拓扑和消费者归属，而不是时间顺序，请用事件数据流配方。',
       include: ['初始确认', '队列或调度器', '后台处理', '回调、重试与超时'],
-      prompt: '用 Archify 时序模式解释这段异步往返链路。展示初始确认、入队或调度、后台处理、回调或轮询、重试与超时，以及调用方何时能观察到最终一致结果。',
+      prompt: '用 Mirofy 时序模式解释这段异步往返链路。展示初始确认、入队或调度、后台处理、回调或轮询、重试与超时，以及调用方何时能观察到最终一致结果。',
     },
   },
   {
@@ -156,7 +156,7 @@ const RAW_RECIPES = [
       useWhen: 'Analytics architecture, ETL/ELT review, PII assessment, warehouse design, or model feature lineage.',
       avoidWhen: 'The audience needs request timing or operational task ownership rather than data assets.',
       include: ['sources and assets', 'transform stages', 'classification or consent', 'stores and consumers'],
-      prompt: 'Use Archify dataflow mode to map this data lineage. Name every data asset and transform, show consent or classification boundaries, distinguish streaming from batch paths, and identify stores plus downstream consumers. Do not use unlabeled flows.',
+      prompt: 'Use Mirofy dataflow mode to map this data lineage. Name every data asset and transform, show consent or classification boundaries, distinguish streaming from batch paths, and identify stores plus downstream consumers. Do not use unlabeled flows.',
     },
     zh: {
       title: '数据血缘', question: '数据从哪里来、如何变化、最终被谁消费？',
@@ -164,7 +164,7 @@ const RAW_RECIPES = [
       useWhen: '适合分析架构、ETL/ELT 评审、PII 评估、数仓设计和特征血缘。',
       avoidWhen: '如果受众需要请求时序或操作负责人，而不是数据资产，请换其他配方。',
       include: ['数据来源与资产', '转换阶段', '分类或同意边界', '存储与消费者'],
-      prompt: '用 Archify 数据流模式梳理这段数据血缘。为每个数据资产和转换命名，展示用户同意或数据分类边界，区分流式与批处理路径，并标明存储和下游消费者；所有数据流都必须有标签。',
+      prompt: '用 Mirofy 数据流模式梳理这段数据血缘。为每个数据资产和转换命名，展示用户同意或数据分类边界，区分流式与批处理路径，并标明存储和下游消费者；所有数据流都必须有标签。',
     },
   },
   {
@@ -177,7 +177,7 @@ const RAW_RECIPES = [
       useWhen: 'Kafka/event-platform design, stream processing reviews, ownership, replay, and failure handling.',
       avoidWhen: 'Topic names, consumer groups, and delivery semantics are not known—use a generic workflow instead.',
       include: ['producers and event names', 'topics and ordering', 'processors and consumer groups', 'state, replay, and DLQ'],
-      prompt: 'Use Archify dataflow mode to draw this event-stream topology. Name producers, events, topics, ordered processors, consumer groups, state stores, replay paths, and the DLQ. Show ownership and delivery semantics only when supported by evidence.',
+      prompt: 'Use Mirofy dataflow mode to draw this event-stream topology. Name producers, events, topics, ordered processors, consumer groups, state stores, replay paths, and the DLQ. Show ownership and delivery semantics only when supported by evidence.',
     },
     zh: {
       title: '事件流拓扑', question: '哪些事件经过哪些 Topic、处理器、消费者组和失败路径？',
@@ -185,7 +185,7 @@ const RAW_RECIPES = [
       useWhen: '适合 Kafka/事件平台设计、流处理评审、归属、重放和失败处理。',
       avoidWhen: '如果 Topic、消费者组和投递语义都不清楚，请先用通用工作流，不要编造事件拓扑。',
       include: ['生产者与事件名', 'Topic 与顺序', '处理器与消费者组', '状态、重放与 DLQ'],
-      prompt: '用 Archify 数据流模式绘制这段事件流拓扑。命名生产者、事件、Topic、有序处理器、消费者组、状态存储、重放路径和 DLQ；只有在证据充分时才标注归属和投递语义。',
+      prompt: '用 Mirofy 数据流模式绘制这段事件流拓扑。命名生产者、事件、Topic、有序处理器、消费者组、状态存储、重放路径和 DLQ；只有在证据充分时才标注归属和投递语义。',
     },
   },
   {
@@ -198,7 +198,7 @@ const RAW_RECIPES = [
       useWhen: 'Tasks, orders, tickets, subscriptions, jobs, agent runs, or any durable object with status.',
       avoidWhen: 'The object has no durable state and the real question is participant interaction over time.',
       include: ['start and active states', 'event-labelled transitions', 'wait and retry states', 'all terminal outcomes'],
-      prompt: 'Use Archify lifecycle mode to model this object. Separate main progress, waiting or interruption states, and terminal outcomes. Label transitions with events, include retry, cancellation, timeout, success, and failure where real, and never hide an ending.',
+      prompt: 'Use Mirofy lifecycle mode to model this object. Separate main progress, waiting or interruption states, and terminal outcomes. Label transitions with events, include retry, cancellation, timeout, success, and failure where real, and never hide an ending.',
     },
     zh: {
       title: '对象生命周期', question: '有哪些状态、什么事件触发流转、最终如何结束？',
@@ -206,7 +206,7 @@ const RAW_RECIPES = [
       useWhen: '适合任务、订单、工单、订阅、作业、Agent Run 等带持久状态的对象。',
       avoidWhen: '对象没有持久状态，真正问题是参与者随时间的交互时，请使用时序图。',
       include: ['开始与执行态', '带事件的转换', '等待与重试态', '所有终态'],
-      prompt: '用 Archify 生命周期模式建模这个对象。分开主进度、等待或中断状态和终态；用事件标注转换，并在真实存在时展示重试、取消、超时、成功和失败，不能隐藏任何结束方式。',
+      prompt: '用 Mirofy 生命周期模式建模这个对象。分开主进度、等待或中断状态和终态；用事件标注转换，并在真实存在时展示重试、取消、超时、成功和失败，不能隐藏任何结束方式。',
     },
   },
   {
@@ -219,7 +219,7 @@ const RAW_RECIPES = [
       useWhen: 'Release controllers, GitOps reconciliation, environment promotion, or deployment status APIs.',
       avoidWhen: 'The question is the human/CI sequence of delivery actions rather than the deployment object state.',
       include: ['queued and running states', 'verification and approval', 'promotion and rollback', 'success, failure, cancellation'],
-      prompt: 'Use Archify lifecycle mode to model the deployment object. Show queued, building, verifying, waiting for approval, promoting, rolling back, and every terminal outcome. Label the events and guards that permit each transition.',
+      prompt: 'Use Mirofy lifecycle mode to model the deployment object. Show queued, building, verifying, waiting for approval, promoting, rolling back, and every terminal outcome. Label the events and guards that permit each transition.',
     },
     zh: {
       title: '部署生命周期', question: '一次发布当前处于什么状态，下一步可能发生什么？',
@@ -227,7 +227,7 @@ const RAW_RECIPES = [
       useWhen: '适合发布控制器、GitOps 对账、环境晋级和部署状态 API。',
       avoidWhen: '如果重点是人员与 CI 的交付动作顺序，而不是部署对象状态，请用交付工作流。',
       include: ['排队与执行态', '验证与审批', '晋级与回滚', '成功、失败与取消'],
-      prompt: '用 Archify 生命周期模式建模部署对象。展示排队、构建、验证、等待审批、晋级、回滚以及所有终态，并标注允许每次状态转换的事件和守卫条件。',
+      prompt: '用 Mirofy 生命周期模式建模部署对象。展示排队、构建、验证、等待审批、晋级、回滚以及所有终态，并标注允许每次状态转换的事件和守卫条件。',
     },
   },
 ];
@@ -303,10 +303,10 @@ export function recommendScenario(query, options = {}) {
 
 export function formatScenarioList(lang = 'en') {
   const isZh = lang === 'zh';
-  const heading = isZh ? 'Archify 场景配方（11）' : 'Archify scenario recipes (11)';
+  const heading = isZh ? 'Mirofy 场景配方（11）' : 'Mirofy scenario recipes (11)';
   const intro = isZh
-    ? '先选择你要回答的问题，再选择图表类型。可运行：archify guide "你的场景"'
-    : 'Choose the question before the diagram type. Run: archify guide "your scenario"';
+    ? '先选择你要回答的问题，再选择图表类型。可运行：mirofy guide "你的场景"'
+    : 'Choose the question before the diagram type. Run: mirofy guide "your scenario"';
   return [heading, '', intro, '', ...listScenarioRecipes(lang).flatMap((recipe) => [
     `${recipe.id}  [${recipe.type}]  ${recipe.title}`,
     `  ${recipe.question}`,

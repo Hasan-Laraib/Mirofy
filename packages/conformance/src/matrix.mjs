@@ -318,7 +318,7 @@ export const HARVESTED_ROWS = [
     id: '4.5',
     name: 'Style Picker + S cycle',
     proof: 'preset-matrix.test.mjs',
-    testTitle: 'the "S" key cycles the visual style via Archify.preset.cycle (4.5)',
+    testTitle: 'the "S" key cycles the visual style via Mirofy.preset.cycle (4.5)',
   },
   {
     id: '4.6',
@@ -492,7 +492,7 @@ export const HARVESTED_ROWS = [
     name: 'visual-check (4 viewports, pending)',
     proof: 'delivery.test.mjs',
     // Its proof file is delivery.test.mjs (a non-browser suite most of the
-    // time), but the row's own test spawns the real `archify visual-check`
+    // time), but the row's own test spawns the real `mirofy visual-check`
     // CLI, which needs a real Chrome/Chromium to inspect anything -- without
     // one, the test calls t.skip() rather than asserting. That makes 6.3
     // browser-dependent exactly like the 14 Phase-5 rows, even though it
@@ -500,7 +500,7 @@ export const HARVESTED_ROWS = [
     // treats a `browser: true` row inside a shared suite the same way it
     // treats one in a browser-only suite (deferred by id, never silently
     // counted as passing, and never a title-check failure while deferred).
-    // See scripts/conformance.mjs's ARCHIFY_CHROME/PRODUCT_CHROME mapping
+    // See scripts/conformance.mjs's MIROFY_CHROME/PRODUCT_CHROME mapping
     // comment for how this row's Chrome discovery is wired to the same
     // PRODUCT_CHROME switch as the other 14.
     browser: true,

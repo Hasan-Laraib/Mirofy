@@ -5,7 +5,7 @@
        serialization remain untouched. Escape first clears an active guided
        view/focus, then exits the stage.
        ============================================================ */
-    Archify.presentation = (function () {
+    Mirofy.presentation = (function () {
       var html = document.documentElement;
       var btn = document.getElementById('btn-present');
       var label = document.getElementById('present-label');
@@ -37,7 +37,7 @@
           return next;
         }
         if (next) {
-          if (Archify.semanticLens && typeof Archify.semanticLens.clearPreview === 'function') Archify.semanticLens.clearPreview();
+          if (Mirofy.semanticLens && typeof Mirofy.semanticLens.clearPreview === 'function') Mirofy.semanticLens.clearPreview();
           previousScrollY = window.scrollY || 0;
           html.setAttribute('data-present', 'true');
           try { window.scrollTo(0, 0); } catch (_) {}
@@ -47,10 +47,10 @@
         render(next);
         if (options.updateUrl !== false) updateUrl(next);
         requestAnimationFrame(function () {
-          if (Archify.view && typeof Archify.view.reset === 'function') {
-            Archify.view.reset({ automatic: true });
+          if (Mirofy.view && typeof Mirofy.view.reset === 'function') {
+            Mirofy.view.reset({ automatic: true });
             requestAnimationFrame(function () {
-              if (Archify.view && typeof Archify.view.sync === 'function') Archify.view.sync();
+              if (Mirofy.view && typeof Mirofy.view.sync === 'function') Mirofy.view.sync();
             });
           }
           if (!next && previousScrollY) {

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-semantic-lens-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-semantic-lens-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -37,7 +37,7 @@ test('all typed renderers inherit one viewer-only Semantic Lens', () => {
     const html = render(mode, example);
     assert.match(html, /id="semantic-lens" hidden role="dialog" aria-modal="false" aria-labelledby="semantic-lens-title"/, mode);
     assert.match(html, /id="btn-semantic-lens"[^>]+aria-label="Open semantic lens"[^>]+aria-expanded="false"[^>]+aria-controls="semantic-lens"/, mode);
-    assert.match(html, /Archify\.semanticLens = \(function \(\)/, mode);
+    assert.match(html, /Mirofy\.semanticLens = \(function \(\)/, mode);
     assert.match(html, /svg\.querySelectorAll\('\[data-node-id\]\[data-node-kind\]'\)/, mode);
     assert.doesNotMatch(canonicalSvg(html), /semantic-lens-overlay|data-lens-active|data-lens-match/, mode);
   }
@@ -64,14 +64,14 @@ test('Semantic Lens is shareable and yields cleanly to stronger reader intent', 
   assert.match(html, /window\.addEventListener\('hashchange', syncFromHash\)/);
   assert.match(html, /event\.composedPath\(\)/);
   assert.match(html, /eventPath\.indexOf\(panel\) >= 0/);
-  assert.match(html, /Archify\.semanticLens\.clear\(\{ updateUrl: false/);
-  assert.match(html, /Archify\.focus\.clear\(\{ updateUrl: false, preserveView: true \}\)/);
-  assert.match(html, /Archify\.routeProbe\.clear\(\{ updateUrl: false, restoreFocus: false \}\)/);
-  assert.match(html, /Archify\.guidedViews\.showAll\(\{ clearFocus: false, updateUrl: false \}\)/);
-  assert.match(html, /if \(action === 'lens'\) return Archify\.semanticLens\.open\(\)/);
+  assert.match(html, /Mirofy\.semanticLens\.clear\(\{ updateUrl: false/);
+  assert.match(html, /Mirofy\.focus\.clear\(\{ updateUrl: false, preserveView: true \}\)/);
+  assert.match(html, /Mirofy\.routeProbe\.clear\(\{ updateUrl: false, restoreFocus: false \}\)/);
+  assert.match(html, /Mirofy\.guidedViews\.showAll\(\{ clearFocus: false, updateUrl: false \}\)/);
+  assert.match(html, /if \(action === 'lens'\) return Mirofy\.semanticLens\.open\(\)/);
   assert.match(html, /e\.key === 'l' \|\| e\.key === 'L'/);
-  assert.match(html, /e\.key === 'Escape' && Archify\.semanticLens\.isOpen\(\)/);
-  assert.match(html, /e\.key === 'Escape' && Archify\.semanticLens\.active\(\)/);
+  assert.match(html, /e\.key === 'Escape' && Mirofy\.semanticLens\.isOpen\(\)/);
+  assert.match(html, /e\.key === 'Escape' && Mirofy\.semanticLens\.active\(\)/);
 });
 
 test('Semantic Lens preserves Reading Depth, mobile containment, print, embed, and export boundaries', () => {

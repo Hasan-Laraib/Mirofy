@@ -5,7 +5,7 @@
        Two selected kinds compare only direct cross-kind relationships while
        preserving the full diagram as a dimmed spatial reference.
        ============================================================ */
-    Archify.semanticLens = (function () {
+    Mirofy.semanticLens = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container.querySelector(':scope > svg');
@@ -450,17 +450,17 @@
       }
       function prepareForLens() {
         clearLegendPreview();
-        if (Archify.focus && typeof Archify.focus.clear === 'function') {
-          Archify.focus.clear({ updateUrl: false, preserveView: true });
+        if (Mirofy.focus && typeof Mirofy.focus.clear === 'function') {
+          Mirofy.focus.clear({ updateUrl: false, preserveView: true });
         }
-        if (Archify.routeProbe && typeof Archify.routeProbe.clear === 'function') {
-          Archify.routeProbe.clear({ updateUrl: false, restoreFocus: false });
+        if (Mirofy.routeProbe && typeof Mirofy.routeProbe.clear === 'function') {
+          Mirofy.routeProbe.clear({ updateUrl: false, restoreFocus: false });
         }
-        if (Archify.guidedViews && typeof Archify.guidedViews.showAll === 'function') {
-          Archify.guidedViews.showAll({ clearFocus: false, updateUrl: false });
+        if (Mirofy.guidedViews && typeof Mirofy.guidedViews.showAll === 'function') {
+          Mirofy.guidedViews.showAll({ clearFocus: false, updateUrl: false });
         }
-        if (Archify.intentTrace && typeof Archify.intentTrace.clear === 'function') {
-          Archify.intentTrace.clear({ announce: false });
+        if (Mirofy.intentTrace && typeof Mirofy.intentTrace.clear === 'function') {
+          Mirofy.intentTrace.clear({ announce: false });
         }
       }
       function select(kind, options) {
@@ -489,10 +489,10 @@
         options = options || {};
         if (html.getAttribute('data-embed') === 'true') return false;
         lensOpener = options.opener || trigger;
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
-        if (Archify.finder && Archify.finder.isOpen()) Archify.finder.close({ restoreFocus: false });
-        if (Archify.radar && Archify.radar.isOpen()) Archify.radar.close({ restoreFocus: false });
-        if (Archify.guide && Archify.guide.isOpen()) Archify.guide.close({ restoreFocus: false });
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
+        if (Mirofy.finder && Mirofy.finder.isOpen()) Mirofy.finder.close({ restoreFocus: false });
+        if (Mirofy.radar && Mirofy.radar.isOpen()) Mirofy.radar.close({ restoreFocus: false });
+        if (Mirofy.guide && Mirofy.guide.isOpen()) Mirofy.guide.close({ restoreFocus: false });
         renderKinds();
         panel.hidden = false;
         trigger.setAttribute('aria-expanded', 'true');
@@ -515,8 +515,8 @@
         renderKinds();
         status.textContent = viewerText('viewer.lens.choose');
         if (options.updateUrl !== false) updateHash();
-        if (options.preserveView !== true && Archify.view && typeof Archify.view.reset === 'function') {
-          Archify.view.reset({ automatic: true });
+        if (options.preserveView !== true && Mirofy.view && typeof Mirofy.view.reset === 'function') {
+          Mirofy.view.reset({ automatic: true });
         }
         if (options.closePanel === true) close({ restoreFocus: false });
         return false;

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-diagram-guide-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-diagram-guide-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -37,9 +37,9 @@ test('all typed renderers inherit one viewer-only Diagram Guide', () => {
     const html = render(mode, example);
     assert.match(html, /id="diagram-guide" hidden role="dialog" aria-modal="false" aria-labelledby="diagram-guide-title"/, mode);
     assert.match(html, /id="btn-diagram-guide"[^>]+aria-label="Open diagram guide"[^>]+aria-haspopup="dialog"[^>]+aria-expanded="false"/, mode);
-    assert.match(html, /Archify\.guide = \(function \(\)/, mode);
+    assert.match(html, /Mirofy\.guide = \(function \(\)/, mode);
     assert.match(html, /Diagram Guide — a factual command deck over existing interactions/, mode);
-    assert.doesNotMatch(canonicalSvg(html), /diagram-guide|Archify\.guide|Explore this system/, mode);
+    assert.doesNotMatch(canonicalSvg(html), /diagram-guide|Mirofy\.guide|Explore this system/, mode);
   }
 });
 
@@ -48,7 +48,7 @@ test('Diagram Guide reports compiled semantic facts and honest story availabilit
   assert.match(html, /svg\.querySelectorAll\('\[data-node-id\]'\)\.length/);
   assert.match(html, /svg\.querySelectorAll\('\[data-edge-from\]\[data-edge-to\]'\)/);
   assert.match(html, /edge\.getAttribute\('data-edge-key'\)/);
-  assert.match(html, /return Archify\.guidedViews && Number\(Archify\.guidedViews\.count\) \|\| 0/);
+  assert.match(html, /return Mirofy\.guidedViews && Number\(Mirofy\.guidedViews\.count\) \|\| 0/);
   assert.match(html, /storyBtn\.disabled = views === 0/);
   assert.match(html, /viewerCount\('viewer\.guide\.fact\.view', views\)/);
   assert.match(html, /viewerText\('viewer\.guide\.story\.unavailable'\)/);
@@ -56,24 +56,24 @@ test('Diagram Guide reports compiled semantic facts and honest story availabilit
 
 test('Diagram Guide delegates its task rows to existing production interactions', () => {
   const html = render('architecture', CASES.architecture);
-  assert.match(html, /if \(action === 'find'\) return Archify\.finder\.open\(\)/);
-  assert.match(html, /if \(action === 'route'\) return Archify\.routeProbe\.begin\(\{ focusNode: true \}\)/);
-  assert.match(html, /if \(action === 'map'\) return Archify\.radar\.open\(\)/);
-  assert.match(html, /if \(action === 'story'\) return Archify\.guidedViews\.play\(\)/);
-  assert.match(html, /if \(action === 'present'\) return Archify\.presentation\.enter\(\)/);
-  assert.match(html, /if \(action === 'export'\) return Archify\.exportMenu\.open\(\)/);
-  assert.match(html, /if \(action === 'theme'\) return Archify\.theme\.toggle\(\)/);
-  assert.match(html, /if \(action === 'reset'\) return Archify\.view\.reset\(\)/);
-  assert.match(html, /Archify\.guidedViews\.pause\(\)/);
-  assert.match(html, /Archify\.finder\.close\(\{ restoreFocus: false \}\)/);
-  assert.match(html, /Archify\.radar\.close\(\{ restoreFocus: false \}\)/);
+  assert.match(html, /if \(action === 'find'\) return Mirofy\.finder\.open\(\)/);
+  assert.match(html, /if \(action === 'route'\) return Mirofy\.routeProbe\.begin\(\{ focusNode: true \}\)/);
+  assert.match(html, /if \(action === 'map'\) return Mirofy\.radar\.open\(\)/);
+  assert.match(html, /if \(action === 'story'\) return Mirofy\.guidedViews\.play\(\)/);
+  assert.match(html, /if \(action === 'present'\) return Mirofy\.presentation\.enter\(\)/);
+  assert.match(html, /if \(action === 'export'\) return Mirofy\.exportMenu\.open\(\)/);
+  assert.match(html, /if \(action === 'theme'\) return Mirofy\.theme\.toggle\(\)/);
+  assert.match(html, /if \(action === 'reset'\) return Mirofy\.view\.reset\(\)/);
+  assert.match(html, /Mirofy\.guidedViews\.pause\(\)/);
+  assert.match(html, /Mirofy\.finder\.close\(\{ restoreFocus: false \}\)/);
+  assert.match(html, /Mirofy\.radar\.close\(\{ restoreFocus: false \}\)/);
   assert.match(html, /event\.stopPropagation\(\);[\s\S]+execute\(button\.getAttribute\('data-guide-action'\)\)/);
 });
 
 test('Diagram Guide is keyboard-first, mobile-contained, motion-safe, and embed-clean', () => {
   const html = render('sequence', CASES.sequence);
   assert.match(html, /e\.key === '\?'/);
-  assert.match(html, /Archify\.guide\.toggle\(\)/);
+  assert.match(html, /Mirofy\.guide\.toggle\(\)/);
   assert.match(html, /event\.key === 'ArrowRight'/);
   assert.match(html, /event\.key === 'ArrowDown'/);
   assert.match(html, /event\.key === 'Home'/);

@@ -15,12 +15,12 @@ import {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const cli = path.join(skillRoot, 'bin/archify.mjs');
+const cli = path.join(skillRoot, 'bin/mirofy.mjs');
 const baseFixture = path.join(skillRoot, 'examples/checkout-platform.base.architecture.json');
 const headFixture = path.join(skillRoot, 'examples/checkout-platform.head.architecture.json');
 const checkedArtifact = path.resolve(skillRoot, '../examples/checkout-platform-delta.html');
 const checkedReceipt = path.resolve(skillRoot, '../examples/checkout-platform-delta.receipt.json');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-delta-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-delta-'));
 
 const read = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const run = (args) => spawnSync(process.execPath, [cli, ...args], { cwd: skillRoot, encoding: 'utf8' });
@@ -295,7 +295,7 @@ test('compare CLI writes a deterministic three-state artifact and complete sidec
   assert.match(firstHtml, /title="After architecture explorer"/);
   assert.match(firstHtml, /id="export-svg"[^>]*>Export SVG</);
   assert.match(firstHtml, /id="share-card"[^>]*>Share Card</);
-  assert.match(firstHtml, /window\.Archify\.deltaExport = \{ canonicalSvg: canonicalDeltaSvg, shareCard/);
+  assert.match(firstHtml, /window\.Mirofy\.deltaExport = \{ canonicalSvg: canonicalDeltaSvg, shareCard/);
   assert.match(firstHtml, /canvas\.width = 1200;[\s\S]*canvas\.height = 630;/);
   assert.match(firstHtml, /structural-frame.*stroke:var\(--delta\)!important/);
   assert.match(firstHtml, /structural-frame.*data-delta-state="changed".*stroke-dasharray:2 3!important/);
@@ -312,7 +312,7 @@ test('compare CLI writes a deterministic three-state artifact and complete sidec
   assert.match(firstHtml, /:not\(\[data-delta-review-current\]\)/);
   assert.match(firstHtml, /--review-same-opacity:1;--review-change-opacity:1/);
   assert.match(firstHtml, /--d-focus:#006b8f/);
-  assert.match(firstHtml, /document\.querySelectorAll\('#archify-compare-receipt'\)\.length !== 1/);
+  assert.match(firstHtml, /document\.querySelectorAll\('#mirofy-compare-receipt'\)\.length !== 1/);
   assert.match(firstHtml, /targetsMatch\(reviewSources\[index\], row, matches\)/);
   assert.match(firstHtml, /document\.addEventListener\('visibilitychange'/);
   assert.match(firstHtml, /window\.addEventListener\('beforeprint', overview\)/);
@@ -416,7 +416,7 @@ test('artifact validation fails closed on missing, duplicate, or self-blessed re
       && error.details.failures.includes('missing Delta target state relationship:fraud-check'),
   );
 
-  const receiptNode = html.match(/<script id="archify-compare-receipt"[\s\S]*?<\/script>/)?.[0];
+  const receiptNode = html.match(/<script id="mirofy-compare-receipt"[\s\S]*?<\/script>/)?.[0];
   assert.ok(receiptNode);
   const duplicateReceipt = html.replace(receiptNode, `${receiptNode}${receiptNode}`);
   assert.throws(

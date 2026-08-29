@@ -108,7 +108,7 @@ async function navigate(url) {
   const navigation = await browser.cdp.send('Page.navigate', { url }, sessionId);
   if (navigation.errorText) throw new Error(`Chrome navigation failed: ${navigation.errorText}`);
   await loaded;
-  // Let boot-time module IIFEs (Archify.guidedViews et al.) finish running.
+  // Let boot-time module IIFEs (Mirofy.guidedViews et al.) finish running.
   await evaluate(`new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))`, true);
 }
 
@@ -152,8 +152,8 @@ before(async () => {
   fileUrl = pathToFileURL(out).href;
 
   // A second, purpose-built artifact for [2.2]: the Verified Source Beacon
-  // is installed by runtime JS (Archify.sourceEvidence.installBeacons(),
-  // template.html) that reads an <script id="archify-source-evidence-data">
+  // is installed by runtime JS (Mirofy.sourceEvidence.installBeacons(),
+  // template.html) that reads an <script id="mirofy-source-evidence-data">
   // payload the renderer only embeds when given a real --repo-root whose
   // pinned revision verifies -- see validation-gates.test.mjs's 2.1/2.2 test
   // for the non-browser half (the evidence data itself). None of that runs
@@ -199,7 +199,7 @@ before(async () => {
   fs.writeFileSync(evidenceInput, JSON.stringify(evidenceDoc));
   const evidenceOut = path.join(tmp, 'beacon.html');
   execFileSync(process.execPath, [
-    path.join(coreRoot, 'bin/archify.mjs'), 'render', 'architecture', evidenceInput, evidenceOut, '--repo-root', evidenceRepo,
+    path.join(coreRoot, 'bin/mirofy.mjs'), 'render', 'architecture', evidenceInput, evidenceOut, '--repo-root', evidenceRepo,
   ], { stdio: ['ignore', 'ignore', 'pipe'] });
   evidenceFileUrl = pathToFileURL(evidenceOut).href;
 
@@ -337,7 +337,7 @@ test('[5.1] Pan/zoom/reset (Semantic Camera) actually changes the rendered svg s
 
 test('[5.11] Motion Governor flips html[data-motion] between live and still via btn-motion', { skip }, async () => {
   // production-deployment.architecture.json sets meta.animation:"trace",
-  // which is Motion Governor's capability gate (Archify.motionGovernor
+  // which is Motion Governor's capability gate (Mirofy.motionGovernor
   // hides btn-motion entirely otherwise) -- this is why this row needs a
   // different fixture than the plain toggle-panel rows above.
   const capable = await evaluate(`document.getElementById('btn-motion').hidden === false`);

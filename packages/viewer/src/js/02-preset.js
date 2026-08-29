@@ -1,4 +1,4 @@
-    Archify.preset = (function () {
+    Mirofy.preset = (function () {
       var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial'];
       var LABELS = {
         classic: viewerText('viewer.preset.classic.short'),
@@ -45,7 +45,7 @@
       function isOpen() { return menu.classList.contains('open'); }
       function open(focusLast) {
         if (html.getAttribute('data-embed') === 'true') return false;
-        if (Archify.exportMenu && Archify.exportMenu.isOpen()) Archify.exportMenu.close(false);
+        if (Mirofy.exportMenu && Mirofy.exportMenu.isOpen()) Mirofy.exportMenu.close(false);
         menu.classList.add('open');
         btn.setAttribute('aria-expanded', 'true');
         var available = options();

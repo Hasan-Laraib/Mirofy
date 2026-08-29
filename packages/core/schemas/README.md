@@ -1,4 +1,4 @@
-# Archify JSON IR Schemas
+# Mirofy JSON IR Schemas
 
 Each typed renderer consumes a JSON intermediate representation (IR) validated
 against one of the schemas in this folder before any layout work happens.
@@ -63,7 +63,7 @@ Architecture documents that omit an explicit `viewBox` size that automatic
 viewBox from the same measured resolved legend footprint used for final SVG
 layout. Across all renderers, legacy documents that omit `meta.legend` use a
 compatibility-safe implicit `auto`: if the resolved legend cannot fit an
-explicit authored viewBox without overlap, Archify omits the complete legend
+explicit authored viewBox without overlap, Mirofy omits the complete legend
 instead of turning a previously valid schema-v1 document into a hard failure.
 Once an author adds `meta.legend` (including explicit `mode: "auto"`), the
 layout is intentional and unfit labels or bands fail with a path-prefixed
@@ -99,8 +99,8 @@ local to the current page.
 
 Every semantic node collection (`components`, `nodes`, `participants`, and
 `states`) also accepts one optional `brand`: either a canonical string returned
-by `archify brands --json`, or a digest-pinned `{ "url", "sha256" }` object
-returned by `archify brands capture <url> --json`. Known IDs and known-brand
+by `mirofy brands --json`, or a digest-pinned `{ "url", "sha256" }` object
+returned by `mirofy brands capture <url> --json`. Known IDs and known-brand
 domains use the bundled vector catalogue. Unknown URLs must be captured in that
 explicit command before authoring; render and validate never perform an
 unpinned network capture. Unsafe, unavailable, changed, or unsupported content
@@ -164,7 +164,7 @@ exports carry no repository evidence.
 
 `meta.quality_profile` and `meta.engineering_profile` answer different
 questions. `quality_profile` is available in all five modes and controls how
-strictly Archify judges composition. `engineering_profile` is an optional
+strictly Mirofy judges composition. `engineering_profile` is an optional
 Architecture-only semantic contract; omitting it preserves the ordinary v1
 behavior.
 

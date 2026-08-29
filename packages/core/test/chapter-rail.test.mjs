@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-chapter-rail-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-chapter-rail-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -80,7 +80,7 @@ test('chapter rail has positional, touch, mobile, motion, embed, and print bound
   assert.match(html, /behavior: 'auto'/);
   assert.match(html, /prefers-reduced-motion: reduce[\s\S]*\.guided-view-chapter \{ transition: none !important; \}/);
   assert.match(html, /html\[data-embed="true"\] \.guided-views \{ display: none !important; \}/);
-  assert.match(html, /\.toolbar, \.diagram-nav, \.focus-chip, \.guided-views, \.archify-toast, \.no-print \{ display: none !important; \}/);
+  assert.match(html, /\.toolbar, \.diagram-nav, \.focus-chip, \.guided-views, \.mirofy-toast, \.no-print \{ display: none !important; \}/);
 });
 
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));

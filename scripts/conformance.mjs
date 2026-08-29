@@ -31,16 +31,16 @@ const includeBrowser = process.env.PRODUCT_CHROME ? true : false;
 // The project's own signal for "is a browser available" is PRODUCT_CHROME
 // (see the honesty rules above and CONTRIBUTING.md). The harvested
 // packages/core/bin/visual-check.mjs -- which row 6.3's proof (delivery.
-// test.mjs) drives through the real `archify visual-check` CLI -- reads
-// ARCHIFY_CHROME instead, and must not be modified (it is inside
+// test.mjs) drives through the real `mirofy visual-check` CLI -- reads
+// MIROFY_CHROME instead, and must not be modified (it is inside
 // packages/core). Rather than duplicate visual-check's Chrome-discovery
 // logic, map the one signal onto the other for every suite this script
 // spawns, so 6.3 gates on the same PRODUCT_CHROME switch as every other
 // browser row instead of silently falling back to whatever Chrome (if any)
-// happens to be on PATH. Never overrides an ARCHIFY_CHROME the environment
+// happens to be on PATH. Never overrides an MIROFY_CHROME the environment
 // already set explicitly.
-if (process.env.PRODUCT_CHROME && !process.env.ARCHIFY_CHROME) {
-  process.env.ARCHIFY_CHROME = process.env.PRODUCT_CHROME;
+if (process.env.PRODUCT_CHROME && !process.env.MIROFY_CHROME) {
+  process.env.MIROFY_CHROME = process.env.PRODUCT_CHROME;
 }
 
 const unproven = HARVESTED_ROWS.filter((row) => row.proof === null);

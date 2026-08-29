@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 const template = fs.readFileSync(path.join(skillRoot, 'assets', 'template.html'), 'utf8');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-story-carrier-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-story-carrier-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -36,10 +36,10 @@ function canonicalSvg(html) {
 test('all five renderers inherit one viewer-only Semantic Story Carrier', () => {
   for (const [mode, example] of Object.entries(CASES)) {
     const html = render(mode, example);
-    assert.match(html, /Archify\.flowTokens = \{/, mode);
+    assert.match(html, /Mirofy\.flowTokens = \{/, mode);
     assert.match(html, /className: 'story-flow-token'/, mode);
     assert.match(html, /data-story-carrier-token/, mode);
-    assert.match(html, /animation: archify-relationship-token-life 0\.78s linear 1 both/, mode);
+    assert.match(html, /animation: mirofy-relationship-token-life 0\.78s linear 1 both/, mode);
     assert.doesNotMatch(canonicalSvg(html), /story-flow-token|story-carrier-token|semantic-flow-token/, mode);
   }
 });
@@ -57,7 +57,7 @@ test('Story deduplicates SVG path and label fragments by stable authored edge ke
 test('Story reuses the exact semantic token vocabulary on its existing finite edge pulse', () => {
   assert.match(template, /function createSemanticFlowToken\(edge, shape, options\)/);
   assert.match(template, /relationshipTokenGeometry\(shape, relationshipTokenKind\(edge\), key, options\)/);
-  assert.match(template, /Archify\.flowTokens\.create\(edge, shapes\[0\], \{/);
+  assert.match(template, /Mirofy\.flowTokens\.create\(edge, shapes\[0\], \{/);
   assert.match(template, /className: 'story-flow-token'/);
   assert.match(template, /duration: '0\.78s'/);
   assert.match(template, /carrier\.setAttribute\('data-story-beat-step', String\(step\.index\)\)/);
@@ -82,7 +82,7 @@ test('Story Carrier cleanup and export remain owned by Story Trail', () => {
   assert.match(template, /overlay\.remove\(\)/);
   assert.match(template, /var pulseGeneration = storyPulseGeneration/);
   assert.match(template, /if \(pulseGeneration === storyPulseGeneration\) clearStoryPulse\(\)/);
-  assert.equal((template.match(/storyPulseOwnerToken = Archify\.motionGovernor\.claim\('story'/g) || []).length, 1);
+  assert.equal((template.match(/storyPulseOwnerToken = Mirofy\.motionGovernor\.claim\('story'/g) || []).length, 1);
   assert.match(template, /clone\.querySelectorAll\('\[data-story-overlay\], \[data-story-carrier-overlay\]'\)/);
   assert.match(template, /@media print \{[\s\S]+\.story-trail-overlay,[\s\S]+\.story-carrier-overlay \{ display: none !important; \}/);
 });

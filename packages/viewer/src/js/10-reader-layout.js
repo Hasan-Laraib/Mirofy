@@ -7,7 +7,7 @@
        embed, presentation, print, and non-wide diagrams retain their own
        established layout contracts.
        ============================================================ */
-    Archify.waitForStableLayout = function (options) {
+    Mirofy.waitForStableLayout = function (options) {
       options = options || {};
       var maximumFrames = Math.max(1, Number(options.maximumFrames) || 240);
       var fontsReady = document.fonts && document.fonts.ready
@@ -47,7 +47,7 @@
       });
     };
 
-    Archify.readerLayout = (function () {
+    Mirofy.readerLayout = (function () {
       var html = document.documentElement;
       var body = document.body;
       var shell = document.querySelector('.container');
@@ -94,7 +94,7 @@
         );
       }
       function clear() {
-        html.style.removeProperty('--archify-reader-width');
+        html.style.removeProperty('--mirofy-reader-width');
         html.removeAttribute('data-reader-layout');
         html.removeAttribute('data-reader-overflow');
         lastWidth = 0;
@@ -115,7 +115,7 @@
         var rounded = Math.round(width);
         if (Math.abs(rounded - lastWidth) < 1) return false;
         lastWidth = rounded;
-        html.style.setProperty('--archify-reader-width', rounded + 'px');
+        html.style.setProperty('--mirofy-reader-width', rounded + 'px');
         html.setAttribute('data-reader-layout', 'adaptive');
         return true;
       }
@@ -184,7 +184,7 @@
         ].join('|');
       }
       function whenStable() {
-        return Archify.waitForStableLayout({
+        return Mirofy.waitForStableLayout({
           schedule: schedule,
           pending: function () { return Boolean(frame || settleFrame); },
           snapshot: stableSnapshot,

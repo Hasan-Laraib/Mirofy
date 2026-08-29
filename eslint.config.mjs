@@ -32,7 +32,7 @@ export default [
         XMLSerializer: 'readonly', MutationObserver: 'readonly',
         ResizeObserver: 'readonly', IntersectionObserver: 'readonly',
         fetch: 'readonly', Promise: 'readonly', CustomEvent: 'readonly',
-        Archify: 'writable', archifyI18nData: 'writable',
+        Mirofy: 'writable', mirofyI18nData: 'writable',
         viewerText: 'readonly', viewerCount: 'readonly',
         viewerKindLabel: 'readonly', hasDrawableGeometry: 'readonly',
         URLSearchParams: 'readonly', MediaRecorder: 'readonly',

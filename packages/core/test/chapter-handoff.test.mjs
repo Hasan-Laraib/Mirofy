@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'archify-chapter-handoff-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-chapter-handoff-'));
 
 const CASES = {
   architecture: 'web-app.architecture.json',
@@ -62,8 +62,8 @@ test('handoff holds one truthful anchor then settles through one finite camera t
   assert.match(html, /duration: 420/);
   assert.match(html, /requestAnimationFrame\(step\)/);
   assert.match(html, /var eased = 1 - Math\.pow\(1 - fraction, 3\)/);
-  assert.match(html, /Archify\.motionGovernor\.claim\('handoff'/);
-  assert.match(html, /Archify\.motionGovernor\.release\(handoff\.ownerToken\)/);
+  assert.match(html, /Mirofy\.motionGovernor\.claim\('handoff'/);
+  assert.match(html, /Mirofy\.motionGovernor\.release\(handoff\.ownerToken\)/);
   assert.match(html, /handoffReceipt\.textContent = viewerText\('viewer\.guided\.handoff'/);
   assert.doesNotMatch(html, /chapter-handoff[^\n]+infinite/);
 });
@@ -74,7 +74,7 @@ test('latest intent, manual takeover, Still, reduced motion, and hidden pages cl
   assert.match(html, /cameraTransaction\.cancel\(reason \|\| 'cancelled', commitTarget === true\)/);
   assert.match(html, /transaction\.settled/);
   assert.match(html, /currentHandoff !== handoff/);
-  assert.match(html, /Archify\.guidedViews\.cancelHandoff\(reason \|\| 'manual'\)/);
+  assert.match(html, /Mirofy\.guidedViews\.cancelHandoff\(reason \|\| 'manual'\)/);
   assert.match(html, /settleHandoff\(systemPaused \? 'reduced-motion' : \(hasSuspension\(\) \? 'hidden' : 'still'\)\)/);
   assert.match(html, /settleHandoff\('hidden'\)/);
   assert.match(html, /settleHandoff\('reduced-motion'\)/);

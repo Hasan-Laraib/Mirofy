@@ -188,7 +188,7 @@ test('route_rhythm fires on a cramped sub-16px interior turn (3.5)', () => {
 // gate from being silently accepted as proof of this one.
 // ---------------------------------------------------------------------------
 
-const cli = path.join(coreRoot, 'bin/archify.mjs');
+const cli = path.join(coreRoot, 'bin/mirofy.mjs');
 
 function validateShowcaseExpectFailure(fixtureName) {
   const input = path.join(negativeFixturesRoot, fixtureName);
@@ -240,14 +240,14 @@ test('CLI: showcase validate blocks delivery of an edge routed through an unrela
 });
 
 // ---------------------------------------------------------------------------
-// Third, independent proof: `archify render` (not `validate`). `validate`
+// Third, independent proof: `mirofy render` (not `validate`). `validate`
 // always runs the standalone checker (scripts/check-render-output.mjs) as
 // its second stage whenever the renderer itself exits 0 -- so a CLI test
 // built on `validate` can pass on the strength of the checker alone and
 // never actually exercise the render-time gate in geometry.mjs's
 // clean*Problems functions (commandValidate only reaches "render" stage
 // failure when the renderer itself throws). `render` has no such second
-// stage: commandRender in bin/archify.mjs only spawns the renderer and
+// stage: commandRender in bin/mirofy.mjs only spawns the renderer and
 // forwards its exit code, so this is the one CLI path whose result depends
 // solely on the render-time gate.
 //
@@ -281,7 +281,7 @@ function renderShowcaseExpectFailure(fixtureName) {
 
 function assertRenderBlocksDelivery(fixtureName, expectedCode) {
   const result = renderShowcaseExpectFailure(fixtureName);
-  assert.notEqual(result.status, 0, `${fixtureName}: expected a nonzero exit from 'archify render --quality showcase'`);
+  assert.notEqual(result.status, 0, `${fixtureName}: expected a nonzero exit from 'mirofy render --quality showcase'`);
   const output = `${result.stdout || ''}${result.stderr || ''}`;
   assert.ok(
     output.includes(`[${expectedCode}]`),

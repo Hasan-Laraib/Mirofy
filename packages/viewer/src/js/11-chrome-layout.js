@@ -5,7 +5,7 @@
        appearance while a small bottom stage rail becomes part of the reader
        budget whenever its zero-reserve position would enter the stage.
        ============================================================ */
-    Archify.viewerChromeLayout = (function () {
+    Mirofy.viewerChromeLayout = (function () {
       var html = document.documentElement;
       var container = document.querySelector('.diagram-container');
       var svg = container && container.querySelector(':scope > svg');
@@ -100,16 +100,16 @@
         reserve = next;
         if (reserve) {
           if (options.remember !== false) restorableReserve = reserve;
-          container.style.setProperty('--archify-nav-reserve', reserve + 'px');
+          container.style.setProperty('--mirofy-nav-reserve', reserve + 'px');
           container.setAttribute('data-nav-stage-rail', 'true');
           html.setAttribute('data-nav-stage-rail', 'true');
         } else {
-          container.style.removeProperty('--archify-nav-reserve');
+          container.style.removeProperty('--mirofy-nav-reserve');
           container.removeAttribute('data-nav-stage-rail');
           html.removeAttribute('data-nav-stage-rail');
         }
-        if (Archify.readerLayout && typeof Archify.readerLayout.schedule === 'function') {
-          Archify.readerLayout.schedule();
+        if (Mirofy.readerLayout && typeof Mirofy.readerLayout.schedule === 'function') {
+          Mirofy.readerLayout.schedule();
         }
         if (options.quiet !== true) {
           if (settleFrame) cancelAnimationFrame(settleFrame);
@@ -233,8 +233,8 @@
         baselineStageGap = null;
         restorableReserve = 0;
         writeReserve(0, { quiet: true });
-        var readerReady = Archify.readerLayout && typeof Archify.readerLayout.whenStable === 'function'
-          ? Archify.readerLayout.whenStable().catch(function () {})
+        var readerReady = Mirofy.readerLayout && typeof Mirofy.readerLayout.whenStable === 'function'
+          ? Mirofy.readerLayout.whenStable().catch(function () {})
           : Promise.resolve();
         probePromise = readerReady.then(function () {
           probingBaseline = false;
@@ -269,7 +269,7 @@
         ].join('|');
       }
       function whenStable() {
-        return Archify.waitForStableLayout({
+        return Mirofy.waitForStableLayout({
           schedule: schedule,
           pending: function () { return Boolean(frame || settleFrame || probingBaseline); },
           snapshot: stableSnapshot,
