@@ -3,7 +3,7 @@
 Plan: `analysis/future/plans/2026-08-29-p1a-viewer-design-system.md` (a private
   planning corpus, outside this repo)
 Controller ledger (full detail): `.superpowers/sdd/2026-08-29-p1a-viewer-design-system/progress.md`
-Repo: `L:\Projects\product-p0` · branch `p1a-viewer-design-system` off `main` @ `fed9236` (CI 13/13 green)
+Repo: `L:\Projects\product-p0` · branch `p1a-viewer-design-system` off `main` @ `8a5a733` (CI 13/13 green)
 
 This is the condensed record, in the style of `docs/P0-BUILD-LEDGER.md`: what was
 decided, why, and what it costs if wrong. The controller ledger above is the
@@ -11,21 +11,24 @@ full transcript (30 rulings, 9 plan defects found by implementers/reviewers
 rather than by the plan's author); this document pulls forward what a later
 reader needs without re-deriving it.
 
-## Merge precondition — read before merging
+## Merge precondition (historical — no longer applies)
 
-`check-provenance.mjs` resolves the `provenance-anchor` tag first and falls
-back to the raw SHA `54a1307`. The tag is currently **local-only**
-(`git ls-remote --tags origin` is empty). Two things must happen at merge:
+At the time this branch was merged, `check-provenance.mjs` resolved the
+`provenance-anchor` tag first and fell back to the raw SHA `8262b95`. The
+tag was **local-only** (`git ls-remote --tags origin` returned nothing), so
+the merge required two things:
 
-1. Push the tag: `git push origin provenance-anchor`.
-2. Merge with a **real merge commit — not squash or rebase**.
+1. Pushing the tag: `git push origin provenance-anchor`.
+2. Merging with a **real merge commit — not squash or rebase**.
 
-A squash-merge followed by branch deletion would have made `54a1307`
+A squash-merge followed by branch deletion would have made `8262b95`
 unreachable and `check:provenance` would then have failed permanently on
 `main`, with the only apparent remedy being to edit the evidence the gate
-existed to protect (the gate has since been retired, so this risk no longer
-applies). Full detail was tracked in the per-row accounting document, lines
-69-88 (since removed).
+existed to protect. Both the gate and the tag have since been retired: the
+gate was replaced by `check:drift`, and the `provenance-anchor` tag was
+deleted when this repository's history was rewritten. Neither the
+precondition nor the risk applies any longer. Full detail was tracked in the
+per-row accounting document, lines 69-88 (since removed).
 
 ## Pre-flight rulings (selected)
 
@@ -64,7 +67,7 @@ change `packages/core` — a gate phrased as "tree == source baseline modulo
 substitutions" would fail on correct work and get disabled within a task.
 Chosen form: `scripts/check-core-drift.mjs` + `scripts/core-manifest.json`,
 re-baselineable via `--update` (refused under CI), mirroring the existing
-`scripts/golden.mjs` pattern. Unplanned proof of its value: commit `ce8eea6`
+`scripts/golden.mjs` pattern. Unplanned proof of its value: commit `7cd0920`
 touched 12 files under `packages/core`; golden stayed 5/5 green **and blind**,
 while drift named all 12 — precisely the hole this ruling exists to close,
 demonstrated by accident rather than argument.
@@ -115,17 +118,17 @@ fresh `packages/viewer` build against the committed file:
 
 | Boundary | Commit | template.html |
 |---|---|---|
-| Task 1 (workspace + rebuild) | `fed9236..328024f` | 678,398 bytes, byte-identical on the first run |
-| Task 2 (19 JS modules) | `328024f..726499c` | 678,398 bytes, unchanged |
-| Task 3 (CSS split, extractor retired) | `726499c..54a1307` | 678,398 bytes, unchanged — `54a1307` tagged `provenance-anchor` |
-| Rename (plan's Task 10, executed 4th) | `54a1307..ce8eea6` | all 163 blob hashes move (identifier substitution); proved *reversible*, not byte-frozen in the import sense — this is why the old byte-identity check became `check:provenance` (a historical claim pinned to `54a1307`, since retired) paired with the new `check:drift` |
-| Task 4 (golden → 20 digests) | `ce8eea6..bf86b63` | template.html untouched |
-| Task 5 (`contract.mjs`) | `bf86b63..88a667d` | template.html untouched |
-| Task 6 (generated tokens) | `88a667d..6eea6f4` | self-consistent, byte-identical to its own prior committed form |
-| **Task 7 — graduation** | **`31f5b18`** (`build: reclassify template.html as generated and re-baseline goldens`) | **first commit where core bytes move for a genuine content reason** (not a rename): the okabe-ito palette blocks, preset registration, and style-picker option land in `template.html`, five schemas gain the `okabe-ito` enum value, `i18n.mjs` gains its locale pair, and `generated-validators.mjs` regenerates — 8 files, all traced and confirmed necessary (Ruling 22) |
-| Task 7 fix round 1 | `80d7132` | light-mode palette re-derived (Ruling 23) |
-| Task 8 | `7c31f14`, `2aaca68` | svg `role` fix + boot-time-only documentation |
-| Task 9 | `ee56e27`, `a470a18` | `preview.mjs` watch-root fix; five committed examples removed |
+| Task 1 (workspace + rebuild) | `8a5a733..2a64a85` | 678,398 bytes, byte-identical on the first run |
+| Task 2 (19 JS modules) | `2a64a85..35cbefe` | 678,398 bytes, unchanged |
+| Task 3 (CSS split, extractor retired) | `35cbefe..8262b95` | 678,398 bytes, unchanged — `8262b95` was tagged `provenance-anchor`, a tag since deleted |
+| Rename (plan's Task 10, executed 4th) | `8262b95..7cd0920` | all 163 blob hashes move (identifier substitution); proved *reversible*, not byte-frozen in the import sense — this is why the old byte-identity check became `check:provenance` (a historical claim pinned to `8262b95`, since retired) paired with the new `check:drift` |
+| Task 4 (golden → 20 digests) | `7cd0920..173ae1b` | template.html untouched |
+| Task 5 (`contract.mjs`) | `173ae1b..7640d0a` | template.html untouched |
+| Task 6 (generated tokens) | `7640d0a..ac66d99` | self-consistent, byte-identical to its own prior committed form |
+| **Task 7 — graduation** | **`c17b7e9`** (`build: reclassify template.html as generated and re-baseline goldens`) | **first commit where core bytes move for a genuine content reason** (not a rename): the okabe-ito palette blocks, preset registration, and style-picker option land in `template.html`, five schemas gain the `okabe-ito` enum value, `i18n.mjs` gains its locale pair, and `generated-validators.mjs` regenerates — 8 files, all traced and confirmed necessary (Ruling 22) |
+| Task 7 fix round 1 | `999c028` | light-mode palette re-derived (Ruling 23) |
+| Task 8 | `8f2361e`, `7c0af4d` | svg `role` fix + boot-time-only documentation |
+| Task 9 | `da5d466`, `53a58c1` | `preview.mjs` watch-root fix; five committed examples removed |
 
 Everything from Task 1 through Task 6 held `packages/core` byte-frozen in the
 strict sense the plan's Global Constraints define ("Tasks 1–6 must leave
@@ -327,7 +330,7 @@ independently of the generator. The next person leaning on one of these
 gates as if it validates content, rather than merely staleness, needs this
 distinction before they do.
 
-**Task 7** — the Okabe–Ito preset; core's graduation point (`31f5b18`).
+**Task 7** — the Okabe–Ito preset; core's graduation point (`c17b7e9`).
 **Ruling 22:** the "exactly one hash may change" instruction was wrong — 8
 hashes moved, all traced and required (schemas needed the new enum value
 before the preset would even pass validation). **Ruling 23 (Critical):** the
@@ -354,9 +357,9 @@ fix's boot-time boundary as explicit P1b debt rather than widening the task.
 Accounting both ways: 42/42 proved without Chrome, 59/59 with.
 
 **Task 9 (this task)** — see the task-9 report for full step-by-step detail.
-Summary: `preview.mjs` watch-root fix landed (`ee56e27`); five committed
+Summary: `preview.mjs` watch-root fix landed (`da5d466`); five committed
 rendered examples removed, tree 7.3 MB → measured **3.9 MB**, budget
-lowered 10 MB → 6 MB (`a470a18`); this document and the P0-ledger closing
+lowered 10 MB → 6 MB (`53a58c1`); this document and the P0-ledger closing
 note follow.
 
 **Known limitation of the new Step-1 test.** `resolveWatchRoot`'s own test
@@ -383,9 +386,9 @@ including all seven semantic component hues — hardcoded to the
 classic-light values, with no representation in `tokens.mjs`. Neither the
 count assertion nor the leak-string assertion (above) can see it: both look
 at `emitPalette()`'s output or a single literal needle, and this block never
-went near either. It is pre-existing — present at `fed9236`
-(`packages/core/assets/template.html`) and at the `provenance-anchor`
-`54a1307` (`01-structure.css`) — so it is not a P1a regression.
+went near either. It is pre-existing — present at `8a5a733`
+(`packages/core/assets/template.html`) and at the commit then tagged
+`provenance-anchor`, `8262b95` (`01-structure.css`) — so it is not a P1a regression.
 
 Task 7 flagged only one of its twenty-seven lines, `--external-stroke`
 (deferred minor, `01-structure.css:2649`), not the block as a whole.
@@ -415,24 +418,25 @@ from clean detached checkouts (not a working-tree artefact):
 
 | Commit | Failure |
 |---|---|
-| `cbe6d0c` | `check:template` fails — palette added, template not yet rebuilt |
-| `618911c` | `check:drift` fails on 8 files (`template.html`, `generated-validators.mjs`, `i18n.mjs`, 4 schemas); resolved at `31f5b18` |
-| `2aaca68`, `ee56e27`, `a470a18`, `faf41b4`, `121ebd9` | `check:drift` fails on `renderers/shared/cli.mjs` (`1bb6b2f8…` vs `835bd657…`) — a CRLF-poisoned baseline entry |
+| `c971ff3` | `check:template` fails — palette added, template not yet rebuilt |
+| `35ba3a2` | `check:drift` fails on 8 files (`template.html`, `generated-validators.mjs`, `i18n.mjs`, 4 schemas); resolved at `c17b7e9` |
+| `7c0af4d`, `da5d466`, `53a58c1`, `c5dd78c`, `0cbc2b7` | `check:drift` fails on `renderers/shared/cli.mjs` (`1bb6b2f8…` vs `835bd657…`) — a CRLF-poisoned baseline entry |
 
-The CRLF poisoning is **5 commits wide in committed history** (`2aaca68`
-through `121ebd9`), not merely a local working-tree problem — each of those
+The CRLF poisoning is **5 commits wide in committed history** (`7c0af4d`
+through `0cbc2b7`), not merely a local working-tree problem — each of those
 five, checked out fresh, fails `check:drift` with the exact same one-file
-diff. It was fixed at `18bc34a` (re-baseline off the correct LF hash) and
-hardened at `245907f` (refuse to hash a CR byte at all). `git bisect run npm
+diff. It was fixed at `e74c216` (re-baseline off the correct LF hash) and
+hardened at `0391338` (refuse to hash a CR byte at all). `git bisect run npm
 run check` will produce false positives across both windows above — a
 bisect landing on any of these six commits reports the wrong thing broken.
-The tip, `245907f`, is green.
+The tip, `0391338`, is green.
 
 ## Verification (measured at the close of Task 9, before push)
 
 - `check:template`: byte-identical, 683,160 bytes.
-- `check:provenance`: 163/163 at the pinned `provenance-anchor` tag
-  (`54a1307`), unchanged by P1a. (Gate since retired.)
+- `check:provenance`: 163/163 at the commit then pinned by the
+  `provenance-anchor` tag (`8262b95`), unchanged by P1a. (Gate and tag
+  since retired.)
 - `check:drift`: 160/160 against a manifest re-baselined only for
   `bin/preview.mjs` (Task 9), the five removed examples (Task 9), and the
   Task 7 graduation set (`template.html`, `i18n.mjs`, 5 schemas,

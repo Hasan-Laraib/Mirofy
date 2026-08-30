@@ -12,7 +12,7 @@ Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
 ## 2026-08-30 — Repository identity: drop the source repo's own references, retire provenance
 
-**Commits:** `45b3f89..dbb9074` (Task 1, remove the repository's own
+**Commits:** `97b2c13..97608d8` (Task 1, remove the repository's own
 references to its source — `LICENSE`, `NOTICE`, the provenance record,
 the provenance manifest, and `scripts/check-provenance.mjs`; Task 2,
 copy the active analysis corpus in-tree at `docs/analysis/` and
@@ -44,8 +44,8 @@ no reference to its source outside `packages/core/LICENSE`.
 
 ## 2026-08-29 — P1a: viewer & design-system spine
 
-**Commits:** `fed9236..afe7429` (38 commits on `p1a-viewer-design-system`),
-merged to `main` at `9ae3f80`.
+**Commits:** `8a5a733..0b394f9` (38 commits on `p1a-viewer-design-system`),
+merged to `main` at `2d2cd09`.
 
 **What changed:** `packages/core/assets/template.html` stopped being
 hand-maintained and became a generated artifact, built from a new
@@ -74,7 +74,7 @@ this phase left open (an eleventh, unmodelled print-media palette block in
 
 ## 2026-08-29 — P0: foundation import
 
-**Commits:** `4379f9a..fed9236`.
+**Commits:** `4379f9a..8a5a733`.
 
 **What changed:** New repository scaffolded (`Mirofy`, `@mirofy/*` scope,
 Node `>=18`, pure ESM, zero runtime dependencies). Renderers, schemas,

@@ -15,7 +15,7 @@
 - `docs/analysis/37-ENGINEERING-STANDARDS.md` — test-per-feature, commit granularity
 - `L:\Projects\product-p0\docs\P1A-BUILD-LEDGER.md` — the debt this plan clears
 
-**Repository:** `L:\Projects\product-p0` — remote `Hasan-Laraib/Mirofy`, `main` @ `9ae3f80`, CI 13/13 green, conformance 60 rows / 59 proved with Chrome, 1 UNPROVEN (6.10).
+**Repository:** `L:\Projects\product-p0` — remote `Hasan-Laraib/Mirofy`, `main` @ `2d2cd09`, CI 13/13 green, conformance 60 rows / 59 proved with Chrome, 1 UNPROVEN (6.10).
 
 ---
 
@@ -33,7 +33,7 @@
 
 ## Corrections to the spec, found by reading the code
 
-Verified against `main` @ `9ae3f80`. Where spec and code disagree, **the code is authoritative**.
+Verified against `main` @ `2d2cd09`. Where spec and code disagree, **the code is authoritative**.
 
 | Spec claim | Verified reality | Consequence |
 |---|---|---|

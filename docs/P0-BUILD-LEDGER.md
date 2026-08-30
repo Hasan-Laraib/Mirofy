@@ -576,7 +576,7 @@ FIRST REAL CI RUN (33246506982, pushed 499c53a to Hasan-Laraib/Mirofy):
   Push to origin was deliberately withheld pending the operator's own
   confirmation given this anomaly — see the final report.
 
-### CI green-up wave 2 — run 33247521138 (11/13) -> commits 3fd65ac, 1e5d2d0
+### CI green-up wave 2 — run 33247521138 (11/13) -> commits 6a60e7d, 4ff7954
 
 Two jobs remained red after wave 1. Both turned out to be single-cause, and
 neither was a product defect — the conformance suite never wrongly passed.
