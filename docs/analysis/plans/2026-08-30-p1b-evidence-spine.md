@@ -338,7 +338,7 @@ Commit as four: the renderer role fix, the boot-patch removal, the print-block f
 - Consumes: the existing inline `sources` shape at `architecture.schema.json:97` — `{path (required), line, end_line, label}`, `minItems: 1`, `maxItems: 3`.
 - Produces: `$defs.sources` in `common.schema.json`, referenced as `{"$ref": "common.schema.json#/$defs/sources"}` from six sites (five relationship arrays plus architecture components).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```js
 // Row 2.4. The differentiator: every relationship can answer "why do I believe
@@ -374,41 +374,41 @@ for (const [mode, arrayName] of Object.entries(RELATIONSHIP_ARRAY)) {
 
 Add a `validate(mode, doc)` helper that writes the document to a temp file and shells out to `mirofy validate <mode> <file> --json`, returning `{ok, message}` parsed from the receipt. Use the CLI rather than importing the validator directly, so the test exercises the path a user actually takes.
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `node --test packages/conformance/test/evidence.test.mjs`
 Expected: all five FAIL — `sources` is not permitted on any relationship array today. (Architecture will fail too: `sources` exists on components, not connections.)
 
-- [ ] **Step 3: Promote `sources` into `common.schema.json`**
+- [x] **Step 3: Promote `sources` into `common.schema.json`**
 
 Move the inline definition from `architecture.schema.json:97` into `common.schema.json` under `$defs.sources`, verbatim — same `minItems`, `maxItems`, `required`, `additionalProperties: false`, and the same property constraints. Changing any of them here would silently loosen validation for components, which already ship.
 
-- [ ] **Step 4: Reference it from all six sites**
+- [x] **Step 4: Reference it from all six sites**
 
 Replace the architecture component's inline block with `{"$ref": "common.schema.json#/$defs/sources"}`, and add the same `$ref` to `connections`, `flows`, `transitions`, `messages` and `edges`. Do **not** add it to sequence's `segments` or `activations` — those are lifeline structure and activation bars, not relationships.
 
-- [ ] **Step 5: Regenerate the validators**
+- [x] **Step 5: Regenerate the validators**
 
 Regenerate `generated-validators.mjs` with the repository's own generator (`packages/core/scripts/generate-validators.mjs`). Never hand-edit it.
 
 **Cross-file `$ref` is the established pattern here, not new ground** — verified before this plan was dispatched: the five schemas already carry **106** cross-file `$ref`s into `common.schema.json` (`legendEntry` alone is referenced 32 times), resolved by `ajv.addSchema()` at `generate-validators.mjs:20`. Your `$defs.sources` reference is one more of the same kind. Treat a resolution failure as a mistake in your edit, not as a limitation of the toolchain.
 
-- [ ] **Step 6: Run the test**
+- [x] **Step 6: Run the test**
 
 Run: `node --test packages/conformance/test/evidence.test.mjs`
 Expected: 5/5 pass.
 
-- [ ] **Step 7: Add evidence to the fixtures**
+- [x] **Step 7: Add evidence to the fixtures**
 
 Add a `sources` entry to at least one relationship in each of the five fixture documents, pointing at real paths in this repository so the evidence is verifiable rather than decorative.
 
-- [ ] **Step 8: Register row 2.4 and re-baseline**
+- [x] **Step 8: Register row 2.4 and re-baseline**
 
 Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'evidence.test.mjs'`, `testTitle: '[2.4] architecture accepts sources on its connections and rejects a malformed entry'`. Verify it reports proved via `node scripts/conformance.mjs`, not by eye.
 
 `check:drift` will fail for the schemas and validators; re-baseline and confirm only those moved. Golden will move if the fixtures changed; verify the cause first.
 
-- [ ] **Step 9: Full gate, gallery, status, commit**
+- [x] **Step 9: Full gate, gallery, status, commit**
 
 `npm run check` → exit 0. `npm run gallery`, `npm run status`. Commit as three: the `$defs` promotion, the five `$ref` sites, the test and row registration. `Refs: 2.4`.
 

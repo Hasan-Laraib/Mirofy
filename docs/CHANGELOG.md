@@ -13,6 +13,37 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b Task 3: relationships can carry evidence
+
+**Commits:** `2ea5302..b10149b` on `p1b-evidence-spine`.
+
+Evidence could be attached to an architecture component and to nothing
+else. A relationship — the claim that two things are connected — could not
+answer "why do I believe this?" in any of the five diagram types. That is
+the differentiator this phase exists for, and four of five types had no
+support for it at all.
+
+The `sources` shape moved verbatim from architecture's inline component
+definition into `common.schema.json` `$defs`, and is referenced from six
+sites: components (now a `$ref`), plus `connections`, `flows`,
+`transitions`, `messages` and `edges`. One definition, so components and
+relationships cannot drift into two subtly different evidence shapes.
+Deliberately NOT added to sequence's `segments` or `activations` — lifeline
+structure and activation bars are not relationships.
+
+Row 2.4 is asserted once per diagram type, not once overall, precisely
+because support existed for one of the five: a single-type test would have
+passed while four types silently had nothing. Each test also asserts that a
+source without `path` is REJECTED — evidence that is silently dropped is
+worse than evidence never claimed.
+
+The five fixtures now cite real files in this repository with checked line
+ranges. Golden is unchanged, correctly: nothing renders edge evidence yet.
+
+One gate caught a real staleness during this task. Adding row 2.4 moved it
+from PLANNED to SHIPPED, and `status:check` failed the build naming the
+totals line — the gate wired in Task 7, doing its job unprompted.
+
 ## 2026-08-30 — P1b Task 2: P1a's debt cleared
 
 **Commits:** `495a230..4a6b520` on `p1b-evidence-spine`.
