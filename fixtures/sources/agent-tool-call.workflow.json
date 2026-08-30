@@ -41,7 +41,7 @@
     { "id": "trace", "lane": "trace", "col": 4, "type": "database", "label": "Trace Log", "sublabel": "events + output" }
   ],
   "edges": [
-    { "from": "user", "to": "chat", "variant": "default", "sources": [{ "path": "packages/core/renderers/workflow/render-workflow.mjs", "line": 1, "end_line": 40, "label": "workflow renderer" }] },
+    { "from": "user", "to": "chat", "variant": "default" },
     { "from": "chat", "to": "planner", "label": "plan", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "route": "drop", "labelSegment": 1 },
     { "from": "planner", "to": "router", "variant": "default" },
     { "from": "router", "to": "approval", "label": "needs approval?", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "drop", "labelSegment": 0, "labelDx": 34, "labelDy": 18 },

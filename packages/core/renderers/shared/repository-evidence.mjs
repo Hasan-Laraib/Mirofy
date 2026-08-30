@@ -78,19 +78,39 @@ function sourceLineCount(content) {
   return lines.length - (/(?:\r\n|\n|\r)$/.test(content) ? 1 : 0);
 }
 
+// The relationship array each diagram type calls its edges. These are the
+// arrays that gained `sources` alongside architecture components, so evidence
+// resolution has to walk them too -- a `sources` entry the schema accepts and
+// resolution never reads is evidence that vanishes silently, which is the one
+// failure mode this module exists to prevent.
+const RELATIONSHIP_ARRAY = {
+  architecture: 'connections',
+  dataflow: 'flows',
+  lifecycle: 'transitions',
+  sequence: 'messages',
+  workflow: 'edges',
+};
+
+// The single source of truth for "which diagram types can carry evidence".
+// The CLI's --repo-root guard reads this rather than keeping its own list, so
+// a sixth diagram type added without evidence support is rejected loudly
+// instead of silently ignoring the flag.
+export function supportsRepositoryEvidence(diagramType) {
+  return Boolean(RELATIONSHIP_ARRAY[diagramType]);
+}
+
+function carriesSources(list) {
+  return Array.isArray(list) && list.some((entry) => Array.isArray(entry?.sources) && entry.sources.length);
+}
+
 export function hasRepositoryEvidence(diagramType, diagram) {
-  if (diagramType !== 'architecture') return false;
-  const components = Array.isArray(diagram?.components) ? diagram.components : [];
-  return Boolean(diagram?.meta?.repository) || components.some((component) => Array.isArray(component?.sources) && component.sources.length);
+  if (!RELATIONSHIP_ARRAY[diagramType]) return false;
+  if (diagram?.meta?.repository) return true;
+  return carriesSources(diagram?.components) || carriesSources(diagram?.[RELATIONSHIP_ARRAY[diagramType]]);
 }
 
 export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
   if (!hasRepositoryEvidence(diagramType, diagram)) return null;
-  if (diagramType !== 'architecture') evidenceFailure('repository-evidence/type-unsupported', 'Repository evidence is currently supported for architecture diagrams only.', {
-    subject: { diagramType },
-    supportedFixes: ['use architecture mode or remove repository evidence'],
-  });
-
   const repository = diagram.meta?.repository;
   if (!repository) evidenceFailure('repository-evidence/repository-required', 'Repository evidence requires /meta/repository.', {
     subject: { path: '/meta/repository' },
@@ -156,14 +176,18 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     });
   }
 
-  const nodes = Object.create(null);
-  let referenceCount = 0;
-  const components = Array.isArray(diagram.components) ? diagram.components : [];
-  for (const [componentIndex, component] of components.entries()) {
-    if (!Array.isArray(component.sources) || component.sources.length === 0) continue;
+  const repoUrl = repository.url.replace(/\.git\/?$/i, '').replace(/\/$/, '');
+
+  // One verification path for components and relationships alike. The JSON
+  // pointer differs (/components/... vs /connections/..., /flows/..., and so
+  // on) because an author fixing an error must be sent to the place in THEIR
+  // document where the mistake is; the failure codes do not differ, because
+  // they are a diagnostic contract consumers already match on.
+  function verifySources(authoredSources, pointerBase, subjectExtra) {
     const verified = [];
-    for (const [sourceIndex, authored] of component.sources.entries()) {
-      const where = `/components/${componentIndex}/sources/${sourceIndex}/path`;
+    for (const [sourceIndex, authored] of authoredSources.entries()) {
+      const pointer = `${pointerBase}/${sourceIndex}`;
+      const where = `${pointer}/path`;
       const source = {
         path: verifiedSourcePath(authored.path, where),
         ...(authored.line ? { line: authored.line } : {}),
@@ -171,14 +195,14 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
         ...(authored.label ? { label: authored.label } : {}),
       };
       if (source.endLine && !source.line) {
-        evidenceFailure('repository-evidence/line-required', `/components/${componentIndex}/sources/${sourceIndex}/end_line requires line.`, {
-          subject: { path: `/components/${componentIndex}/sources/${sourceIndex}/end_line`, componentId: component.id },
+        evidenceFailure('repository-evidence/line-required', `${pointer}/end_line requires line.`, {
+          subject: { path: `${pointer}/end_line`, ...subjectExtra },
           supportedFixes: ['add line or remove end_line'],
         });
       }
       if (source.endLine && source.endLine < source.line) {
-        evidenceFailure('repository-evidence/line-range-invalid', `/components/${componentIndex}/sources/${sourceIndex}/end_line must be greater than or equal to line.`, {
-          subject: { path: `/components/${componentIndex}/sources/${sourceIndex}`, componentId: component.id },
+        evidenceFailure('repository-evidence/line-range-invalid', `${pointer}/end_line must be greater than or equal to line.`, {
+          subject: { path: pointer, ...subjectExtra },
           evidence: { line: source.line, endLine: source.endLine },
           supportedFixes: ['use an end_line greater than or equal to line'],
         });
@@ -187,7 +211,7 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
       const type = runGit(realRoot, ['cat-file', '-t', object]);
       if (type.status !== 0 || type.stdout.trim() !== 'blob') {
         evidenceFailure('repository-evidence/file-missing', `${where} does not identify a file at revision ${revision}.`, {
-          subject: { path: where, componentId: component.id },
+          subject: { path: where, ...subjectExtra },
           evidence: { sourcePath: source.path, revision },
           supportedFixes: ['use a file path that exists at the pinned revision'],
         });
@@ -195,29 +219,58 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
       if (source.line) {
         const content = runGit(realRoot, ['show', object]);
         if (content.status !== 0) evidenceFailure('repository-evidence/file-unreadable', `${where} could not be read at revision ${revision}.`, {
-          subject: { path: where, componentId: component.id },
+          subject: { path: where, ...subjectExtra },
           evidence: { sourcePath: source.path, revision },
           supportedFixes: ['verify the pinned blob is readable in the local checkout'],
         });
         const lineCount = sourceLineCount(content.stdout);
         const requestedLine = source.endLine || source.line;
         if (requestedLine > lineCount) {
-          evidenceFailure('repository-evidence/line-out-of-range', `/components/${componentIndex}/sources/${sourceIndex} requests line ${requestedLine}, but ${source.path} has ${lineCount} lines at revision ${revision}.`, {
-            subject: { path: `/components/${componentIndex}/sources/${sourceIndex}`, componentId: component.id },
+          evidenceFailure('repository-evidence/line-out-of-range', `${pointer} requests line ${requestedLine}, but ${source.path} has ${lineCount} lines at revision ${revision}.`, {
+            subject: { path: pointer, ...subjectExtra },
             evidence: { sourcePath: source.path, requestedLine, lineCount, revision },
             supportedFixes: ['use a line range that exists at the pinned revision'],
           });
         }
       }
-      verified.push({ ...source, href: sourceHref(repository.url.replace(/\.git\/?$/i, '').replace(/\/$/, ''), revision, source) });
-      referenceCount += 1;
+      verified.push({ ...source, href: sourceHref(repoUrl, revision, source) });
     }
+    return verified;
+  }
+
+  const nodes = Object.create(null);
+  const edges = Object.create(null);
+  let referenceCount = 0;
+
+  const components = Array.isArray(diagram.components) ? diagram.components : [];
+  for (const [componentIndex, component] of components.entries()) {
+    if (!Array.isArray(component.sources) || component.sources.length === 0) continue;
+    const verified = verifySources(component.sources, `/components/${componentIndex}/sources`, { componentId: component.id });
+    referenceCount += verified.length;
     nodes[component.id] = verified;
   }
+
+  // Relationships are keyed by their array index, which is exactly what the
+  // renderers already emit as data-edge-key (focusEdgeAttrs's fourth
+  // argument). Keying by `id` would cover only the edges that happen to
+  // declare one -- most authored relationships do not.
+  const relationshipArray = RELATIONSHIP_ARRAY[diagramType];
+  const relationships = Array.isArray(diagram[relationshipArray]) ? diagram[relationshipArray] : [];
+  for (const [relationshipIndex, relationship] of relationships.entries()) {
+    if (!Array.isArray(relationship.sources) || relationship.sources.length === 0) continue;
+    const verified = verifySources(
+      relationship.sources,
+      `/${relationshipArray}/${relationshipIndex}/sources`,
+      { relationshipId: relationship.id ?? `${relationship.from}->${relationship.to}` },
+    );
+    referenceCount += verified.length;
+    edges[String(relationshipIndex)] = verified;
+  }
+
   if (referenceCount === 0) {
-    evidenceFailure('repository-evidence/source-required', '/meta/repository requires at least one component source reference.', {
+    evidenceFailure('repository-evidence/source-required', '/meta/repository requires at least one verified source reference.', {
       subject: { path: '/meta/repository' },
-      supportedFixes: ['add at least one verified component source or remove repository metadata'],
+      supportedFixes: ['add at least one verified component or relationship source, or remove repository metadata'],
     });
   }
 
@@ -225,11 +278,12 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     schemaVersion: 1,
     verified: true,
     repository: {
-      url: repository.url.replace(/\.git\/?$/i, '').replace(/\/$/, ''),
+      url: repoUrl,
       revision,
       shortRevision: revision.slice(0, 7),
     },
     referenceCount,
     nodes,
+    edges,
   };
 }
