@@ -21,18 +21,7 @@
         "visual_preset": { "enum": ["classic", "signal-flow", "blueprint", "editorial", "okabe-ito"] },
         "quality_profile": { "enum": ["standard", "showcase"] },
         "engineering_profile": { "enum": ["deployment-ownership"] },
-        "repository": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["url", "revision"],
-          "properties": {
-            "url": {
-              "type": "string",
-              "pattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:\\.git)?/?$"
-            },
-            "revision": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" }
-          }
-        },
+        "repository": { "$ref": "common.schema.json#/$defs/repository" },
         "views": { "$ref": "common.schema.json#/$defs/guidedViews" },
         "legend": {
           "type": "object",

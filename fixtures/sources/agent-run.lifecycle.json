@@ -26,7 +26,7 @@
     { "id": "expired", "type": "failure", "label": "Expired", "sublabel": "timeout", "lane": "terminal", "col": 1, "tag": "terminal" }
   ],
   "transitions": [
-    { "from": "executing", "to": "approval", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "straight", "sources": [{ "path": "packages/core/renderers/lifecycle/render-lifecycle.mjs", "line": 1, "end_line": 40, "label": "lifecycle renderer" }] },
+    { "from": "executing", "to": "approval", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "straight" },
     { "from": "reviewing", "to": "blocked", "variant": "default", "route": "drop" },
     { "from": "executing", "to": "failed", "variant": "security", "fromSide": "left", "toSide": "top", "via": [[320, 157], [320, 342], [402, 342]] },
     { "from": "blocked", "to": "expired", "variant": "security", "fromSide": "bottom", "toSide": "top", "route": "straight" },

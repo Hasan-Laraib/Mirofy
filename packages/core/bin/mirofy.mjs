@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { supportsRepositoryEvidence } from '../renderers/shared/repository-evidence.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
@@ -239,8 +240,8 @@ function formatDiagnostics(error, diagnostics = []) {
 }
 
 function assertEvidenceType(type, repoRoot) {
-  if (repoRoot && type !== 'architecture') {
-    fail('--repo-root is currently supported for architecture diagrams only.');
+  if (repoRoot && !supportsRepositoryEvidence(type)) {
+    fail(`--repo-root is not supported for ${type} diagrams.`);
   }
 }
 
