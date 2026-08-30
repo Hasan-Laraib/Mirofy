@@ -1,14 +1,42 @@
 # Changelog
 
 Reverse-chronological record of *what changed and when*. This is narrative,
-not machine-derived — for *what is built*, see `docs/IMPLEMENTATION-STATUS.md`,
-which is generated from the conformance matrix. `npm run check:changelog`
+not machine-derived — for *what is built*, see the conformance matrix at
+`docs/analysis/32-PARITY-AND-FEATURE-MATRIX.md`. (A generated
+`docs/IMPLEMENTATION-STATUS.md` and its `scripts/status.mjs` arrive with the P1b
+evidence spine and are not on `main` yet — do not link them from here until they
+are.) `npm run check:changelog`
 enforces exactly one thing: that the newest entry below cites a commit
 reachable from `HEAD`. It catches a changelog quietly going stale while
 commits keep landing; it cannot and does not judge whether the prose is
 any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
+
+## 2026-08-30 — Retire the last inherited identifiers; make row 6.3 say why it failed
+
+**Commits:** `a74ab8c..27b6372`.
+
+The root `LICENSE` carried a second copyright line naming the source
+project's author. It was belt-and-braces — `packages/core/LICENSE` already
+carries the notice the MIT terms actually require — so the root file now
+names only this project's contributors. `packages/core/LICENSE` is
+unchanged and stays byte-identical to its harvest state; it is the single
+permitted reference and must never be edited.
+
+Six URLs in `packages/core` still pointed at the source repository's owner
+and would 404: the `SKILL.md` author field and five rename-artifact
+assertions across four tests. Repointed at this repository. Drift
+re-baselined for the five edited files.
+
+Conformance row 6.3 skips when Chrome is undetected, but a Chrome that
+resolves and then fails mid-capture takes the other branch, where the
+empty-viewport default surfaced as a bare `0 !== 4` — twice in CI, on two
+different platforms, with the real message sitting unread in the receipt
+the test had already parsed. It now asserts on `receipt.error` first. This
+is diagnosis, not a fix: the underlying intermittent failure is not
+reproducible locally and remains open, but its next occurrence will name
+its own cause.
 
 ## 2026-08-30 — Repository identity: drop the source repo's own references, retire provenance
 
