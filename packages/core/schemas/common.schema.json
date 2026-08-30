@@ -3,6 +3,24 @@
   "$id": "https://github.com/Hasan-Laraib/Mirofy/schemas/common.schema.json",
   "title": "Mirofy Shared Definitions",
   "$defs": {
+    "engineeringOwner": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "engineeringDeployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "regions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 1, "maxLength": 32 }
+        },
+        "networkScope": { "enum": ["public", "internal", "restricted", "isolated"] }
+      }
+    },
     "provenance": {
       "enum": ["authored", "source-backed", "statically-derived", "config-derived", "runtime-observed", "inferred"]
     },
