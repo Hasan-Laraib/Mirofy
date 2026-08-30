@@ -154,6 +154,11 @@ test('visual-check inspects 4 viewports and reports its review as pending, never
     return;
   }
   assert.equal(receipt.visualReview, 'pending', 'visual-check must never report review as complete on its own');
+  // A Chrome that resolves but then fails mid-capture leaves viewports empty, which used to
+  // surface as a bare `0 !== 4`. Report what visual-check actually said before counting.
+  assert.equal(receipt.error ?? null, null,
+    `visual-check could not complete its Chrome inspection: ${receipt.error} `
+    + `(diagnostics: ${JSON.stringify(receipt.diagnostics ?? [])})`);
   assert.equal(receipt.containment.viewports.length, 4);
   const widths = receipt.containment.viewports.map((v) => v.width).sort((a, b) => a - b);
   assert.deepEqual(widths, [1440, 1600, 1920, 2048]);
