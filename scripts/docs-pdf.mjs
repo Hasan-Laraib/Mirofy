@@ -3,10 +3,16 @@
 // unknown external tool and had no reproducible path; from here they are
 // generated artifacts with a committed source of truth.
 //
-// Not wired into `npm run check`: both PDFs live outside this repository
-// (analysis/pdf/ in the sibling archify repo), which CI never checks out,
-// and generation needs a real Chrome. This is an operator command, run by
-// hand after editing any of the source .md files it concatenates.
+// Not wired into `npm run check`: generation needs a real Chrome, and the
+// output is a build artifact rather than a source of truth. This is an
+// operator command, run by hand after editing any of the source .md files it
+// concatenates.
+//
+// Scope note: this renders the analysis corpus that is tracked in this
+// repository, under docs/analysis/. An earlier version also rendered a
+// second, larger PDF from documents held outside the repo; those sources are
+// not in the tree and cannot be resolved from it, so that output is not
+// produced here.
 import { Buffer } from 'node:buffer';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -21,11 +27,10 @@ const { ChromeVisualBrowser, findChrome } = await import(visualCheck);
 
 /** @type {Array<[string, string, string]>} */
 const DOCS = [
-  ['System-Intelligence-Plan', 'L:/Projects/archify/analysis/future', 'Mirofy — System Intelligence Plan'],
-  ['System-Intelligence-Corpus', 'L:/Projects/archify/analysis', 'Mirofy — Analysis Corpus'],
+  ['System-Intelligence-Plan', path.join(repoRoot, 'docs/analysis'), 'Mirofy — System Intelligence Plan'],
 ];
 
-const OUT_DIR = 'L:/Projects/archify/analysis/pdf';
+const OUT_DIR = process.env.MIROFY_DOCS_PDF_OUT || path.join(repoRoot, 'docs/analysis/pdf');
 
 // The declared per-PDF file order, recovered from the EXISTING PDFs'
 // structure (Step 6's first-choice source): both carry a literal table of
@@ -47,31 +52,6 @@ const ORDER = {
     '36-VISUAL-SYSTEM.md',
     '31-V1-ARCHITECTURE.md',
     '37-ENGINEERING-STANDARDS.md',
-    '34-COMPETITIVE-POSITIONING.md',
-  ],
-  'System-Intelligence-Corpus': [
-    'future/30-PRODUCT-THESIS.md',
-    'future/32-PARITY-AND-FEATURE-MATRIX.md',
-    'future/33-MASTER-ROADMAP.md',
-    'future/36-VISUAL-SYSTEM.md',
-    'future/31-V1-ARCHITECTURE.md',
-    'future/34-COMPETITIVE-POSITIONING.md',
-    'future/37-ENGINEERING-STANDARDS.md',
-    'future/35-NAMING-BRIEF.md',
-    'archify-current/01-CURRENT-STATE.md',
-    'archify-current/02-CRITICAL-ANALYSIS.md',
-    'archify-current/05-PR-ISSUE-TRIAGE.md',
-    'archify-current/07-MARKET-LANDSCAPE.md',
-    'archify-current/08-INCUMBENT-PRICING.md',
-    'archify-current/09-CONSTRAINT-LAYOUT.md',
-    'archify-current/reviews/12-EXTERNAL-REVIEW-VERDICT.md',
-    'archify-current/reviews/13-STRATEGIC-REVIEW-VERDICT.md',
-    'archify-current/reviews/14-ADJUDICATION-VERDICT.md',
-    'future/reference/10-EXECUTIVE-SYNTHESIS.md',
-    'future/reference/03-IMPROVEMENTS.md',
-    'future/reference/04-ROADMAP.md',
-    'future/reference/06-GROWTH-STRATEGY.md',
-    'future/reference/22-NAMING-legacy.md',
   ],
 };
 
@@ -179,6 +159,7 @@ async function main() {
 
       const pdf = await printToPdf(browser, sessionId, pathToFileURL(htmlPath).href);
 
+      fs.mkdirSync(OUT_DIR, { recursive: true });
       const outPath = path.join(OUT_DIR, `${basename}.pdf`);
       const tmpOut = `${outPath}.tmp-${process.pid}`;
       fs.writeFileSync(tmpOut, pdf);

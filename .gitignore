@@ -15,3 +15,6 @@ preview/
 
 # SDD working artifacts: briefs, reports, review packages, ledger.
 .superpowers/
+
+# Generated PDF output from `npm run docs:pdf`.
+docs/analysis/pdf/
