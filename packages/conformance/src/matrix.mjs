@@ -211,6 +211,28 @@ export const IMPORTED_ROWS = [
     testTitle: '[4.14] the six provenance treatments are pairwise distinct without colour, in every preset and both themes',
   },
 
+  {
+    id: '5.20',
+    name: 'Evidence Passport for relationships',
+    // Selecting a relationship focuses its SOURCE NODE, so the Passport was
+    // showing that node's evidence while the user believed they were
+    // inspecting the edge -- evidence attributed to the wrong subject, which
+    // is worse than showing none. The edge's own class and sources now
+    // replace it.
+    //
+    // Every assertion is against the fixture's exact values (path, line
+    // range, revision, class), never that the panel is merely non-empty: a
+    // panel rendering the WRONG file's evidence is non-empty too, and that is
+    // precisely the defect this row exists to catch.
+    //
+    // browser: true, so it defers rather than falsely passing without Chrome.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence-passport.browser.test.mjs',
+    browser: true,
+    testTitle: "[5.20] selecting a relationship reports ITS evidence in the Passport, not its source node's",
+  },
+
   // Phase 3 — Layout validation gates
   {
     id: '3.1',
