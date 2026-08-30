@@ -1128,6 +1128,50 @@ export function automaticPortRhythmBridge(
 // Keep conservative auto-routed fan-out/fan-in relationships visually
 // distinct without changing authored route controls. The returned map only
 // contains endpoints that belong to a shared automatic midpoint anchor.
+/** Identity for a relationship, matching the tie-break key used when sorting. */
+function relationKey(relation) {
+  return `${relation.id || ''}\u0000${relation.from}\u0000${relation.to}\u0000${relation.label || ''}`;
+}
+
+/**
+ * The coordinate this port should aim for.
+ *
+ * The counterpart's centre makes the edge straight, and that is the answer
+ * whenever straight is actually available. It is not available in two cases,
+ * and in both the port keeps the side's centre and the old even spread:
+ *
+ *   * the relationship is spread at BOTH ends, so moving this port competes
+ *     with the port at the other end rather than meeting it
+ *   * a straight route would cross a component that has nothing to do with
+ *     this relationship
+ *
+ * In both cases the answer is the slot the EVEN SPREAD would have given this
+ * endpoint, not the side's centre. Those differ, and the difference decides
+ * the outcome: a component's centre is usually exactly the axis a blocked
+ * route was blocked on, so falling back to it leaves the edge inside the
+ * obstacle it was supposed to avoid.
+ *
+ * The second case is not a matter of taste. Clean Flow (row 3.1) rejects an
+ * edge that crosses an unrelated component, so aiming at a blocked axis turns
+ * a valid document into one the renderer refuses to draw.
+ */
+function portIdeal(item, index, evenSlot, verticalSide, spreadEndpoints, boxes) {
+  const other = item.endpoint === 'from' ? 'to' : 'from';
+  if (spreadEndpoints.has(`${relationKey(item.relation)}\u0000${other}`)) return evenSlot(index);
+
+  const ideal = verticalSide ? item.counterpart.cy : item.counterpart.cx;
+  const start = anchor(item.rect, item.side);
+  const straight = verticalSide
+    ? { start: [start[0], ideal], end: [item.counterpart.cx, ideal] }
+    : { start: [ideal, start[1]], end: [ideal, item.counterpart.cy] };
+
+  for (const box of boxes.values()) {
+    if (box === item.rect || box === item.counterpart) continue;
+    if (segmentIntersectsRect(straight, box)) return evenSlot(index);
+  }
+  return ideal;
+}
+
 export function automaticPortSpread(
   relations,
   boxes,
@@ -1162,6 +1206,15 @@ export function automaticPortSpread(
     add(relation, 'to', to, toSide, from);
   }
 
+  // Which endpoints are spread at all. An endpoint is spread when its side
+  // carries more than one relationship, and a relationship spread at both
+  // ends is the case where moving either port competes with the other.
+  const spreadEndpoints = new Set();
+  for (const items of groups.values()) {
+    if (items.length < 2) continue;
+    for (const item of items) spreadEndpoints.add(`${relationKey(item.relation)}\u0000${item.endpoint}`);
+  }
+
   for (const items of groups.values()) {
     if (items.length < 2) continue;
     const verticalSide = items[0].side === 'left' || items[0].side === 'right';
@@ -1185,9 +1238,18 @@ export function automaticPortSpread(
     // including edges that could have run dead straight. The solver places
     // the ports as close to their ideals as the band and the separation
     // allow, and reduces to the even spread when the ideals coincide.
+    //
+    // Two endpoints keep the centre instead, and both boundaries are the ones
+    // alignFacingPorts already draws for the same reasons: an endpoint whose
+    // relationship is spread at BOTH ends, where moving one port competes
+    // with the other's, and an endpoint whose straight route is blocked. A
+    // straight line through an unrelated component is not an improvement on a
+    // dogleg -- it is a Clean Flow violation, and the renderer rejects the
+    // document rather than draw it.
     const centre = verticalSide ? items[0].rect.cy : items[0].rect.cx;
+    const evenSlot = (index) => centre + (index - (items.length - 1) / 2) * spacing;
     const positions = solvePortPositions(
-      items.map((item) => (verticalSide ? item.counterpart.cy : item.counterpart.cx)),
+      items.map((item, index) => portIdeal(item, index, evenSlot, verticalSide, spreadEndpoints, boxes)),
       { lo: centre - usable / 2, hi: centre + usable / 2, gap: spacing },
     );
 

@@ -110,6 +110,33 @@ an id. It then re-validates and reports what it could not reach: displacement
 fixes overlaps, not routing or label placement, and those it names rather than
 leaving for the next run to rediscover.
 
+## Automatic port spread
+
+Automatic Port Spread is a default renderer behavior, not something you author.
+When several relationships leave the same side of one node, the renderer gives
+them distinct endpoints on that side so they cannot collapse into a single
+line. You do not set these endpoints and you should not try to.
+
+It is bounded. It applies only where the renderer owns the endpoint:
+
+- a single relationship on a side is left on its plain anchor
+- explicit `via`, `channelX`, `channelY` or `labelAt` opt a relationship out
+  entirely, because those say you are routing it yourself
+- an explicit `route` other than `auto` opts out for the same reason
+
+Each spread endpoint aims at the coordinate that would make its own edge run
+straight, which is wherever its counterpart sits, so facing automatic ports
+(`left`/`right` or `top`/`bottom`) end up sharing one shared axis whenever that
+is reachable. Two cases keep the plain even spread instead: a relationship
+spread at both ends, where moving one endpoint only competes with the other,
+and an endpoint whose straight line would cross an unrelated node. The second
+is not a preference -- an edge through an unrelated node fails Clean Flow, and
+the renderer refuses the document rather than draw it.
+
+The consequence for authoring: place nodes, and let the endpoints follow. If a
+relationship must take a specific path, say so with `via` and it will be left
+alone.
+
 ## Authoring invariants
 
 - One obvious main path; side branches leave the nearest main-path node. Remove low-value edges before adding routing controls.

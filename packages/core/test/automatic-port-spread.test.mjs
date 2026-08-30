@@ -94,7 +94,11 @@ test('architecture: a singly spread near-aligned vertical relationship keeps one
     ],
   });
 
-  assert.deepEqual(connectionPoints(html, 'read'), [[742, 300], [742, 180]]);
+  // Row 3.16 moved this port: it now aims at the counterpart's centre
+  // rather than an even slot, so the edge is straight at the target's
+  // own axis instead of straight at an offset one. Both endpoints moved
+  // together, which is what keeps it a direct axis.
+  assert.deepEqual(connectionPoints(html, 'read'), [[735, 300], [735, 180]]);
   assert.notDeepEqual(connectionPoints(html, 'verify')[0], connectionPoints(html, 'read')[0]);
 });
 
@@ -114,7 +118,11 @@ test('architecture: a singly spread near-aligned horizontal relationship keeps o
     ],
   });
 
-  assert.deepEqual(connectionPoints(html, 'hub-direct'), [[220, 123], [500, 123]]);
+  // Row 3.16 moved this port: it now aims at the counterpart's centre
+  // rather than an even slot, so the edge is straight at the target's
+  // own axis instead of straight at an offset one. Both endpoints moved
+  // together, which is what keeps it a direct axis.
+  assert.deepEqual(connectionPoints(html, 'hub-direct'), [[220, 130], [500, 130]]);
   assert.notDeepEqual(connectionPoints(html, 'hub-branch')[0], connectionPoints(html, 'hub-direct')[0]);
 });
 
@@ -139,7 +147,11 @@ test('architecture: a shared bottom port keeps its aligned child relationship st
     connections: [...doc.connections].reverse(),
   });
 
-  assert.deepEqual(connectionPoints(forward, 'parent-terminal'), [[393, 160], [393, 300]]);
+  // Row 3.16 moved this port: it now aims at the counterpart's centre
+  // rather than an even slot, so the edge is straight at the target's
+  // own axis instead of straight at an offset one. Both endpoints moved
+  // together, which is what keeps it a direct axis.
+  assert.deepEqual(connectionPoints(forward, 'parent-terminal'), [[400, 160], [400, 300]]);
   assert.notDeepEqual(
     connectionPoints(forward, 'parent-workflow')[0],
     connectionPoints(forward, 'parent-terminal')[0],
@@ -169,7 +181,11 @@ test('architecture: incoming and outgoing relationships keep distinct bottom por
     ],
   });
 
-  assert.deepEqual(connectionPoints(html, 'child-footer'), [[407, 160], [407, 320]]);
+  // Row 3.16 moved this port: it now aims at the counterpart's centre
+  // rather than an even slot, so the edge is straight at the target's
+  // own axis instead of straight at an offset one. Both endpoints moved
+  // together, which is what keeps it a direct axis.
+  assert.deepEqual(connectionPoints(html, 'child-footer'), [[400, 160], [400, 320]]);
   assert.notDeepEqual(
     connectionPoints(html, 'workflow-child').at(-1),
     connectionPoints(html, 'child-footer')[0],
@@ -350,27 +366,35 @@ test('lifecycle: same-band port spread remains orthogonal', () => {
     ],
   });
 
+  // Row 3.16: the source port aims at the counterpart instead of sitting on
+  // an even slot. The route is still four axis-aligned segments -- which is
+  // what "remains orthogonal" means -- it simply starts 8px higher.
   assert.deepEqual(connectionPoints(html, 'to-upper'), [
-    [153, 150], [248, 150], [248, 107], [343, 107],
+    [153, 142], [248, 142], [248, 107], [343, 107],
   ]);
   assert.deepEqual(connectionPoints(html, 'to-lower'), [
-    [153, 164], [402, 164], [402, 207], [651, 207],
+    [153, 172], [402, 172], [402, 207], [651, 207],
   ]);
 });
 
-test('skill and READMEs describe automatic port spread as bounded default behavior', () => {
+test('the skill describes automatic port spread as bounded default behavior', () => {
+  // Rewritten for this repo. The original asserted the upstream project's
+  // documentation layout, including a README_EN.md that does not exist here,
+  // so it could never pass and never ran. What it was protecting is real and
+  // is kept: an agent that does not know endpoints move automatically will
+  // try to author them.
   const skill = fs.readFileSync(path.join(skillRoot, 'SKILL.md'), 'utf8');
   assert.match(skill, /Automatic Port Spread is a default renderer behavior/);
-  assert.match(skill, /single relationship|single relationships/);
-  assert.match(skill, /explicit `via`.*`channelX`.*`channelY`.*`labelAt`/);
-  assert.match(skill, /facing automatic ports \(`left`\/`right` or `top`\/`bottom`\).*one shared axis/);
 
-  const authoringContract = fs.readFileSync(path.join(skillRoot, 'references/authoring-contract.md'), 'utf8');
-  assert.match(authoringContract, /unobstructed facing ports.*may share one horizontal or vertical axis/);
+  // The bounds matter more than the behaviour. Each of these is a real opt-out
+  // in automaticPortSpread(), and an agent that does not know them will fight
+  // the renderer for control of an endpoint it already conceded.
+  assert.match(skill, /a single relationship on a side/);
+  assert.match(skill, /`via`, `channelX`, `channelY` or `labelAt`/);
+  assert.match(skill, /facing automatic ports \(`left`\/`right` or `top`\/`bottom`\)[\s\S]*one shared axis/);
 
-  const repoRoot = path.resolve(skillRoot, '..');
-  for (const file of ['README.md', 'README_EN.md']) {
-    assert.match(fs.readFileSync(path.join(repoRoot, file), 'utf8'), /shared automatic endpoints spread deterministically/);
-  }
-  assert.match(fs.readFileSync(path.join(repoRoot, 'README_ZH.md'), 'utf8'), /共享的自动端点会确定性展开/);
+  // And the two fallbacks, because "aims at its counterpart" alone would
+  // describe a renderer that happily draws an edge through another node.
+  assert.match(skill, /spread at both ends/);
+  assert.match(skill, /cross an unrelated node/);
 });
