@@ -42,6 +42,20 @@ function gitValue(repoRoot, args, failure) {
 // Kept as a thin wrapper so the origin comparison below reads the same for
 // every forge: two remotes match when they resolve to the same host and the
 // same slug, whether they were written as https, ssh:// or git@.
+/**
+ * Are two paths the same directory?
+ *
+ * Separator- and case-normalised, because the two sides of this comparison
+ * come from different sources: one from git, one from the filesystem.
+ */
+function samePath(left, right) {
+  const normalise = (value) => {
+    const resolved = path.resolve(String(value)).split(String.fromCharCode(92)).join('/').replace(/[/]+$/, '');
+    return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+  };
+  return normalise(left) === normalise(right);
+}
+
 function remoteSlug(value) {
   const host = detectHost(value);
   return host ? `${host.id}:${host.slug}` : null;
@@ -207,7 +221,12 @@ function prepareRepository(entry, rootPath, declaredIds) {
     });
   }
   const gitRoot = gitValue(realRoot, ['rev-parse', '--show-toplevel'], `Evidence root "${realRoot}" is not a Git repository.`);
-  if (fs.realpathSync(gitRoot) !== realRoot) {
+  // Compared as NORMALISED paths, not as strings. On Windows `git rev-parse
+  // --show-toplevel` answers with forward slashes (C:/Users/...) while
+  // fs.realpathSync answers with backslashes, and the drive letter's case can
+  // differ too -- so an identical directory failed this check on all four
+  // Windows CI jobs while passing on Linux and macOS.
+  if (!samePath(fs.realpathSync(gitRoot), realRoot)) {
     evidenceFailure('repository-evidence/root-not-top-level', `Evidence root must be the Git top-level directory: ${gitRoot}`, {
       subject: { repoRoot: realRoot },
       evidence: { gitTopLevel: gitRoot },
