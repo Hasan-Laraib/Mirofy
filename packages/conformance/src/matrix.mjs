@@ -1,6 +1,6 @@
-// One entry per harvested (H) row in analysis/future/32-PARITY-AND-FEATURE-MATRIX.md,
+// One entry per imported (H) row in analysis/future/32-PARITY-AND-FEATURE-MATRIX.md,
 // as extracted mechanically into
-// .superpowers/sdd/2026-08-29-p0-foundation/harvested-rows.md: 55 pure-H rows,
+// .superpowers/sdd/2026-08-29-p0-foundation/imported-rows.md: 55 pure-H rows,
 // plus row 3.1b (added post-P0 to close the mislabelled-row-plus-coverage-gap
 // residual recorded in docs/P0-BUILD-LEDGER.md) -- 56 rows total.
 // Row 1.10 is H->R (rebuilt in P1) and is intentionally absent from this list.
@@ -37,7 +37,7 @@
 // genuinely asserts both (e.g. 1.1/4.1: one smoke test proves both "five
 // typed domains" and "five typed renderers" by rendering all five). It is
 // never used to paper over a row with no real, distinct coverage.
-export const HARVESTED_ROWS = [
+export const IMPORTED_ROWS = [
   // Phase 1 — Authoring surface
   {
     id: '1.1',
@@ -370,7 +370,7 @@ export const HARVESTED_ROWS = [
   {
     id: '4.13',
     name: 'Okabe-Ito colour-blind-safe preset',
-    // Upstream declined this preset on maintenance grounds: the palette was
+    // The source project declined this preset on maintenance grounds: the palette was
     // eight duplicated hand-written CSS blocks. Task 6's generated token
     // model turned it into a data change; this row proves the published
     // Okabe-Ito hues actually land in the token model, not merely that
@@ -495,8 +495,8 @@ export const HARVESTED_ROWS = [
   {
     id: '5.17',
     name: 'data-* contract (renderer -> viewer/validator/tooling consumers)',
-    // Not harvested from the ancestor: added in P1a to close a gap the
-    // harvest never covered -- nothing previously checked that renderer-
+    // Not imported from the source project: added in P1a to close a gap the
+    // import never covered -- nothing previously checked that renderer-
     // emitted data-* attributes agree with what the viewer, the post-render
     // validator, and the delta/visual-check tooling actually read.
     origin: 'N',
@@ -507,7 +507,7 @@ export const HARVESTED_ROWS = [
   {
     id: '5.19',
     name: 'axe-core accessibility gate (all five visual presets)',
-    // Not harvested from the ancestor: added in P1a (Task 8) to prove
+    // Not imported from the source project: added in P1a (Task 8) to prove
     // 37-ENGINEERING-STANDARDS.md's accessibility-floor commitment against a
     // real rendered artifact in real Chrome, rather than leaving it a
     // restated promise. browser: true for the same reason as the 14 rows
@@ -552,7 +552,7 @@ export const HARVESTED_ROWS = [
     // treats a `browser: true` row inside a shared suite the same way it
     // treats one in a browser-only suite (deferred by id, never silently
     // counted as passing, and never a title-check failure while deferred).
-    // The harvested visual-check CLI reads MIROFY_CHROME directly, which is
+    // The imported visual-check CLI reads MIROFY_CHROME directly, which is
     // the same switch the other 14 gate on, so this row's Chrome discovery
     // needs no wiring of its own.
     browser: true,
@@ -613,6 +613,6 @@ export const HARVESTED_ROWS = [
     id: '6.10',
     name: 'Deterministic ZIP packaging',
     proof: null,
-    note: 'The ancestor\'s packaging tooling (scripts/build-zip.sh, scripts/package-smoke.mjs, .github/workflows/release.yml) was not part of Task 4\'s harvest scope (renderers, schemas, viewer, CLI only) and no task in this 11-task P0 plan (see tasks 8-11) adds ZIP packaging. There is no artifact in product-p0 to assert against. Deferred beyond P0 foundation.',
+    note: 'The source project\'s packaging tooling (scripts/build-zip.sh, scripts/package-smoke.mjs, .github/workflows/release.yml) was not part of Task 4\'s import scope (renderers, schemas, viewer, CLI only) and no task in this 11-task P0 plan (see tasks 8-11) adds ZIP packaging. There is no artifact in product-p0 to assert against. Deferred beyond P0 foundation.',
   },
 ];
