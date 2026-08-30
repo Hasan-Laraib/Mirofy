@@ -144,6 +144,27 @@ export const IMPORTED_ROWS = [
     testTitle: '[2.2] Verified Source Beacon renders "SRC n" on a node with verified repository evidence, and stays off a node without it',
   },
 
+  {
+    id: '2.4',
+    name: 'Evidence on relationships (all five diagram types)',
+    // Evidence could be attached to architecture COMPONENTS since P0, and to
+    // nothing else. A relationship -- the claim that two things are connected
+    // -- could not answer "why do I believe this?" in any of the five types.
+    // The `sources` shape is now a single $defs in common.schema.json,
+    // referenced from six sites, so components and relationships cannot drift
+    // apart into two subtly different evidence shapes.
+    //
+    // Proved per diagram type on purpose: support existed for exactly one of
+    // the five before this task, so a single-type test would have passed
+    // while four types silently had no support at all. Each test also asserts
+    // the REJECTION of a source with no `path`, because evidence that is
+    // silently dropped is worse than evidence never claimed.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence.test.mjs',
+    testTitle: '[2.4] architecture accepts sources on its connections and rejects a malformed entry',
+  },
+
   // Phase 3 — Layout validation gates
   {
     id: '3.1',
