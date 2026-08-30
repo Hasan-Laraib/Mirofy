@@ -13,6 +13,38 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b rebased onto the rewritten main; the roadmap is read live
+
+**Commits:** `7ad8e09..d83c344` on `p1b-evidence-spine`.
+
+The four paused P1b commits (gallery, status generator, PDF generator,
+roadmap drift check) now sit on the current `main`. The rebase was not the
+clean replay it was planned as, and what it surfaced is worth recording.
+
+Three of the four commits conflicted, on `.gitignore` and on `package.json`
+— every one of them rewrites the whole `check` chain to append its own
+script. Resolved by keeping `main`'s chain and carrying over each commit's
+new entry, so no gate was silently dropped.
+
+Worse, one break did *not* conflict. `scripts/status.mjs` was written
+before the origin category was renamed, and still imports that category's
+old export name, which `matrix.mjs` no longer provides. The two files never overlap, so git merged
+them cleanly into a module that throws at load — and because `status:check`
+is in the gate chain, `npm run check` failed at import. A rebase across a
+rename can produce a textually clean merge that does not run.
+
+The roadmap is no longer a frozen 118-row copy. That copy existed because
+the document lived outside the repository; it is now tracked in-tree, so
+`scripts/roadmap.mjs` parses it live and reports the same 118 rows.
+`check:roadmap`, which existed only to diff the copy against the live file,
+is deleted rather than promoted into the gate chain — once the copy is the
+live file, that diff compares a thing to itself. `status:check` already
+covers it, proved by mutating a roadmap row and watching the build fail.
+
+The PDF generator's absolute external paths could not simply be made
+repo-relative: most of its sources are held privately and were never
+brought in-tree. It now renders the six in-tree analysis documents only.
+
 ## 2026-08-30 — Retire the last inherited identifiers; make row 6.3 say why it failed
 
 **Commits:** `a74ab8c..27b6372`.
