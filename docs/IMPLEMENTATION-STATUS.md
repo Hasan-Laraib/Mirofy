@@ -9,6 +9,10 @@ Do not hand-edit this file -- regenerate it with `npm run status`.
 `npm run status:check` (part of `npm run check`) fails the build if this file
 has drifted from what the matrix and the roadmap snapshot would produce.
 
+The PLANNED roadmap snapshot is a frozen, undated-by-revision copy (the sibling
+repo it comes from has no tracked history to pin to) -- it can go stale silently.
+Run `npm run check:roadmap` by hand to diff it against the live roadmap document.
+
 **Totals:** 59 SHIPPED (17 browser-proved), 1 UNPROVEN, 59 PLANNED.
 
 ## Shipped & unproven — from the conformance matrix
