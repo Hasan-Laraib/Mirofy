@@ -51,7 +51,7 @@ Verified against `main` @ `2d2cd09`. Where spec and code disagree, **the code is
 - **Commit identity:** author and committer are `Hasan-Laraib <lxh417bham@gmail.com>`. **Never add a `Co-Authored-By: Claude` trailer.**
 - **Zero runtime dependencies** in every workspace package (`delivery.test.mjs` row 6.9). `marked` goes in **root `devDependencies`** only.
 - **Platform floor:** Node 18/20/22/24 × ubuntu/macos/windows. All 13 CI jobs green.
-- **`npm run check` is the gate**, and it now chains: `lint → typecheck → test → test:golden → check:template → check:drift → test:conformance → check:artifacts → check:size → check:audit`.
+- **`npm run check` is the gate**, and it now chains: `lint → check:changelog → status:check → typecheck → test → test:golden → check:template → check:drift → test:conformance → check:artifacts → check:size → check:audit`.
 - **The core-integrity gate.** `check:drift` is the present-tense gate (`scripts/core-manifest.json`); re-baseline it deliberately with `--update` and confirm only intended paths moved. Its CR-byte guard will refuse to hash a file containing `\r`.
 - **Line endings are LF.** A text-mode write poisoned a manifest in P1a. `docs/` is not covered by the CR guard — verify at byte level before committing anything you generated.
 - **`testTitle` must match a test name character-for-character.** The harness proves a row only on an exact TAP `ok` match; a mismatch reads as "not proved" while looking registered.
@@ -253,7 +253,7 @@ Commit as three: the gallery, the status file plus its gate, and the PDF generat
 
 > **Why before the evidence work.** Task 4 edits the same renderers, and Tasks 6–7 edit the same CSS and token model. Clearing debt first keeps those diffs about evidence instead of tangled with unrelated corrections.
 
-- [ ] **Step 1: Write the failing test for the static role**
+- [x] **Step 1: Write the failing test for the static role**
 
 The gate added in P1a scans the **post-boot** DOM and therefore cannot see the renderer's static output. This test reads the rendered HTML directly, so it can:
 
@@ -273,49 +273,49 @@ test('the rendered SVG declares a role that permits interactive descendants, bef
 });
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `node --test packages/conformance/test/accessibility.browser.test.mjs`
 Expected: FAIL — the static markup still says `role="img"`.
 
-- [ ] **Step 3: Fix the renderer**
+- [x] **Step 3: Fix the renderer**
 
 In `packages/core/renderers/shared/cli.mjs`, change the emitted `role="img"` to `role="graphics-document"`. Update the comment added in P1a: it currently records that the defect is corrected only at viewer boot, and that is no longer true.
 
-- [ ] **Step 4: Remove the now-redundant boot-time patch**
+- [x] **Step 4: Remove the now-redundant boot-time patch**
 
 In `packages/viewer/src/js/07-focus.js`, remove the runtime role assignment. Leave a one-line comment noting the renderer now emits the correct role. Two mechanisms for one invariant is how they drift apart.
 
-- [ ] **Step 5: Verify both, and re-baseline**
+- [x] **Step 5: Verify both, and re-baseline**
 
 Run: `node --test packages/conformance/test/accessibility.browser.test.mjs` → passes, and with `MIROFY_CHROME` set the five axe rows still pass.
 Run: `npm run build:template`, then `node scripts/check-template.mjs` → byte-identical.
 Run: `npm run check:drift` → FAILS naming `cli.mjs` and `assets/template.html`. Re-baseline with `node scripts/check-core-drift.mjs --update` and confirm **only those two** hashes moved.
 Run: `npm run test:golden` → fails; verify the cause is the role attribute only, then `node scripts/golden.mjs --update` (25 entries).
 
-- [ ] **Step 6: Fix the print block's specificity bug**
+- [x] **Step 6: Fix the print block's specificity bug**
 
 `packages/viewer/src/css/01-structure.css` line ~2618 opens `@media print { :root, [data-theme="dark"], [data-theme="light"] { … } }` setting 27 custom properties, and its comment claims it forces the light palette for print. It does not: `[data-preset="X"][data-theme="Y"]` is specificity (0,2,0) and `[data-theme="light"]` is (0,1,0); `@media` adds none. Printing from dark theme in `signal-flow`, `blueprint`, `editorial` or `okabe-ito` puts the **preset's dark palette on white paper**.
 
 Add `html[data-preset][data-theme]` to the block's selector list. That is (0,2,1) — an element plus two attributes — which outranks every preset-qualified palette selector. Correct the comment to describe what the rule actually does and why the extra selector is required.
 
-- [ ] **Step 7: Prove the print fix**
+- [x] **Step 7: Prove the print fix**
 
 Write a test asserting that, for each of the five presets, the print block's selector list contains a selector whose specificity exceeds that preset's palette selector. Compute specificity in the test rather than asserting a literal string, so a future selector edit is evaluated rather than pattern-matched.
 
 Run it before the fix to see it fail for four presets, then after to see it pass. Record both.
 
-- [ ] **Step 8: Close the eleventh-block hole**
+- [x] **Step 8: Close the eleventh-block hole**
 
 `viewer-modules.test.mjs`'s leak assertion checks one literal selector, and P1a recorded a mitigation — "backstopped by the count assertion" — that the final review proved false. Neither check can see a palette block already living in structural CSS, and the print block is the standing counter-example.
 
 Replace it: scan `01-structure.css` for **any** rule declaring four or more `--` custom properties, and assert the set of such selectors matches a documented allowlist, each entry carrying a written reason. The print block is the one legitimate entry. A twelfth block then fails the gate instead of arriving unseen.
 
-- [ ] **Step 9: Prove that gate is not decorative**
+- [x] **Step 9: Prove that gate is not decorative**
 
 Add a second palette-like block to `01-structure.css` temporarily; confirm the test fails naming its selector; remove it; confirm it passes. Record the transcript.
 
-- [ ] **Step 10: Full gate, gallery, status**
+- [x] **Step 10: Full gate, gallery, status**
 
 Run `npm run check` → exit 0. Run `npm run gallery` and open `preview/index.html`; print-preview one dark-theme `editorial` diagram (Ctrl+P) and confirm the palette is now light on paper. Run `npm run status`.
 
@@ -338,7 +338,7 @@ Commit as four: the renderer role fix, the boot-patch removal, the print-block f
 - Consumes: the existing inline `sources` shape at `architecture.schema.json:97` — `{path (required), line, end_line, label}`, `minItems: 1`, `maxItems: 3`.
 - Produces: `$defs.sources` in `common.schema.json`, referenced as `{"$ref": "common.schema.json#/$defs/sources"}` from six sites (five relationship arrays plus architecture components).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```js
 // Row 2.4. The differentiator: every relationship can answer "why do I believe
@@ -374,41 +374,41 @@ for (const [mode, arrayName] of Object.entries(RELATIONSHIP_ARRAY)) {
 
 Add a `validate(mode, doc)` helper that writes the document to a temp file and shells out to `mirofy validate <mode> <file> --json`, returning `{ok, message}` parsed from the receipt. Use the CLI rather than importing the validator directly, so the test exercises the path a user actually takes.
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `node --test packages/conformance/test/evidence.test.mjs`
 Expected: all five FAIL — `sources` is not permitted on any relationship array today. (Architecture will fail too: `sources` exists on components, not connections.)
 
-- [ ] **Step 3: Promote `sources` into `common.schema.json`**
+- [x] **Step 3: Promote `sources` into `common.schema.json`**
 
 Move the inline definition from `architecture.schema.json:97` into `common.schema.json` under `$defs.sources`, verbatim — same `minItems`, `maxItems`, `required`, `additionalProperties: false`, and the same property constraints. Changing any of them here would silently loosen validation for components, which already ship.
 
-- [ ] **Step 4: Reference it from all six sites**
+- [x] **Step 4: Reference it from all six sites**
 
 Replace the architecture component's inline block with `{"$ref": "common.schema.json#/$defs/sources"}`, and add the same `$ref` to `connections`, `flows`, `transitions`, `messages` and `edges`. Do **not** add it to sequence's `segments` or `activations` — those are lifeline structure and activation bars, not relationships.
 
-- [ ] **Step 5: Regenerate the validators**
+- [x] **Step 5: Regenerate the validators**
 
 Regenerate `generated-validators.mjs` with the repository's own generator (`packages/core/scripts/generate-validators.mjs`). Never hand-edit it.
 
 **Cross-file `$ref` is the established pattern here, not new ground** — verified before this plan was dispatched: the five schemas already carry **106** cross-file `$ref`s into `common.schema.json` (`legendEntry` alone is referenced 32 times), resolved by `ajv.addSchema()` at `generate-validators.mjs:20`. Your `$defs.sources` reference is one more of the same kind. Treat a resolution failure as a mistake in your edit, not as a limitation of the toolchain.
 
-- [ ] **Step 6: Run the test**
+- [x] **Step 6: Run the test**
 
 Run: `node --test packages/conformance/test/evidence.test.mjs`
 Expected: 5/5 pass.
 
-- [ ] **Step 7: Add evidence to the fixtures**
+- [x] **Step 7: Add evidence to the fixtures**
 
 Add a `sources` entry to at least one relationship in each of the five fixture documents, pointing at real paths in this repository so the evidence is verifiable rather than decorative.
 
-- [ ] **Step 8: Register row 2.4 and re-baseline**
+- [x] **Step 8: Register row 2.4 and re-baseline**
 
 Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'evidence.test.mjs'`, `testTitle: '[2.4] architecture accepts sources on its connections and rejects a malformed entry'`. Verify it reports proved via `node scripts/conformance.mjs`, not by eye.
 
 `check:drift` will fail for the schemas and validators; re-baseline and confirm only those moved. Golden will move if the fixtures changed; verify the cause first.
 
-- [ ] **Step 9: Full gate, gallery, status, commit**
+- [x] **Step 9: Full gate, gallery, status, commit**
 
 `npm run check` → exit 0. `npm run gallery`, `npm run status`. Commit as three: the `$defs` promotion, the five `$ref` sites, the test and row registration. `Refs: 2.4`.
 
@@ -424,19 +424,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 - Consumes: `$defs.sources` (Task 3); existing `data-edge-id` / `data-edge-from` / `data-edge-to` markup.
 - Produces: `data-source-evidence-count` and `data-source-evidence-beacon` on edge elements, mirroring the node contract that already exists.
 
-- [ ] **Step 1: Write the failing test** — assert that a rendered artifact carries a resolved evidence payload for an *edge*, and that the payload's path and line match the fixture. Assert per diagram type.
+- [x] **Step 1: Write the failing test** — assert that a rendered artifact carries a resolved evidence payload for an *edge*, and that the payload's path and line match the fixture. Assert per diagram type.
 
-- [ ] **Step 2: Run it, watch it fail.** Evidence resolution today walks components only.
+- [x] **Step 2: Run it, watch it fail.** Evidence resolution today walks components only.
 
-- [ ] **Step 3: Extend `repository-evidence.mjs`** to resolve `sources` on the five relationship arrays as well as components, reusing the existing verification path — the same git checks, the same failure codes. Verification is already relationship-agnostic; only the traversal needs widening.
+- [x] **Step 3: Extend `repository-evidence.mjs`** to resolve `sources` on the five relationship arrays as well as components, reusing the existing verification path — the same git checks, the same failure codes. Verification is already relationship-agnostic; only the traversal needs widening.
 
-- [ ] **Step 4: Extend the viewer's beacon installer.** `06-source-evidence.js` currently queries `[data-node-id]`. Add `[data-edge-id]`, positioning the beacon at the edge's label anchor. Keep one code path — two beacon implementations would drift.
+- [x] **Step 4: Extend the viewer's beacon installer.** `06-source-evidence.js` currently queries `[data-node-id]`. Add `[data-edge-id]`, positioning the beacon at the edge's label anchor. Keep one code path — two beacon implementations would drift.
 
-- [ ] **Step 5: Prove the beacon appears on an edge in a real browser**, in the browser suite, with `MIROFY_CHROME` set. Row 2.2 currently proves beacons on nodes; extend it rather than adding a parallel row, and update its `testTitle` if the name changes — verifying via the conformance harness.
+- [x] **Step 5: Prove the beacon appears on an edge in a real browser**, in the browser suite, with `MIROFY_CHROME` set. Row 2.2 currently proves beacons on nodes; extend it rather than adding a parallel row, and update its `testTitle` if the name changes — verifying via the conformance harness.
 
-- [ ] **Step 6: Gallery check.** Run `npm run gallery` and open an architecture diagram: the edge with fixture evidence must show `SRC n`, and clicking it must not throw. Record what you saw.
+- [x] **Step 6: Gallery check.** Run `npm run gallery` and open an architecture diagram: the edge with fixture evidence must show `SRC n`, and clicking it must not throw. Record what you saw.
 
-- [ ] **Step 7: Full gate, re-baselines, status, commit.** `Refs: 2.4, 2.2`.
+- [x] **Step 7: Full gate, re-baselines, status, commit.** `Refs: 2.4, 2.2`.
 
 ---
 
@@ -470,19 +470,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 >
 > State all three collisions in the module's header comment, so the next person greps with them in mind.
 
-- [ ] **Step 1: Write `evidence-provenance.mjs`** with the ordered class list, a membership predicate, and the resolution rule: a relationship or component with no explicit `provenance` but with verified `sources` resolves to `source-backed`; with neither, `authored`. Order matters — it is the display order in the legend and the Passport, and it runs from strongest evidence to weakest.
+- [x] **Step 1: Write `evidence-provenance.mjs`** with the ordered class list, a membership predicate, and the resolution rule: a relationship or component with no explicit `provenance` but with verified `sources` resolves to `source-backed`; with neither, `authored`. Order matters — it is the display order in the legend and the Passport, and it runs from strongest evidence to weakest.
 
-- [ ] **Step 2: Write the failing tests** — the six classes are exactly these six in this order; an unknown class fails validation; the resolution rule produces `source-backed` for a subject with verified sources and `authored` for one without; and no class name collides with a geometry field on the same object.
+- [x] **Step 2: Write the failing tests** — the six classes are exactly these six in this order; an unknown class fails validation; the resolution rule produces `source-backed` for a subject with verified sources and `authored` for one without; and no class name collides with a geometry field on the same object.
 
-- [ ] **Step 3: Run them, watch them fail.**
+- [x] **Step 3: Run them, watch them fail.**
 
-- [ ] **Step 4: Add `$defs.provenance`** to `common.schema.json` as an enum of the six, and permit it on components and the five relationship arrays. It is **optional** — a document that does not claim a provenance class is not malformed; it resolves to `authored`, which is the truthful default for hand-written documents.
+- [x] **Step 4: Add `$defs.provenance`** to `common.schema.json` as an enum of the six, and permit it on components and the five relationship arrays. It is **optional** — a document that does not claim a provenance class is not malformed; it resolves to `authored`, which is the truthful default for hand-written documents.
 
-- [ ] **Step 5: Regenerate validators; run the tests; register row 2.5** with an exact `testTitle`.
+- [x] **Step 5: Regenerate validators; run the tests; register row 2.5** with an exact `testTitle`.
 
-- [ ] **Step 6: Prove the enum bites** — a document claiming `provenance: "vibes"` must fail validation naming the field. Record it.
+- [x] **Step 6: Prove the enum bites** — a document claiming `provenance: "vibes"` must fail validation naming the field. Record it.
 
-- [ ] **Step 7: Full gate, status, commit.** `Refs: 2.5`.
+- [x] **Step 7: Full gate, status, commit.** `Refs: 2.5`.
 
 ---
 
@@ -498,19 +498,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 
 > **The binding constraint, from `36-VISUAL-SYSTEM.md` V4:** the six treatments must be distinguishable **without colour**, because provenance is a trust signal. Use stroke treatment, texture and markers — dash patterns, marker shapes, opacity — and let colour reinforce rather than carry. This is why the treatments live in structural CSS rather than the palette: they must survive all five presets and both themes unchanged.
 
-- [ ] **Step 1: Write the failing test** — assert all six classes render with **distinct** non-colour treatments. Concretely: for each class, extract the computed `stroke-dasharray`, `marker-end` and `stroke-width` of an edge carrying it, and assert the six tuples are pairwise distinct. A test that only checked colour would pass a design that fails the spec's central requirement.
+- [x] **Step 1: Write the failing test** — assert all six classes render with **distinct** non-colour treatments. Concretely: for each class, extract the computed `stroke-dasharray`, `marker-end` and `stroke-width` of an edge carrying it, and assert the six tuples are pairwise distinct. A test that only checked colour would pass a design that fails the spec's central requirement.
 
-- [ ] **Step 2: Add a colour-independence assertion** — render the six, convert each treatment's colour to greyscale (luminance only), and assert the six are *still* pairwise distinguishable by their non-colour attributes alone. Reuse `color-science.mjs` for the luminance conversion rather than writing a second implementation.
+- [x] **Step 2: Add a colour-independence assertion** — render the six, convert each treatment's colour to greyscale (luminance only), and assert the six are *still* pairwise distinguishable by their non-colour attributes alone. Reuse `color-science.mjs` for the luminance conversion rather than writing a second implementation.
 
-- [ ] **Step 3: Run both, watch them fail.**
+- [x] **Step 3: Run both, watch them fail.**
 
-- [ ] **Step 4: Emit `data-provenance`** on nodes and edges from all five renderers, using `resolveProvenance` so an unclaimed subject still carries its resolved class.
+- [x] **Step 4: Emit `data-provenance`** on nodes and edges from all five renderers, using `resolveProvenance` so an unclaimed subject still carries its resolved class.
 
-- [ ] **Step 5: Implement the six treatments** in `01-structure.css`, keyed on `[data-provenance="…"]`. Verify each survives all five presets and both themes — the gallery is the fastest way to check this.
+- [x] **Step 5: Implement the six treatments** in `01-structure.css`, keyed on `[data-provenance="…"]`. Verify each survives all five presets and both themes — the gallery is the fastest way to check this.
 
-- [ ] **Step 6: Prove non-vacuity** — make two classes share a dash pattern; confirm the distinctness test fails naming the colliding pair; restore; confirm it passes.
+- [x] **Step 6: Prove non-vacuity** — make two classes share a dash pattern; confirm the distinctness test fails naming the colliding pair; restore; confirm it passes.
 
-- [ ] **Step 7: Register row 4.14. Full gate, re-baselines, gallery, status, commit.** `Refs: 4.14, 2.5`.
+- [x] **Step 7: Register row 4.14. Full gate, re-baselines, gallery, status, commit.** `Refs: 4.14, 2.5`.
 
 ---
 
@@ -524,19 +524,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 **Interfaces:**
 - Consumes: everything from Tasks 3–6; the browser helper at `packages/conformance/test/helpers/browser.mjs`.
 
-- [ ] **Step 1: Write the failing browser test** — click an edge carrying evidence; the Passport opens and reports the file path, the line range, the revision, and the provenance class. Assert against the *fixture's* values, not merely that the panel is non-empty.
+- [x] **Step 1: Write the failing browser test** — click an edge carrying evidence; the Passport opens and reports the file path, the line range, the revision, and the provenance class. Assert against the *fixture's* values, not merely that the panel is non-empty.
 
-- [ ] **Step 2: Run it with `MIROFY_CHROME`, watch it fail** — today only nodes open the Passport.
+- [x] **Step 2: Run it with `MIROFY_CHROME`, watch it fail** — today only nodes open the Passport.
 
-- [ ] **Step 3: Make edges focusable and selectable**, mirroring the node interaction: keyboard-reachable, visible focus, and the same deep-link behaviour. The accessibility floor in `36-VISUAL-SYSTEM.md` §4 applies — a mouse-only edge Passport is a regression, and the axe gate from P1a will be watching.
+- [x] **Step 3: Make edges focusable and selectable**, mirroring the node interaction: keyboard-reachable, visible focus, and the same deep-link behaviour. The accessibility floor in `36-VISUAL-SYSTEM.md` §4 applies — a mouse-only edge Passport is a regression, and the axe gate from P1a will be watching.
 
-- [ ] **Step 4: Render the evidence** — path, line range, revision, provenance class, and the host link built by Task 8's adapter. Strip it from canonical exports, as node evidence already is (`36-VISUAL-SYSTEM.md` §4.4, *canonical clean*).
+- [x] **Step 4: Render the evidence** — path, line range, revision, provenance class, and the host link built by Task 8's adapter. Strip it from canonical exports, as node evidence already is (`36-VISUAL-SYSTEM.md` §4.4, *canonical clean*).
 
-- [ ] **Step 5: Prove the export stays clean** — assert an exported SVG carries no Passport markup and no beacon.
+- [x] **Step 5: Prove the export stays clean** — assert an exported SVG carries no Passport markup and no beacon.
 
-- [ ] **Step 6: Register row 5.20** with `browser: true` so it defers rather than falsely passes without Chrome. Verify both accountings.
+- [x] **Step 6: Register row 5.20** with `browser: true` so it defers rather than falsely passes without Chrome. Verify both accountings.
 
-- [ ] **Step 7: Full gate both ways, gallery, status, commit.** `Refs: 5.20`.
+- [x] **Step 7: Full gate both ways, gallery, status, commit.** `Refs: 5.20`.
 
 ---
 
@@ -552,7 +552,7 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 
 > **Smaller than it reads.** Verification in `repository-evidence.mjs` is already host-agnostic — it runs `git` against a real checkout. Only two things are GitHub-bound: the `githubSlug()` regex at line 41, and the hard `startsWith('https://github.com/')` rejection at line 107. This task extracts those into adapters and deletes the rejection.
 
-- [ ] **Step 1: Write the failing test** — for each supported host, a repository URL parses to the right slug and produces the correct blob URL shape:
+- [x] **Step 1: Write the failing test** — for each supported host, a repository URL parses to the right slug and produces the correct blob URL shape:
 
 | Host | Blob URL |
 |---|---|
@@ -564,17 +564,17 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 
 Assert the exact strings. A test asserting only "a URL was produced" would pass every wrong template.
 
-- [ ] **Step 2: Run it, watch it fail** — `hosts.mjs` does not exist.
+- [x] **Step 2: Run it, watch it fail** — `hosts.mjs` does not exist.
 
-- [ ] **Step 3: Write `hosts.mjs`** with one adapter per host: a URL matcher, a slug extractor, and a blob-URL builder. Keep `ssh://`, `git@` and `https://` forms working for each, as the GitHub matcher already does.
+- [x] **Step 3: Write `hosts.mjs`** with one adapter per host: a URL matcher, a slug extractor, and a blob-URL builder. Keep `ssh://`, `git@` and `https://` forms working for each, as the GitHub matcher already does.
 
-- [ ] **Step 4: Rewire `repository-evidence.mjs`** to call `detectHost()`, and **delete** the `startsWith('https://github.com/')` rejection. Keep every existing failure code and message for the GitHub path — a user on GitHub must see no behaviour change, and the existing tests are the check.
+- [x] **Step 4: Rewire `repository-evidence.mjs`** to call `detectHost()`, and **delete** the `startsWith('https://github.com/')` rejection. Keep every existing failure code and message for the GitHub path — a user on GitHub must see no behaviour change, and the existing tests are the check.
 
-- [ ] **Step 5: Prove an unknown host fails honestly** — a URL matching no adapter must produce a clear diagnostic naming the supported hosts, not a silently wrong link. Assert the message lists them.
+- [x] **Step 5: Prove an unknown host fails honestly** — a URL matching no adapter must produce a clear diagnostic naming the supported hosts, not a silently wrong link. Assert the message lists them.
 
-- [ ] **Step 6: Confirm GitHub is unchanged** — run the full existing evidence suite and confirm no GitHub-path assertion changed. Record the before/after counts.
+- [x] **Step 6: Confirm GitHub is unchanged** — run the full existing evidence suite and confirm no GitHub-path assertion changed. Record the before/after counts.
 
-- [ ] **Step 7: Register row 2.3. Full gate, status, commit.** `Refs: 2.3`.
+- [x] **Step 7: Register row 2.3. Full gate, status, commit.** `Refs: 2.3`.
 
 ---
 
@@ -584,32 +584,35 @@ Assert the exact strings. A test asserting only "a URL was produced" would pass 
 - Create: `docs/P1B-BUILD-LEDGER.md`
 - Modify: `docs/IMPLEMENTATION-STATUS.md` (regenerated), `docs/P1A-BUILD-LEDGER.md` (debt disposition), `README.md`, `CONTRIBUTING.md`, the analysis `.md` sources and their PDFs
 
-- [ ] **Step 1: Write the P1b ledger** in the style of `docs/P1A-BUILD-LEDGER.md`: what was decided, why, and what it costs if wrong. Carry forward every defect found in *this plan* by an implementer or reviewer — P1a's ledger records nine, and that record proved more useful than any success narrative in it.
+- [x] **Step 1: Write the P1b ledger** in the style of `docs/P1A-BUILD-LEDGER.md`: what was decided, why, and what it costs if wrong. Carry forward every defect found in *this plan* by an implementer or reviewer — P1a's ledger records nine, and that record proved more useful than any success narrative in it.
 
-- [ ] **Step 2: Record the P1a debt disposition** in `docs/P1A-BUILD-LEDGER.md`: the static `role="img"` — **fixed** at the renderer (Task 2); the print palette block — **specificity corrected and the false mitigation replaced** (Task 2); token deduplication — **still deferred**, with the reason.
+- [x] **Step 2: Record the P1a debt disposition** in `docs/P1A-BUILD-LEDGER.md`: the static `role="img"` — **fixed** at the renderer (Task 2); the print palette block — **specificity corrected and the false mitigation replaced** (Task 2); token deduplication — **still deferred**, with the reason.
 
-- [ ] **Step 3: Update the analysis sources and regenerate the PDFs.** `32-PARITY-AND-FEATURE-MATRIX.md` must reflect the rows now shipped; `33-MASTER-ROADMAP.md` must show P1.8–P1.11 complete. Then `npm run docs:pdf`, and confirm the regenerated PDFs carry the updated content.
+- [x] **Step 3: Update the analysis sources and regenerate the PDFs.** `32-PARITY-AND-FEATURE-MATRIX.md` must reflect the rows now shipped; `33-MASTER-ROADMAP.md` must show P1.8–P1.11 complete. Then `npm run docs:pdf`, and confirm the regenerated PDFs carry the updated content.
 
-- [ ] **Step 4: Regenerate the status file and the gallery**, and confirm `npm run status:check` passes.
+- [x] **Step 4: Regenerate the status file and the gallery**, and confirm `npm run status:check` passes.
 
-- [ ] **Step 5: Final verification** — `npm run check` exit 0 both with and without `MIROFY_CHROME`; report both. Do **not** push; the operator merges.
+- [x] **Step 5: Final verification** — `npm run check` exit 0 both with and without `MIROFY_CHROME`; report both. Do **not** push; the operator merges.
 
 ---
 
 ## Definition of done for P1b
 
-- [ ] All five diagram types accept `sources` on their relationship array, via one shared `$defs.sources`
-- [ ] Evidence resolves and renders on edges as well as nodes, verified against a real repository
-- [ ] Six provenance classes exist, are validated, and resolve by a documented rule
-- [ ] The six treatments are **pairwise distinct without colour**, proven by simulation, across 5 presets × 2 themes
-- [ ] Clicking an edge opens the Passport with file, lines, revision and provenance — keyboard-reachable, and stripped from canonical exports
-- [ ] Five forges supported; an unknown host fails with a diagnostic naming the supported list
-- [ ] Rows 2.3, 2.4, 2.5, 4.14, 5.20 registered and proved, each `testTitle` matching character-for-character; no previously-proved row lost
-- [ ] P1a debt cleared: static role fixed at the renderer, print block correct, leak gate replaced with a real one
-- [ ] `npm run gallery`, `npm run status`, `npm run docs:pdf` all work; `status:check` is in the `check` chain
-- [ ] Every new gate has been observed failing on a deliberate break, with the transcript recorded
-- [ ] `npm run check` exit 0 with and without Chrome; all 13 CI jobs green
-- [ ] No commit carries a `Co-Authored-By: Claude` trailer
+- [x] All five diagram types accept `sources` on their relationship array, via one shared `$defs.sources`
+- [x] Evidence resolves and renders on edges as well as nodes, verified against a real repository
+- [x] Six provenance classes exist, are validated, and resolve by a documented rule
+- [x] The six treatments are **pairwise distinct without colour**, proven by simulation, across 5 presets × 2 themes
+- [x] Clicking an edge opens the Passport with file, lines, revision and provenance — keyboard-reachable, and stripped from canonical exports
+- [x] Five forges supported; an unknown host fails with a diagnostic naming the supported list
+- [x] Rows 2.3, 2.4, 2.5, 4.14, 5.20 registered and proved, each `testTitle` matching character-for-character; no previously-proved row lost
+- [x] P1a debt cleared: static role fixed at the renderer, print block correct, leak gate replaced with a real one
+- [x] `npm run gallery`, `npm run status`, `npm run docs:pdf` all work; `status:check` is in the `check` chain
+- [x] Every new gate has been observed failing on a deliberate break, with the transcript recorded
+- [x] `npm run check` exit 0 with and without Chrome
+- [ ] All 13 CI jobs green — **not yet verifiable**: this branch is
+  deliberately unpushed ("Do not push. The operator merges."), so CI has
+  never run on it. Local runs pass both ways; that is not the same claim.
+- [x] No commit carries a `Co-Authored-By: Claude` trailer
 
 ---
 

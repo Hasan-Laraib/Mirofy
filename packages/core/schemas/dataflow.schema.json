@@ -26,6 +26,9 @@
         "title"
       ],
       "properties": {
+        "repository": {
+          "$ref": "common.schema.json#/$defs/repository"
+        },
         "title": {
           "type": "string",
           "minLength": 1
@@ -183,6 +186,12 @@
           "label"
         ],
         "properties": {
+          "provenance": {
+            "$ref": "common.schema.json#/$defs/provenance"
+          },
+          "sources": {
+            "$ref": "common.schema.json#/$defs/sources"
+          },
           "id": {
             "$ref": "common.schema.json#/$defs/id"
           },

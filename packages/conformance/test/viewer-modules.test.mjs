@@ -74,8 +74,47 @@ test('the palette file holds exactly the ten preset/theme blocks (4.12)', () => 
   ]) {
     assert.ok(css.includes(needle), `palette block missing: ${needle}`);
   }
-  // 01-structure.css must not have absorbed any custom-property block, or
-  // Task 6's generator would silently stop covering part of the palette.
+  // 01-structure.css must not have absorbed any custom-property block, or the
+  // token generator would silently stop covering part of the palette.
+  //
+  // This used to test one literal selector, which only ever caught the single
+  // block someone thought to name. P1a recorded it as "backstopped by the
+  // count assertion" above; it is not -- that count reads emitPalette()'s
+  // output, and a palette block sitting in structural CSS never appears
+  // there. Neither check could see the standing counter-example: the print
+  // block below, 27 custom properties, living in 01-structure.css the whole
+  // time.
+  //
+  // So scan for the SHAPE instead: any rule declaring four or more custom
+  // properties is palette-like, and the set of them must match this
+  // allowlist exactly. An eleventh block then fails this gate by existing,
+  // rather than by happening to match a string someone remembered to add.
+  const ALLOWED_PROPERTY_BLOCKS = new Map([
+    [':root, [data-theme="dark"], [data-theme="light"], html[data-preset][data-theme]',
+      'The @media print palette. It must restate the full light palette rather than '
+      + 'inherit it, because printing from dark theme would otherwise put dark fills and '
+      + 'neon strokes on white paper, and @media contributes no specificity of its own. '
+      + 'tokens.test.mjs separately proves it outranks every preset palette.'],
+  ]);
+
   const structure = fs.readFileSync(path.join(SRC_ROOT, 'css/01-structure.css'), 'utf8');
-  assert.ok(!structure.includes('[data-preset="editorial"][data-theme="light"] {'), 'a palette block leaked into 01-structure.css');
+  const withoutComments = structure.replace(/\/\*[\s\S]*?\*\//g, '');
+  const found = [];
+  const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
+  let match;
+  while ((match = ruleRe.exec(withoutComments)) !== null) {
+    const declared = (match[2].match(/(^|[\s;])--[\w-]+\s*:/g) ?? []).length;
+    if (declared >= 4) found.push(match[1].trim().replace(/\s+/g, ' '));
+  }
+
+  const unexpected = found.filter((sel) => !ALLOWED_PROPERTY_BLOCKS.has(sel));
+  assert.deepEqual(unexpected, [],
+    'a palette-like block (4+ custom properties) appeared in 01-structure.css without an '
+    + 'allowlist entry. Either move it into the token model (packages/viewer/src/tokens/), '
+    + 'or add it to ALLOWED_PROPERTY_BLOCKS above with a written reason it must live in '
+    + 'structural CSS.');
+  const missing = [...ALLOWED_PROPERTY_BLOCKS.keys()].filter((sel) => !found.includes(sel));
+  assert.deepEqual(missing, [],
+    'an allowlisted palette block is gone from 01-structure.css. If that is deliberate, '
+    + 'remove its entry; if not, the print palette has been lost.');
 });

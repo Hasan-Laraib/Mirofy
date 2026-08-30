@@ -378,6 +378,57 @@ already states this; recorded here too so a later reader does not mistake
 "8/8 green" for evidence that short-path resolution works, rather than
 evidence that the export exists and returns *something*.
 
+## P1b debt disposition (closed 2026-08-30, P1b Task 2)
+
+Every item this ledger carried forward as P1b debt, and what became of it.
+
+**The static `role="img"` — FIXED, at the renderer.** `svgRootAttrs` now emits
+`role="graphics-document"`, so the static markup a JS-disabled reader and
+every non-viewer consumer receives is correct on its own terms. The
+boot-time assignment in `07-focus.js` was removed: two mechanisms for one
+invariant is how they drift apart. A new test reads the rendered HTML
+directly and needs no Chrome, so it checks the surface the axe rows
+structurally cannot — they scan the post-boot DOM.
+
+Fallout, recorded because it was not anticipated: `architecture-delta.mjs`
+matched `role="img"` literally when extracting the primary SVG, so `compare`
+died with `delta/svg-missing` against any freshly rendered artifact. Both
+roles are now accepted permanently — `compare` reads a base artifact
+alongside a head one, so an artifact rendered before the change is precisely
+the input that tool exists to handle.
+
+**The print-media palette block — FIXED, and it was worse than described
+below.** The block is real and pre-existing, as recorded; what this ledger
+did not say is that it never worked. `@media` contributes no specificity, so
+its `:root, [data-theme=…]` selectors at `(0,1,0)` lost to every preset
+palette at `[data-preset="X"][data-theme="Y"]`, `(0,2,0)`. Printing from
+dark theme in signal-flow, blueprint, editorial or okabe-ito put that
+preset's **dark** palette on white paper. Adding `html[data-preset][data-theme]`,
+`(0,2,1)`, wins over all eight. Verified in real Chrome under print
+emulation, not by reading the cascade.
+
+**The false mitigation — REPLACED.** This ledger records the leak assertion as
+"backstopped by the count assertion". It was not: that count reads
+`emitPalette()`'s output, and a palette block living in structural CSS never
+appears there. Neither check could see the print block itself, which is the
+standing counter-example and had been sitting in `01-structure.css` the whole
+time. The gate now scans for the SHAPE — any rule declaring four or more
+custom properties — against an allowlist whose one entry carries a written
+reason, and it was observed failing on a planted eleventh block.
+
+**Token-model deduplication — STILL DEFERRED.** The model stores all ten
+blocks verbatim rather than deduplicating. Not done in P1b, deliberately:
+moving the print block into the token model changes CSS source order, and
+cascade order is exactly what the specificity bug above was about — fixing a
+cascade bug with a cascade-affecting refactor in the same change would make
+the result unverifiable. It also has no payoff yet, because V4's provenance
+treatments are structural rather than per-palette. Revisit when something
+needs six treatments × ten palettes.
+
+See `docs/P1B-BUILD-LEDGER.md` for the phase that closed these.
+
+---
+
 ## P1b debt: the print-media palette block (`01-structure.css:2618-2650`)
 
 An eleventh palette block, entirely outside the Task 6 token model: a

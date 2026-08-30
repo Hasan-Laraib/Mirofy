@@ -141,7 +141,121 @@ export const IMPORTED_ROWS = [
     // ("SRC 1"), its absence on a node with no sources, and the aria-label
     // update -- see viewer.browser.test.mjs's "[2.2]" test.
     browser: true,
-    testTitle: '[2.2] Verified Source Beacon renders "SRC n" on a node with verified repository evidence, and stays off a node without it',
+    testTitle: '[2.2] Verified Source Beacon renders "SRC n" on a node and on a relationship with verified repository evidence, and stays off ones without it',
+  },
+
+  {
+    id: '2.4',
+    name: 'Evidence on relationships (all five diagram types)',
+    // Evidence could be attached to architecture COMPONENTS since P0, and to
+    // nothing else. A relationship -- the claim that two things are connected
+    // -- could not answer "why do I believe this?" in any of the five types.
+    // The `sources` shape is now a single $defs in common.schema.json,
+    // referenced from six sites, so components and relationships cannot drift
+    // apart into two subtly different evidence shapes.
+    //
+    // Proved per diagram type on purpose: support existed for exactly one of
+    // the five before this task, so a single-type test would have passed
+    // while four types silently had no support at all. Each test also asserts
+    // the REJECTION of a source with no `path`, because evidence that is
+    // silently dropped is worse than evidence never claimed.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence.test.mjs',
+    testTitle: '[2.4] architecture accepts sources on its connections and rejects a malformed entry',
+  },
+
+  {
+    id: '2.5',
+    name: 'Six-class evidence provenance',
+    // The vocabulary that says what KIND of knowledge stands behind a node or
+    // a relationship: authored, source-backed, statically-derived,
+    // config-derived, runtime-observed, inferred. Optional in the schema on
+    // purpose -- a document that claims no class is not malformed, it
+    // resolves to `authored`, which is the truthful description of a
+    // hand-written document rather than a flattering one.
+    //
+    // The row's testTitle pins the ORDER, which is the published display
+    // order for the legend and Passport and is NOT a confidence ranking:
+    // `authored` leads the list while being the weakest of the six. Sorting
+    // it "properly" would silently reorder the legend, so the test asserts
+    // the sequence rather than the set.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence.test.mjs',
+    testTitle: '[2.5] the six provenance classes are exactly these six, in the published order',
+  },
+
+  {
+    id: '2.3',
+    name: 'Host-agnostic evidence (GitHub, GitLab, Bitbucket, Gitea, Gitee, Azure DevOps)',
+    // Verification was never host-bound -- it runs `git` against a real
+    // checkout, and git does not care where the remote lives. FIVE things
+    // were: the slug regex, an outright rejection of anything not on
+    // github.com, the blob-URL builder, the viewer's repository link, and the
+    // schema's url pattern. All five now go through hosts.mjs.
+    //
+    // The blob URL shapes are asserted as exact strings per forge, because
+    // they genuinely disagree -- GitLab omits the second "L", Bitbucket uses
+    // #lines-a:b, Azure addresses files by query string. A test that only
+    // checked "a URL was produced" would pass every wrong template, and a
+    // wrong template is the worst failure available here: a confident,
+    // clickable link to nothing.
+    //
+    // An unrecognised host is refused BY NAME rather than guessed at, and the
+    // rejection lists the supported forges -- an author cannot guess which
+    // are understood from a refusal that does not say.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence.test.mjs',
+    testTitle: '[2.3] github repository URLs resolve to the right slug and blob URL',
+  },
+
+  {
+    id: '4.14',
+    name: 'Evidence-first visual language (six provenance treatments)',
+    // 36-VISUAL-SYSTEM.md V4's binding constraint is that the six classes are
+    // distinguishable WITHOUT COLOUR, because provenance is a trust signal
+    // and roughly 8% of men have colour-vision deficiency. The test therefore
+    // measures ONLY the non-colour channels (stroke-dasharray, stroke-width,
+    // opacity) and ignores hue entirely: a set of treatments that differed
+    // only by colour would pass a casual look and fail the requirement.
+    //
+    // Computed styles from a real browser, not the stylesheet text. Parsing
+    // the CSS would prove a rule was written, not that it wins the cascade --
+    // which is precisely where P1a's print-palette bug lived.
+    //
+    // `authored` carries no rule at all. It is what every unclaimed subject
+    // resolves to, so styling it would restyle every document ever authored
+    // in order to say "this is normal"; its distinctness is being the
+    // untouched baseline.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'provenance-visual.test.mjs',
+    browser: true,
+    testTitle: '[4.14] the six provenance treatments are pairwise distinct without colour, in every preset and both themes',
+  },
+
+  {
+    id: '5.20',
+    name: 'Evidence Passport for relationships',
+    // Selecting a relationship focuses its SOURCE NODE, so the Passport was
+    // showing that node's evidence while the user believed they were
+    // inspecting the edge -- evidence attributed to the wrong subject, which
+    // is worse than showing none. The edge's own class and sources now
+    // replace it.
+    //
+    // Every assertion is against the fixture's exact values (path, line
+    // range, revision, class), never that the panel is merely non-empty: a
+    // panel rendering the WRONG file's evidence is non-empty too, and that is
+    // precisely the defect this row exists to catch.
+    //
+    // browser: true, so it defers rather than falsely passing without Chrome.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence-passport.browser.test.mjs',
+    browser: true,
+    testTitle: "[5.20] selecting a relationship reports ITS evidence in the Passport, not its source node's",
   },
 
   // Phase 3 — Layout validation gates

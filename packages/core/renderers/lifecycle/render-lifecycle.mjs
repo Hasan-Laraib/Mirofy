@@ -2,6 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { esc, renderDefinitions, renderSemanticSigil, textUnits } from '../shared/utils.mjs';
 import { animateAttr, focusEdgeAttrs, focusNodeAttrs, focusNodeTitle, loadDiagramWithBrandMarks, writeDiagram, svgAccessibleText, svgRootAttrs } from '../shared/cli.mjs';
+import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
 import { resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
 import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
@@ -40,7 +41,7 @@ const stateTextFit = {
 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const { diagram: lifecycle, template, outPath } = await loadDiagramWithBrandMarks({
+const { diagram: lifecycle, template, outPath, sourceEvidence } = await loadDiagramWithBrandMarks({
   rendererDir: __dirname,
   diagramType: 'lifecycle',
   defaultExample: 'agent-run.lifecycle.json'
@@ -460,6 +461,7 @@ function renderState(state) {
     tag: state.tag,
     context: laneLabels.get(state.lane) || i18nText(lifecycle.meta.locale, 'node.context.lifecycle'),
     ...brandMetadataFor(state),
+    provenance: resolveProvenance(state),
   };
   return `        <g ${focusNodeAttrs(state.id, state.label, passport, lifecycle.meta.locale)}>
           ${focusNodeTitle(state.label, passport)}
@@ -474,7 +476,7 @@ function renderTransitionPath(transition, index) {
   const [cls, marker] = arrowClassMap[transition.variant || 'default'] || arrowClassMap.default;
   const routed = pathFor(transition);
   const strokeWidth = transition.width || (transition.variant === 'emphasis' ? 2 : 1.1);
-  return `        <path ${focusEdgeAttrs(transition.from, transition.to, transition.label, index, transition.id)} data-composition-points="${routePointsValue(routed.points)}" d="${routed.d}" class="${cls}"${animateAttr(lifecycle.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
+  return `        <path ${focusEdgeAttrs(transition.from, transition.to, transition.label, index, transition.id, resolveProvenance(transition))} data-composition-points="${routePointsValue(routed.points)}" d="${routed.d}" class="${cls}"${animateAttr(lifecycle.meta, 'edge', index)} stroke-width="${strokeWidth}" marker-end="url(#${marker})"/>`;
 }
 
 function renderTransitionLabel(transition, index) {
@@ -487,7 +489,7 @@ function renderTransitionLabel(transition, index) {
   const note = transition.note
     ? `\n        <text data-detail="fine" x="${lx}" y="${ly + 11}" class="t-dim" font-size="7" text-anchor="middle">${esc(transition.note)}</text>`
     : '';
-  return `        <g data-detail="context" ${focusEdgeAttrs(transition.from, transition.to, transition.label, index, transition.id)}>
+  return `        <g data-detail="context" ${focusEdgeAttrs(transition.from, transition.to, transition.label, index, transition.id, resolveProvenance(transition))}>
           <rect x="${lx - labelW / 2}" y="${ly - 11}" width="${labelW}" height="${labelH}" rx="4" class="c-mask"/>
           <text x="${lx}" y="${ly}" class="${variantAccent(transition.variant)}" font-size="8" text-anchor="middle">${esc(transition.label)}</text>${note}
         </g>`;
@@ -567,4 +569,5 @@ writeDiagram({
   meta: lifecycle.meta,
   svg: renderSvg(),
   cards: lifecycle.cards,
+  sourceEvidence,
 });

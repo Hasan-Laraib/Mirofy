@@ -17,6 +17,7 @@
       var evidence = document.getElementById('focus-evidence');
       var repositoryLink = document.getElementById('focus-repository');
       var evidenceLinks = document.getElementById('focus-evidence-links');
+      var provenanceSlot = document.getElementById('focus-provenance');
       var summary = document.getElementById('focus-summary');
       var reachSection = document.getElementById('focus-reach');
       var reachStatus = document.getElementById('focus-reach-status');
@@ -43,25 +44,11 @@
       var reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
       var finePointerQuery = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : null;
 
-      // The renderer ships the diagram svg with role="img" (an accessible
-      // name via aria-labelledby, and -- per the ARIA spec -- an implicit
-      // promise that its content is presentational). That promise is false
-      // the moment this module runs: every [data-node-id] the renderer
-      // emits already carries tabindex="0" role="button" (focusNodeAttrs in
-      // packages/core/renderers/shared/cli.mjs), and this module is about to
-      // add more real, individually-focusable controls (the relationship
-      // hit targets below). A container that says "my children are
-      // presentational" while containing real interactive descendants fails
-      // axe-core's nested-interactive rule (WCAG 4.1.2) -- assistive tech is
-      // told there is nothing to interact with here, directly contradicting
-      // what a sighted mouse/keyboard user can actually do. "graphics-document"
-      // (WAI-ARIA Graphics Module) is the role built for exactly this case: a
-      // named, accessible graphic whose descendants remain individually
-      // exposed. It keeps the same aria-labelledby name this svg already
-      // carries, so no name is lost. This runs unconditionally (not only
-      // when relationship hit targets install) because the node buttons
-      // above are present in every mode, embed included.
-      svg.setAttribute('role', 'graphics-document');
+      // The renderer emits role="graphics-document" on the diagram svg
+      // itself (svgRootAttrs in packages/core/renderers/shared/cli.mjs), so
+      // there is nothing to correct at boot. Do not reintroduce a runtime
+      // assignment here: two mechanisms for one invariant drift apart, and
+      // the static markup is the one a JS-disabled reader receives.
 
       function nodes() {
         return Array.prototype.slice.call(svg.querySelectorAll('[data-node-id]'));
@@ -351,20 +338,39 @@
         element.textContent = normalized;
         element.hidden = !normalized;
       }
-      function renderSourceEvidence(id) {
+      /* Takes the resolved sources and class rather than an id, so the same
+         renderer serves a node and a relationship. Keeping two would let the
+         two subjects drift into reporting evidence differently, which is the
+         one thing a trust panel must not do. */
+      function renderSourceEvidence(sources, provenanceClass) {
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
         repositoryLink.textContent = '';
-        var sources = Mirofy.sourceEvidence.node(id);
+        provenanceSlot.textContent = '';
+        provenanceSlot.hidden = true;
         var repository = Mirofy.sourceEvidence.repository();
         if (!repository || !sources.length) {
           evidence.hidden = true;
           return;
         }
-        var slug = repository.url.replace(/^https:\/\/github\.com\//, '').replace(/\/$/, '');
-        repositoryLink.href = repository.url + '/tree/' + repository.revision;
+        /* The slug and the revision link come from the payload, which the
+           host adapter built. Deriving them here meant assuming one forge's
+           URL shape: on anything but GitHub the link 404'd and the slug
+           displayed as a full URL. Older artifacts carry neither field, so
+           both fall back to the previous behaviour. */
+        var slug = repository.slug
+          || repository.url.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, '');
+        repositoryLink.href = repository.treeUrl || (repository.url + '/tree/' + repository.revision);
         repositoryLink.textContent = slug + ' @ ' + repository.shortRevision;
         repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
+        /* The class token is shown verbatim: it is published vocabulary the
+           documentation and the legend both use, not prose to localise. The
+           accessible label carries the localised framing instead. */
+        if (provenanceClass) {
+          provenanceSlot.textContent = provenanceClass;
+          provenanceSlot.setAttribute('aria-label', viewerText('viewer.passport.provenance', { class: provenanceClass }));
+          provenanceSlot.hidden = false;
+        }
         sources.forEach(function (source) {
           var link = document.createElement('a');
           link.className = 'semantic-passport-source';
@@ -396,7 +402,7 @@
         setPassportValue(document.getElementById('focus-brand'), node.getAttribute('data-node-brand'));
         semanticId.textContent = id;
         semanticId.hidden = false;
-        renderSourceEvidence(id);
+        renderSourceEvidence(Mirofy.sourceEvidence.node(id), node.getAttribute('data-provenance'));
       }
       function relationshipsFor(id, byId) {
         var seen = {};
@@ -823,6 +829,19 @@
         var target = relationshipHitTarget(key);
         if (target) target.setAttribute('aria-pressed', 'true');
         renderRelationshipCopyAction();
+        /* Pinning a relationship focuses its SOURCE NODE, so without this the
+           Passport would keep showing that node's evidence while the user is
+           inspecting the edge -- evidence attributed to the wrong subject,
+           which is worse than showing none. The edge's own class and sources
+           replace it, keyed by data-edge-key (its index in the authored
+           array), which is what evidence resolution keys its edges map by. */
+        var pinnedEdge = edges().filter(function (edge) {
+          return edge.getAttribute('data-edge-key') === key;
+        })[0];
+        renderSourceEvidence(
+          Mirofy.sourceEvidence.edge(key),
+          pinnedEdge ? pinnedEdge.getAttribute('data-provenance') : null
+        );
         summary.textContent = viewerText('viewer.passport.relationship.pinned', {
           from: record.fromLabel,
           to: record.toLabel,
