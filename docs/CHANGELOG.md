@@ -13,6 +13,49 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1d: the system model
+
+**Commits:** `67347f0..` on `p1d-system-model`.
+
+One inventory the diagrams become views of — components, relationships and
+boundaries with stable ids, `evidenceRefs[]` and provenance, assembled from
+authored documents plus P1c's evidence graph. Roadmap **P1.6**; rows 1.12,
+1.14, 1.15, 1.17.
+
+**Row 1.12 said IDs are "mandatory for every object".** Read as tightening
+the five authored schemas, that breaks every document ever written, every
+fixture and all 25 golden digests — for a capability the *model* needs and
+authors do not. So the model assigns: an authored id is used verbatim and
+claimed first, so a derived id can never displace one; a derived id is
+**marked as derived**, because it is stable only while the content it
+derives from is. Rename the label and it changes. That is a real limitation
+of deriving identity from content, and the model states it per object rather
+than presenting every id as equally durable.
+
+**`owner` and `deployment{regions, networkScope}` are real fields now**
+(1.15). They were smuggled before — owner read out of a component's display
+`tag`, regions inferred from boundary membership — which works and is legible
+to nobody. Optional, with the fallbacks kept, and the diagnostics now report
+which fields they *checked* rather than asserting the answer came from `tag`.
+Golden is untouched, which is the proof they are additive.
+
+**Overrides re-provenance to `authored`** (1.17). An override is a person
+disagreeing with the analysis; if the object kept saying `statically-derived`
+a human decision would wear the authority of machine evidence. What the
+override replaced stays on record. An override naming an unknown id throws —
+a typo'd override that quietly does nothing is the failure mode.
+
+`npm run model` against this repository's fixtures: 7 documents → 62
+components, 71 relationships, 6 boundaries. Every object resolves `authored`,
+and that is the honest answer rather than a bug: the fixtures describe a
+hypothetical shop while the scan analysed *this* repo's source, so the join
+between them is empty by construction. Making it non-empty is the scanner's
+subject-naming problem, not the model's.
+
+**Not in this phase:** P1.7, the view compiler. It is "where the AI lives",
+it has no matrix row, and its binding contract — *cannot emit a relationship
+absent from the model* — needed the model to exist first.
+
 ## 2026-08-30 — P1c merged to main
 
 **Commits:** merge commit `211fc05` (PR #10).

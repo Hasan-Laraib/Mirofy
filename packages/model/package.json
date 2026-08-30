@@ -1,0 +1,12 @@
+{
+  "name": "@mirofy/model",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The system model: one inventory of components, relationships and boundaries with stable ids, evidence refs and provenance.",
+  "exports": {
+    "./model": "./src/model.mjs",
+    "./ids": "./src/ids.mjs",
+    "./overrides": "./src/overrides.mjs"
+  }
+}

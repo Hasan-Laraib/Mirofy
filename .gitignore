@@ -21,3 +21,6 @@ docs/analysis/pdf/
 
 # Scanner output from `npm run scan`.
 scan/
+
+# System model output from `npm run model`.
+scan/model.json

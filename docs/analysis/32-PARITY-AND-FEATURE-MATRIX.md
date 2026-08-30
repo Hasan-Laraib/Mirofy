@@ -44,12 +44,12 @@ Every source-baseline feature is accounted for; none is dropped.
 | 1.9 | Legend modes (auto/all/hidden) | **H** | P0 | |
 | 1.10 | Agent contract (`SKILL.md`) | **H→R** | P1 | Rewritten for scan-first flow; skill install becomes optional |
 | 1.11 | Explicit `pos:[x,y]` authoring | **R** | P2 | Replaced by intent + solver. Manual pins still honoured as hard constraints |
-| 1.12 | Stable semantic IDs | **R** | P1 | **Mandatory for every object** — components, boundaries, connections, messages, flows, states, transitions |
+| 1.12 | Stable semantic IDs | **R** | P1 | **Mandatory for every object** — components, boundaries, connections, messages, flows, states, transitions — ✅ **SHIPPED (P1d)** |
 | 1.13 | Mermaid import | **N** | P1 | `import mermaid` → typed IR (adapted from the source project's implementation as the base) |
-| 1.14 | **System model** (`model.json`) | **N** | P1 | One inventory; diagrams become views. Kills the 12-node ceiling |
-| 1.15 | First-class engineering metadata | **N** | P1 | `owner`, `deployment{regions, networkScope}` as real fields |
+| 1.14 | **System model** (`model.json`) | **N** | P1 | One inventory; diagrams become views. Kills the 12-node ceiling — ✅ **SHIPPED (P1d)** |
+| 1.15 | First-class engineering metadata | **N** | P1 | `owner`, `deployment{regions, networkScope}` as real fields — ✅ **SHIPPED (P1d)** |
 | 1.16 | Recipe library (100) | **N** | P3 | The source baseline has 11 |
-| 1.17 | Human overrides | **N** | P1 | Recorded as `authored` provenance, never disguised as derived |
+| 1.17 | Human overrides | **N** | P1 | Recorded as `authored` provenance, never disguised as derived — ✅ **SHIPPED (P1d)** |
 
 ## 2 · Scanner & evidence *(the new spine)*
 
