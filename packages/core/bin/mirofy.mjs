@@ -82,31 +82,53 @@ function extractQualityArgs(args) {
   return { rest, quality };
 }
 
+// --repo-root is REPEATABLE for multi-repository documents:
+//   --repo-root <path>              the single-repository form, unchanged
+//   --repo-root <id>=<path>  ...    one per declared repository
+//
+// The id half is kept verbatim rather than resolved, because only the part
+// after `=` is a path. Resolving the whole token would turn "api=/src/api"
+// into a path that does not exist and report it as an unreadable checkout.
 function extractRepoRootArgs(args) {
   const rest = [];
-  let repoRoot;
+  const repoRoots = [];
+  const take = (value) => {
+    const match = /^([A-Za-z][A-Za-z0-9_-]*)=(.+)$/.exec(value);
+    repoRoots.push(match ? `${match[1]}=${path.resolve(match[2])}` : path.resolve(value));
+  };
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (arg === '--repo-root') {
-      repoRoot = args[index + 1];
-      if (!repoRoot || repoRoot.startsWith('--')) fail('--repo-root requires a repository path.');
+      const value = args[index + 1];
+      if (!value || value.startsWith('--')) fail('--repo-root requires a repository path, or <id>=<path>.');
+      take(value);
       index += 1;
       continue;
     }
     if (arg.startsWith('--repo-root=')) {
-      repoRoot = arg.slice('--repo-root='.length);
-      if (!repoRoot) fail('--repo-root requires a repository path.');
+      const value = arg.slice('--repo-root='.length);
+      if (!value) fail('--repo-root requires a repository path, or <id>=<path>.');
+      take(value);
       continue;
     }
     rest.push(arg);
   }
-  return { rest, repoRoot: repoRoot ? path.resolve(repoRoot) : undefined };
+  // One root stays a bare string so every existing caller and message is
+  // unchanged; several become the list the resolver keys by id.
+  const repoRoot = repoRoots.length === 0 ? undefined
+    : repoRoots.length === 1 && !repoRoots[0].includes('=') ? repoRoots[0]
+      : repoRoots;
+  return { rest, repoRoot };
 }
 
 function rendererEnv(quality, repoRoot, diagnosticJson = false) {
   return {
     ...(quality ? { MIROFY_QUALITY_PROFILE: quality } : {}),
-    ...(repoRoot ? { MIROFY_REPO_ROOT: repoRoot } : {}),
+    // Several roots cross the process boundary newline-separated. A comma
+    // or path separator would be ambiguous -- Windows paths contain the
+    // one and colons the other -- while a newline cannot appear in a path
+    // on any platform this supports.
+    ...(repoRoot ? { MIROFY_REPO_ROOT: Array.isArray(repoRoot) ? repoRoot.join(String.fromCharCode(10)) : repoRoot } : {}),
     ...(diagnosticJson ? { MIROFY_DIAGNOSTIC_FORMAT: 'json' } : {}),
   };
 }

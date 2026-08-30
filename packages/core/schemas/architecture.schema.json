@@ -22,6 +22,7 @@
         "quality_profile": { "enum": ["standard", "showcase"] },
         "engineering_profile": { "enum": ["deployment-ownership"] },
         "repository": { "$ref": "common.schema.json#/$defs/repository" },
+        "repositories": { "$ref": "common.schema.json#/$defs/repositories" },
         "views": { "$ref": "common.schema.json#/$defs/guidedViews" },
         "legend": {
           "type": "object",

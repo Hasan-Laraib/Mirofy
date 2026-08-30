@@ -108,44 +108,94 @@ function carriesSources(list) {
 
 export function hasRepositoryEvidence(diagramType, diagram) {
   if (!RELATIONSHIP_ARRAY[diagramType]) return false;
-  if (diagram?.meta?.repository) return true;
+  if (diagram?.meta?.repository || diagram?.meta?.repositories) return true;
   return carriesSources(diagram?.components) || carriesSources(diagram?.[RELATIONSHIP_ARRAY[diagramType]]);
 }
 
-export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
-  if (!hasRepositoryEvidence(diagramType, diagram)) return null;
-  const repository = diagram.meta?.repository;
-  if (!repository) evidenceFailure('repository-evidence/repository-required', 'Repository evidence requires /meta/repository.', {
-    subject: { path: '/meta/repository' },
-    supportedFixes: ['add the pinned public repository metadata or remove component sources'],
-  });
-  if (!FULL_SHA_RE.test(repository.revision || '')) {
-    evidenceFailure('repository-evidence/revision-invalid', '/meta/repository/revision must be a full 40-character commit SHA.', {
-      subject: { path: '/meta/repository/revision' },
-      evidence: { revision: repository.revision },
+/**
+ * The repositories a document declares, as `id -> {id, url, revision}`.
+ *
+ * Two forms, and never both. `meta.repository` is the single-repository form
+ * every document written before multi-repo support uses, and it keeps working
+ * exactly as it did -- a migration nobody asked for is a bug. Its sources
+ * carry no `repository` field, so they resolve against the one repository
+ * under the reserved id below.
+ *
+ * `meta.repositories` names several. Declaring both is refused rather than
+ * silently preferring one, because whichever a reader assumed would be right
+ * half the time.
+ */
+const SINGLE = '';
+
+function declaredRepositories(diagram) {
+  const single = diagram.meta?.repository;
+  const many = diagram.meta?.repositories;
+  if (single && many) {
+    evidenceFailure('repository-evidence/repository-form-ambiguous',
+      'Declare either /meta/repository or /meta/repositories, not both.', {
+        subject: { path: '/meta' },
+        supportedFixes: ['remove /meta/repository and keep /meta/repositories, or the other way round'],
+      });
+  }
+  if (many) return new Map(many.map((entry) => [entry.id, { ...entry }]));
+  if (single) return new Map([[SINGLE, { id: SINGLE, ...single }]]);
+  evidenceFailure('repository-evidence/repository-required',
+    'Repository evidence requires /meta/repository or /meta/repositories.', {
+      subject: { path: '/meta/repository' },
+      supportedFixes: ['add the pinned public repository metadata or remove component sources'],
+    });
+  return new Map();
+}
+
+/**
+ * Roots, as `id -> path`. `--repo-root <path>` is the single-repository form;
+ * `--repo-root <id>=<path>`, repeatable, names one per repository.
+ */
+export function parseRepoRoots(input) {
+  if (!input) return new Map();
+  // A string may carry several roots, newline-separated, because that is how
+  // they cross the process boundary from the CLI into the renderer.
+  const values = Array.isArray(input) ? input : String(input).split(String.fromCharCode(10)).filter(Boolean);
+  const roots = new Map();
+  for (const value of values) {
+    const match = /^([A-Za-z][A-Za-z0-9_-]*)=(.+)$/.exec(String(value));
+    if (match) roots.set(match[1], match[2]);
+    else roots.set(SINGLE, String(value));
+  }
+  return roots;
+}
+
+/** Verify one repository's checkout and return everything a citation needs. */
+function prepareRepository(entry, rootPath, declaredIds) {
+  const where = entry.id === SINGLE ? '/meta/repository' : `/meta/repositories/${entry.id}`;
+  if (!FULL_SHA_RE.test(entry.revision || '')) {
+    evidenceFailure('repository-evidence/revision-invalid', `${where}/revision must be a full 40-character commit SHA.`, {
+      subject: { path: `${where}/revision` },
+      evidence: { revision: entry.revision },
       supportedFixes: ['pin one full 40-character commit SHA'],
     });
   }
-  const authoredHost = detectHost(repository.url);
-  if (!authoredHost) {
-    // Named alternatives, not a bare refusal: an author cannot guess which
-    // forges are understood, and a wrong guess here yields a confident link
-    // to nothing -- the one thing evidence must never produce.
-    evidenceFailure('repository-evidence/url-invalid', `/meta/repository/url must be a public repository URL on a supported host (${HOST_IDS.join(', ')}).`, {
-      subject: { path: '/meta/repository/url' },
-      evidence: { repositoryUrl: repository.url, supportedHosts: HOST_IDS },
+  const host = detectHost(entry.url);
+  if (!host) {
+    evidenceFailure('repository-evidence/url-invalid', `${where}/url must be a public repository URL on a supported host (${HOST_IDS.join(', ')}).`, {
+      subject: { path: `${where}/url` },
+      evidence: { repositoryUrl: entry.url, supportedHosts: HOST_IDS },
       supportedFixes: [`use a canonical public repository URL on one of: ${HOST_IDS.join(', ')}`],
     });
   }
-  const authoredSlug = remoteSlug(repository.url);
-  if (!repoRootInput) {
-    evidenceFailure('repository-evidence/root-required', 'This diagram declares source evidence. Pass --repo-root <repository> so Mirofy can verify it before rendering.', {
-      subject: { path: '/meta/repository' },
-      supportedFixes: ['pass --repo-root with the matching local Git checkout'],
-    });
+  if (!rootPath) {
+    // Naming WHICH repository is missing, and what was declared: with several
+    // in play, "pass --repo-root" alone leaves the author guessing.
+    const flag = entry.id === SINGLE ? '--repo-root <repository>' : `--repo-root ${entry.id}=<path>`;
+    evidenceFailure('repository-evidence/root-required',
+      `This diagram declares source evidence in repository ${JSON.stringify(entry.id || entry.url)}. Pass ${flag} so Mirofy can verify it before rendering.`, {
+        subject: { path: where },
+        evidence: { declaredRepositories: declaredIds },
+        supportedFixes: [`pass ${flag} with the matching local Git checkout`],
+      });
   }
 
-  const requestedRoot = path.resolve(repoRootInput);
+  const requestedRoot = path.resolve(rootPath);
   let realRoot;
   try {
     realRoot = fs.realpathSync(requestedRoot);
@@ -165,15 +215,14 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     });
   }
   const origin = gitValue(realRoot, ['remote', 'get-url', 'origin'], 'Evidence repository must have an origin remote.');
-  if (remoteSlug(origin) !== authoredSlug) {
-    evidenceFailure('repository-evidence/origin-mismatch', `Evidence repository origin ${JSON.stringify(origin)} does not match ${JSON.stringify(repository.url)}.`, {
+  if (remoteSlug(origin) !== remoteSlug(entry.url)) {
+    evidenceFailure('repository-evidence/origin-mismatch', `Evidence repository origin ${JSON.stringify(origin)} does not match ${JSON.stringify(entry.url)}.`, {
       subject: { repoRoot: realRoot },
-      evidence: { localOrigin: origin, authoredRepository: repository.url },
+      evidence: { localOrigin: origin, authoredRepository: entry.url },
       supportedFixes: ['use the matching local checkout or correct the authored repository URL'],
     });
   }
-
-  const revision = repository.revision.toLowerCase();
+  const revision = entry.revision.toLowerCase();
   const commit = runGit(realRoot, ['cat-file', '-e', `${revision}^{commit}`]);
   if (commit.status !== 0) {
     evidenceFailure('repository-evidence/revision-unavailable', `Evidence revision ${revision} is not available in the local repository.`, {
@@ -182,8 +231,55 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
       supportedFixes: ['fetch the pinned commit or pin an available full commit SHA'],
     });
   }
+  return {
+    id: entry.id,
+    realRoot,
+    revision,
+    host,
+    url: host.web,
+  };
+}
 
-  const repoUrl = repository.url.replace(/\.git\/?$/i, '').replace(/\/$/, '');
+export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
+  if (!hasRepositoryEvidence(diagramType, diagram)) return null;
+
+  const declared = declaredRepositories(diagram);
+  const declaredIds = [...declared.keys()];
+  const roots = parseRepoRoots(repoRootInput);
+
+  // Every declared repository is prepared up front, so a missing checkout is
+  // reported before any citation is read rather than at whichever source
+  // happened to reference it first.
+  const repositories = new Map();
+  for (const [id, entry] of declared) {
+    repositories.set(id, prepareRepository(entry, roots.get(id), declaredIds));
+  }
+
+  /** The repository a source belongs to, refusing an undeclared name. */
+  function repositoryFor(source, pointer) {
+    const requested = typeof source.repository === 'string' ? source.repository : null;
+    if (requested === null) {
+      if (repositories.has(SINGLE)) return repositories.get(SINGLE);
+      // With several declared, an unlabelled citation is ambiguous. Guessing
+      // would attach evidence to whichever repository happened to be first.
+      evidenceFailure('repository-evidence/repository-unspecified',
+        `${pointer} does not say which repository it is in, and this diagram declares several (${declaredIds.join(', ')}).`, {
+          subject: { path: pointer },
+          evidence: { declaredRepositories: declaredIds },
+          supportedFixes: [`set ${pointer}/repository to one of: ${declaredIds.join(', ')}`],
+        });
+    }
+    const found = repositories.get(requested);
+    if (!found) {
+      evidenceFailure('repository-evidence/repository-unknown',
+        `${pointer}/repository is ${JSON.stringify(requested)}, which this diagram does not declare. Declared: ${declaredIds.join(', ')}.`, {
+          subject: { path: `${pointer}/repository` },
+          evidence: { requested, declaredRepositories: declaredIds },
+          supportedFixes: [`use one of the declared repositories: ${declaredIds.join(', ')}`],
+        });
+    }
+    return found;
+  }
 
   // One verification path for components and relationships alike. The JSON
   // pointer differs (/components/... vs /connections/..., /flows/..., and so
@@ -195,6 +291,12 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     for (const [sourceIndex, authored] of authoredSources.entries()) {
       const pointer = `${pointerBase}/${sourceIndex}`;
       const where = `${pointer}/path`;
+      // Which repository this citation is in decides the checkout it is
+      // verified against AND the link it produces. Verifying against "a"
+      // repository rather than the right one is how a path that exists in a
+      // sibling repo passes as evidence for this one.
+      const repo = repositoryFor(authored, pointer);
+      const { realRoot, revision } = repo;
       const source = {
         path: verifiedSourcePath(authored.path, where),
         ...(authored.line ? { line: authored.line } : {}),
@@ -240,7 +342,11 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
           });
         }
       }
-      verified.push({ ...source, href: sourceHref(authoredHost, revision, source) });
+      verified.push({
+        ...source,
+        ...(repo.id ? { repository: repo.id } : {}),
+        href: sourceHref(repo.host, revision, source),
+      });
     }
     return verified;
   }
@@ -275,27 +381,35 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
   }
 
   if (referenceCount === 0) {
-    evidenceFailure('repository-evidence/source-required', '/meta/repository requires at least one verified source reference.', {
+    evidenceFailure('repository-evidence/source-required', 'The declared repository metadata requires at least one verified source reference.', {
       subject: { path: '/meta/repository' },
       supportedFixes: ['add at least one verified component or relationship source, or remove repository metadata'],
     });
   }
 
+  const first = repositories.get(SINGLE) ?? [...repositories.values()][0];
   return {
     schemaVersion: 1,
     verified: true,
+    // The single-repository shape is preserved so the viewer and every
+    // consumer written against it keep working; `repositories` is additive.
     repository: {
-      url: repoUrl,
-      revision,
-      shortRevision: revision.slice(0, 7),
-      // Built here, by the host adapter, rather than in the viewer. The viewer
-      // used to append "/tree/<revision>" and strip a github.com prefix, which
-      // is right for exactly one forge and a broken link plus a full-URL slug
-      // on every other.
-      host: authoredHost.id,
-      slug: authoredHost.slug,
-      treeUrl: authoredHost.treeUrl(revision),
+      url: first.url,
+      revision: first.revision,
+      shortRevision: first.revision.slice(0, 7),
+      host: first.host.id,
+      slug: first.host.slug,
+      treeUrl: first.host.treeUrl(first.revision),
     },
+    repositories: [...repositories.values()].map((entry) => ({
+      id: entry.id,
+      url: entry.url,
+      revision: entry.revision,
+      shortRevision: entry.revision.slice(0, 7),
+      host: entry.host.id,
+      slug: entry.host.slug,
+      treeUrl: entry.host.treeUrl(entry.revision),
+    })),
     referenceCount,
     nodes,
     edges,

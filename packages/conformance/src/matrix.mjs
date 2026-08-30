@@ -187,6 +187,31 @@ export const IMPORTED_ROWS = [
   },
 
   {
+    id: '2.6',
+    name: 'Multi-repo evidence identity',
+    // A system rarely lives in one repository. With a single
+    // /meta/repository every citation was implicitly "in that repo", so a
+    // component whose code lives elsewhere either cited a path that does not
+    // exist or went uncited. Both are worse than naming the repository.
+    //
+    // /meta/repositories declares several, each with its own url and
+    // revision, and a source names which one it belongs to. That decides BOTH
+    // the checkout it is verified against and the link it produces --
+    // verifying against "a" repository rather than the right one is how a
+    // path that exists in a sibling repo passes as evidence for this one, and
+    // the gate was observed failing on exactly that shortcut.
+    //
+    // The single-repository form keeps working untouched; a migration nobody
+    // asked for is a bug. Declaring both is refused rather than silently
+    // preferring one, because whichever a reader assumed would be right half
+    // the time.
+    origin: 'N',
+    phase: 'P2',
+    proof: 'multi-repo-evidence.test.mjs',
+    testTitle: '[2.6] evidence is verified against the right repository, not merely a repository',
+  },
+
+  {
     id: '2.3',
     name: 'Host-agnostic evidence (GitHub, GitLab, Bitbucket, Gitea, Gitee, Azure DevOps)',
     // Verification was never host-bound -- it runs `git` against a real
