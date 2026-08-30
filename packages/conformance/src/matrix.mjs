@@ -258,6 +258,21 @@ export const IMPORTED_ROWS = [
     testTitle: "[5.20] selecting a relationship reports ITS evidence in the Passport, not its source node's",
   },
 
+  {
+    id: '5.16',
+    name: 'Modularized viewer source',
+    // Delivered in P1a -- packages/viewer/src holds 19 modules and the
+    // template is generated from them (check:template proves byte-identity)
+    // -- and its proof tests were written then too, titled (5.16). The row
+    // itself was never registered, so a shipped capability sat in PLANNED
+    // for a full phase. Registered during the P1c roadmap sync that noticed
+    // the discrepancy: the accounting gate can only catch what has a row.
+    origin: 'R',
+    phase: 'P1',
+    proof: 'viewer-modules.test.mjs',
+    testTitle: 'the viewer ships as 19 separate module files, not one blob (5.16)',
+  },
+
   // Phase 3 — Layout validation gates
   {
     id: '3.1',
