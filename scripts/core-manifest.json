@@ -34,7 +34,7 @@
     "references/delivery-contract.md": "e774cb6c095ea34b68fe0440c59df8f5593b2e96",
     "references/viewer-runtime.md": "919b71bc94d13ae9927b2fa83a6c2f97a2a2aad5",
     "renderers/architecture/grid.mjs": "807a1b860f531bab0ee217af19e6887fbbade398",
-    "renderers/architecture/render-architecture.mjs": "8cad341823eaed381dafd92f42ddf6239a9096a5",
+    "renderers/architecture/render-architecture.mjs": "8229ec736ed47fb0754e8e9c1959e82a11b8ebaa",
     "renderers/dataflow/README.md": "0aa1c4299b623a243636b834d51f1bb6bd1914ce",
     "renderers/dataflow/render-dataflow.mjs": "c4f34efcd4a4a31842f9cca7d218899ae84b0540",
     "renderers/lifecycle/README.md": "1e8f7470bdf497901eb9908d31e80c41e72dcb43",
