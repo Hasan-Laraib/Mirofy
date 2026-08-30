@@ -2618,8 +2618,18 @@
     @media print {
       /* Force the FULL light palette — including component fills/strokes and
          lane/arrow colors — so printing from dark theme doesn't put neon
-         strokes and translucent dark fills on white paper. */
-      :root, [data-theme="dark"], [data-theme="light"] {
+         strokes and translucent dark fills on white paper.
+
+         html[data-preset][data-theme] is required, not decorative. @media
+         contributes no specificity, so this block only wins on the cascade.
+         The preset palettes are [data-preset="X"][data-theme="Y"] — two
+         attributes, (0,2,0) — which outrank :root and [data-theme="…"]
+         (0,1,0) on their own. Without the element-qualified selector below,
+         (0,2,1), printing from dark theme in signal-flow, blueprint,
+         editorial or okabe-ito puts that preset's DARK palette on white
+         paper. tokens.test.mjs computes both specificities and fails if
+         this block ever stops outranking them. */
+      :root, [data-theme="dark"], [data-theme="light"], html[data-preset][data-theme] {
         --bg: #ffffff;
         --grid: transparent;
         --panel: #ffffff;
