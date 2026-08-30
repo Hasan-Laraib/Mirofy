@@ -1,8 +1,0 @@
-Mirofy
-
-This product derives substantial portions of its rendering, validation, and
-viewer subsystems from Archify (https://github.com/tt-a1i/archify), used under
-the MIT License, at revision 12106be.
-
-Those portions live under packages/core/ and retain their original license.
-Archify is itself based on Cocoon-AI/architecture-diagram-generator (MIT).

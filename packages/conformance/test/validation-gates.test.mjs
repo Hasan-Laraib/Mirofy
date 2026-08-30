@@ -395,14 +395,14 @@ test('repository evidence verifies a pinned 40-char revision against a real repo
   // On Windows CI runners the account backing `os.tmpdir()` is long enough
   // (e.g. "runneradmin") that Windows also exposes an 8.3 short alias for
   // it (e.g. "RUNNER~1"), and that short form is what TEMP/os.tmpdir()
-  // actually returns there. `fs.realpathSync` (used by the harvested
+  // actually returns there. `fs.realpathSync` (used by the
   // repository-evidence check below) does not expand that alias, but
   // `git rev-parse --show-toplevel` always reports the canonical long-form
   // path -- so passing the raw mkdtemp path as --repo-root makes the two
   // disagree about "the same directory" even though they are. Resolving
   // through git's own canonical output up front, and using THAT path for
   // every later git/file/CLI operation, keeps this test's repo root in the
-  // exact form the harvested check will independently re-derive and match
+  // exact form the check will independently re-derive and match
   // against, on every OS. This is a test-only path issue, not a bug in
   // packages/core.
   const evidenceRepo = git(['rev-parse', '--show-toplevel'], mkdtempRepo).replace(/\//g, path.sep);

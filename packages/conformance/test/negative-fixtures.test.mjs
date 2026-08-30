@@ -256,7 +256,7 @@ test('CLI: showcase validate blocks delivery of an edge routed through an unrela
 // the checker independently re-detects the same violation via its own,
 // separate implementation -- while these five fail, because `render`
 // --quality showcase now writes the violating artifact instead of exiting
-// non-zero. See docs/harvest.md-adjacent conformance notes / the fix report
+// non-zero. See the fix-round conformance notes / the fix report
 // for the captured before/after output.
 //
 // The renderer has no --json diagnostic mode wired through `render` (that
