@@ -170,6 +170,9 @@
           "label"
         ],
         "properties": {
+          "sources": {
+            "$ref": "common.schema.json#/$defs/sources"
+          },
           "id": {
             "$ref": "common.schema.json#/$defs/id"
           },
