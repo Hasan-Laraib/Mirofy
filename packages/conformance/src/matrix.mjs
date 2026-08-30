@@ -530,6 +530,39 @@ export const IMPORTED_ROWS = [
     testTitle: '[3.13] repair never touches topology, labels, or semantics',
   },
   {
+    id: '3.14',
+    name: 'Straight-route port placement',
+    // Row 3.7 gave fanned-out relationships distinct ports so they could not
+    // collapse into one line. It spread them evenly about the side's centre:
+    // correct about separation, indifferent about direction. An edge whose
+    // counterpart sat 200px away still left from a port 14px off centre and
+    // bent to reach it, and some of those edges could have been straight.
+    //
+    // So the ports are solved rather than spaced. Each port's ideal is the
+    // coordinate that would make ITS edge straight -- where its counterpart
+    // sits -- and the solve is the exact least-squares projection of those
+    // ideals onto the side's band under a minimum separation. Closed form,
+    // not an iteration with a budget, so the same diagram always produces the
+    // same ports.
+    //
+    // Even spread is contained rather than replaced: when every counterpart
+    // sits at the same coordinate no port can beat any other, and the
+    // solution IS the even spread. A test pins that degenerate case to the
+    // exact positions row 3.7 produced.
+    //
+    // Order is the other half, and it belongs to the sort rather than the
+    // solve: endpoints are ordered by counterpart position, which is what
+    // stops fan-out edges crossing, and the separation constraint carries
+    // that order through. Observed failing on the tempting mistake -- ports
+    // spread about the centre again -- which broke both behaviour tests while
+    // every invariant test stayed green, since the old code satisfied those
+    // invariants too.
+    origin: 'N',
+    phase: 'P2',
+    proof: 'straight-route.test.mjs',
+    testTitle: '[3.14] a port that can make its edge straight, does',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

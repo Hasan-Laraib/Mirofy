@@ -35,7 +35,10 @@ export function recordDiagnostic(diagnostic) {
 
 export function throwDiagnosticError(message, diagnostics) {
   for (const diagnostic of diagnostics || []) recordDiagnostic(diagnostic);
-  const error = new Error(message);
+  // The diagnostics ride on the error so a caller that catches it keeps the
+  // structured detail, not just the message. Declaring the carried property
+  // is what makes that contract visible rather than incidental.
+  const error = /** @type {Error & {mirofyDiagnostics?: object[]}} */ (new Error(message));
   error.mirofyDiagnostics = (diagnostics || []).map(normalizedDiagnostic);
   throw error;
 }

@@ -3,6 +3,7 @@
 // ({x, y, width, height, cx, cy}) in.
 
 import { recordDiagnostic } from './diagnostics.mjs';
+import { solvePortPositions } from './port-solver.mjs';
 
 // In degraded mode (no ajv) a type-wrong top-level field reaches the renderer.
 // Coerce non-arrays to [] so the module-level Maps build without throwing and
@@ -262,6 +263,10 @@ export function routeHonorsEndpointSides(points, fromSide, toSide) {
 // omit endpoint sides, do not invent a relative-position side and then reject
 // the route for disagreeing with that invention. Pure automatic routes may
 // still be checked against renderer-inferred sides.
+/** Every relationship is checked unless a caller narrows the set. */
+/** @type {(relation: any, index: number) => boolean} */
+const CHECK_EVERY_RELATION = () => true;
+
 export function cleanEndpointSideProblems({
   relations,
   endpointIds,
@@ -270,7 +275,7 @@ export function cleanEndpointSideProblems({
   relationCollection,
   fromSideFor,
   toSideFor,
-  shouldCheckRelation = () => true,
+  shouldCheckRelation = CHECK_EVERY_RELATION,
   routeHint = 'align the first/final via segment with fromSide/toSide, change the side, or remove explicit routing so auto can choose a perpendicular approach',
 }) {
   const problems = [];
@@ -1056,6 +1061,7 @@ export function automaticPortRhythmBridge(
   end,
   fromSide,
   toSide,
+  /** @type {{endpointStubPx?: number, interiorSegmentPx?: number, accept?: (points: number[][]) => boolean}} */
   { endpointStubPx = 24, interiorSegmentPx = 16, accept } = {},
 ) {
   if (!Array.isArray(start) || !Array.isArray(end)
@@ -1122,7 +1128,12 @@ export function automaticPortRhythmBridge(
 // Keep conservative auto-routed fan-out/fan-in relationships visually
 // distinct without changing authored route controls. The returned map only
 // contains endpoints that belong to a shared automatic midpoint anchor.
-export function automaticPortSpread(relations, boxes, { gutter = 16, maxSpacing = 14, sideFor } = {}) {
+export function automaticPortSpread(
+  relations,
+  boxes,
+  /** @type {{gutter?: number, maxSpacing?: number, sideFor?: (relation: any, endpoint: string) => string}} */
+  { gutter = 16, maxSpacing = 14, sideFor } = {},
+) {
   const groups = new Map();
   const spread = new Map();
 
@@ -1168,11 +1179,22 @@ export function automaticPortSpread(relations, boxes, { gutter = 16, maxSpacing 
     const spacing = Math.min(maxSpacing, usable / (items.length - 1));
     if (!(spacing > 0)) continue;
 
+    // Each port's ideal is the coordinate that would make ITS edge straight,
+    // which is where its counterpart sits. Spreading evenly about the side's
+    // centre instead bends every edge whose counterpart is elsewhere --
+    // including edges that could have run dead straight. The solver places
+    // the ports as close to their ideals as the band and the separation
+    // allow, and reduces to the even spread when the ideals coincide.
+    const centre = verticalSide ? items[0].rect.cy : items[0].rect.cx;
+    const positions = solvePortPositions(
+      items.map((item) => (verticalSide ? item.counterpart.cy : item.counterpart.cx)),
+      { lo: centre - usable / 2, hi: centre + usable / 2, gap: spacing },
+    );
+
     for (const [index, item] of items.entries()) {
-      const offset = (index - (items.length - 1) / 2) * spacing;
       const point = anchor(item.rect, item.side);
-      if (verticalSide) point[1] += offset;
-      else point[0] += offset;
+      if (verticalSide) point[1] = positions[index];
+      else point[0] = positions[index];
       const endpoints = spread.get(item.relation) || {};
       endpoints[item.endpoint] = point;
       spread.set(item.relation, endpoints);
