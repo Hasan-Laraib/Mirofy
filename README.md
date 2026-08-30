@@ -107,6 +107,8 @@ confident link to nothing is worse than admitting the host is unknown.
 | `packages/model` | The system model: stable ids, evidence refs, human overrides |
 | `packages/compile` | View compiler and the planner seam |
 | `packages/import` | Foreign formats (Mermaid) into typed documents |
+| `packages/layout` | Constraint layout: view IR with intent to coordinates (dev-time) |
+| `packages/benchmark` | First-pass usable rate, measured on a schedule |
 | `packages/core` | Renderers, schemas, validators, CLI |
 | `packages/viewer` | The interactive viewer, built into a single template |
 | `packages/conformance` | The matrix, and the tests every row names |
