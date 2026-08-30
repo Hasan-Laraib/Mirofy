@@ -4,9 +4,9 @@
   "files": {
     "LICENSE": "4c27b7152c7e4593dfdd153761ce178177d30464",
     "README.md": "aa72211b39cba9d16db4c202f5927bc034f7ddb8",
-    "SKILL.md": "e79110596dc285e5f5383106872b8c80eeffb38f",
+    "SKILL.md": "7a6b29e8a0f44e85b5d12426e99ec24fe413cc8a",
     "assets/template.html": "8f822f82aeafb613b590a15f5202bb9a48c725b5",
-    "bin/mirofy.mjs": "befe310e9d93f14240d0724d0cda8b0d4b1ddc6f",
+    "bin/mirofy.mjs": "77df9bca0c529b8173e0c95f16c90c6d94294994",
     "bin/open-artifact.mjs": "878f6b4caa06b5ed2185ae45fb3be9675925ce5b",
     "bin/preview.mjs": "c81c1ce6e98394fcc68d4c3a86028c63fa56cf33",
     "bin/visual-check.mjs": "4c958e96ca58312f9f54026c64d5360801f155b4",

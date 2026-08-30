@@ -12,6 +12,25 @@ metadata:
 
 Create a self-contained, interactive HTML diagram from a small typed JSON specification. Static output is the default; enable motion only when the user asks for a demo or presentation.
 
+## Scan-first: derive the diagram from a real repository
+
+When the diagram must describe code that exists, do not author it from
+memory. Derive it:
+
+```bash
+npm run scan      # repository -> evidence graph (facts and gaps)
+npm run model     # evidence + documents -> one system model
+npm run compile   # model -> a bounded view with intent
+```
+
+Each step reports what it could NOT determine. `scan` records a gap for every
+file it could not analyse, `compile` records every object it omitted and why.
+Carry those forward to the user; a diagram that silently omits half a system
+is worse than one that says what it left out.
+
+Use the fast path below when the user is describing something that does not
+exist yet, or when no repository is available.
+
 ## Fast authoring path
 
 Use this bounded path for ordinary generation. Do not read the optional Viewer Runtime reference unless the user asks about those features.
@@ -52,11 +71,26 @@ When ambiguous, run `node bin/mirofy.mjs guide "<scenario>" --json`. Scenario pr
 
 ## Mermaid input
 
-Read Mermaid for topology and meaning, then author fresh Mirofy JSON; do not mechanically render Mermaid styling.
+Convert it with the command, then improve the result:
 
-- `flowchart` / `graph` → `workflow`, or `architecture` for a component map.
-- `sequenceDiagram` → `sequence`; participants become semantic participants and arrows become messages.
-- `stateDiagram` → `lifecycle`; states and transitions retain meaning, not Mermaid style.
+```bash
+node bin/mirofy.mjs import mermaid <input.mmd> [output.json] [--json]
+```
+
+- `flowchart` / `graph` → `architecture`
+- `sequenceDiagram` → `sequence`
+- `stateDiagram` / `stateDiagram-v2` → `lifecycle`
+
+The importer never guesses. Any line it cannot read is reported as a gap with
+its line number instead of being dropped, so tell the user what was not
+carried across rather than presenting the result as complete.
+
+It also assigns no positions: a converted architecture uses `layout.mode:
+"grid"`, and a graph that fans out can place an edge through a node. That
+fails `clean-flow`, which is an always-on correctness gate, so **validate
+after importing** and adjust the layout when it complains. Read the Mermaid
+for meaning too — the importer carries topology, not domain judgement, and
+labels or types often deserve rewriting.
 
 ## Authoring invariants
 
@@ -107,7 +141,12 @@ Read `references/viewer-runtime.md` only when the user explicitly asks for Share
 
 ## Setup and fallback
 
-No install is required inside the skill package. Verify with:
+**Installing the skill is optional.** Every capability is reachable by running
+the CLI directly from a checkout — `node bin/mirofy.mjs <verb>` — and nothing
+below requires the skill to be installed first. Install it for convenience,
+not as a precondition.
+
+Verify with:
 
 ```bash
 node bin/mirofy.mjs doctor

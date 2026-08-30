@@ -296,6 +296,50 @@ export const IMPORTED_ROWS = [
     proof: 'system-model.test.mjs',
     testTitle: '[1.12] every model object gets an id, and an authored id survives verbatim',
   },
+
+  {
+    id: '1.10',
+    name: 'Agent contract (SKILL.md), scan-first',
+    // SKILL.md is read by an agent that then makes promises to a user on its
+    // behalf. A capability claimed there and absent from the CLI is not a
+    // documentation slip -- it is an agent telling someone the tool can do
+    // something it cannot.
+    //
+    // That was the live state when this row was written: SKILL.md advertised
+    // pasted-Mermaid input and "convert/beautify Mermaid" while `grep -rn
+    // mermaid packages/core --include=*.mjs` returned nothing at all. The
+    // gate is mechanical -- every `mirofy <verb>` the document names must be a
+    // verb the CLI dispatches -- so prose stays free to describe and is not
+    // free to invent.
+    origin: 'R',
+    phase: 'P1',
+    proof: 'agent-contract.test.mjs',
+    testTitle: '[1.10] every capability SKILL.md claims maps to a real CLI verb',
+  },
+  {
+    id: '1.13',
+    name: 'Mermaid import',
+    // Hand-written, because row 6.9 forbids runtime dependencies. That limits
+    // how much syntax it understands, and the honest response is the scanner
+    // rule applied unchanged: a line the reader cannot parse becomes a Gap
+    // naming the line number, never a silently dropped node and never an
+    // invented edge. An importer that quietly discards what it cannot read
+    // produces a diagram confidently wrong about the very thing it was asked
+    // to convert.
+    //
+    // flowchart -> architecture (needs no lanes, no positions);
+    // sequenceDiagram -> sequence (y from message ORDER, real information);
+    // stateDiagram -> lifecycle (one explicit lane, because a state diagram
+    // has none and inventing several would invent domain structure).
+    //
+    // No positions are emitted: architecture imports declare
+    // layout.mode "grid" so the renderer places them, rather than the
+    // importer inventing an arrangement and presenting it as authored intent.
+    origin: 'N',
+    phase: 'P1',
+    proof: 'mermaid-import.test.mjs',
+    testTitle: '[1.13] a flowchart becomes an architecture document that validates',
+  },
   {
     id: '1.14',
     name: 'System model (model.json)',

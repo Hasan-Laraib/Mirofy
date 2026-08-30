@@ -1,0 +1,8 @@
+{
+  "name": "@mirofy/import",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Import foreign diagram formats into typed Mirofy documents.",
+  "exports": { "./mermaid": "./src/mermaid.mjs" }
+}

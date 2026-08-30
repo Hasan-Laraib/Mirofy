@@ -29,6 +29,7 @@ function usage() {
   mirofy examples
   mirofy doctor
   mirofy demo [output-directory]
+  mirofy import mermaid <input.mmd> [output.json] [--json]
 
 Types:
   architecture, workflow, sequence, dataflow, lifecycle
@@ -1597,6 +1598,57 @@ function commandValidate(args) {
 
 const [command, ...args] = process.argv.slice(2);
 
+async function commandImport(argv) {
+  const json = argv.includes('--json');
+  const positional = argv.filter((value) => !value.startsWith('--'));
+  const [format, input, output] = positional;
+  if (format !== 'mermaid' || !input) {
+    fail('Usage: mirofy import mermaid <input.mmd> [output.json] [--json]');
+  }
+  let text;
+  try {
+    text = fs.readFileSync(input, 'utf8');
+  } catch (error) {
+    fail(`import: could not read ${JSON.stringify(input)}: ${error.message}`);
+  }
+
+  const { importMermaid } = await import('../../import/src/mermaid.mjs');
+  let result;
+  try {
+    result = importMermaid(text);
+  } catch (error) {
+    fail(error.message);
+  }
+
+  const outPath = output || `${input.replace(/\.[^.]+$/, '')}.json`;
+  fs.writeFileSync(outPath, `${JSON.stringify(result.document, null, 2)}
+`);
+
+  if (json) {
+    process.stdout.write(`${JSON.stringify({
+      schemaVersion: 1,
+      ok: true,
+      command: 'import',
+      format: 'mermaid',
+      diagramType: result.diagramType,
+      output: path.resolve(outPath),
+      gaps: result.gaps,
+    }, null, 2)}
+`);
+    return;
+  }
+
+  console.log(`import: ${input} -> ${outPath} (${result.diagramType})`);
+  // Gaps are reported, never swallowed: the person who pasted the Mermaid is
+  // the only one who can tell whether what was skipped mattered.
+  if (result.gaps.length) {
+    console.log(`import: ${result.gaps.length} line(s) not carried across:`);
+    for (const gap of result.gaps) console.log(`  line ${gap.line}: ${gap.text}`);
+  } else {
+    console.log('import: every line was carried across');
+  }
+}
+
 switch (command) {
   case undefined:
   case '-h':
@@ -1642,6 +1694,9 @@ switch (command) {
     break;
   case 'demo':
     commandDemo(args);
+    break;
+  case 'import':
+    await commandImport(args);
     break;
   default:
     fail(`Unknown command "${command}".\n\n${usage()}`);
