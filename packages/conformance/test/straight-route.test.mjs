@@ -1,4 +1,4 @@
-// Row 3.14. Straight-route port placement.
+// Row 3.16. Straight-route port placement.
 //
 // Row 3.7 gives fanned-out relationships distinct ports so they do not
 // collapse into one line. It spread them evenly about the side's centre,
@@ -56,7 +56,7 @@ function fanOut() {
 
 const sourceY = (spread, relation) => spread.get(relation).from[1];
 
-test('[3.14] a port that can make its edge straight, does', () => {
+test('[3.16] a port that can make its edge straight, does', () => {
   const { boxes, relations } = fanOut();
   const spread = automaticPortSpread(relations, boxes);
 
@@ -67,7 +67,7 @@ test('[3.14] a port that can make its edge straight, does', () => {
     'the port did not move to where its edge would be straight');
 });
 
-test('[3.14] a port that cannot be straight goes as close as the band allows', () => {
+test('[3.16] a port that cannot be straight goes as close as the band allows', () => {
   const { boxes, relations } = fanOut();
   const spread = automaticPortSpread(relations, boxes);
 
@@ -78,7 +78,7 @@ test('[3.14] a port that cannot be straight goes as close as the band allows', (
   assert.equal(sourceY(spread, relations[2]), 384, 'the lower port is not at the bottom of the band');
 });
 
-test('[3.14] separation and order survive the solve', () => {
+test('[3.16] separation and order survive the solve', () => {
   const { boxes, relations } = fanOut();
   const spread = automaticPortSpread(relations, boxes);
   const ys = relations.map((relation) => sourceY(spread, relation));
@@ -93,7 +93,7 @@ test('[3.14] separation and order survive the solve', () => {
   assert.deepEqual([...ys].sort((l, r) => l - r), ys, 'the solve reordered the ports');
 });
 
-test('[3.14] ports stay inside the side they belong to', () => {
+test('[3.16] ports stay inside the side they belong to', () => {
   const { boxes, relations } = fanOut();
   const spread = automaticPortSpread(relations, boxes);
   const hub = boxes.get('hub');
@@ -107,7 +107,7 @@ test('[3.14] ports stay inside the side they belong to', () => {
   }
 });
 
-test('[3.14] even spread is preserved where it was always right', () => {
+test('[3.16] even spread is preserved where it was always right', () => {
   // Three relationships into the same place have no straighter port than any
   // other, and the even spread about that place is exactly what row 3.7
   // produced. The new solver must contain the old behaviour, not replace it.
@@ -117,7 +117,7 @@ test('[3.14] even spread is preserved where it was always right', () => {
   );
 });
 
-test('[3.14] the solve is the minimum displacement, not merely a feasible one', () => {
+test('[3.16] the solve is the minimum displacement, not merely a feasible one', () => {
   // A feasible answer is easy; the closest feasible answer is the point. This
   // compares against every arrangement on a 1px lattice, so a solver that
   // simply satisfied the constraints would lose to something in the sweep.
@@ -136,13 +136,13 @@ test('[3.14] the solve is the minimum displacement, not merely a feasible one', 
     `solved cost ${cost(solved)} is worse than the best lattice arrangement ${best}`);
 });
 
-test('[3.14] the solve is deterministic', () => {
+test('[3.16] the solve is deterministic', () => {
   const first = automaticPortSpread(fanOut().relations, fanOut().boxes);
   const second = automaticPortSpread(fanOut().relations, fanOut().boxes);
   assert.deepEqual([...first.values()], [...second.values()]);
 });
 
-test('[3.14] the straight route survives all the way into the rendered SVG', () => {
+test('[3.16] the straight route survives all the way into the rendered SVG', () => {
   // Everything above tests the solver. This tests the product: a fan-out
   // whose middle edge can be straight must actually RENDER straight. The
   // usable band has to be wide enough for the solve to have any freedom --

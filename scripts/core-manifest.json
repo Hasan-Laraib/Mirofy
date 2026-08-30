@@ -56,7 +56,7 @@
     "renderers/shared/layout-report.mjs": "3128a65aa2678e4f705c2a662d33aa8289318ee4",
     "renderers/shared/legend.mjs": "e9e80d6fd74f013c30bf87d56fcaf0dfa2b794cf",
     "renderers/shared/output-path.mjs": "39d5e70b11348703615d1385beca2a25b71ed1c4",
-    "renderers/shared/port-solver.mjs": "41490c4b27b51d37510ec2d1dad5013f688f4d74",
+    "renderers/shared/port-solver.mjs": "4ad4a0fe75bde7cf071b2ba963763b795c6c71f8",
     "renderers/shared/repository-evidence.mjs": "b0674b1886c96784effb48423fa33ae19958a88e",
     "renderers/shared/text-fit.mjs": "31c0b1799089b760eae103ede9d357b04d5ca035",
     "renderers/shared/utils.mjs": "01442d54283d388bb16af0a24d109aaf8a4f41af",

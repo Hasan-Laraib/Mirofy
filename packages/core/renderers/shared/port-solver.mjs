@@ -1,4 +1,4 @@
-// Straight-route port placement (row 3.14).
+// Straight-route port placement (row 3.16).
 //
 // When several relationships leave the same side of a component, they need
 // distinct ports or they collapse into one line. Spreading them evenly about

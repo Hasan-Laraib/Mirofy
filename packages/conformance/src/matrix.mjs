@@ -530,7 +530,7 @@ export const IMPORTED_ROWS = [
     testTitle: '[3.13] repair never touches topology, labels, or semantics',
   },
   {
-    id: '3.14',
+    id: '3.16',
     name: 'Straight-route port placement',
     // Row 3.7 gave fanned-out relationships distinct ports so they could not
     // collapse into one line. It spread them evenly about the side's centre:
@@ -560,7 +560,7 @@ export const IMPORTED_ROWS = [
     origin: 'N',
     phase: 'P2',
     proof: 'straight-route.test.mjs',
-    testTitle: '[3.14] a port that can make its edge straight, does',
+    testTitle: '[3.16] a port that can make its edge straight, does',
   },
   {
     id: '1.11',
