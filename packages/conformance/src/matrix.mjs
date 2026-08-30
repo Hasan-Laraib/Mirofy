@@ -343,6 +343,31 @@ export const IMPORTED_ROWS = [
   },
 
   {
+    id: '1.18',
+    name: 'View compiler (bounded view IR with intent)',
+    // P1.7 shipped with no matrix row of its own -- the roadmap's rows column
+    // reads "--" -- so this row was created with the capability. A capability
+    // delivered without a row is invisible to every gate downstream of the
+    // matrix, which is exactly how 5.16 sat in PLANNED for a full phase after
+    // it shipped.
+    //
+    // The contract (31-V1-ARCHITECTURE.md section 3): may select, group, name
+    // and omit; may NOT invent a relationship absent from the model;
+    // omissions are recorded, not silent. Every contract assertion runs
+    // against a planner written specifically to VIOLATE it -- the default
+    // planner is the one implementation guaranteed not to be the problem, so
+    // proving the contract against it proves nothing.
+    //
+    // The AI lives behind this seam. It is not wired in yet: the seam plus a
+    // deterministic default makes the contract enforceable and testable
+    // without a network dependency, which row 6.9 forbids anyway.
+    origin: 'N',
+    phase: 'P1e',
+    proof: 'view-compiler.test.mjs',
+    testTitle: '[1.18] a planner cannot invent a relationship absent from the model',
+  },
+
+  {
     id: '4.14',
     name: 'Evidence-first visual language (six provenance treatments)',
     // 36-VISUAL-SYSTEM.md V4's binding constraint is that the six classes are

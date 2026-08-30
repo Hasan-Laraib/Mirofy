@@ -1,0 +1,12 @@
+{
+  "name": "@mirofy/compile",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The view compiler: system model to bounded view IR with intent, behind a planner seam.",
+  "exports": {
+    "./compile": "./src/compile.mjs",
+    "./request": "./src/request.mjs",
+    "./planners/deterministic": "./src/planners/deterministic.mjs"
+  }
+}
