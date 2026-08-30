@@ -1,14 +1,14 @@
 # SDD ledger — plan: analysis/future/plans/2026-08-29-p0-foundation.md
 
 Spec: analysis/future/33-MASTER-ROADMAP.md (P0), with 31/32/36/37.
-Build target: L:/Projects/product-p0 (NEW repo — this plan does not modify the upstream repository).
+Build target: L:/Projects/product-p0 (NEW repo — this plan does not modify the source repository).
 
 ## Pre-flight rulings
 
 Ruling: Build the new repository at `L:/Projects/product-p0`, local git only, no remote.
-— The plan creates a new repo; a worktree of the upstream repository is the wrong isolation
-  model, and the upstream repository itself is never modified by this plan (it is the
-  read-only harvest source).
+— The plan creates a new repo; a worktree of the source repository is the wrong isolation
+  model, and the source repository itself is never modified by this plan (it is the
+  read-only import source).
 — Cost if wrong: a directory move (`mv`) and a `git remote add`. Trivial.
 
 Ruling: Task 9 Steps 4-5 (`git push -u origin main`, branch protection) are DEFERRED, not
@@ -41,14 +41,14 @@ auto-discovers and recurses into `packages/*/test/` — confirmed 2/2 tests foun
 | T7 -> T9 | `scripts/conformance.mjs` via `npm run test:conformance` | OK |
 | T7 <-> T9 | env var `PRODUCT_CHROME` | OK, same name both sides |
 | T9 -> T10 | `.github/workflows/ci.yml` extended | OK, sequential |
-| T2 -> all | `packages/core/**` harvested tree | OK, every later task reads it |
+| T2 -> all | `packages/core/**` imported tree | OK, every later task reads it |
 
 ## Pre-flight scan — per-task self-consistency
 
 | Task | Finding |
 |---|---|
 | T1 | **CONFLICT**: `npm test` glob breaks on Windows/Node 18 — ruled above. Minor: `eslint .` with zero matching files may warn; Step 6 expects exit 0 — implementer to confirm |
-| T2 | Claims "unmodified" while removing 2 files + editing package.json; the discrepancy is documented in Step 4's README and `docs/harvest.md` (T11). Consistent |
+| T2 | Claims "unmodified" while removing 2 files + editing package.json; the discrepancy is documented in Step 4's README and the per-row accounting doc (T11). Consistent |
 | T3 | Step 2 test imports a module Step 4 creates — intended TDD failure. Consistent |
 | T4 | `--update` then verify; Step 5 proves the harness can fail. Consistent |
 | T5 | Step 1 uses `path.relative` which Step 2 expects to fail and Step 3 fixes. Self-aware. Consistent |
@@ -62,7 +62,7 @@ auto-discovers and recurses into `packages/*/test/` — confirmed 2/2 tests foun
 ## Progress
 
 Task 1: implementer DONE (commit ef0e39e, 8 files). Verified: test script landed as
-  `node --test` per ruling; the upstream repository untouched. Review dispatched.
+  `node --test` per ruling; the source repository untouched. Review dispatched.
   Note: review package built against the empty tree (4b825dc) — new repo, no BASE commit.
 Task 1: review clean — spec ✅, quality approved.
   Ruling: Conventional Commits scope is OPTIONAL, not mandatory. The reviewer flagged
@@ -76,11 +76,11 @@ Task 1: review clean — spec ✅, quality approved.
 Task 1: complete (commit ef0e39e, review clean)
 Task 2: implementer DONE (commit 4a5de9d, 165 files under packages/core).
   Controller verification (mechanical, stronger than a diff review):
-    - blob-hash compare vs the upstream baseline: 163/164 shared files IDENTICAL
+    - blob-hash compare vs the source baseline: 163/164 shared files IDENTICAL
     - deviations are EXACTLY the 3 permitted (del test/golden.mjs, del package-lock.json,
       rewrite package.json) + brief-mandated new README.md
     - 0 of 165 committed text blobs contain CR bytes
-    - core.autocrlf=false is repo-LOCAL; system gitconfig untouched (the upstream repository
+    - core.autocrlf=false is repo-LOCAL; system gitconfig untouched (the source repository
       still reads true)
   NOTE — my Task 2 ruling had a flaw the implementer caught: `git archive | tar -x` is NOT
   eol-neutral. Git applies checkout-style conversion, and this machine's SYSTEM gitconfig
@@ -92,15 +92,15 @@ Task 2: implementer DONE (commit 4a5de9d, 165 files under packages/core).
 Task 2: review clean — spec ✅, quality approved, 0 Critical/Important.
   Reviewer independently reproduced: the CRLF mechanism (plain `git archive` -> CRLF;
   `-c core.autocrlf=false` -> LF matching the blob), the 714,353-byte render, 16/16
-  16/16 upstream-named (pre-rename) environment variables intact, and byte-exact
+  16/16 originally-named (pre-rename) environment variables intact, and byte-exact
   package.json/README.md.
   Ruling: PLAN DEFECT in Task 2 Step 3 — the brief's literal JSON block changes `name`,
   `version`, `description` and `bin` in addition to `scripts`, contradicting its own prose
   "keep everything else byte-identical". The implementer followed the literal JSON. That is
   the correct resolution: a scripts-only patch would have shipped a `bin` entry keyed to the
-  upstream package's own name,
+  source package's own name,
   violating the no-invented-name / @product scope constraint. Ruling stands, no rework.
-  — Cost if wrong: packages/core/package.json metadata differs from the ancestor's; trivial
+  — Cost if wrong: packages/core/package.json metadata differs from the source project's; trivial
     to amend, and it must differ anyway for the workspace to function.
 Task 2: minor (deferred): commit message does not disclose that the ROOT package-lock.json
   was also regenerated in the same commit (correct to include it; just under-disclosed).
@@ -109,15 +109,15 @@ Task 2: minor (deferred): brief Step 5's "~700-760 KB" is ambiguous KB vs KiB; a
 Task 2: complete (commits ef0e39e..4a5de9d, review clean)
 Task 3: implementer DONE (commit e9299fc) — 7 fixtures, conformance pkg, smoke test.
   CONTROLLER-FOUND DEFECT (mine, from Task 1): `npm test` = bare `node --test` auto-discovered
-  packages/core/test/ (93 harvested ancestor files) -> 736 tests / 74 fail. CI would have
+  packages/core/test/ (93 imported files) -> 736 tests / 74 fail. CI would have
   failed on all 12 matrix jobs at Task 9.
   Ruling: replace root test script with scripts/run-tests.mjs — discovers
   packages/*/test/**/*.test.mjs, EXCLUDES packages/core/, passes explicit paths to node --test.
   Alternatives ruled out empirically: `node --test <dir>` errors on Node 24 (with and without
   trailing slash); Node's --test glob needs 21+ but matrix includes 18; shell globs don't
-  expand under pwsh on windows-latest; --test-exclude-pattern does not exist. The ancestor
+  expand under pwsh on windows-latest; --test-exclude-pattern does not exist. The source project
   solved this the same way (its own scripts/run-tests.mjs) — good precedent.
-  The harvested suite is not abandoned; it becomes relevant in P1 when core is refactored.
+  The imported suite is not abandoned; it becomes relevant in P1 when core is refactored.
   — Cost if wrong: one script + one package.json line.
 Task 3: fix round 1/5 (test runner scoped; commit d95717e). npm test now 1/1 pass,
   0 packages/core files executed. Review dispatched over BOTH commits (e9299fc..d95717e).
@@ -129,7 +129,7 @@ DOC CORRECTION (analysis corpus, not the build):
   Mechanical extraction of its own tables gives 118 capabilities — 55 H, 2 H->R, 6 R, 55 N,
   not the stated "92 — 44 H, 12 R, 36 N". Corrected in doc 32 (with the correction noted
   in-place) and in 00-INDEX.md. Consequence: the Task 7 conformance suite must cover 55 H
-  rows, not 44. Extracted list written to <workspace>/harvested-rows.md for Task 7.
+  rows, not 44. Extracted list written to <workspace>/imported-rows.md for Task 7.
   — Cost if wrong: the conformance suite would under-cover parity, which is the one
     guarantee this whole phase exists to provide.
 Task 3: review clean — spec ✅, quality approved, 0 Critical/Important.
@@ -140,20 +140,20 @@ Task 3: review clean — spec ✅, quality approved, 0 Critical/Important.
   test and confirmed run-tests.mjs exits 1 rather than swallowing failures, and confirmed
   new packages/nested dirs are auto-discovered so Tasks 5-9 need no runner changes.
 Task 3: minor (deferred): pre-fix failure counts in the report (781/149) don't reproduce
-  exactly today (733/73) — the harvested ancestor suite appears order/env-dependent. Core
+  exactly today (733/73) — the imported suite appears order/env-dependent. Core
   claim (core tests cannot pass here) holds either way.
 Task 3: minor (deferred): report calls EXCLUDED an "allowlist"; it is a denylist. Cosmetic.
 Task 3: complete (commits 4a5de9d..d95717e, review clean)
 Task 4: implementer DONE (commit 7fc4ec1) — scripts/golden.mjs + fixtures/golden/manifest.json.
   *** PARITY PROOF ESTABLISHED ***
   Controller verified independently: all 5 manifest digests MATCH the values computed in the
-  ancestor checkout BEFORE product-p0 existed:
+  source checkout BEFORE product-p0 existed:
     architecture 9929c7a58f80caf7 | workflow 9b0fecf978657d3b | sequence df09a2e3f89e058e
     dataflow     6ce83723e51cfbcd | lifecycle e6479f9c86bc69fd
-  This proves two things at once: (a) the harvest is byte-faithful, and (b) the render is
+  This proves two things at once: (a) the import is byte-faithful, and (b) the render is
   environment-independent (no absolute path / timestamp / hostname leaks into the artifact),
   which is what makes the cross-platform CI matrix in Task 9 viable at all.
-  Also verified: golden 5/5 pass; template.html blob still == ancestor 12106be (8e15e85), so
+  Also verified: golden 5/5 pass; template.html blob still == source 12106be (8e15e85), so
   the Step 5 mutation test reverted cleanly with no CRLF damage; tree clean.
   Review dispatched with instructions to REPRODUCE the mutation test rather than trust it,
   and to judge whether `--update` needs a guard against silently re-baselining a regression.
@@ -223,10 +223,10 @@ Task 7: implementer DONE (1c4a616, 13c33b6, 0691332, 9b249d2). npm test 36/36, g
   reporter honest: proved 40 / browser-deferred 14 (ids listed) / UNPROVEN 1 = 55 total.
   Ruling: row 6.10 (Deterministic ZIP packaging) was MISCATEGORISED IN MY SPEC as H.
   Confirmed its implementation (scripts/build-zip.sh, write-deterministic-zip.mjs,
-  package-smoke.mjs) lives at the ANCESTOR'S REPO ROOT, outside the upstream repository's own
-  subtree the harvest copies — nothing was harvested to have parity with. Doc 32 corrected: 6.10 H->N,
+  package-smoke.mjs) lives at the SOURCE PROJECT'S REPO ROOT, outside the source repository's own
+  subtree the import copies — nothing was imported to have parity with. Doc 32 corrected: 6.10 H->N,
   phase P1. Totals now 54 H / 2 H->R / 6 R / 56 N. Implementer's UNPROVEN marking was correct.
-  — Cost if wrong: a row is tracked as new rather than harvested; no code impact.
+  — Cost if wrong: a row is tracked as new rather than imported; no code impact.
 Task 7: review returned ❌ NOT APPROVED — 2 Critical, 2 Important.
   CRITICAL 1 (deepest false proof yet): rows 3.1-3.5 provable ONLY by "nine checks report
   ok:true on ONE CLEAN fixture" — which a gate that does nothing also satisfies. Reviewer
@@ -297,21 +297,21 @@ Tasks 8+10 (batched): implementer DONE — 19175dc, f86ab1a, 0d3b205, 64afa01.
   HTML: packages/core/examples/{dataflow-product-analytics, lifecycle-agent-run,
   sequence-cache-miss-request, web-app-rendered, workflow-agent-tool-call-rendered}.html
   ~700 KB each = 3.4 MB = **53% of the 6.4 MB tracked tree**.
-  This is precisely the anti-pattern doc 32 row 7.1 exists to eliminate ("the ancestor
-  carries 22.8 MB of committed HTML"). The Task 2 harvest brought them because they live
-  inside the upstream repository's examples/. Verified: NOTHING in our code references them (no renderer, bin,
+  This is precisely the anti-pattern doc 32 row 7.1 exists to eliminate ("the source project
+  carries 22.8 MB of committed HTML"). The Task 2 import brought them because they live
+  inside the source repository's examples/. Verified: NOTHING in our code references them (no renderer, bin,
   script, or conformance reference; the fixtures/sources grep hits are just meta.output
   fields naming an .html path, not a dependency).
   PLAN CONFLICT I MISSED WHEN WRITING IT: Task 2 mandates "import unmodified" while row 7.1
-  mandates "no generated artifacts in git". Both cannot hold for the upstream repository's
+  mandates "no generated artifacts in git". Both cannot hold for the source repository's
   examples/*.html.
   Ruling: do NOT delete them in P0. They are inside the subtree we have proven byte-identical
-  to the ancestor; deleting now would break that proof and force re-verification for no P0
+  to the source project; deleting now would break that proof and force re-verification for no P0
   benefit. Instead (a) tighten BUDGET_MB 20 -> 10 so the gate constrains rather than
   decorates, and (b) record the 3.4 MB as explicit P1 debt to remove during the viewer
   refactor, when packages/core is being restructured anyway.
   Sizing rationale: at 20 MB the gate permits 18 more committed artifacts before tripping —
-  it would not have caught the ancestor's own failure. At 10 MB it trips after ~4, while
+  it would not have caught the source project's own failure. At 10 MB it trips after ~4, while
   leaving 3.6 MB for legitimate P1 source growth (modularised viewer is text, not artifacts).
   — Cost if wrong: a P1 task hits the budget and must either clean the inherited HTML (the
     intended outcome) or raise the number deliberately with a stated reason.
@@ -404,10 +404,10 @@ FINAL fix wave: complete (commits 50ba394..1daafd3, 11 commits). Scoped re-revie
   EXACTLY its own row (cleanCrossingProblems->3.1, cleanLabelRouteClearance->3.2,
   cleanAmbiguousCorridor->3.3, cleanBorderRuns->3.4, cleanRouteRhythm->3.5). Assertions check
   the specific composition/* code, not bare exit status.
-  harvest-manifest.json verified NON-TAUTOLOGICAL: all 163 hashes cross-checked directly
-  against the upstream baseline, 163/163 match, 166 ancestor files fully accounted
-  for (163 identical + 2 removed + 1 added). It is the ancestor's hashes, not self-baselined.
-  Tally 38/16/54 consistent across README, CONTRIBUTING, harvest.md; conformance.mjs computes
+  The byte-identity manifest verified NON-TAUTOLOGICAL: all 163 hashes cross-checked directly
+  against the source baseline, 163/163 match, 166 source files fully accounted
+  for (163 identical + 2 removed + 1 added). It is the source project's hashes, not self-baselined.
+  Tally 38/16/54 consistent across README, CONTRIBUTING, the accounting doc; conformance.mjs computes
   counts dynamically so there are no hardcoded numbers to go stale.
 
 RESIDUAL PARKED (no second fix wave per process):
@@ -429,7 +429,7 @@ RESIDUAL PARKED (no second fix wave per process):
 
 P0 COMPLETE. 35 commits. Final: npm run check exit 0 both ways; golden 5/5;
   conformance 38 proved / 16 browser-deferred / 1 UNPROVEN (no Chrome), 54/0/1 (with Chrome);
-  harvest-identity 163/163 vs ancestor; tracked tree 6.5 MB / 10 MB; 0 advisories;
+  byte-identity 163/163 vs source baseline; tracked tree 6.5 MB / 10 MB; 0 advisories;
   template.html blob 8e15e85 unchanged throughout.
 
 RESIDUAL CLOSED (post-P0): row 3.1 rename + new row 3.1b (cleanFlowProblems).
@@ -444,7 +444,7 @@ RESIDUAL CLOSED (post-P0): row 3.1 rename + new row 3.1b (cleanFlowProblems).
   3.1-3.5): scripts/check-render-output.mjs has no equivalent check and
   packages/core cannot be modified to add one -- documented in
   negative-fixtures.test.mjs's header comment. Totals updated in README,
-  CONTRIBUTING, harvest.md: 55->56 rows, 38->39 proved (no Chrome), 54->55
+  CONTRIBUTING, the accounting doc: 55->56 rows, 38->39 proved (no Chrome), 54->55
   proved (with PRODUCT_CHROME).
 
   Attribution proof 1 -- gut cleanFlowProblems (`return [];` inserted at its
@@ -457,7 +457,7 @@ RESIDUAL CLOSED (post-P0): row 3.1 rename + new row 3.1b (cleanFlowProblems).
   Raw TAP confirmed only these 3 lines read "not ok" (out of 43 tests across
   all suites); every 3.1/3.2-3.5 test and every other row's test still read
   "ok". Reverted (git checkout -- packages/core/renderers/shared/geometry.mjs);
-  tree clean; check-harvest-identity.mjs OK afterward.
+  tree clean; the byte-identity check OK afterward.
 
   Attribution proof 2 -- gut cleanCrossingProblems (`return [];` inserted at
   its top, same file), run `node scripts/conformance.mjs`:
@@ -466,11 +466,11 @@ RESIDUAL CLOSED (post-P0): row 3.1 rename + new row 3.1b (cleanFlowProblems).
         missing passing test: CLI: showcase render rejects a genuine proper-crossing with composition/proper-crossing (3.1)
   Exactly one "not ok" line; all three 3.1b tests, and every other row,
   stayed "ok" -- 3.1 and 3.1b are independently attributed in both
-  directions. Reverted; tree clean; check-harvest-identity.mjs OK.
+  directions. Reverted; tree clean; the byte-identity check OK.
 
   Afterward: npm run check exit 0 with and without PRODUCT_CHROME; golden
   5/5; conformance 39/39 proved (no Chrome) / 55/55 (with Chrome), 16
-  browser-deferred, 1 UNPROVEN (6.10); check-harvest-identity.mjs OK
+  browser-deferred, 1 UNPROVEN (6.10); the byte-identity check OK
   (163 identical, 1 intentionally changed, 1 added, 2 removed); git diff --
   packages/core empty; git status clean; template.html blob 8e15e85 unchanged.
   Commit f84b1e2.
@@ -493,7 +493,7 @@ FIRST REAL CI RUN (33246506982, pushed 499c53a to Hasan-Laraib/Mirofy):
   explicitly, so only the dedicated browser job (which sets it) proves those
   14 rows -- everywhere else in CI they defer honestly by id, matching the
   pre-existing documented contract. Comment at the fallback rewritten to
-  state the CI rule. README/CONTRIBUTING/harvest.md re-checked: their
+  state the CI rule. README/CONTRIBUTING/the accounting doc re-checked: their
   browser-row accounting (39 without Chrome / 55 with) already matches this
   behaviour, no wording changes needed there.
   Commit 6518117.
@@ -518,13 +518,13 @@ FIRST REAL CI RUN (33246506982, pushed 499c53a to Hasan-Laraib/Mirofy):
   fs.mkdtempSync(os.tmpdir()); on GitHub's windows-latest runner the account
   behind os.tmpdir() ("runneradmin") is long enough that Windows also
   exposes an 8.3 short alias ("RUNNER~1"), and TEMP/os.tmpdir() there
-  actually returns that short form. The harvested (unmodified)
+  actually returns that short form. The imported (unmodified)
   repository-evidence.mjs compares fs.realpathSync(repoRootInput) against
   git's own `rev-parse --show-toplevel`; realpathSync does not expand the
   8.3 alias, but git always reports the canonical long-form path, so the two
   legitimately-identical paths compare unequal and every render trips
   repository-evidence/root-not-top-level. This is a test-harness path bug,
-  not a Windows-broken harvested behaviour: packages/core's identity check
+  not a Windows-broken imported behaviour: packages/core's identity check
   is doing exactly what it is supposed to do (reject a root that isn't
   provably the git top-level) — the test was just handing it a root spelled
   two different ways depending on which tool answered.
@@ -532,7 +532,7 @@ FIRST REAL CI RUN (33246506982, pushed 499c53a to Hasan-Laraib/Mirofy):
   git's own canonical `rev-parse --show-toplevel` output immediately after
   `git init`, and use that value for every later git/file/CLI call,
   including --repo-root. This keeps the path in the exact form the
-  harvested check will independently re-derive and match against, on every
+  identity check will independently re-derive and match against, on every
   OS (a no-op on POSIX, where git's output already matches os.tmpdir()'s).
   Commit 57a28ef.
 
@@ -558,7 +558,7 @@ FIRST REAL CI RUN (33246506982, pushed 499c53a to Hasan-Laraib/Mirofy):
   0 both with and without PRODUCT_CHROME; conformance 39/39 proved (no
   Chrome) / 55/55 (with Chrome) — unchanged from before this wave, as
   expected (these are CI-environment/path fixes, not row-mapping changes);
-  golden 5/5; check-harvest-identity.mjs OK (163 identical / 1 changed / 1
+  golden 5/5; the byte-identity check OK (163 identical / 1 changed / 1
   added / 2 removed); git diff -- packages/core empty; git status clean.
   Commits 6518117, 9dc1cd2, 57a28ef.
 
@@ -595,9 +595,9 @@ was the file, not a row. Node 18/20/22 bundle a libuv that does not reach the
 assert, which is why only the Node 24 cell was red.
 
   Ruling: fix in the test (`fs.realpathSync.native` on the mkdtemp root), not
-  in `preview.mjs`. `packages/core` is harvested unmodified and byte-identity
-  is enforced by `check:harvest` over 163 blob hashes; editing core to fix
-  this would trade a test-only symptom for a broken harvest boundary, which
+  in `preview.mjs`. `packages/core` is imported unmodified and byte-identity
+  is enforced by the byte-identity check over 163 blob hashes; editing core to fix
+  this would trade a test-only symptom for a broken import boundary, which
   is the whole premise of P0. The same short-path hazard is already handled
   this way at validation-gates.test.mjs:401, so the idiom is established.
   — Cost if wrong: the CLI's pre-rename `preview` command still aborts for a real user whose own

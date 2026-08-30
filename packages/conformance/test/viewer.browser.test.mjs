@@ -1,6 +1,6 @@
 // Drives the delivered artifact in real headless Chrome via the same CDP
-// client the ancestor's visual-check uses (ChromeVisualBrowser / findChrome,
-// packages/core/bin/visual-check.mjs) and asserts, per harvested row, that
+// client packages/core/bin/visual-check.mjs uses (ChromeVisualBrowser /
+// findChrome) and asserts, per imported row, that
 // the row's actual mechanism fires -- not just that its markup exists.
 //
 // Fix-round-1 history (read before touching row coverage or titles):

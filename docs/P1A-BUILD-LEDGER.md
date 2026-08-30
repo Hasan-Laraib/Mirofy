@@ -1,7 +1,7 @@
 # P1a Build Ledger — Viewer & Design System Spine
 
-Plan: `analysis/future/plans/2026-08-29-p1a-viewer-design-system.md` (upstream
-  repository's private planning corpus, outside this repo)
+Plan: `analysis/future/plans/2026-08-29-p1a-viewer-design-system.md` (a private
+  planning corpus, outside this repo)
 Controller ledger (full detail): `.superpowers/sdd/2026-08-29-p1a-viewer-design-system/progress.md`
 Repo: `L:\Projects\product-p0` · branch `p1a-viewer-design-system` off `main` @ `fed9236` (CI 13/13 green)
 
@@ -24,7 +24,8 @@ A squash-merge followed by branch deletion would have made `54a1307`
 unreachable and `check:provenance` would then have failed permanently on
 `main`, with the only apparent remedy being to edit the evidence the gate
 existed to protect (the gate has since been retired, so this risk no longer
-applies). Full detail was tracked in `docs/harvest.md:69-88` (since removed).
+applies). Full detail was tracked in the per-row accounting document, lines
+69-88 (since removed).
 
 ## Pre-flight rulings (selected)
 
@@ -56,10 +57,10 @@ the same grep on the working tree (expect >0).
 
 **Ruling 17 — restore a present-tense drift gate, don't reduce provenance to
 a historical-only claim.** The rename (see below) converted the old
-`check:harvest` into `check:provenance`, a constant function of immutable
+byte-identity check into `check:provenance`, a constant function of immutable
 history that could never fail on a code change (that gate has since been
 retired). But Tasks 6/7/9 legitimately
-change `packages/core` — a gate phrased as "tree == ancestor modulo
+change `packages/core` — a gate phrased as "tree == source baseline modulo
 substitutions" would fail on correct work and get disabled within a task.
 Chosen form: `scripts/check-core-drift.mjs` + `scripts/core-manifest.json`,
 re-baselineable via `--update` (refused under CI), mirroring the existing
@@ -69,10 +70,10 @@ while drift named all 12 — precisely the hole this ruling exists to close,
 demonstrated by accident rather than argument.
 
 **Ruling 18 — the plan text for Tasks 4–9 was written pre-rename** and
-referenced `check:harvest`, `PRODUCT_CHROME`, `harvest-manifest.json`, and
-the CLI's pre-rename `preview` invocation throughout. Repaired before
+referenced the old byte-identity check, `PRODUCT_CHROME`, its manifest file,
+and the CLI's pre-rename `preview` invocation throughout. Repaired before
 dispatch; Task 7's "graduation"
-step in particular had been "watch check:harvest fail, then reclassify the
+step in particular had been "watch the old byte-identity check fail, then reclassify the
 manifest entry" — a gate that no longer behaves that way, aimed at a file
 that is now immutable. An implementer handed the old text would have
 hand-edited the immutable provenance record to make a gate pass.
@@ -117,7 +118,7 @@ fresh `packages/viewer` build against the committed file:
 | Task 1 (workspace + rebuild) | `fed9236..328024f` | 678,398 bytes, byte-identical on the first run |
 | Task 2 (19 JS modules) | `328024f..726499c` | 678,398 bytes, unchanged |
 | Task 3 (CSS split, extractor retired) | `726499c..54a1307` | 678,398 bytes, unchanged — `54a1307` tagged `provenance-anchor` |
-| Rename (plan's Task 10, executed 4th) | `54a1307..ce8eea6` | all 163 blob hashes move (identifier substitution); proved *reversible*, not byte-frozen in the harvest sense — this is why `check:harvest` became `check:provenance` (a historical claim pinned to `54a1307`, since retired) paired with the new `check:drift` |
+| Rename (plan's Task 10, executed 4th) | `54a1307..ce8eea6` | all 163 blob hashes move (identifier substitution); proved *reversible*, not byte-frozen in the import sense — this is why the old byte-identity check became `check:provenance` (a historical claim pinned to `54a1307`, since retired) paired with the new `check:drift` |
 | Task 4 (golden → 20 digests) | `ce8eea6..bf86b63` | template.html untouched |
 | Task 5 (`contract.mjs`) | `bf86b63..88a667d` | template.html untouched |
 | Task 6 (generated tokens) | `88a667d..6eea6f4` | self-consistent, byte-identical to its own prior committed form |
@@ -130,7 +131,7 @@ Everything from Task 1 through Task 6 held `packages/core` byte-frozen in the
 strict sense the plan's Global Constraints define ("Tasks 1–6 must leave
 every one of the 163 blob hashes unchanged"); the rename is a distinct,
 identifier-only move that the plan explicitly separates from this chain and
-that motivated splitting `check:harvest` into `check:provenance` (since
+that motivated splitting the old byte-identity check into `check:provenance` (since
 retired) + `check:drift` (Ruling 17).
 
 ## Task 5 Step 6 — the contract-test canary
@@ -256,14 +257,14 @@ the true seam is 308 (an 11-line error from an unverified closing-brace
 guess). Two further brief snippets needed re-anchoring for the same root
 cause (4-space CSS indentation inherited from the `<style>` tag).
 
-**Rename (plan's Task 10, executed 4th)** — every upstream-branded identifier,
+**Rename (plan's Task 10, executed 4th)** — every source-project-branded identifier,
 in all three casings (PascalCase, lowercase, and the ALL_CAPS env-var
 prefix), replaced with the corresponding Mirofy-branded identifier
 (`Mirofy`/`mirofy`/`MIROFY_`) across 4,823 occurrences. **Four plan defects
 found by the implementer:** a fourth protected attribution file
 (`packages/core/LICENSE`, third-party copyright); 75 missed colon-form
 render-slot markers that still carried the pre-rename brand prefix (e.g.
-`<!-- ...:SVG_SLOT_START -->`); `harvest-manifest.json` had to stay unrenamed
+`<!-- ...:SVG_SLOT_START -->`); the byte-identity manifest had to stay unrenamed
 (it resolves paths *at the
 anchor commit*); a fabricated GitHub org leaked into 6 schema `$id`s and
 their generated validators. **Ruling 16:** the "identifier-only" proof was
@@ -439,7 +440,7 @@ The tip, `245907f`, is green.
   to move only the intended paths.
 - `test:golden`: 25/25, 5 modes × 5 presets, all digests distinct.
 - `test:conformance`: 60 rows — 42/42 proved without Chrome, 17
-  browser-deferred by id, 1 UNPROVEN (6.10, pre-existing, out of harvest
+  browser-deferred by id, 1 UNPROVEN (6.10, pre-existing, out of import
   scope); 59/59 proved with `MIROFY_CHROME` set.
 - `check:size`: 3.9 MB / 6 MB budget.
 - `check:audit`: 0 vulnerabilities.
