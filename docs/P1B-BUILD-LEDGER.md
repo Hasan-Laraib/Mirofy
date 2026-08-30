@@ -263,8 +263,9 @@ Measured at the close of Task 9.
   rather than duplicated, its `testTitle` updated in `matrix.mjs` to match
   character-for-character
 - No commit carries a `Co-Authored-By: Claude` trailer
-- **CI has not run on this branch.** It is deliberately unpushed, so the
-  "13 jobs green" claim in the plan's definition of done is unverified.
-  `npm run check` passing locally both with and without Chrome is a
-  weaker claim than CI green across 4 Node versions × 3 platforms, and is
-  recorded here as the weaker claim it is.
+- **CI verified after the operator authorised the push.** This ledger
+  first recorded the "13 jobs green" claim as unverified, because the
+  branch was deliberately unpushed and a local `npm run check` is a
+  weaker claim than 4 Node versions × 3 platforms. Both runs are now on
+  record: 33308334550 on PR #9 (13/13) and 33308461167 on `main` at the
+  merge commit `744c67f` (13/13).

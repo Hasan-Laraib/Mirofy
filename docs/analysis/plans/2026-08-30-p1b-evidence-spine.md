@@ -609,9 +609,9 @@ Assert the exact strings. A test asserting only "a URL was produced" would pass 
 - [x] `npm run gallery`, `npm run status`, `npm run docs:pdf` all work; `status:check` is in the `check` chain
 - [x] Every new gate has been observed failing on a deliberate break, with the transcript recorded
 - [x] `npm run check` exit 0 with and without Chrome
-- [ ] All 13 CI jobs green — **not yet verifiable**: this branch is
-  deliberately unpushed ("Do not push. The operator merges."), so CI has
-  never run on it. Local runs pass both ways; that is not the same claim.
+- [x] All 13 CI jobs green — verified after the operator authorised the
+  push: run 33308334550 on the PR (13/13) and run 33308461167 on `main`
+  after the merge commit `744c67f` (13/13).
 - [x] No commit carries a `Co-Authored-By: Claude` trailer
 
 ---

@@ -13,6 +13,19 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b merged to main
+
+**Commits:** merge commit `744c67f` (PR #9, 39 commits).
+
+The evidence spine is on `main`. CI 13/13 on the PR (run 33308334550) and
+13/13 again on `main` after the merge (run 33308461167) — the one claim the
+close-out could not verify locally, now verified both places it matters.
+
+64 of 65 conformance rows proved with Chrome, 0 deferred, 0 title-check
+failures; the single UNPROVEN row (6.10, deterministic ZIP packaging) is
+unchanged since P0 and out of scope. `docs/IMPLEMENTATION-STATUS.md` reads
+64 SHIPPED / 1 UNPROVEN / 54 PLANNED.
+
 ## 2026-08-30 — P1b Task 8: evidence from any supported host
 
 **Commits:** `9f578fa..31ca6fb` on `p1b-evidence-spine`.
