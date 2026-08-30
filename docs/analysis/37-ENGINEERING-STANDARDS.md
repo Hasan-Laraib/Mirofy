@@ -14,7 +14,7 @@ untested 693 KB viewer, and 24 unreviewable PRs.
 > **Every row in [32 · Parity & Feature Matrix](32-PARITY-AND-FEATURE-MATRIX.md) — imported,
 > rebuilt, or new — carries at least one automated test before it is considered delivered.**
 
-All 92 capabilities. No exceptions, no "we'll add tests later."
+All 118 capabilities. No exceptions, no "we'll add tests later."
 
 ### Test type by origin
 
