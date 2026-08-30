@@ -584,32 +584,32 @@ Assert the exact strings. A test asserting only "a URL was produced" would pass 
 - Create: `docs/P1B-BUILD-LEDGER.md`
 - Modify: `docs/IMPLEMENTATION-STATUS.md` (regenerated), `docs/P1A-BUILD-LEDGER.md` (debt disposition), `README.md`, `CONTRIBUTING.md`, the analysis `.md` sources and their PDFs
 
-- [ ] **Step 1: Write the P1b ledger** in the style of `docs/P1A-BUILD-LEDGER.md`: what was decided, why, and what it costs if wrong. Carry forward every defect found in *this plan* by an implementer or reviewer — P1a's ledger records nine, and that record proved more useful than any success narrative in it.
+- [x] **Step 1: Write the P1b ledger** in the style of `docs/P1A-BUILD-LEDGER.md`: what was decided, why, and what it costs if wrong. Carry forward every defect found in *this plan* by an implementer or reviewer — P1a's ledger records nine, and that record proved more useful than any success narrative in it.
 
-- [ ] **Step 2: Record the P1a debt disposition** in `docs/P1A-BUILD-LEDGER.md`: the static `role="img"` — **fixed** at the renderer (Task 2); the print palette block — **specificity corrected and the false mitigation replaced** (Task 2); token deduplication — **still deferred**, with the reason.
+- [x] **Step 2: Record the P1a debt disposition** in `docs/P1A-BUILD-LEDGER.md`: the static `role="img"` — **fixed** at the renderer (Task 2); the print palette block — **specificity corrected and the false mitigation replaced** (Task 2); token deduplication — **still deferred**, with the reason.
 
-- [ ] **Step 3: Update the analysis sources and regenerate the PDFs.** `32-PARITY-AND-FEATURE-MATRIX.md` must reflect the rows now shipped; `33-MASTER-ROADMAP.md` must show P1.8–P1.11 complete. Then `npm run docs:pdf`, and confirm the regenerated PDFs carry the updated content.
+- [x] **Step 3: Update the analysis sources and regenerate the PDFs.** `32-PARITY-AND-FEATURE-MATRIX.md` must reflect the rows now shipped; `33-MASTER-ROADMAP.md` must show P1.8–P1.11 complete. Then `npm run docs:pdf`, and confirm the regenerated PDFs carry the updated content.
 
-- [ ] **Step 4: Regenerate the status file and the gallery**, and confirm `npm run status:check` passes.
+- [x] **Step 4: Regenerate the status file and the gallery**, and confirm `npm run status:check` passes.
 
-- [ ] **Step 5: Final verification** — `npm run check` exit 0 both with and without `MIROFY_CHROME`; report both. Do **not** push; the operator merges.
+- [x] **Step 5: Final verification** — `npm run check` exit 0 both with and without `MIROFY_CHROME`; report both. Do **not** push; the operator merges.
 
 ---
 
 ## Definition of done for P1b
 
-- [ ] All five diagram types accept `sources` on their relationship array, via one shared `$defs.sources`
-- [ ] Evidence resolves and renders on edges as well as nodes, verified against a real repository
-- [ ] Six provenance classes exist, are validated, and resolve by a documented rule
-- [ ] The six treatments are **pairwise distinct without colour**, proven by simulation, across 5 presets × 2 themes
-- [ ] Clicking an edge opens the Passport with file, lines, revision and provenance — keyboard-reachable, and stripped from canonical exports
-- [ ] Five forges supported; an unknown host fails with a diagnostic naming the supported list
-- [ ] Rows 2.3, 2.4, 2.5, 4.14, 5.20 registered and proved, each `testTitle` matching character-for-character; no previously-proved row lost
-- [ ] P1a debt cleared: static role fixed at the renderer, print block correct, leak gate replaced with a real one
-- [ ] `npm run gallery`, `npm run status`, `npm run docs:pdf` all work; `status:check` is in the `check` chain
-- [ ] Every new gate has been observed failing on a deliberate break, with the transcript recorded
-- [ ] `npm run check` exit 0 with and without Chrome; all 13 CI jobs green
-- [ ] No commit carries a `Co-Authored-By: Claude` trailer
+- [x] All five diagram types accept `sources` on their relationship array, via one shared `$defs.sources`
+- [x] Evidence resolves and renders on edges as well as nodes, verified against a real repository
+- [x] Six provenance classes exist, are validated, and resolve by a documented rule
+- [x] The six treatments are **pairwise distinct without colour**, proven by simulation, across 5 presets × 2 themes
+- [x] Clicking an edge opens the Passport with file, lines, revision and provenance — keyboard-reachable, and stripped from canonical exports
+- [x] Five forges supported; an unknown host fails with a diagnostic naming the supported list
+- [x] Rows 2.3, 2.4, 2.5, 4.14, 5.20 registered and proved, each `testTitle` matching character-for-character; no previously-proved row lost
+- [x] P1a debt cleared: static role fixed at the renderer, print block correct, leak gate replaced with a real one
+- [x] `npm run gallery`, `npm run status`, `npm run docs:pdf` all work; `status:check` is in the `check` chain
+- [x] Every new gate has been observed failing on a deliberate break, with the transcript recorded
+- [x] `npm run check` exit 0 with and without Chrome; all 13 CI jobs green
+- [x] No commit carries a `Co-Authored-By: Claude` trailer
 
 ---
 

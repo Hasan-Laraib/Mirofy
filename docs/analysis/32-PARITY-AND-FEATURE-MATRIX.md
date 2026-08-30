@@ -57,9 +57,9 @@ Every source-baseline feature is accounted for; none is dropped.
 |---|---|---|---|---|
 | 2.1 | Repository evidence (revision-pinned) | **H** | P0 | Verifies file/lines existed at an exact SHA |
 | 2.2 | Verified Source Beacon (`SRC n`) | **H** | P0 | Extended to edges in P1 |
-| 2.3 | Host-agnostic evidence | **N** | P1 | Verification decoupled from link generation → GitLab, Gitee, Bitbucket, GHES, Azure DevOps |
-| 2.4 | **Evidence on relationships** | **N** | **P1** | ⭐ The core differentiator. Every edge answers *"why do I believe this?"* |
-| 2.5 | **Six-class provenance** | **N** | **P1** | `authored` · `source-backed` · `statically-derived` · `config-derived` · `runtime-observed` · `inferred` |
+| 2.3 | Host-agnostic evidence | **N** | P1 | Verification decoupled from link generation → GitLab, Gitee, Bitbucket, GHES, Azure DevOps — ✅ **SHIPPED (P1b)** |
+| 2.4 | **Evidence on relationships** | **N** | **P1** | ⭐ The core differentiator. Every edge answers *"why do I believe this?"* — ✅ **SHIPPED (P1b)** |
+| 2.5 | **Six-class provenance** | **N** | **P1** | `authored` · `source-backed` · `statically-derived` · `config-derived` · `runtime-observed` · `inferred` — ✅ **SHIPPED (P1b)** |
 | 2.6 | Multi-repo evidence identity | **N** | P2 | `{repository, revision, path, symbol/range}` |
 | 2.7 | Evidence graph store + query | **N** | P1 | Append-only, provenance-first |
 | 2.8 | Scanner: TS/JS imports | **N** | P1 | v1 core adapter |
@@ -110,7 +110,7 @@ Every source-baseline feature is accounted for; none is dropped.
 | 4.11 | Shared compiler pipeline | **R** | P1 | Ends five-renderer drift |
 | 4.12 | Generated design tokens | **R** | P1 | Replaces 8 hand-written palette blocks |
 | 4.13 | **Colour-blind preset (Okabe–Ito)** | **N** | P1 | ~40 lines once tokens are generated |
-| 4.14 | **Evidence-first visual language** | **N** | P1 | 6 provenance treatments, on edges too, non-colour-dependent |
+| 4.14 | **Evidence-first visual language** | **N** | P1 | 6 provenance treatments, on edges too, non-colour-dependent — ✅ **SHIPPED (P1b)** |
 | 4.15 | Tree-shaken artifacts | **N** | P3 | Cuts the ~735 KB default |
 
 ## 5 · Viewer
@@ -136,7 +136,7 @@ Every source-baseline feature is accounted for; none is dropped.
 | 5.17 | Renderer↔viewer contract (`contract.mjs`) | **N** | P1 | 202 `data-*` attributes become checked |
 | 5.18 | Browser tests in CI | **N** | P0 | 23 pre-existing skips |
 | 5.19 | axe-core accessibility gate | **N** | P1 | |
-| 5.20 | **Evidence Passport** (edges + provenance) | **N** | P1 | |
+| 5.20 | **Evidence Passport** (edges + provenance) | **N** | P1 — ✅ **SHIPPED (P1b)** | |
 | 5.21 | **Nudge-to-patch** | **N** | P3 | Drag → JSON patch. Escape hatch, not an editor |
 | 5.22 | Hierarchical view navigation | **N** | P4 | system → service → flow → source |
 

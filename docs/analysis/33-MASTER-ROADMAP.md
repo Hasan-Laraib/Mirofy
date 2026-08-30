@@ -56,10 +56,10 @@ a chosen name.
 | P1.5 | **Honest coverage report.** Derived / inferred / **not analysed**. Never a fabricated percentage | 2.17 | M |
 | P1.6 | **System model.** Components, relationships, boundaries with `evidenceRefs[]`. **Mandatory stable IDs for every object.** Human overrides recorded as `authored` | 1.14, 1.12, 1.17, 1.15 | L |
 | P1.7 | **View compiler + AI abstraction.** Model → bounded view IR with intent (`group`/`rank`/`mainPath`/`adjacency`). **Contract test: cannot emit a relationship absent from the model** | — | L |
-| P1.8 | ⭐ **Evidence on relationships.** `sources` on connections; then messages, flows, transitions | **2.4** | L |
-| P1.9 | ⭐ **Six-class provenance.** Carried independently of the fact, on nodes *and* edges | **2.5** | M |
-| P1.10 | **Evidence Passport + visual language.** Click an edge → file, lines, revision, derivation, provenance. Six distinguishable treatments, **not colour-dependent** | 5.20, 4.14 | L |
-| P1.11 | **Host-agnostic evidence.** Verification decoupled from link generation → GitLab, Gitee, Bitbucket, GHES, Azure DevOps | 2.3 | M |
+| P1.8 | ✅ **SHIPPED (P1b)** · ⭐ **Evidence on relationships.** `sources` on connections; then messages, flows, transitions | **2.4** | L |
+| P1.9 | ✅ **SHIPPED (P1b)** · ⭐ **Six-class provenance.** Carried independently of the fact, on nodes *and* edges | **2.5** | M |
+| P1.10 | ✅ **SHIPPED (P1b)** · **Evidence Passport + visual language.** Click an edge → file, lines, revision, derivation, provenance. Six distinguishable treatments, **not colour-dependent** | 5.20, 4.14 | L |
+| P1.11 | ✅ **SHIPPED (P1b)** · **Host-agnostic evidence.** Verification decoupled from link generation → GitLab, Gitee, Bitbucket, GHES, Azure DevOps | 2.3 | M |
 | P1.12 | **Shared compiler pipeline.** Five renderers → one pass pipeline | 4.11 | XL |
 | P1.13 | **Modularize the viewer.** 693 KB monolith → `viewer/src/{core,camera,inspect,trace,story,motion,export,radar}` + build. Template becomes generated, with `check:template`. **Golden tests guard every extraction** | 5.16 | XL |
 | P1.14 | **`contract.mjs`.** All 202 `data-*` attributes + CSS classes as one checked source of truth. Resolves the label-colour ambiguity as a written rule | 5.17 | M |
