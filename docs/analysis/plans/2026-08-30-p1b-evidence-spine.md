@@ -470,19 +470,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 >
 > State all three collisions in the module's header comment, so the next person greps with them in mind.
 
-- [ ] **Step 1: Write `evidence-provenance.mjs`** with the ordered class list, a membership predicate, and the resolution rule: a relationship or component with no explicit `provenance` but with verified `sources` resolves to `source-backed`; with neither, `authored`. Order matters — it is the display order in the legend and the Passport, and it runs from strongest evidence to weakest.
+- [x] **Step 1: Write `evidence-provenance.mjs`** with the ordered class list, a membership predicate, and the resolution rule: a relationship or component with no explicit `provenance` but with verified `sources` resolves to `source-backed`; with neither, `authored`. Order matters — it is the display order in the legend and the Passport, and it runs from strongest evidence to weakest.
 
-- [ ] **Step 2: Write the failing tests** — the six classes are exactly these six in this order; an unknown class fails validation; the resolution rule produces `source-backed` for a subject with verified sources and `authored` for one without; and no class name collides with a geometry field on the same object.
+- [x] **Step 2: Write the failing tests** — the six classes are exactly these six in this order; an unknown class fails validation; the resolution rule produces `source-backed` for a subject with verified sources and `authored` for one without; and no class name collides with a geometry field on the same object.
 
-- [ ] **Step 3: Run them, watch them fail.**
+- [x] **Step 3: Run them, watch them fail.**
 
-- [ ] **Step 4: Add `$defs.provenance`** to `common.schema.json` as an enum of the six, and permit it on components and the five relationship arrays. It is **optional** — a document that does not claim a provenance class is not malformed; it resolves to `authored`, which is the truthful default for hand-written documents.
+- [x] **Step 4: Add `$defs.provenance`** to `common.schema.json` as an enum of the six, and permit it on components and the five relationship arrays. It is **optional** — a document that does not claim a provenance class is not malformed; it resolves to `authored`, which is the truthful default for hand-written documents.
 
-- [ ] **Step 5: Regenerate validators; run the tests; register row 2.5** with an exact `testTitle`.
+- [x] **Step 5: Regenerate validators; run the tests; register row 2.5** with an exact `testTitle`.
 
-- [ ] **Step 6: Prove the enum bites** — a document claiming `provenance: "vibes"` must fail validation naming the field. Record it.
+- [x] **Step 6: Prove the enum bites** — a document claiming `provenance: "vibes"` must fail validation naming the field. Record it.
 
-- [ ] **Step 7: Full gate, status, commit.** `Refs: 2.5`.
+- [x] **Step 7: Full gate, status, commit.** `Refs: 2.5`.
 
 ---
 

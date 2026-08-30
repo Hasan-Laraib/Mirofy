@@ -13,6 +13,40 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b Task 5: the six-class provenance vocabulary
+
+**Commits:** `bbfe407..fe0ed05` on `p1b-evidence-spine`.
+
+`authored` · `source-backed` · `statically-derived` · `config-derived` ·
+`runtime-observed` · `inferred` — what kind of knowledge stands behind a node
+or a relationship. Optional in the schema: a document claiming no class is
+not malformed, it resolves to `authored`, which describes a hand-written
+document truthfully rather than flatteringly.
+
+The module is `evidence-provenance.mjs`, not `provenance.mjs`, because the
+word already means two other things here: where a brand logo came from
+(source URL and SHA-256 across 107 marks — most occurrences of the word in
+this repository), and whether repository metadata differs between a delta's
+base and head. `authored` and `inferred` collide as well; both already
+describe *layout* elsewhere. Nothing may be renamed, so the header states
+all three collisions and every class name is exported rather than written
+inline.
+
+The published order is preserved and asserted as a sequence. It is the
+legend's display order, **not** a confidence ranking: `authored` leads while
+being the weakest of the six, since it is what a subject with no evidence
+resolves to. The plan described it as "strongest to weakest", which
+contradicts both specification documents and the resolution rule itself.
+The specification won, and the test pins the sequence so that sorting it
+into an apparent ranking cannot silently reorder the legend.
+
+Worth recording about an existing gate: row 5.17's `data-*` contract scans
+renderer sources as raw **text**, comments included. Naming an attribute in
+a comment beside code that does not emit it reads as an emission nothing
+consumes — which is what the new module's header did on first write. Crude
+by design, and the crudeness is what makes it catch real defects; but it
+means comments in `renderers/` are part of that gate's input.
+
 ## 2026-08-30 — P1b Task 4: evidence reaches the edges
 
 **Commits:** `e60734c..ac4b8e7` on `p1b-evidence-spine`.
