@@ -28,8 +28,8 @@ test('start page: checked-in HTML is reproducible from canonical scenario recipe
 test('start page: offers five bounded bilingual starts without ingesting source content', () => {
   const html = fs.readFileSync(path.join(repoRoot, 'docs/start.html'), 'utf8');
   assert.doesNotMatch(html, /\[\[[A-Z0-9_]+\]\]/);
-  assert.match(html, /npx -y skills add tt-a1i\/mirofy --skill mirofy --agent codex --global --copy --yes/);
-  assert.match(html, /npx -y skills add tt-a1i\/mirofy --skill mirofy --agent codex --copy --yes/);
+  assert.match(html, /npx -y skills add Hasan-Laraib\/Mirofy --skill mirofy --agent codex --global --copy --yes/);
+  assert.match(html, /npx -y skills add Hasan-Laraib\/Mirofy --skill mirofy --agent codex --copy --yes/);
   for (const agent of ['cursor', 'codex', 'claude-code', 'opencode']) {
     assert.match(html, new RegExp(`role="tab" data-agent="${agent}"`));
   }

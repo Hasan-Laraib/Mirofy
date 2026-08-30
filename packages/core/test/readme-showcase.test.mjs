@@ -126,7 +126,7 @@ test('all README languages keep the product hero and retain the verified animate
     assert.ok(heroIndex >= 0 && heroIndex < titleIndex, `${filename}: product hero is not above the title`);
     assert.ok(proofIndex > demosIndex, `${filename}: animated proof must live in the demo section`);
     assert.match(readme, /docs\/assets\/mirofy-live-proof\.gif/);
-    assert.match(readme, /https:\/\/tt-a1i\.github\.io\/mirofy\/gallery\.html/);
+    assert.match(readme, /https:\/\/hasan-laraib\.github\.io\/Mirofy\/gallery\.html/);
   }
   assert.equal(
     fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8'),
