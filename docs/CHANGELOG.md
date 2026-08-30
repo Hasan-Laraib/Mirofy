@@ -13,6 +13,47 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b Task 2: P1a's debt cleared
+
+**Commits:** `495a230..4a6b520` on `p1b-evidence-spine`.
+
+**The diagram svg now declares `role="graphics-document"`, not `role="img"`.**
+Every component node carries `tabindex="0" role="button"`, and `role="img"`
+declares its own subtree presentational — a WCAG 4.1.2 defect
+(axe-core: nested-interactive). It was corrected at viewer boot only, which
+left the static markup wrong for JS-disabled readers and every non-viewer
+consumer, and invisible to the axe gate, which scans the post-boot DOM and
+so could never see it. The new test reads rendered HTML directly and needs
+no Chrome. The boot-time assignment is gone: two mechanisms for one
+invariant is how they drift apart.
+
+That change broke `compare`. `extractArchitectureSvg` matched `role="img"`
+literally, so every comparison against a freshly rendered artifact failed
+with `delta/svg-missing`. It now accepts both roles — not as a courtesy,
+but because `compare` reads a base artifact alongside a head one, and a
+base rendered before the change is exactly what the tool exists to handle.
+
+**The print stylesheet did not do what its comment claimed.** `@media`
+contributes no specificity, so the print palette's `:root, [data-theme=…]`
+selectors, `(0,1,0)`, lost to every preset palette's
+`[data-preset="X"][data-theme="Y"]`, `(0,2,0)`. Printing from dark theme in
+signal-flow, blueprint, editorial or okabe-ito put that preset's **dark**
+palette on white paper — 8 of the 10 palette blocks outranked the rule meant
+to override them. Adding `html[data-preset][data-theme]`, `(0,2,1)`, wins.
+
+Verified in real Chrome under print emulation, not by reading the cascade:
+before, editorial printed `--bg: #181611` with `#7fc6c7` strokes; after,
+`#ffffff` with `#0891b2`. All five presets now resolve to a white ground.
+
+**The palette-leak gate was decorative.** It tested one literal selector, so
+it caught only the block someone thought to name; P1a recorded it as
+"backstopped by the count assertion", which was false — that count reads
+the emitter's output, where a block living in structural CSS never appears.
+Neither check could see the 27-property print block sitting in
+`01-structure.css` the whole time. It now scans for the shape (any rule
+declaring 4+ custom properties) against an allowlist with written reasons,
+and was observed failing on a planted eleventh block.
+
 ## 2026-08-30 — P1b rebased onto the rewritten main; the roadmap is read live
 
 **Commits:** `7ad8e09..d83c344` on `p1b-evidence-spine`.

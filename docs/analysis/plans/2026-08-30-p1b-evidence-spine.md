@@ -51,7 +51,7 @@ Verified against `main` @ `2d2cd09`. Where spec and code disagree, **the code is
 - **Commit identity:** author and committer are `Hasan-Laraib <lxh417bham@gmail.com>`. **Never add a `Co-Authored-By: Claude` trailer.**
 - **Zero runtime dependencies** in every workspace package (`delivery.test.mjs` row 6.9). `marked` goes in **root `devDependencies`** only.
 - **Platform floor:** Node 18/20/22/24 × ubuntu/macos/windows. All 13 CI jobs green.
-- **`npm run check` is the gate**, and it now chains: `lint → typecheck → test → test:golden → check:template → check:drift → test:conformance → check:artifacts → check:size → check:audit`.
+- **`npm run check` is the gate**, and it now chains: `lint → check:changelog → status:check → typecheck → test → test:golden → check:template → check:drift → test:conformance → check:artifacts → check:size → check:audit`.
 - **The core-integrity gate.** `check:drift` is the present-tense gate (`scripts/core-manifest.json`); re-baseline it deliberately with `--update` and confirm only intended paths moved. Its CR-byte guard will refuse to hash a file containing `\r`.
 - **Line endings are LF.** A text-mode write poisoned a manifest in P1a. `docs/` is not covered by the CR guard — verify at byte level before committing anything you generated.
 - **`testTitle` must match a test name character-for-character.** The harness proves a row only on an exact TAP `ok` match; a mismatch reads as "not proved" while looking registered.
@@ -253,7 +253,7 @@ Commit as three: the gallery, the status file plus its gate, and the PDF generat
 
 > **Why before the evidence work.** Task 4 edits the same renderers, and Tasks 6–7 edit the same CSS and token model. Clearing debt first keeps those diffs about evidence instead of tangled with unrelated corrections.
 
-- [ ] **Step 1: Write the failing test for the static role**
+- [x] **Step 1: Write the failing test for the static role**
 
 The gate added in P1a scans the **post-boot** DOM and therefore cannot see the renderer's static output. This test reads the rendered HTML directly, so it can:
 
@@ -273,49 +273,49 @@ test('the rendered SVG declares a role that permits interactive descendants, bef
 });
 ```
 
-- [ ] **Step 2: Run it to verify it fails**
+- [x] **Step 2: Run it to verify it fails**
 
 Run: `node --test packages/conformance/test/accessibility.browser.test.mjs`
 Expected: FAIL — the static markup still says `role="img"`.
 
-- [ ] **Step 3: Fix the renderer**
+- [x] **Step 3: Fix the renderer**
 
 In `packages/core/renderers/shared/cli.mjs`, change the emitted `role="img"` to `role="graphics-document"`. Update the comment added in P1a: it currently records that the defect is corrected only at viewer boot, and that is no longer true.
 
-- [ ] **Step 4: Remove the now-redundant boot-time patch**
+- [x] **Step 4: Remove the now-redundant boot-time patch**
 
 In `packages/viewer/src/js/07-focus.js`, remove the runtime role assignment. Leave a one-line comment noting the renderer now emits the correct role. Two mechanisms for one invariant is how they drift apart.
 
-- [ ] **Step 5: Verify both, and re-baseline**
+- [x] **Step 5: Verify both, and re-baseline**
 
 Run: `node --test packages/conformance/test/accessibility.browser.test.mjs` → passes, and with `MIROFY_CHROME` set the five axe rows still pass.
 Run: `npm run build:template`, then `node scripts/check-template.mjs` → byte-identical.
 Run: `npm run check:drift` → FAILS naming `cli.mjs` and `assets/template.html`. Re-baseline with `node scripts/check-core-drift.mjs --update` and confirm **only those two** hashes moved.
 Run: `npm run test:golden` → fails; verify the cause is the role attribute only, then `node scripts/golden.mjs --update` (25 entries).
 
-- [ ] **Step 6: Fix the print block's specificity bug**
+- [x] **Step 6: Fix the print block's specificity bug**
 
 `packages/viewer/src/css/01-structure.css` line ~2618 opens `@media print { :root, [data-theme="dark"], [data-theme="light"] { … } }` setting 27 custom properties, and its comment claims it forces the light palette for print. It does not: `[data-preset="X"][data-theme="Y"]` is specificity (0,2,0) and `[data-theme="light"]` is (0,1,0); `@media` adds none. Printing from dark theme in `signal-flow`, `blueprint`, `editorial` or `okabe-ito` puts the **preset's dark palette on white paper**.
 
 Add `html[data-preset][data-theme]` to the block's selector list. That is (0,2,1) — an element plus two attributes — which outranks every preset-qualified palette selector. Correct the comment to describe what the rule actually does and why the extra selector is required.
 
-- [ ] **Step 7: Prove the print fix**
+- [x] **Step 7: Prove the print fix**
 
 Write a test asserting that, for each of the five presets, the print block's selector list contains a selector whose specificity exceeds that preset's palette selector. Compute specificity in the test rather than asserting a literal string, so a future selector edit is evaluated rather than pattern-matched.
 
 Run it before the fix to see it fail for four presets, then after to see it pass. Record both.
 
-- [ ] **Step 8: Close the eleventh-block hole**
+- [x] **Step 8: Close the eleventh-block hole**
 
 `viewer-modules.test.mjs`'s leak assertion checks one literal selector, and P1a recorded a mitigation — "backstopped by the count assertion" — that the final review proved false. Neither check can see a palette block already living in structural CSS, and the print block is the standing counter-example.
 
 Replace it: scan `01-structure.css` for **any** rule declaring four or more `--` custom properties, and assert the set of such selectors matches a documented allowlist, each entry carrying a written reason. The print block is the one legitimate entry. A twelfth block then fails the gate instead of arriving unseen.
 
-- [ ] **Step 9: Prove that gate is not decorative**
+- [x] **Step 9: Prove that gate is not decorative**
 
 Add a second palette-like block to `01-structure.css` temporarily; confirm the test fails naming its selector; remove it; confirm it passes. Record the transcript.
 
-- [ ] **Step 10: Full gate, gallery, status**
+- [x] **Step 10: Full gate, gallery, status**
 
 Run `npm run check` → exit 0. Run `npm run gallery` and open `preview/index.html`; print-preview one dark-theme `editorial` diagram (Ctrl+P) and confirm the palette is now light on paper. Run `npm run status`.
 
