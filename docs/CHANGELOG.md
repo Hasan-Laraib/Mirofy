@@ -13,6 +13,39 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b Task 8: evidence from any supported host
+
+**Commits:** `9f578fa..31ca6fb` on `p1b-evidence-spine`.
+
+Evidence now resolves against GitHub, GitLab, Bitbucket, Gitea, Gitee and
+Azure DevOps. Verification itself never needed changing — it runs `git`
+against a real checkout, and git does not care where the remote lives.
+
+The plan said "only two things are GitHub-bound". There were **five**: the
+slug regex; an outright rejection of any URL not starting with
+`https://github.com/`; `sourceHref`, which hardcoded GitHub's
+`/blob/{rev}/{path}#L{a}-L{b}`; the viewer's repository link, which appended
+`/tree/{rev}` and stripped a `github.com` prefix — right for one forge, a
+404 and a full-URL slug on every other; and the schema's `url` pattern,
+which rejected non-GitHub URLs before resolution ever ran.
+
+The line-range fragment is where forges genuinely disagree, and it is the
+detail worth getting right: GitLab omits the second `L` (`#L4-9`),
+Bitbucket uses `#lines-4:9`, Azure DevOps addresses files by query string
+entirely and its slug is four segments with a load-bearing `_git` marker
+rather than owner/name. A wrong template still produces a URL — a
+confident, clickable link to nothing, which is worse than admitting the host
+is unknown. So `detectHost` returns null rather than guessing, and the
+rejection **names** the supported forges: an author cannot guess which are
+understood from a refusal that does not say.
+
+The schema keeps a shape check and the adapter owns the host list.
+Duplicating the forges in JSON would drift from the module that actually
+builds the URLs.
+
+GitHub behaviour is unchanged, and that was checked rather than assumed:
+evidence 21/21, validation-gates 25/25, the Passport browser rows 2/2.
+
 ## 2026-08-30 — P1b Task 7: the Evidence Passport for relationships
 
 **Commits:** `3bbe832..867afa6` on `p1b-evidence-spine`.

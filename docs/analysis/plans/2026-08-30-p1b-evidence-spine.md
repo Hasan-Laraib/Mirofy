@@ -552,7 +552,7 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 
 > **Smaller than it reads.** Verification in `repository-evidence.mjs` is already host-agnostic — it runs `git` against a real checkout. Only two things are GitHub-bound: the `githubSlug()` regex at line 41, and the hard `startsWith('https://github.com/')` rejection at line 107. This task extracts those into adapters and deletes the rejection.
 
-- [ ] **Step 1: Write the failing test** — for each supported host, a repository URL parses to the right slug and produces the correct blob URL shape:
+- [x] **Step 1: Write the failing test** — for each supported host, a repository URL parses to the right slug and produces the correct blob URL shape:
 
 | Host | Blob URL |
 |---|---|
@@ -564,17 +564,17 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 
 Assert the exact strings. A test asserting only "a URL was produced" would pass every wrong template.
 
-- [ ] **Step 2: Run it, watch it fail** — `hosts.mjs` does not exist.
+- [x] **Step 2: Run it, watch it fail** — `hosts.mjs` does not exist.
 
-- [ ] **Step 3: Write `hosts.mjs`** with one adapter per host: a URL matcher, a slug extractor, and a blob-URL builder. Keep `ssh://`, `git@` and `https://` forms working for each, as the GitHub matcher already does.
+- [x] **Step 3: Write `hosts.mjs`** with one adapter per host: a URL matcher, a slug extractor, and a blob-URL builder. Keep `ssh://`, `git@` and `https://` forms working for each, as the GitHub matcher already does.
 
-- [ ] **Step 4: Rewire `repository-evidence.mjs`** to call `detectHost()`, and **delete** the `startsWith('https://github.com/')` rejection. Keep every existing failure code and message for the GitHub path — a user on GitHub must see no behaviour change, and the existing tests are the check.
+- [x] **Step 4: Rewire `repository-evidence.mjs`** to call `detectHost()`, and **delete** the `startsWith('https://github.com/')` rejection. Keep every existing failure code and message for the GitHub path — a user on GitHub must see no behaviour change, and the existing tests are the check.
 
-- [ ] **Step 5: Prove an unknown host fails honestly** — a URL matching no adapter must produce a clear diagnostic naming the supported hosts, not a silently wrong link. Assert the message lists them.
+- [x] **Step 5: Prove an unknown host fails honestly** — a URL matching no adapter must produce a clear diagnostic naming the supported hosts, not a silently wrong link. Assert the message lists them.
 
-- [ ] **Step 6: Confirm GitHub is unchanged** — run the full existing evidence suite and confirm no GitHub-path assertion changed. Record the before/after counts.
+- [x] **Step 6: Confirm GitHub is unchanged** — run the full existing evidence suite and confirm no GitHub-path assertion changed. Record the before/after counts.
 
-- [ ] **Step 7: Register row 2.3. Full gate, status, commit.** `Refs: 2.3`.
+- [x] **Step 7: Register row 2.3. Full gate, status, commit.** `Refs: 2.3`.
 
 ---
 
