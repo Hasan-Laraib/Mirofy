@@ -2,7 +2,7 @@
 // as extracted mechanically into
 // .superpowers/sdd/2026-08-29-p0-foundation/imported-rows.md: 55 pure-H rows,
 // plus row 3.1b (added post-P0 to close the mislabelled-row-plus-coverage-gap
-// residual recorded in docs/P0-BUILD-LEDGER.md) -- 56 rows total.
+// residual recorded in the build ledger) -- 56 rows total.
 // Row 1.10 is H->R (rebuilt in P1) and is intentionally absent from this list.
 //
 // `proof` names the test file (or script) that guarantees the row.
@@ -441,7 +441,7 @@ export const IMPORTED_ROWS = [
     // named "no edge across unrelated node" capability is
     // cleanFlowProblems / clean-flow/edge-through-node, an always-on
     // correctness invariant with its own row below (3.1b) -- it was
-    // uncovered entirely until now (see docs/P0-BUILD-LEDGER.md's
+    // uncovered entirely until now (see the build ledger's
     // "RESIDUAL PARKED" entry). The tests and testTitles here are
     // unchanged and remain sound for what they actually test.
     //

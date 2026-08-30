@@ -36,15 +36,11 @@
    the palette itself is generated from the token model. Run
    `npm run build:template` after any change under `packages/viewer/` so the
    committed template stays in sync with its source.
-8. **Every task updates `docs/CHANGELOG.md` before its final commit.** It is
-   the running record of what changed and when — narrative, and kept
-   current as work happens rather than reconstructed at the end of a
-   phase. `npm run check:changelog` only proves the record hasn't been
-   forgotten: its newest entry must cite a commit reachable from `HEAD`.
-   That is all it checks — it cannot and does not judge whether the prose
-   is accurate or complete, which is left to review.
-   `docs/IMPLEMENTATION-STATUS.md` remains the separate, machine-generated
-   record of what is built.
+8. **`packages/conformance/src/matrix.mjs` is the record of what is built.**
+   Every capability has a row naming the test that proves it, and the row's
+   `testTitle` must match that test character-for-character. A capability
+   without a row is invisible to the gates, so add the row in the same change
+   as the code.
 
 ## Test types
 
@@ -56,7 +52,6 @@
 
 ```bash
 npm run lint              # eslint .
-npm run check:changelog   # docs/CHANGELOG.md's newest entry cites a commit reachable from HEAD
 npm run typecheck         # tsc --noEmit
 npm run test              # node:test suites outside the conformance matrix
 npm run test:golden       # digest parity against the recorded golden renders

@@ -16,14 +16,8 @@ preview/
 # SDD working artifacts: briefs, reports, review packages, ledger.
 .superpowers/
 
-# Generated PDF output from `npm run docs:pdf`.
-docs/analysis/pdf/
-
 # Scanner output from `npm run scan`.
 scan/
-
-# System model output from `npm run model`.
-scan/model.json
 
 # View compiler output from `npm run compile`.
 scan/view.json
