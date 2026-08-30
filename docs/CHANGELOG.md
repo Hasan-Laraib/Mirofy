@@ -15,7 +15,7 @@ Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
 ## 2026-08-30 — P1f: the showcase false negative (row 3.11)
 
-**Commits:** on `p1f-frame-composition`.
+**Commits:** `2f50fc5` on `p1f-frame-composition`.
 
 A frame-vs-frame check existed. **All of it** sat behind
 `requiresNestedBoundaryMembership` — the opt-in deployment-ownership
