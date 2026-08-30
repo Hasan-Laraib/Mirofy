@@ -437,6 +437,32 @@ export const IMPORTED_ROWS = [
   },
 
   {
+    id: '4.11',
+    name: 'Shared compiler pipeline (composition gate parity)',
+    // "Ends five-renderer drift", and the drift was already there: four
+    // renderers called all seven composition gates while `sequence` called
+    // six, silently missing cleanEndpointSideProblems. Nothing recorded
+    // whether that was a decision or an oversight, and nothing would have
+    // caught a second one.
+    //
+    // composition-pass.mjs is now the declared table and the renderers are
+    // checked against it in BOTH directions: a gate dropped from a renderer
+    // fails, and an exemption that is no longer true fails too, so the table
+    // cannot rot into a list of excuses. Every exemption must carry a written
+    // reason -- "this gate does not apply" is a claim about the diagram's
+    // geometry, and writing it down is what separates a considered exemption
+    // from a gate someone forgot to wire up.
+    //
+    // Sequence's exemption is real: messages run horizontally between fixed
+    // lifelines at an authored `y`, the schema has no fromSide/toSide field,
+    // and the renderer never reads one.
+    origin: 'R',
+    phase: 'P1',
+    proof: 'composition-pass.test.mjs',
+    testTitle: '[4.11] every renderer runs every composition gate it is not declared exempt from',
+  },
+
+  {
     id: '5.20',
     name: 'Evidence Passport for relationships',
     // Selecting a relationship focuses its SOURCE NODE, so the Passport was
