@@ -186,6 +186,31 @@ export const IMPORTED_ROWS = [
     testTitle: '[2.5] the six provenance classes are exactly these six, in the published order',
   },
 
+  {
+    id: '4.14',
+    name: 'Evidence-first visual language (six provenance treatments)',
+    // 36-VISUAL-SYSTEM.md V4's binding constraint is that the six classes are
+    // distinguishable WITHOUT COLOUR, because provenance is a trust signal
+    // and roughly 8% of men have colour-vision deficiency. The test therefore
+    // measures ONLY the non-colour channels (stroke-dasharray, stroke-width,
+    // opacity) and ignores hue entirely: a set of treatments that differed
+    // only by colour would pass a casual look and fail the requirement.
+    //
+    // Computed styles from a real browser, not the stylesheet text. Parsing
+    // the CSS would prove a rule was written, not that it wins the cascade --
+    // which is precisely where P1a's print-palette bug lived.
+    //
+    // `authored` carries no rule at all. It is what every unclaimed subject
+    // resolves to, so styling it would restyle every document ever authored
+    // in order to say "this is normal"; its distinctness is being the
+    // untouched baseline.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'provenance-visual.test.mjs',
+    browser: true,
+    testTitle: '[4.14] the six provenance treatments are pairwise distinct without colour, in every preset and both themes',
+  },
+
   // Phase 3 — Layout validation gates
   {
     id: '3.1',
