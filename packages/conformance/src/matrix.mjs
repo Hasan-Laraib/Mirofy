@@ -165,6 +165,27 @@ export const IMPORTED_ROWS = [
     testTitle: '[2.4] architecture accepts sources on its connections and rejects a malformed entry',
   },
 
+  {
+    id: '2.5',
+    name: 'Six-class evidence provenance',
+    // The vocabulary that says what KIND of knowledge stands behind a node or
+    // a relationship: authored, source-backed, statically-derived,
+    // config-derived, runtime-observed, inferred. Optional in the schema on
+    // purpose -- a document that claims no class is not malformed, it
+    // resolves to `authored`, which is the truthful description of a
+    // hand-written document rather than a flattering one.
+    //
+    // The row's testTitle pins the ORDER, which is the published display
+    // order for the legend and Passport and is NOT a confidence ranking:
+    // `authored` leads the list while being the weakest of the six. Sorting
+    // it "properly" would silently reorder the legend, so the test asserts
+    // the sequence rather than the set.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence.test.mjs',
+    testTitle: '[2.5] the six provenance classes are exactly these six, in the published order',
+  },
+
   // Phase 3 — Layout validation gates
   {
     id: '3.1',

@@ -14,6 +14,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { coreRoot, fixturesRoot, repoRoot } from '../src/render.mjs';
+import { PROVENANCE_CLASSES, isProvenanceClass, resolveProvenance } from '../../core/renderers/shared/evidence-provenance.mjs';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-evidence-'));
 const cli = path.join(coreRoot, 'bin/mirofy.mjs');
@@ -142,3 +143,56 @@ for (const mode of Object.keys(RELATIONSHIP_ARRAY)) {
     assert.match(sources[0].href, /^https:\/\/github\.com\/.+#L1-L40$/);
   });
 }
+
+// Row 2.5. The six-class vocabulary. These tests exist mostly to pin things
+// that are easy to "tidy" into being wrong: the class list's ORDER (it is the
+// published display order, not a confidence ranking), and the resolution rule
+// that makes an unclaimed-but-evidenced subject source-backed rather than
+// leaving it to be re-declared in a second field.
+test('[2.5] the six provenance classes are exactly these six, in the published order', () => {
+  assert.deepEqual([...PROVENANCE_CLASSES], [
+    'authored',
+    'source-backed',
+    'statically-derived',
+    'config-derived',
+    'runtime-observed',
+    'inferred',
+  ]);
+  assert.equal(Object.isFrozen(PROVENANCE_CLASSES), true, 'the class list must not be mutable');
+});
+
+test('[2.5] provenance resolves from evidence when it is not claimed', () => {
+  // Claimed explicitly: taken at its word.
+  assert.equal(resolveProvenance({ provenance: 'runtime-observed' }), 'runtime-observed');
+  // Unclaimed but evidenced: source-backed, without needing a second field.
+  assert.equal(resolveProvenance({ sources: [{ path: 'src/app.js' }] }), 'source-backed');
+  // Claimed AND evidenced: the explicit claim still wins.
+  assert.equal(resolveProvenance({ provenance: 'config-derived', sources: [{ path: 'a.js' }] }), 'config-derived');
+  // Neither: authored, the truthful default for a hand-written document.
+  assert.equal(resolveProvenance({}), 'authored');
+  assert.equal(resolveProvenance({ sources: [] }), 'authored');
+  // A class outside the six is not honoured here either -- the schema rejects
+  // it first, and passing it through would paint an unknown treatment.
+  assert.equal(resolveProvenance({ provenance: 'vibes' }), 'authored');
+  assert.equal(isProvenanceClass('vibes'), false);
+});
+
+test('[2.5] no provenance class collides with a geometry field on the same subject', () => {
+  // `authored` and `inferred` both already mean layout things elsewhere in
+  // this repository (authoredToSide, sideOrigin === 'inferred'). The classes
+  // are carried in their own field, so the collision is a reader hazard
+  // rather than a data one -- this asserts it stays that way.
+  const subject = { provenance: 'inferred', authoredToSide: 'left', sources: [{ path: 'a.js' }] };
+  assert.equal(resolveProvenance(subject), 'inferred');
+  assert.equal(subject.authoredToSide, 'left', 'resolution must not touch geometry fields');
+});
+
+test('[2.5] the schema rejects a provenance class outside the six', () => {
+  const source = JSON.parse(fs.readFileSync(path.join(fixturesRoot, FIXTURE.architecture), 'utf8'));
+  source.connections[0].provenance = 'runtime-observed';
+  assert.equal(validate('architecture', source).ok, true, 'a valid provenance class was rejected');
+  source.connections[0].provenance = 'vibes';
+  const rejected = validate('architecture', source);
+  assert.equal(rejected.ok, false, 'the schema accepted a provenance class outside the six');
+  assert.match(rejected.message, /provenance/, 'the rejection did not name the provenance field');
+});
