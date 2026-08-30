@@ -13,7 +13,7 @@ PLANNED rows are read live from the roadmap document on every run, so they
 cannot silently disagree with it: edit a roadmap row without rerunning
 `npm run status` and the build fails.
 
-**Totals:** 61 SHIPPED (17 browser-proved), 1 UNPROVEN, 57 PLANNED.
+**Totals:** 62 SHIPPED (18 browser-proved), 1 UNPROVEN, 56 PLANNED.
 
 ## Shipped & unproven — from the conformance matrix
 
@@ -32,6 +32,7 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 2.2 | Verified Source Beacon (SRC n) | H | P0 | SHIPPED (browser-proved) | `viewer.browser.test.mjs` |
 | 2.4 | Evidence on relationships (all five diagram types) | N | P1b | SHIPPED | `evidence.test.mjs` |
 | 2.5 | Six-class evidence provenance | N | P1b | SHIPPED | `evidence.test.mjs` |
+| 4.14 | Evidence-first visual language (six provenance treatments) | N | P1b | SHIPPED (browser-proved) | `provenance-visual.test.mjs` |
 | 3.1 | Proper Crossing Gate (edge-vs-edge, showcase-only) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
 | 3.1b | Clean Flow Gate (no edge across unrelated node) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
 | 3.2 | Clean Label Gate (≥4 px) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
@@ -113,7 +114,6 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 3.14 | Calibrated thresholds | N | P2 |
 | 3.15 | Architecture assertions (assert) | N | P5 |
 | 4.11 | Shared compiler pipeline | R | P1 |
-| 4.14 | Evidence-first visual language | N | P1 |
 | 4.15 | Tree-shaken artifacts | N | P3 |
 | 5.15 | Runtime i18n (en, zh-CN) | H→R | P3 |
 | 5.16 | Modularized viewer source | R | P1 |
