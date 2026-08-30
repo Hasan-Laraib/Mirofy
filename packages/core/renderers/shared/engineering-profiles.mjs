@@ -42,28 +42,41 @@ export function deploymentOwnershipDiagnostics(diagram) {
 
   components.forEach((component, index) => {
     if (component.type === 'external') return;
-    if (typeof component.tag !== 'string' || component.tag.trim() === '') {
+    // `owner` is the first-class field (row 1.15); `tag` is the legacy
+    // carrier, kept because every document authored before that field
+    // existed uses it. The diagnostic reports WHICH source answered --
+    // a diagnostic that lies about where it looked is worse than none.
+    const ownerField = typeof component.owner === 'string' && component.owner.trim() !== ''
+      ? 'owner'
+      : typeof component.tag === 'string' && component.tag.trim() !== '' ? 'tag' : null;
+    if (!ownerField) {
       diagnostics.push({
         code: 'engineering/deployment-owner-missing',
         severity: 'error',
-        message: `Deployment component ${JSON.stringify(component.id)} does not name its owner in tag.`,
+        message: `Deployment component ${JSON.stringify(component.id)} does not name its owner.`,
         subject: subject('components', index, component),
-        evidence: { componentType: component.type, ownerField: 'tag' },
-        supportedFixes: [`set /components/${index}/tag to the responsible team or owner`],
+        evidence: { componentType: component.type, checkedFields: ['owner', 'tag'] },
+        supportedFixes: [`set /components/${index}/owner to the responsible team or owner`],
       });
     }
 
-    const regions = membership(boundaries, component.id, 'region');
+    // Same shape for regions: the declared field wins, boundary membership
+    // is the fallback. A component that declares its regions outright is not
+    // ambiguous no matter how many boundaries happen to wrap it.
+    const declaredRegions = Array.isArray(component.deployment?.regions) ? component.deployment.regions : null;
+    const regions = declaredRegions && declaredRegions.length
+      ? declaredRegions.map((label) => ({ boundary: { label }, index: -1 }))
+      : membership(boundaries, component.id, 'region');
     if (regions.length === 0) {
       diagnostics.push({
         code: 'engineering/deployment-region-scope',
         severity: 'error',
-        message: `Deployment component ${JSON.stringify(component.id)} is not assigned to a region boundary.`,
+        message: `Deployment component ${JSON.stringify(component.id)} is not assigned to a region.`,
         subject: subject('components', index, component),
-        evidence: { componentType: component.type, regionMemberships: 0 },
-        supportedFixes: ['add the component id to the real region boundary wraps list'],
+        evidence: { componentType: component.type, regionMemberships: 0, checkedFields: ['deployment.regions', 'boundaries'] },
+        supportedFixes: [`set /components/${index}/deployment/regions, or add the component id to a region boundary wraps list`],
       });
-    } else if (regions.length > 1) {
+    } else if (!declaredRegions && regions.length > 1) {
       diagnostics.push({
         code: 'engineering/deployment-region-ambiguous',
         severity: 'error',
