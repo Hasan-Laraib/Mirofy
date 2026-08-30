@@ -353,8 +353,14 @@
           evidence.hidden = true;
           return;
         }
-        var slug = repository.url.replace(/^https:\/\/github\.com\//, '').replace(/\/$/, '');
-        repositoryLink.href = repository.url + '/tree/' + repository.revision;
+        /* The slug and the revision link come from the payload, which the
+           host adapter built. Deriving them here meant assuming one forge's
+           URL shape: on anything but GitHub the link 404'd and the slug
+           displayed as a full URL. Older artifacts carry neither field, so
+           both fall back to the previous behaviour. */
+        var slug = repository.slug
+          || repository.url.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, '');
+        repositoryLink.href = repository.treeUrl || (repository.url + '/tree/' + repository.revision);
         repositoryLink.textContent = slug + ' @ ' + repository.shortRevision;
         repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
         /* The class token is shown verbatim: it is published vocabulary the
