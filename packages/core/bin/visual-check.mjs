@@ -273,11 +273,17 @@ export function chromeVisualBrowserArgs(profileRoot, {
 }
 
 async function evaluate(cdp, sessionId, expression, awaitPromise = false) {
+  // 60s, not the transport default of 15s. The first evaluate on a page
+  // deliberately WAITS -- document.fonts.ready plus the reader layout's
+  // whenStable -- and a cold Chrome on a loaded CI runner can take longer
+  // than 15s to settle. That is a settlement wait, not a liveness probe;
+  // timing it out reported "Runtime.evaluate: timed out after 15000ms"
+  // intermittently on CI Node 18/20 runners while never reproducing locally.
   const response = await cdp.send('Runtime.evaluate', {
     expression,
     awaitPromise,
     returnByValue: true,
-  }, sessionId);
+  }, sessionId, 60000);
   if (response.exceptionDetails) {
     throw new Error(response.exceptionDetails.exception?.description
       || response.exceptionDetails.text
