@@ -26,11 +26,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
-      # fetch-depth: 0 (full history) is required, not a nicety: check:provenance
-      # verifies the harvest claim against the pinned anchor commit, and the
-      # default depth-1 shallow clone does not contain it. The gate detects that
-      # and fails rather than passing vacuously, so a shallow checkout turns every
-      # job in this workflow red.
+      # fetch-depth: 0 (full history): was required by check:provenance, which
+      # verified a byte-identity claim against a pinned anchor commit that a
+      # default depth-1 shallow clone would not contain. That gate has since
+      # been retired; the setting is left as-is here.
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
@@ -55,11 +54,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      # fetch-depth: 0 (full history) is required, not a nicety: check:provenance
-      # verifies the harvest claim against the pinned anchor commit, and the
-      # default depth-1 shallow clone does not contain it. The gate detects that
-      # and fails rather than passing vacuously, so a shallow checkout turns every
-      # job in this workflow red.
+      # fetch-depth: 0 (full history): was required by check:provenance, which
+      # verified a byte-identity claim against a pinned anchor commit that a
+      # default depth-1 shallow clone would not contain. That gate has since
+      # been retired; the setting is left as-is here.
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
