@@ -15,6 +15,8 @@ Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
 ## 2026-08-30 — Roadmap sync: a shipped capability was invisible to the accounting
 
+**Commits:** `91f58ec`.
+
 While scoping P1c against the roadmap, four P1a deliveries turned out to be
 unmarked (P1.13 modularized viewer, P1.14 contract.mjs, P1.15 generated
 tokens, P1.17 axe gate) — and one of them, row 5.16, had never been
