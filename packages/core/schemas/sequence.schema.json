@@ -173,6 +173,9 @@
           "label"
         ],
         "properties": {
+          "provenance": {
+            "$ref": "common.schema.json#/$defs/provenance"
+          },
           "sources": {
             "$ref": "common.schema.json#/$defs/sources"
           },
