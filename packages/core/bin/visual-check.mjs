@@ -198,7 +198,13 @@ class PipeCdp {
     }
   }
 
-  send(method, params = {}, sessionId = undefined, timeoutMs = 15000) {
+  // 60s default, raised from 15s after row 6.3 failed intermittently on CI
+  // with two DIFFERENT calls naming the timeout (Runtime.evaluate once,
+  // Target.getTargets the next run). The diagnosis is not one slow call: a
+  // cold Chrome on a loaded runner can take >15s to answer ANYTHING, and a
+  // per-call fix is whack-a-mole. 60s trades slower failure on a genuinely
+  // hung Chrome for not failing a healthy one -- the right trade for a gate.
+  send(method, params = {}, sessionId = undefined, timeoutMs = 60000) {
     const id = this.nextId++;
     const message = { id, method, params };
     if (sessionId) message.sessionId = sessionId;
@@ -218,7 +224,7 @@ class PipeCdp {
     });
   }
 
-  waitFor(method, sessionId, timeoutMs = 15000) {
+  waitFor(method, sessionId, timeoutMs = 60000) {
     return new Promise((resolve, reject) => {
       const waiter = { method, sessionId, resolve, reject, timer: null };
       waiter.timer = setTimeout(() => {
@@ -273,17 +279,11 @@ export function chromeVisualBrowserArgs(profileRoot, {
 }
 
 async function evaluate(cdp, sessionId, expression, awaitPromise = false) {
-  // 60s, not the transport default of 15s. The first evaluate on a page
-  // deliberately WAITS -- document.fonts.ready plus the reader layout's
-  // whenStable -- and a cold Chrome on a loaded CI runner can take longer
-  // than 15s to settle. That is a settlement wait, not a liveness probe;
-  // timing it out reported "Runtime.evaluate: timed out after 15000ms"
-  // intermittently on CI Node 18/20 runners while never reproducing locally.
   const response = await cdp.send('Runtime.evaluate', {
     expression,
     awaitPromise,
     returnByValue: true,
-  }, sessionId, 60000);
+  }, sessionId);
   if (response.exceptionDetails) {
     throw new Error(response.exceptionDetails.exception?.description
       || response.exceptionDetails.text
