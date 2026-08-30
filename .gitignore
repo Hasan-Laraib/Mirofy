@@ -8,3 +8,6 @@ build/
 
 # Rendered examples are build output; regenerate with `npm run build`.
 packages/core/examples/*.html
+
+# SDD working artifacts: briefs, reports, review packages, ledger.
+.superpowers/
