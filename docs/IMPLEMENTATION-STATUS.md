@@ -13,7 +13,7 @@ PLANNED rows are read live from the roadmap document on every run, so they
 cannot silently disagree with it: edit a roadmap row without rerunning
 `npm run status` and the build fails.
 
-**Totals:** 70 SHIPPED (19 browser-proved), 1 UNPROVEN, 48 PLANNED.
+**Totals:** 74 SHIPPED (19 browser-proved), 1 UNPROVEN, 44 PLANNED.
 
 ## Shipped & unproven — from the conformance matrix
 
@@ -38,6 +38,10 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 2.9 | Scanner: workspace/package topology | N | P1c | SHIPPED | `scanners.test.mjs` |
 | 2.10 | Scanner: HTTP routes | N | P1c | SHIPPED | `scanners.test.mjs` |
 | 2.17 | Honest coverage report | N | P1c | SHIPPED | `evidence-graph.test.mjs` |
+| 1.12 | Stable semantic IDs | R | P1d | SHIPPED | `system-model.test.mjs` |
+| 1.14 | System model (model.json) | N | P1d | SHIPPED | `system-model.test.mjs` |
+| 1.15 | First-class engineering metadata | N | P1d | SHIPPED | `engineering-metadata.test.mjs` |
+| 1.17 | Human overrides recorded as authored | N | P1d | SHIPPED | `system-model.test.mjs` |
 | 4.14 | Evidence-first visual language (six provenance treatments) | N | P1b | SHIPPED (browser-proved) | `provenance-visual.test.mjs` |
 | 5.20 | Evidence Passport for relationships | N | P1b | SHIPPED (browser-proved) | `evidence-passport.browser.test.mjs` |
 | 5.16 | Modularized viewer source | R | P1 | SHIPPED | `viewer-modules.test.mjs` |
@@ -97,12 +101,8 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 |---|---|---|---|
 | 1.10 | Agent contract (SKILL.md) | H→R | P1 |
 | 1.11 | Explicit pos:[x,y] authoring | R | P2 |
-| 1.12 | Stable semantic IDs | R | P1 |
 | 1.13 | Mermaid import | N | P1 |
-| 1.14 | System model (model.json) | N | P1 |
-| 1.15 | First-class engineering metadata | N | P1 |
 | 1.16 | Recipe library (100) | N | P3 |
-| 1.17 | Human overrides | N | P1 |
 | 2.6 | Multi-repo evidence identity | N | P2 |
 | 2.11 | Scanner: OpenAPI / gRPC | N | P4 |
 | 2.12 | Scanner: Docker Compose | N | P4 |
