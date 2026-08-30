@@ -389,6 +389,8 @@ const MESSAGE_PAIRS = {
   'viewer.passport.sourceMarker': ['SRC', '来源'],
   'viewer.passport.beacon.one': ['{count} verified source; focus this node to inspect', '{count} 个已验证来源；聚焦此节点以检查'],
   'viewer.passport.beacon.other': ['{count} verified sources; focus this node to inspect', '{count} 个已验证来源；聚焦此节点以检查'],
+  'viewer.passport.beaconEdge.one': ['{count} verified source; focus this connection to inspect', '{count} 个已验证来源；聚焦此连接以检查'],
+  'viewer.passport.beaconEdge.other': ['{count} verified sources; focus this connection to inspect', '{count} 个已验证来源；聚焦此连接以检查'],
   'viewer.passport.repository.open': ['Open verified repository revision {revision}', '打开已验证的仓库修订版本 {revision}'],
   'viewer.passport.source.open': ['Open verified source {path} at revision {revision}', '打开修订版本 {revision} 中已验证的来源 {path}'],
   'viewer.passport.source.openLink': ['Open ↗', '打开 ↗'],
