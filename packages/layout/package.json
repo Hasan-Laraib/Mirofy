@@ -1,0 +1,9 @@
+{
+  "name": "@mirofy/layout",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dev-time constraint layout: view IR with intent to coordinates.",
+  "exports": { "./solve": "./src/solve.mjs" },
+  "devDependencies": { "webcola": "^3.4.0" }
+}

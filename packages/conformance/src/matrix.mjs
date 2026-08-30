@@ -463,6 +463,41 @@ export const IMPORTED_ROWS = [
   },
 
   {
+    id: '3.12',
+    name: 'Constraint solver (dev-time)',
+    // webcola does the force layout and overlap avoidance, as a
+    // devDependency of packages/layout alone -- the rendered artifact keeps
+    // row 6.9's zero-runtime-dependency promise.
+    //
+    // It does NOT do the pinning, and that was measured rather than assumed:
+    // `node.fixed = 1` drifted a pinned node 100.8px and
+    // `Descent.locks.add()` drifted it 123.2px over 60 iterations. `fixed` is
+    // read by the d3 drag adaptor rather than by the descent. So pins are
+    // enforced after the solve and asserted here; the gate was observed
+    // failing by deleting that enforcement, which reproduces the drift.
+    origin: 'N',
+    phase: 'P2',
+    proof: 'layout-solver.test.mjs',
+    testTitle: '[3.12] the same view solves to the same coordinates twice',
+  },
+  {
+    id: '1.11',
+    name: 'Authored positions honoured as hard constraints',
+    // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +
+    // solver" with "manual pins still honoured as hard constraints". That
+    // second clause is a promise to the person who typed the coordinates,
+    // and a pin the solver may relocate is not a constraint -- it is a
+    // suggestion with better marketing.
+    //
+    // Enforced after the solve, then anything the restoration collided with
+    // is moved. The pin never is.
+    origin: 'R',
+    phase: 'P2',
+    proof: 'layout-solver.test.mjs',
+    testTitle: '[3.12] an authored position is a hard constraint and survives the solve exactly',
+  },
+
+  {
     id: '5.20',
     name: 'Evidence Passport for relationships',
     // Selecting a relationship focuses its SOURCE NODE, so the Passport was
