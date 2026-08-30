@@ -1,4 +1,4 @@
-// The parity harness: one line of accounting per harvested (H) row.
+// The parity harness: one line of accounting per imported (H) row.
 //
 // Honesty rules (doc 37 §1 — a skipped test is skipped, never described as
 // passing):
@@ -22,16 +22,16 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { HARVESTED_ROWS } from '../packages/conformance/src/matrix.mjs';
+import { IMPORTED_ROWS } from '../packages/conformance/src/matrix.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
 const includeBrowser = process.env.MIROFY_CHROME ? true : false;
 
-const unproven = HARVESTED_ROWS.filter((row) => row.proof === null);
-const browserRows = HARVESTED_ROWS.filter((row) => row.browser);
+const unproven = IMPORTED_ROWS.filter((row) => row.proof === null);
+const browserRows = IMPORTED_ROWS.filter((row) => row.browser);
 const deferredBrowserRows = browserRows.filter(() => !includeBrowser);
-const provableRows = HARVESTED_ROWS.filter((row) => row.proof !== null && (!row.browser || includeBrowser));
+const provableRows = IMPORTED_ROWS.filter((row) => row.proof !== null && (!row.browser || includeBrowser));
 
 const suites = new Set(
   provableRows
@@ -57,7 +57,7 @@ function passingTapTitles(tapOutput) {
 }
 
 const titledSuiteNames = new Set(
-  HARVESTED_ROWS
+  IMPORTED_ROWS
     .filter((row) => row.testTitle)
     .map((row) => row.proof),
 );
@@ -94,7 +94,7 @@ for (const suite of suites) {
   if (suiteFailed) failures += 1;
 
   const passedTitles = passingTapTitles(tapOutput);
-  for (const row of HARVESTED_ROWS) {
+  for (const row of IMPORTED_ROWS) {
     if (row.proof !== suite || !row.testTitle) continue;
     // A browser row sharing a suite with non-browser rows (e.g. 6.3 inside
     // delivery.test.mjs) is expected to skip -- not pass -- when no browser
@@ -119,7 +119,7 @@ const scriptProofs = new Set(provableRows.map((row) => row.proof).filter((proof)
 // defect two fix rounds were just spent closing (see this file's header
 // comment), reopened via the script path instead of the test-file path.
 for (const scriptProof of scriptProofs) {
-  const rowsForScript = HARVESTED_ROWS.filter((row) => row.proof === scriptProof);
+  const rowsForScript = IMPORTED_ROWS.filter((row) => row.proof === scriptProof);
   if (rowsForScript.length > 1) {
     console.error(
       `\nconfiguration error: ${rowsForScript.length} rows map to the script proof "${scriptProof}" ` +
@@ -146,7 +146,7 @@ const titleFailedIds = new Set(titleFailures.map((entry) => entry.id));
 const trulyProvableRows = provableRows.filter((row) => !titleFailedIds.has(row.id));
 if (titleFailures.length) failures += 1;
 
-console.log(`\nconformance: ${HARVESTED_ROWS.length} harvested rows total`);
+console.log(`\nconformance: ${IMPORTED_ROWS.length} imported rows total`);
 console.log(`  proved:            ${failures === 0 ? trulyProvableRows.length : 0} / ${provableRows.length}${failures ? ' (suite or title-check failures below; none counted as passing)' : ''}`);
 console.log(`  browser-deferred:  ${deferredBrowserRows.length} (never counted as passing; set MIROFY_CHROME to run them)`);
 if (deferredBrowserRows.length) {
@@ -164,8 +164,8 @@ for (const row of unproven) {
 }
 
 const accounted = trulyProvableRows.length + deferredBrowserRows.length + unproven.length + titleFailures.length;
-if (accounted !== HARVESTED_ROWS.length) {
-  console.error(`\naccounting error: ${accounted} rows accounted for, expected ${HARVESTED_ROWS.length}`);
+if (accounted !== IMPORTED_ROWS.length) {
+  console.error(`\naccounting error: ${accounted} rows accounted for, expected ${IMPORTED_ROWS.length}`);
   process.exit(1);
 }
 
