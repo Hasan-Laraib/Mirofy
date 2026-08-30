@@ -50,6 +50,16 @@ function gitValue(repoRoot, args, failure) {
  */
 function samePath(left, right) {
   const normalise = (value) => {
+    // realpathSync.native() expands Windows 8.3 short names.
+    // os.tmpdir() answers C:\Users\RUNNER~1\... on CI while git reports the
+    // long C:/Users/runneradmin/... form, and the plain realpathSync leaves
+    // the short name intact -- so the same directory compared unequal on all
+    // four Windows jobs. Same class of bug as P1a's libuv abort.
+    try {
+      value = fs.realpathSync.native(String(value));
+    } catch {
+      // Unreadable is the caller's problem, not this comparison's.
+    }
     const resolved = path.resolve(String(value)).split(String.fromCharCode(92)).join('/').replace(/[/]+$/, '');
     return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
   };
