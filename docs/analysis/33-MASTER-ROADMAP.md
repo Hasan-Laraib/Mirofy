@@ -61,11 +61,11 @@ a chosen name.
 | P1.10 | ✅ **SHIPPED (P1b)** · **Evidence Passport + visual language.** Click an edge → file, lines, revision, derivation, provenance. Six distinguishable treatments, **not colour-dependent** | 5.20, 4.14 | L |
 | P1.11 | ✅ **SHIPPED (P1b)** · **Host-agnostic evidence.** Verification decoupled from link generation → GitLab, Gitee, Bitbucket, GHES, Azure DevOps | 2.3 | M |
 | P1.12 | **Shared compiler pipeline.** Five renderers → one pass pipeline | 4.11 | XL |
-| P1.13 | **Modularize the viewer.** 693 KB monolith → `viewer/src/{core,camera,inspect,trace,story,motion,export,radar}` + build. Template becomes generated, with `check:template`. **Golden tests guard every extraction** | 5.16 | XL |
-| P1.14 | **`contract.mjs`.** All 202 `data-*` attributes + CSS classes as one checked source of truth. Resolves the label-colour ambiguity as a written rule | 5.17 | M |
-| P1.15 | **Generated design tokens + colour-blind preset.** 8 palette combos from the design system; Okabe–Ito ships as proof | 4.12, 4.13 | M |
+| P1.13 | ✅ **SHIPPED (P1a)** · **Modularize the viewer.** 693 KB monolith → `viewer/src/{core,camera,inspect,trace,story,motion,export,radar}` + build. Template becomes generated, with `check:template`. **Golden tests guard every extraction** | 5.16 | XL |
+| P1.14 | ✅ **SHIPPED (P1a)** · **`contract.mjs`.** All 202 `data-*` attributes + CSS classes as one checked source of truth. Resolves the label-colour ambiguity as a written rule | 5.17 | M |
+| P1.15 | ✅ **SHIPPED (P1a)** · **Generated design tokens + colour-blind preset.** 8 palette combos from the design system; Okabe–Ito ships as proof | 4.12, 4.13 | M |
 | P1.16 | **`showcase` false-negative fix.** Boundary overlap + collinear frames | 3.11 | M |
-| P1.17 | **axe-core gate** | 5.19 | S |
+| P1.17 | ✅ **SHIPPED (P1a)** · **axe-core gate** | 5.19 | S |
 | P1.18 | **Mermaid import** | 1.13 | M |
 | P1.19 | **Scan-first agent contract.** `SKILL.md` rewritten; skill install becomes optional, not required | 1.10 | M |
 

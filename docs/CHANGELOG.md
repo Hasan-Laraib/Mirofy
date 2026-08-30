@@ -13,6 +13,21 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — Roadmap sync: a shipped capability was invisible to the accounting
+
+While scoping P1c against the roadmap, four P1a deliveries turned out to be
+unmarked (P1.13 modularized viewer, P1.14 contract.mjs, P1.15 generated
+tokens, P1.17 axe gate) — and one of them, row 5.16, had never been
+registered in the conformance matrix at all. Its three proof tests were
+written in P1a, titled `(5.16)`, and have passed ever since; the row simply
+did not exist, so a delivered capability sat in PLANNED for a full phase.
+
+The lesson is about the accounting gate's blind spot: `status:check` can
+only catch drift in rows that exist. A capability delivered without its row
+is invisible to every gate downstream of the matrix. Row 5.16 is now
+registered against the existing tests — 66 rows, 46/46 proved without
+Chrome — and the roadmap marks match the matrix.
+
 ## 2026-08-30 — P1b merged to main
 
 **Commits:** merge commit `744c67f` (PR #9, 39 commits).

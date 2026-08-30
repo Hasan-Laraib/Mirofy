@@ -132,7 +132,7 @@ Every source-baseline feature is accounted for; none is dropped.
 | 5.13 | Deep links (view/focus/route/reach/relation/beat) | **H** | P0 |
 | 5.14 | Print + embed modes | **H** | P0 |
 | 5.15 | Runtime i18n (en, zh-CN) | **H→R** | P3 | Runtime switching replaces render-time bake |
-| 5.16 | Modularized viewer source | **R** | P1 | From the 693 KB monolith |
+| 5.16 | Modularized viewer source | **R** | P1 | From the 693 KB monolith — ✅ **SHIPPED (P1a; row registered in P1c sync)** |
 | 5.17 | Renderer↔viewer contract (`contract.mjs`) | **N** | P1 | 202 `data-*` attributes become checked |
 | 5.18 | Browser tests in CI | **N** | P0 | 23 pre-existing skips |
 | 5.19 | axe-core accessibility gate | **N** | P1 | |
