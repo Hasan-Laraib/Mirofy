@@ -13,8 +13,8 @@ Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 ## 2026-08-30 — Repository identity: drop the source repo's own references, retire provenance
 
 **Commits:** `45b3f89..dbb9074` (Task 1, remove the repository's own
-references to its source — `LICENSE`, `NOTICE`, `docs/harvest.md`,
-`scripts/harvest-manifest.json`, `scripts/check-provenance.mjs`; Task 2,
+references to its source — `LICENSE`, `NOTICE`, the provenance record,
+the provenance manifest, and `scripts/check-provenance.mjs`; Task 2,
 copy the active analysis corpus in-tree at `docs/analysis/` and
 de-reference it). Task 3 (this changelog and its freshness gate) continues
 the same operation and follows in later commits on this branch.
@@ -27,8 +27,8 @@ byte-identity guarantee they encoded is now carried by `check:drift` alone
 that `docs/P0-BUILD-LEDGER.md` and `docs/P1A-BUILD-LEDGER.md` had only ever
 referenced by path into a sibling repository; every reference to that
 sibling repository, and every now-defunct issue-tracker citation, was
-rewritten by meaning rather than deleted. `test:conformance`'s `Harvested`
-origin category was renamed `Imported`.
+rewritten by meaning rather than deleted. `test:conformance`'s origin
+category was renamed to `Imported`.
 
 **Gates moved:** `check:provenance` removed from the `check` chain entirely
 (retired, not disabled) — the chain became `lint → typecheck → test →
@@ -39,12 +39,12 @@ after `lint` in this same operation. `check:drift` unaffected, still
 `test:conformance` row count unchanged — only the origin label changed.
 
 **Look at:** `.superpowers/sdd/2026-08-30-repository-identity/task-1-report.md`
-and `task-2-report.md` for the full per-file accounting; `git grep -Ion -i
-archify -- . ':!packages/core/LICENSE'` should return `0`.
+and `task-2-report.md` for the full per-file accounting; the repository retains
+no reference to its source outside `packages/core/LICENSE`.
 
 ## 2026-08-29 — P1a: viewer & design-system spine
 
-**Commits:** `afe7429..fed9236` (38 commits on `p1a-viewer-design-system`),
+**Commits:** `fed9236..afe7429` (38 commits on `p1a-viewer-design-system`),
 merged to `main` at `9ae3f80`.
 
 **What changed:** `packages/core/assets/template.html` stopped being
@@ -78,7 +78,7 @@ this phase left open (an eleventh, unmodelled print-media palette block in
 
 **What changed:** New repository scaffolded (`Mirofy`, `@mirofy/*` scope,
 Node `>=18`, pure ESM, zero runtime dependencies). Renderers, schemas,
-viewer, and CLI harvested from the upstream baseline; golden digest parity
+viewer, and CLI imported from the source baseline; golden digest parity
 pinned against it. A 56-row conformance matrix was established with a
 named `testTitle` per row inside a shared suite — not just a passing exit
 code. CI was brought green across a Windows-only `fs.watch` libuv abort
