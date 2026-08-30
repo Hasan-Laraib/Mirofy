@@ -9,10 +9,10 @@
 **Tech Stack:** Node 18/20/22/24, ESM (`.mjs`), `node:test`, ESLint 9 flat config, `tsc --noEmit` with `checkJs`, Chrome via the existing CDP client, `marked` (devDependency, for PDF generation). No runtime dependencies.
 
 **Spec:**
-- `L:\Projects\archify\analysis\future\33-MASTER-ROADMAP.md` — P1.8, P1.9, P1.10, P1.11
-- `L:\Projects\archify\analysis\future\32-PARITY-AND-FEATURE-MATRIX.md` — rows 2.3, 2.4, 2.5, 4.14, 5.20
-- `L:\Projects\archify\analysis\future\36-VISUAL-SYSTEM.md` — V4 evidence-first visual language, §4 never-regress list
-- `L:\Projects\archify\analysis\future\37-ENGINEERING-STANDARDS.md` — test-per-feature, commit granularity
+- `docs/analysis/33-MASTER-ROADMAP.md` — P1.8, P1.9, P1.10, P1.11
+- `docs/analysis/32-PARITY-AND-FEATURE-MATRIX.md` — rows 2.3, 2.4, 2.5, 4.14, 5.20
+- `docs/analysis/36-VISUAL-SYSTEM.md` — V4 evidence-first visual language, §4 never-regress list
+- `docs/analysis/37-ENGINEERING-STANDARDS.md` — test-per-feature, commit granularity
 - `L:\Projects\product-p0\docs\P1A-BUILD-LEDGER.md` — the debt this plan clears
 
 **Repository:** `L:\Projects\product-p0` — remote `Hasan-Laraib/Mirofy`, `main` @ `9ae3f80`, CI 13/13 green, conformance 60 rows / 59 proved with Chrome, 1 UNPROVEN (6.10).
@@ -51,8 +51,8 @@ Verified against `main` @ `9ae3f80`. Where spec and code disagree, **the code is
 - **Commit identity:** author and committer are `Hasan-Laraib <lxh417bham@gmail.com>`. **Never add a `Co-Authored-By: Claude` trailer.**
 - **Zero runtime dependencies** in every workspace package (`delivery.test.mjs` row 6.9). `marked` goes in **root `devDependencies`** only.
 - **Platform floor:** Node 18/20/22/24 × ubuntu/macos/windows. All 13 CI jobs green.
-- **`npm run check` is the gate**, and it now chains: `lint → typecheck → test → test:golden → check:template → check:provenance → check:drift → test:conformance → check:artifacts → check:size → check:audit`.
-- **Two core-integrity gates, different rules.** `check:provenance` is an **immutable** historical claim (163 files at the pinned `provenance-anchor` tag) — **never edit `scripts/harvest-manifest.json`**. `check:drift` is the present-tense gate (`scripts/core-manifest.json`); re-baseline it deliberately with `--update` and confirm only intended paths moved. Its CR-byte guard will refuse to hash a file containing `\r`.
+- **`npm run check` is the gate**, and it now chains: `lint → typecheck → test → test:golden → check:template → check:drift → test:conformance → check:artifacts → check:size → check:audit`.
+- **The core-integrity gate.** `check:drift` is the present-tense gate (`scripts/core-manifest.json`); re-baseline it deliberately with `--update` and confirm only intended paths moved. Its CR-byte guard will refuse to hash a file containing `\r`.
 - **Line endings are LF.** A text-mode write poisoned a manifest in P1a. `docs/` is not covered by the CR guard — verify at byte level before committing anything you generated.
 - **`testTitle` must match a test name character-for-character.** The harness proves a row only on an exact TAP `ok` match; a mismatch reads as "not proved" while looking registered.
 - **Skipped is not passed.** Browser rows report *browser-deferred* without `MIROFY_CHROME`, never proved.
@@ -97,7 +97,7 @@ Verified against `main` @ `9ae3f80`. Where spec and code disagree, **the code is
 - Modify: `package.json` (scripts + `marked` devDependency), `.gitignore` (ignore `preview/`)
 
 **Interfaces:**
-- Consumes: `HARVESTED_ROWS` from `packages/conformance/src/matrix.mjs`; `MODES`, `renderFixture`, `fixturesRoot` from `packages/conformance/src/render.mjs`; `ChromeVisualBrowser`, `findChrome` from `packages/core/bin/visual-check.mjs`.
+- Consumes: `IMPORTED_ROWS` from `packages/conformance/src/matrix.mjs`; `MODES`, `renderFixture`, `fixturesRoot` from `packages/conformance/src/render.mjs`; `ChromeVisualBrowser`, `findChrome` from `packages/core/bin/visual-check.mjs`.
 - Produces: `npm run gallery`, `npm run status`, `npm run status:check`, `npm run docs:pdf`.
 
 > **Why this is Task 1.** The operator asked for three things: a living record of what is built, a way to *see* each feature after it lands, and docs that stay in sync. Building them first means every later task in this plan updates the record and refreshes the gallery as part of its own definition of done, rather than a documentation sweep at the end that nobody reads.
@@ -215,8 +215,8 @@ const { ChromeVisualBrowser, findChrome } = await import(visualCheck);
 
 /** @type {Array<[string, string, string]>} */
 const DOCS = [
-  ['System-Intelligence-Plan', 'L:/Projects/archify/analysis/future', 'Mirofy — System Intelligence Plan'],
-  ['System-Intelligence-Corpus', 'L:/Projects/archify/analysis', 'Mirofy — Analysis Corpus'],
+  ['System-Intelligence-Plan', 'docs/analysis', 'Mirofy — System Intelligence Plan'],
+  ['System-Intelligence-Corpus', '<private corpus, not migrated into this repo>', 'Mirofy — Analysis Corpus'],
 ];
 ```
 
@@ -608,7 +608,7 @@ Assert the exact strings. A test asserting only "a URL was produced" would pass 
 - [ ] P1a debt cleared: static role fixed at the renderer, print block correct, leak gate replaced with a real one
 - [ ] `npm run gallery`, `npm run status`, `npm run docs:pdf` all work; `status:check` is in the `check` chain
 - [ ] Every new gate has been observed failing on a deliberate break, with the transcript recorded
-- [ ] `npm run check` exit 0 with and without Chrome; `check:provenance` 163/163 untouched; all 13 CI jobs green
+- [ ] `npm run check` exit 0 with and without Chrome; all 13 CI jobs green
 - [ ] No commit carries a `Co-Authored-By: Claude` trailer
 
 ---

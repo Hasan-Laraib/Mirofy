@@ -1,6 +1,6 @@
 # 36 · Visual System — Parity Guarantee & Advances
 
-**The question:** will the new product have at least Archify's visuals, or better?
+**The question:** will the new product have at least the source project's visuals, or better?
 **The answer:** **identical by construction at P0, strictly better from P2 onward** — and the
 parity half is verified, not promised.
 
@@ -13,16 +13,17 @@ MIT. Three portability facts, verified against the source on 2026-08-29:
 
 | Check | Result |
 |---|---|
-| Does `assets/template.html` reference Archify paths, packages, or hosts? | **No.** Every `archify*` occurrence is an internal CSS class, `@keyframes` name, or DOM id — `archify-node-pulse`, `archify-edge-flow`, `archify-i18n-data`, `archify-radar-live`. Zero file paths, zero package references |
+| Does `assets/template.html` reference the source project's paths, packages, or hosts? | **No.** Every source-prefixed occurrence was an internal CSS class, `@keyframes` name, or DOM id. Zero file paths, zero package references |
 | External network dependencies in the template? | **Only Google Fonts** (`fonts.googleapis.com`, `fonts.gstatic.com`) plus the W3C SVG namespace. Nothing else |
 | Third-party imports in the five renderers? | **None.** Only sibling modules plus `node:path` / `node:url` |
 
 The template is a **self-contained string artifact** and the renderers are a **dependency-free
-module tree**. Moving them to a new repository is a file copy plus an import-path update.
-Renaming the internal `archify-*` prefix is cosmetic and mechanical.
+module tree**. Moving them to a new repository was a file copy plus an import-path update.
+The internal naming prefix was renamed at import time — every CSS class, `@keyframes` name,
+and DOM id now carries this product's own prefix; none of the source project's remain.
 
-> **This is the whole argument for the Harvest route.** The visual system is the most
-> expensive thing Archify owns and the cheapest thing to carry across.
+> **This is the whole argument for the import route.** The visual system was the most
+> expensive thing the source project owned and the cheapest thing to carry across.
 
 ---
 
@@ -104,7 +105,7 @@ label-on-route collisions — on *every* diagram, not only the ones that survive
 rounds. **This is the single largest visual improvement available.**
 
 ### V2 · Empirically calibrated quality thresholds — **P2**
-Archify's gates use thresholds chosen by judgement: 4 px label clearance, 8 px shared-lane,
+The source project's gates use thresholds chosen by judgement: 4 px label clearance, 8 px shared-lane,
 8/16 px segment rhythm. The Mooney/Purchase/Wybrow/Kobourov corpus publishes median and
 quartile distributions for **10 normalised layout metrics across 447,934 drawings from 16,768
 graphs**, with dataset and code released, and the authors explicitly endorse calibration use.
@@ -115,7 +116,7 @@ assume straight-line simple graphs; the bridging study to boxed nodes with ortho
 and containers is real work, scoped in P2.)*
 
 ### V3 · Colour-blind-safe preset (Okabe–Ito) — **P1**
-Upstream declined this on a maintenance cost that **only exists because the palette is
+The source project declined this on a maintenance cost that **only exists because the palette is
 hand-written 8 times**. Once tokens are generated from the design system, a CVD-safe preset is
 roughly a 40-line data change. ~8% of men have colour-vision deficiency and the entire
 semantic vocabulary is colour-coded — this is a real accessibility gap, closed cheaply.
@@ -152,8 +153,8 @@ round-trip. An escape hatch, not an editor.
 
 Two requirements look contradictory:
 
-- *"Nothing from Archify should be missed"* → harvest the viewer → **identical visuals**
-- *"It shouldn't look like a copy of Archify"* → **distinct visuals**
+- *"Nothing from the source project should be missed"* → import the viewer → **identical visuals**
+- *"It shouldn't look like a copy of the source project"* → **distinct visuals**
 
 They resolve on one distinction:
 
@@ -165,7 +166,7 @@ particular palette, typeface, or chrome layout.
 
 So once design tokens are generated from the design system (**P1.15**), visual identity becomes
 a **token swap**: new palette, new typography scale, new chrome proportions — while every
-harvested capability stays intact and the conformance suite stays green.
+imported capability stays intact and the conformance suite stays green.
 
 ### What can change without touching capability
 
@@ -185,7 +186,7 @@ A lighter, canvas-first surface — warmer neutrals, softer chrome, more spatial
 "midnight console" — reads as a genuinely different product while keeping every behaviour.
 Borrow the *sensibility* of modern canvas tools without copying any specific interface.
 
-**Constraint:** the identity work happens **after P1.15**, never during the harvest. Changing
+**Constraint:** the identity work happens **after P1.15**, never during the import. Changing
 appearance while extracting modules would make golden tests useless exactly when they are most
 needed.
 
@@ -208,7 +209,7 @@ Not by memory — by CI:
 
 | Gate | What it proves |
 |---|---|
-| **Golden SVG tests** | The 7 frozen v1-baseline fixtures render byte-identically after the harvest |
+| **Golden SVG tests** | The 7 frozen v1-baseline fixtures render byte-identically after the import |
 | **Preset × theme matrix** | All 8 combinations render for all 5 diagram types |
 | **Export smoke** | All 6 formats + 3 share-card variants produce non-empty, correctly-sized output |
 | **Browser suite in CI** | The 23 currently-skipped viewer tests run on **every** PR |
@@ -216,8 +217,8 @@ Not by memory — by CI:
 | **axe-core** | The accessibility commitments the design system already makes |
 | **Contract test** | Every CSS class a renderer emits exists; every `data-*` the viewer reads is emitted |
 
-**Definition of done for P0:** the golden tests pass against the harvested renderers, and a
-contact sheet from the new repo is visually indistinguishable from upstream's. Parity is a
+**Definition of done for P0:** the golden tests pass against the imported renderers, and a
+contact sheet from the new repo is visually indistinguishable from the source project's. Parity is a
 test result, not a claim.
 
 ---
@@ -232,5 +233,5 @@ test result, not a claim.
 | **P3** | **+** smaller artifacts · `svg-static` embedding · nudge-to-patch · **Miro board export** (matrix 6.23) — the diagram becomes a live editable board a whole team can annotate |
 | **P4** | **+** hierarchical views for large systems |
 
-At no point are the visuals worse than Archify's, because at no point are they rewritten from
+At no point are the visuals worse than the source project's, because at no point are they rewritten from
 scratch.

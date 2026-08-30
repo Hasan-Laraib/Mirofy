@@ -4,14 +4,14 @@
 small commits, never one. Every check must be green before merge.
 
 These standards are wired in **P0.11**, before the first feature lands — retrofitting
-discipline onto an existing codebase is how the ancestor ended up with 25 failing tests, an
+discipline onto an existing codebase is how the source project ended up with 25 failing tests, an
 untested 693 KB viewer, and 24 unreviewable PRs.
 
 ---
 
 ## 1. Test-per-feature — the rule
 
-> **Every row in [32 · Parity & Feature Matrix](32-PARITY-AND-FEATURE-MATRIX.md) — harvested,
+> **Every row in [32 · Parity & Feature Matrix](32-PARITY-AND-FEATURE-MATRIX.md) — imported,
 > rebuilt, or new — carries at least one automated test before it is considered delivered.**
 
 All 92 capabilities. No exceptions, no "we'll add tests later."
@@ -20,7 +20,7 @@ All 92 capabilities. No exceptions, no "we'll add tests later."
 
 | Origin | Approach | Why |
 |---|---|---|
-| **H** Harvested | **Characterisation test first.** Capture current behaviour *before* touching the code, then refactor against it | You cannot TDD code that already works. You can lock its behaviour so a refactor cannot silently change it |
+| **H** Imported | **Characterisation test first.** Capture current behaviour *before* touching the code, then refactor against it | You cannot TDD code that already works. You can lock its behaviour so a refactor cannot silently change it |
 | **R** Rebuilt | Characterisation test on the old behaviour → new test for the new behaviour → migration test proving the contract holds | Rebuilding is where parity is most likely to be lost |
 | **N** New | **TDD.** Failing test → implementation → green → refactor | Standard discipline for new behaviour |
 
@@ -94,7 +94,7 @@ in one line without "and", split it.**
 
 - **Every commit leaves `main` green.** No "will fix in the next commit"
 - **No commit mixes refactor with behaviour change.** Refactor, then change — separately
-- **Harvested code is imported in its own commit**, unmodified, before any adaptation
+- **Imported code arrives in its own commit**, unmodified, before any adaptation
 - Commit messages explain **why**; the diff already shows what
 
 ---
@@ -121,8 +121,8 @@ Every check must be green before merge. Nothing is skipped, ignored, or `--no-ve
 | 14 | **Benchmark** (first-pass rate) | **Scheduled + release** | ⚠️ **Never a per-PR gate** — external model behaviour changes with no code change in the repo |
 
 **Branch protection:** no direct pushes to `main`; checks 1–13 required; CI runs automatically
-on PRs from returning contributors *(the ancestor's ~20-of-24 PRs with zero CI runs is the
-failure mode being avoided)*.
+on PRs from returning contributors *(the source project's ~20-of-24 PRs with zero CI runs is
+the failure mode being avoided)*.
 
 ---
 
@@ -136,14 +136,15 @@ A matrix row is delivered only when **all** of these hold:
 - [ ] Committed as multiple small conventional commits, each referencing the row
 - [ ] Documented where a user or agent would look for it
 - [ ] For visible changes: `visual-check` contact sheet inspected, and visual review reported truthfully as `passed` / `failed` / `skipped` — **never upgraded**
-- [ ] For harvested rows: golden output still byte-identical
+- [ ] For imported rows: golden output still byte-identical
 - [ ] No `H` row regressed
 
 ## 5. Inherited failure modes being designed out
 
-Each row is a verified defect in the ancestor ([02 · Critical Analysis](../archify-current/02-CRITICAL-ANALYSIS.md)) and the standard that prevents it.
+Each row is a verified defect in the source project (documented privately) and the standard
+that prevents it.
 
-| Ancestor defect | Prevented by |
+| Source-project defect | Prevented by |
 |---|---|
 | 25 tests failing on a clean Windows checkout | Check 9 from day one |
 | 23 browser tests skipped by default | Check 6 — never skipped in CI |
@@ -158,7 +159,7 @@ Each row is a verified defect in the ancestor ([02 · Critical Analysis](../arch
 ## 6. Working agreement
 
 - **TDD for new behaviour.** Red → green → refactor. Not "tests after."
-- **Characterise before you refactor.** Harvested code gets its behaviour locked first.
+- **Characterise before you refactor.** Imported code gets its behaviour locked first.
 - **A skipped test is skipped.** Never described as passing, in a PR or a receipt.
-- **Truthful receipts.** A non-zero exit is never reported as success — the ancestor's discipline, kept.
+- **Truthful receipts.** A non-zero exit is never reported as success — the source project's discipline, kept.
 - **Fix the gate, not the test.** If a check is wrong, change the check deliberately in its own commit with a reason.

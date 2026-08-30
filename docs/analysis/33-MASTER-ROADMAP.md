@@ -1,7 +1,7 @@
 # 33 · Master Roadmap — Implementation Plan
 
-**Route:** Harvest — new spine, harvested organs, feature parity as a hard constraint.
-**Ancestor:** `tt-a1i/archify` @ `12106be` (MIT) · **Matrix:** [32](32-PARITY-AND-FEATURE-MATRIX.md) · **Architecture:** [31](31-V1-ARCHITECTURE.md)
+**Route:** Import — new spine, imported organs, feature parity as a hard constraint.
+**Source project:** MIT-licensed @ `12106be` · **Matrix:** [32](32-PARITY-AND-FEATURE-MATRIX.md) · **Architecture:** [31](31-V1-ARCHITECTURE.md)
 
 ---
 
@@ -20,24 +20,24 @@ P0 Foundation ──► P1 Spine ──► P2 Quality ──┬──► P4 Brea
 ---
 
 # P0 · Foundation — parity established
-**2–3 weeks** · Goal: a new repository whose visuals and validation are provably identical to Archify's.
+**2–3 weeks** · Goal: a new repository whose visuals and validation are provably identical to the source project's.
 
 | # | Task | Matrix | Effort |
 |---|---|---|---|
 | P0.1 | **New repo, clean from birth.** No committed artifacts; source + `gallery.manifest.json` of `{source, sha256, checkCount}`; CI rebuilds and asserts. Deterministic ZIP → release asset | 7.1, 6.10 | M |
-| P0.2 | **Harvest import — unmodified.** Copy `renderers/`, `schemas/`, `assets/template.html`, `delta/`, `brand-marks/`, `bin/` with MIT notice preserved and an explicit attribution line. **No refactoring in this step** | 1.1–1.9, 3.1–3.10, 4.1–4.10, 5.1–5.14, 6.1–6.10 | M |
+| P0.2 | **Import — unmodified.** Copy `renderers/`, `schemas/`, `assets/template.html`, `delta/`, `brand-marks/`, `bin/` with MIT notice preserved and an explicit attribution line. **No refactoring in this step** | 1.1–1.9, 3.1–3.10, 4.1–4.10, 5.1–5.14, 6.1–6.10 | M |
 | P0.3 | **Golden tests green.** The 7 frozen v1-baseline fixtures render byte-identically. All 5 modes × 8 preset/theme combinations. All 6 export formats + 3 share-card variants | 4.4, 6.4, 6.5 | M |
 | P0.4 | **Conformance suite.** One test per **H** row in the matrix. CI fails on any regression — *this is the "nothing missed" guarantee, mechanised* | 7.6 | L |
-| P0.5 | **Cross-platform green.** Windows/macOS/Linux. `.gitattributes eol=lf`; symlink tests skip with reasons, never fail. *(Upstream fails 25/746 on Windows today)* | 7.2 | S |
-| P0.6 | **Browser tests in CI from day one.** The 23 upstream-skipped viewer tests run on every PR | 5.18 | M |
+| P0.5 | **Cross-platform green.** Windows/macOS/Linux. `.gitattributes eol=lf`; symlink tests skip with reasons, never fail. *(The source project fails 25/746 on Windows today)* | 7.2 | S |
+| P0.6 | **Browser tests in CI from day one.** 23 pre-existing skipped viewer tests run on every PR | 5.18 | M |
 | P0.7 | **Hygiene at birth.** ESLint + JSDoc `checkJs`; `SECURITY.md`; SHA-pinned actions; zero CVEs; size budget gate | 7.3, 7.4, 7.7 | S |
-| P0.8 | **Naming sprint.** Run [35](35-NAMING-BRIEF.md) to a decision — 50–80 candidates → eliminate → score → 5 finalists → pick | — | M |
+| P0.8 | **Naming sprint.** A structured decision process — 50–80 candidates → eliminate → score → 5 finalists → pick — held privately | — | M |
 | P0.9 | **Roadmap + thesis published** | 7.5 | S |
 | P0.10 | **Spike: Miro API fidelity.** Before committing to 6.23, verify what `@mirohq/miro-api` can actually create — shape types, connector binding, frames, notes — and what fidelity is achievable. Output is an answer, not kept code | 6.23 | S |
 | P0.11 | **Engineering standards in force.** Test-per-feature, conventional commits, and the full check suite wired before the first feature lands. See [37](37-ENGINEERING-STANDARDS.md) | — | S |
 
 **Exit gate:** conformance suite green · golden SVGs byte-identical · a `visual-check` contact
-sheet from the new repo visually indistinguishable from upstream's · CI green on 3 platforms ·
+sheet from the new repo visually indistinguishable from the source project's · CI green on 3 platforms ·
 a chosen name.
 
 ---
@@ -62,9 +62,9 @@ a chosen name.
 | P1.11 | **Host-agnostic evidence.** Verification decoupled from link generation → GitLab, Gitee, Bitbucket, GHES, Azure DevOps | 2.3 | M |
 | P1.12 | **Shared compiler pipeline.** Five renderers → one pass pipeline | 4.11 | XL |
 | P1.13 | **Modularize the viewer.** 693 KB monolith → `viewer/src/{core,camera,inspect,trace,story,motion,export,radar}` + build. Template becomes generated, with `check:template`. **Golden tests guard every extraction** | 5.16 | XL |
-| P1.14 | **`contract.mjs`.** All 202 `data-*` attributes + CSS classes as one checked source of truth. Resolves the label-colour ambiguity (upstream #142) as a written rule | 5.17 | M |
+| P1.14 | **`contract.mjs`.** All 202 `data-*` attributes + CSS classes as one checked source of truth. Resolves the label-colour ambiguity as a written rule | 5.17 | M |
 | P1.15 | **Generated design tokens + colour-blind preset.** 8 palette combos from the design system; Okabe–Ito ships as proof | 4.12, 4.13 | M |
-| P1.16 | **`showcase` false-negative fix.** Boundary overlap + collinear frames (upstream #74) | 3.11 | M |
+| P1.16 | **`showcase` false-negative fix.** Boundary overlap + collinear frames | 3.11 | M |
 | P1.17 | **axe-core gate** | 5.19 | S |
 | P1.18 | **Mermaid import** | 1.13 | M |
 | P1.19 | **Scan-first agent contract.** `SKILL.md` rewritten; skill install becomes optional, not required | 1.10 | M |
@@ -84,7 +84,7 @@ not analysed, and the conformance suite is still green.
 | P2.1 | **Constraint solver.** Adaptagrams — `cola::Lock` pins authored positions, `AlignmentConstraint`/`SeparationConstraint`, `setAvoidNodeOverlaps`, `libavoid` orthogonal routing. **Dev-time only** (WASM/port); artifact stays zero-dependency. **ELK ruled out** — verified: `elk.position` under `layered` is consumed as a sort key and discarded | 3.12, 1.11 | XL |
 | P2.2 | **`repair --safe`.** `makeFeasible()` pattern — minimise displacement, solve feasibility, report unsatisfiable constraints. Never touches topology, labels, or semantics. Receipt for every nudge | 3.13 | L |
 | P2.3 | **Threshold calibration.** Bridging study against the Mooney corpus (447,934 drawings, 10 normalised metrics, published quartiles). Their metrics assume straight-line simple graphs — the transfer to boxed nodes with orthogonal routes **is** the work | 3.14 | L |
-| P2.4 | **Straight-route preference.** Fix unnecessary port-spread doglegs (upstream #137) via solver port assignment | 3.7 | M |
+| P2.4 | **Straight-route preference.** Fix unnecessary port-spread doglegs via solver port assignment | 3.7 | M |
 | P2.5 | **Multi-repo evidence identity** | 2.6 | M |
 | P2.6 | **Benchmark harness.** Scheduled trend, release-level gate. **Never a per-PR gate** — external models change with no code change | — | M |
 
@@ -98,7 +98,7 @@ benchmark. *No target is advertised before it is measured.*
 
 | # | Task | Matrix | Effort |
 |---|---|---|---|
-| P3.1 | **Attribution** on viewer footer (dismissible) + Share Cards (permanent). *Upstream ships zero — every diagram in the wild is untraceable* | 6.12 | S |
+| P3.1 | **Attribution** on viewer footer (dismissible) + Share Cards (permanent). *The source baseline ships zero — every diagram in the wild is untraceable* | 6.12 | S |
 | P3.2 | **`--format svg-static`** (~20 KB) + tree-shaken artifacts | 6.13, 4.15 | M |
 | P3.3 | **Playground** — fully client-side on GH Pages. Paste JSON or **Mermaid** → live diagram | 6.16 | M |
 | P3.4 | **`publish`** → the user's own gh-pages + printed URL | 6.14 | M |
@@ -186,10 +186,10 @@ thesis.
 
 Non-negotiable for every phase, specified in full in [37 · Engineering Standards](37-ENGINEERING-STANDARDS.md):
 
-- **A feature is not delivered until it has tests.** Every row in [32](32-PARITY-AND-FEATURE-MATRIX.md) — harvested, rebuilt, or new — carries at least one automated test.
+- **A feature is not delivered until it has tests.** Every row in [32](32-PARITY-AND-FEATURE-MATRIX.md) — imported, rebuilt, or new — carries at least one automated test.
 - **Small, frequent, conventional commits.** One behaviour per commit; a task in this roadmap is many commits, never one.
 - **Every check green before merge.** Lint · types · unit · golden · conformance · browser · a11y · size budget · link check.
-- **TDD for new behaviour**; characterisation tests first for harvested code.
+- **TDD for new behaviour**; characterisation tests first for imported code.
 
 ## Intake filter — every new feature must answer
 

@@ -1,6 +1,6 @@
 # 31 · V1 Architecture
 
-**Principle:** new spine, harvested organs. The pipeline that makes it evidence-first is
+**Principle:** new spine, imported organs. The pipeline that makes it evidence-first is
 rebuilt; the subsystems that make output trustworthy and beautiful are imported as working
 MIT-licensed code.
 
@@ -42,40 +42,40 @@ MIT-licensed code.
 │  routing. DEV-TIME ONLY (WASM/port) → artifact stays zero-dependency.   │
 └────────────────────────────┬───────────────────────────────────────────┘
                              ▼
-┌─ [6] VALIDATOR ──────────────────────────────────── HARVESTED ─────────┐
+┌─ [6] VALIDATOR ───────────────────────────────────── IMPORTED ─────────┐
 │  geometry.mjs + all gates + diagnostics[] with supportedFixes.          │
 │  + repair --safe (makeFeasible pattern) + calibrated thresholds.        │
 └────────────────────────────┬───────────────────────────────────────────┘
                              ▼
-┌─ [7] RENDERERS ──────────────────────────────────── HARVESTED ─────────┐
+┌─ [7] RENDERERS ───────────────────────────────────── IMPORTED ─────────┐
 │  5 typed renderers → refactored onto ONE shared pass pipeline.          │
 └────────────────────────────┬───────────────────────────────────────────┘
                              ▼
-┌─ [8] VIEWER ─────────────────────────────────────── HARVESTED ─────────┐
+┌─ [8] VIEWER ──────────────────────────────────────── IMPORTED ─────────┐
 │  Full interaction model, modularized from the 693 KB template.          │
 │  + evidence-first Passport (edges, 6 provenance classes).               │
 └────────────────────────────┬───────────────────────────────────────────┘
                              ▼
-┌─ [9] INTERFACES ───────────────────────────── NEW + HARVESTED ─────────┐
-│  CLI · exports (harvested) · CI action (new) · MCP server (new)         │
+┌─ [9] INTERFACES ────────────────────────────── NEW + IMPORTED ─────────┐
+│  CLI · exports (imported) · CI action (new) · MCP server (new)          │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 2. The harvest boundary
+## 2. The import boundary
 
 | Stage | Origin | Notes |
 |---|---|---|
 | 1 Scanner | **New** | The hardest new work. Adapter-per-source, all independent |
 | 2 Evidence graph | **New** | Store + query. Provenance is a first-class column, never a flag |
-| 3 System model | **New** | Descends from the `archify.model.json` concept, built properly from the start |
+| 3 System model | **New** | Descends from the source project's system-model-file concept, built properly from the start |
 | 4 View compiler | **New** | Where the AI lives — and the only place it lives |
 | 5 Solver | **New** | Adaptagrams verified: `cola::Lock(id,X,Y)` exists and is used per-iteration. **ELK ruled out** — `elk.position` under `layered` is consumed as a sort key and discarded |
-| 6 Validator | **Harvested** | `geometry.mjs` (1,334 LOC, 38 exports) + `diagnostics.mjs`. Thresholds calibrated later, logic imported now |
-| 7 Renderers | **Harvested** | 5 renderers, ~3,358 LOC. Refactored to shared passes in P1 |
-| 8 Viewer | **Harvested** | `template.html` — verified portable: zero path/package references, zero external URLs beyond fonts |
-| 9 Interfaces | **Both** | Delivery, receipts, exports harvested; CI action and MCP new |
+| 6 Validator | **Imported** | `geometry.mjs` (1,334 LOC, 38 exports) + `diagnostics.mjs`. Thresholds calibrated later, logic imported now |
+| 7 Renderers | **Imported** | 5 renderers, ~3,358 LOC. Refactored to shared passes in P1 |
+| 8 Viewer | **Imported** | `template.html` — verified portable: zero path/package references, zero external URLs beyond fonts |
+| 9 Interfaces | **Both** | Delivery, receipts, exports imported; CI action and MCP new |
 
-**Import rule:** harvested code arrives *unmodified* in P0 with the MIT notice preserved, and
+**Import rule:** imported code arrives *unmodified* in P0 with the MIT notice preserved, and
 is refactored only in later phases against golden tests. Never both at once.
 
 ## 3. Module contracts
@@ -124,8 +124,8 @@ depends: Adaptagrams (dev-time)
 rule:    authored positions are hard constraints; everything else is solved.
 ```
 
-Validator, renderers, and viewer keep their existing Archify contracts — that is the point of
-harvesting them.
+Validator, renderers, and viewer keep their existing source-project contracts — that is the
+point of importing them.
 
 ## 4. Data flow example
 
@@ -156,9 +156,9 @@ openapi/payments.yaml           →  openapi-adapter
 │   ├── model/          system model, IDs, overrides, provenance
 │   ├── compile/        view compiler + AI abstraction
 │   ├── layout/         solver bindings (dev-time)
-│   ├── validate/       ← harvested geometry + diagnostics + repair
-│   ├── render/         ← harvested renderers on shared pipeline
-│   ├── viewer/         ← harvested template, modularized (src/ + build)
+│   ├── validate/       ← imported geometry + diagnostics + repair
+│   ├── render/         ← imported renderers on shared pipeline
+│   ├── viewer/         ← imported template, modularized (src/ + build)
 │   ├── cli/            the `<product> .` entry point
 │   ├── ci/             GitHub Action
 │   └── mcp/            MCP server
@@ -167,7 +167,7 @@ openapi/payments.yaml           →  openapi-adapter
 ```
 
 **Zero runtime dependencies** for anything the artifact ships. Solver, linters, and build
-tooling are dev-time — exactly the slot `ajv` occupies in Archify today.
+tooling are dev-time — exactly the slot `ajv` occupies in the source project today.
 
 ## 6. Error handling
 
@@ -189,8 +189,8 @@ tooling are dev-time — exactly the slot `ajv` occupies in Archify today.
 | System model | Conflict, override, and stable-ID regression |
 | View compiler | Contract test — **cannot emit a relationship absent from the model** |
 | Solver | Authored pins are never moved; no unsatisfiable-silent-drop |
-| Validator/renderers | **Golden tests from the 7 frozen v1-baseline fixtures** — byte-identical after harvest |
-| Viewer | Browser suite in CI on every PR (the 23 upstream skips) + axe-core |
+| Validator/renderers | **Golden tests from the 7 frozen v1-baseline fixtures** — byte-identical after import |
+| Viewer | Browser suite in CI on every PR (23 skips inherited from the source project) + axe-core |
 | End-to-end | `<product> .` against 3 real open-source repos; human-reviewed |
 | Parity | The conformance suite in [32](32-PARITY-AND-FEATURE-MATRIX.md) |
 
@@ -200,6 +200,6 @@ tooling are dev-time — exactly the slot `ajv` occupies in Archify today.
 |---|---|
 | **Scanner is the hardest part and easy to underestimate** | v1 = TypeScript/JS only, 3 adapters. Breadth is P4, not P1 |
 | Adaptagrams is C++ and unversioned ("no official releases yet") | Pin a commit; WASM build; `makeFeasible()` is the narrow entry point actually needed |
-| Harvest drags in Archify's coupling | Import unmodified first, refactor only against golden tests |
+| Importing drags in the source project's coupling | Import unmodified first, refactor only against golden tests |
 | Scope collapse under one maintainer | Phase gates in [33](33-MASTER-ROADMAP.md); P1 must ship before P4 begins |
 | Competitor already ships extraction | True — CodeBoarding, 9 languages. **The differentiator is downstream**: composition, validation, edge evidence |

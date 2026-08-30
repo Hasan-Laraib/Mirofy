@@ -1,7 +1,8 @@
 # 32 · Parity & Feature Matrix
 
-**The "nothing is missed" guarantee.** Every feature Archify has, plus every fix, plus every
-new capability — with its origin (harvested / rebuilt / new) and the phase that delivers it.
+**The "nothing is missed" guarantee.** Every feature the source baseline has, plus every fix,
+plus every new capability — with its origin (imported / rebuilt / new) and the phase that
+delivers it.
 
 **This document is also the conformance checklist.** **Every row — H, R, and N alike — must
 have at least one automated test before it is considered delivered**; CI fails if one
@@ -13,15 +14,15 @@ promise.*
 
 | | Origin | Meaning |
 |---|---|---|
-| **H** | Harvested | Imported as working MIT code — parity by construction |
+| **H** | Imported | Imported as working MIT code — parity by construction |
 | **R** | Rebuilt | Concept survives, implementation replaced by the new spine |
-| **N** | New | Does not exist in Archify |
+| **N** | New | Does not exist in the source baseline |
 
 **Totals (counted mechanically from the tables below, 2026-08-29):** **118 capabilities** —
-**54 harvested (H)**, **2 harvested-then-rebuilt (H→R)**, **6 rebuilt (R)**, **56 new (N)**.
-Every Archify feature is accounted for; none is dropped.
+**54 imported (H)**, **2 imported-then-rebuilt (H→R)**, **6 rebuilt (R)**, **56 new (N)**.
+Every source-baseline feature is accounted for; none is dropped.
 
-> *Correction: earlier drafts stated "92 capabilities — 44 harvested, 12 rebuilt, 36 new."
+> *Correction: earlier drafts stated "92 capabilities — 44 imported, 12 rebuilt, 36 new."
 > Those figures were estimated, not counted, and were wrong. The numbers above were
 > extracted programmatically from this document's own tables. The conformance suite is
 > sized against the 55 H rows, not 44.*
@@ -44,10 +45,10 @@ Every Archify feature is accounted for; none is dropped.
 | 1.10 | Agent contract (`SKILL.md`) | **H→R** | P1 | Rewritten for scan-first flow; skill install becomes optional |
 | 1.11 | Explicit `pos:[x,y]` authoring | **R** | P2 | Replaced by intent + solver. Manual pins still honoured as hard constraints |
 | 1.12 | Stable semantic IDs | **R** | P1 | **Mandatory for every object** — components, boundaries, connections, messages, flows, states, transitions |
-| 1.13 | Mermaid import | **N** | P1 | `import mermaid` → typed IR (upstream PR #140 as the base) |
+| 1.13 | Mermaid import | **N** | P1 | `import mermaid` → typed IR (adapted from the source project's implementation as the base) |
 | 1.14 | **System model** (`model.json`) | **N** | P1 | One inventory; diagrams become views. Kills the 12-node ceiling |
 | 1.15 | First-class engineering metadata | **N** | P1 | `owner`, `deployment{regions, networkScope}` as real fields |
-| 1.16 | Recipe library (100) | **N** | P3 | Upstream has 11 |
+| 1.16 | Recipe library (100) | **N** | P3 | The source baseline has 11 |
 | 1.17 | Human overrides | **N** | P1 | Recorded as `authored` provenance, never disguised as derived |
 
 ## 2 · Scanner & evidence *(the new spine)*
@@ -82,11 +83,11 @@ Every Archify feature is accounted for; none is dropped.
 | 3.4 | Clear Container Corridor | **H** | P0 | |
 | 3.5 | Readable Route Rhythm (8/16 px) | **H** | P0 | Calibrated in P2 |
 | 3.6 | Endpoint side contract | **H** | P0 | |
-| 3.7 | Automatic Port Spread | **H** | P0 | Dogleg fix (issue #137) in P2 |
+| 3.7 | Automatic Port Spread | **H** | P0 | Dogleg fix in P2 |
 | 3.8 | Grid placement validation | **H** | P0 | |
 | 3.9 | `deployment-ownership` profile | **H** | P0 | |
 | 3.10 | **Structured diagnostics + `supportedFixes`** | **H** | P0 | Protected. The agent correction protocol |
-| 3.11 | `showcase` false-negative fix | **R** | P1 | Boundary overlap + collinear frames (issue #74) |
+| 3.11 | `showcase` false-negative fix | **R** | P1 | Boundary overlap + collinear frames |
 | 3.12 | **Constraint solver** | **N** | **P2** | Adaptagrams — `cola::Lock` pins, `libavoid` routes. Dev-time |
 | 3.13 | **`repair --safe`** | **N** | P2 | `makeFeasible()` pattern; receipt for every nudge |
 | 3.14 | Calibrated thresholds | **N** | P2 | Mooney corpus bridging study |
@@ -133,7 +134,7 @@ Every Archify feature is accounted for; none is dropped.
 | 5.15 | Runtime i18n (en, zh-CN) | **H→R** | P3 | Runtime switching replaces render-time bake |
 | 5.16 | Modularized viewer source | **R** | P1 | From the 693 KB monolith |
 | 5.17 | Renderer↔viewer contract (`contract.mjs`) | **N** | P1 | 202 `data-*` attributes become checked |
-| 5.18 | Browser tests in CI | **N** | P0 | The 23 upstream skips |
+| 5.18 | Browser tests in CI | **N** | P0 | 23 pre-existing skips |
 | 5.19 | axe-core accessibility gate | **N** | P1 | |
 | 5.20 | **Evidence Passport** (edges + provenance) | **N** | P1 | |
 | 5.21 | **Nudge-to-patch** | **N** | P3 | Drag → JSON patch. Escape hatch, not an editor |
@@ -152,9 +153,10 @@ Every Archify feature is accounted for; none is dropped.
 | 6.7 | `compare` (Before/Delta/After + receipt) | **H** | P0 | Becomes the CI drift engine |
 | 6.8 | CLI: render·validate·deliver·check·guide·brands·doctor·demo | **H** | P0 | |
 | 6.9 | Zero runtime dependencies | **H** | P0 | **Protected. Never trade** |
-| 6.10 | Deterministic ZIP packaging | **N** | P1 | ⚠️ *Reclassified H→N 2026-08-29.* Its implementation (`scripts/build-zip.sh`, `write-deterministic-zip.mjs`, `package-smoke.mjs`) lives at the ancestor's **repo root**, outside the `archify/` subtree the harvest copies — so there is nothing harvested to have parity with. Must be written or ported, not inherited. |
+| 6.10 | Deterministic ZIP packaging | **N** | P1 | ⚠️ *Reclassified H→N 2026-08-29.* Its implementation (`scripts/build-zip.sh`, `write-deterministic-zip.mjs`, `package-smoke.mjs`) lives at the source project's **repo root**, outside the subtree this import copies — so
+there is nothing imported to have parity with. Must be written or ported, not inherited. |
 | 6.11 | **`<product> .` zero-config entry** | **N** | **P1** | ⭐ The first-run experience |
-| 6.12 | Attribution on artifacts | **N** | P3 | Upstream ships zero — the largest unforced growth error |
+| 6.12 | Attribution on artifacts | **N** | P3 | The source baseline ships zero — the largest unforced growth error |
 | 6.13 | `--format svg-static` (~20 KB) | **N** | P3 | README/PR/Notion/Confluence embedding |
 | 6.14 | `publish` → user's own gh-pages | **N** | P3 | No project-owned infrastructure |
 | 6.15 | npm distribution (scoped) | **N** | P3 | |
@@ -167,7 +169,7 @@ Every Archify feature is accounted for; none is dropped.
 | 6.22 | Compliance profiles | **N** | P6 | **Gated on the compliance evidence pass** |
 | 6.23 | **Miro board export** | **N** | **P3** | ⭐ system model → live editable Miro board via `@mirohq/miro-api`. Shapes, connectors, frames; evidence attached as notes. Gives users manual editing and annotation in a tool 90M people already use. Nominative fair use — naming a product you interoperate with is permitted |
 | 6.24 | Miro round-trip (annotations back) | **N** | P5 | **Exploratory.** Reading human annotations back into the model is materially harder than export; scoped out of v1 rather than promised |
-| 6.25 | draw.io / Excalidraw export | **N** | P5 | Second escape hatch; upstream attempted this (PR #72) and stalled on size |
+| 6.25 | draw.io / Excalidraw export | **N** | P5 | Second escape hatch; the source project attempted this and stalled on size |
 
 ## 7 · Repo health *(inherited problems, fixed at birth)*
 
@@ -185,17 +187,17 @@ Every Archify feature is accounted for; none is dropped.
 
 ## Nothing dropped — the audit
 
-Every Archify feature from [01-CURRENT-STATE](../archify-current/01-CURRENT-STATE.md) appears
-above as **H** or **R**. Nothing is marked *discarded*.
+Every source-baseline feature appears above as **H** or **R**; the accounting is held
+privately. Nothing is marked *discarded*.
 
-The four upstream ⚠️ items that look absent are **rebuilt, not removed**:
+The four ⚠️ items that look absent are **rebuilt, not removed**:
 
-| Upstream feature | Fate |
+| Source-baseline feature | Fate |
 |---|---|
 | Explicit x/y coordinate authoring | **Rebuilt** (1.11) — still honoured as hard constraints; no longer *required* |
 | Render-time locale bake | **Rebuilt** (5.15) — becomes runtime switching; both locales survive |
 | 693 KB monolithic template | **Rebuilt** (5.16) — same output, modular source |
-| Committed `archify.zip` | **Rebuilt** (6.10) — same deterministic package, released not committed |
+| Committed release archive | **Rebuilt** (6.10) — same deterministic package, released not committed |
 
 **Conformance rule:** a PR that removes or degrades any **H** row fails CI, regardless of what
 it adds.

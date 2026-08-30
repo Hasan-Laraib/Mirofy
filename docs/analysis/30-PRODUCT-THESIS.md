@@ -1,7 +1,7 @@
 # 30 · Product Thesis
 
-**Working name:** `<PRODUCT>` — placeholder until the sprint in [35-NAMING-BRIEF](35-NAMING-BRIEF.md) completes.
-**Ancestor:** `tt-a1i/archify` (MIT) — conceptual ancestor *and* harvested component source.
+**Product name:** `Mirofy` — decided; the naming rationale is held privately.
+**Source project:** MIT-licensed — conceptual source *and* imported component origin.
 
 ---
 
@@ -76,13 +76,13 @@ Three claims, each defensible against verified competitive evidence:
 | **Structurizr / C4** | Model-first, multi-view | Hand-authored model; goes stale; **prices machine consumption** — API calls and iframe embeds count as chargeable users |
 | **Excalidraw / draw.io / Lucid** | Direct manipulation | Nothing is derived or verified; stale on day two |
 | **Cloudcraft / Hava** | Live cloud topology | Infrastructure only — no code, no relationships, no PR awareness |
-| **Archify (the ancestor)** | Best-in-class visual quality, taste validator, truth discipline | **Authoring-first**: the agent invents topology and coordinates from a blank file; evidence attaches to nodes only, so every *edge* is an unverified assertion |
+| **The source project** | Best-in-class visual quality, taste validator, truth discipline | **Authoring-first**: the agent invents topology and coordinates from a blank file; evidence attaches to nodes only, so every *edge* is an unverified assertion |
 
 ## 8. The architectural inversion
 
 ```
-ARCHIFY                          THIS PRODUCT
-─────────                        ────────────
+SOURCE PROJECT                   THIS PRODUCT
+──────────────                   ────────────
 Agent understands repo           Machine extracts facts
       ↓                                ↓
 Agent authors architecture       System builds evidence graph
@@ -120,7 +120,7 @@ with no JSON authoring, no schema knowledge, and no LLM repair loop:
 
 1. A **correct** architecture view — services, routes, datastores, queues, external dependencies
 2. **Evidence on edges**, not just nodes — click a relationship, see the exact file, lines, revision, and derivation method
-3. **Visual quality indistinguishable from Archify's** — verified by golden tests and a contact sheet
+3. **Visual quality indistinguishable from the source project's** — verified by golden tests and a contact sheet
 4. An **honest coverage statement** — what was derived, what was inferred, what was not analysed. Never a fabricated percentage
 
 If a reader trusts that artifact enough to paste it into a design review, the thesis holds.
