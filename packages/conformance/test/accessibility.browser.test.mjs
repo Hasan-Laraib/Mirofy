@@ -131,3 +131,23 @@ for (const preset of PRESETS) {
     }
   });
 }
+
+// The axe rows above open the artifact in a browser, so they inspect the
+// POST-BOOT dom -- after 07-focus.js has had a chance to correct the role.
+// That is the wrong surface for this defect: it cannot see what the renderer
+// actually wrote. This test reads the rendered HTML directly, needs no Chrome,
+// and therefore checks what a JS-disabled reader and every non-viewer consumer
+// of the artifact really receive.
+test('the rendered SVG declares a role that permits interactive descendants, before any JS runs (5.19)', () => {
+  const out = path.join(tmp, 'static-role.html');
+  renderFixture('architecture', 'web-app.architecture.json', out);
+  const html = fs.readFileSync(out, 'utf8');
+  const svgTag = html.match(/<svg\b[^>]*class="[^"]*diagram[^"]*"[^>]*>/)?.[0]
+    ?? html.match(/<svg\b[^>]*>/)?.[0] ?? '';
+  assert.ok(svgTag, 'no <svg> element found in the rendered artifact');
+  assert.doesNotMatch(svgTag, /role="img"/,
+    'the diagram svg declares role="img" while its nodes carry tabindex="0" role="button"; '
+    + 'role="img" forbids interactive descendants (WCAG 4.1.2). This is the STATIC markup, '
+    + 'so it is what a JS-disabled reader and any non-viewer consumer actually get.');
+  assert.match(svgTag, /role="graphics-document"/);
+});

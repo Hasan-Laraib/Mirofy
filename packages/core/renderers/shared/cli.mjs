@@ -149,23 +149,21 @@ export function validateGuidedViews(diagramType, diagram) {
 
 // Accessible name for the generated diagram SVG.
 //
-// KNOWN GAP (Task 8 fix round 1, 2026): this statically emits role="img"
-// below, while focusNodeAttrs() (this file) statically emits real,
-// focusable tabindex="0" role="button" nodes on every component -- an
-// element declaring its own children presentational while containing real
-// interactive controls is a WCAG 4.1.2 defect (axe-core: nested-interactive).
-// That conflict is corrected only at viewer BOOT time
-// (packages/viewer/src/js/07-focus.js sets role="graphics-document" once
-// Mirofy.focus runs), not here. This function's own static output is still
-// wrong on its own terms: with JavaScript disabled, before boot completes,
-// or for any consumer of this markup other than the shipped viewer runtime,
-// the static role="img" over interactive descendants persists uncorrected.
-// packages/conformance/test/accessibility.browser.test.mjs's gate cannot
-// see this either, because it only ever scans the post-boot DOM. Recorded
-// as P1b debt (task-8-report.md): fix it here, in the renderer, so the
-// static markup itself is correct -- deliberately not done in Task 8,
-// since that would move every renderer's output and all 25 golden
-// digests, a change that deserves its own task and its own review.
+// The diagram svg declares role="graphics-document" (WAI-ARIA Graphics
+// Module), not role="img". focusNodeAttrs() below emits real, focusable
+// tabindex="0" role="button" nodes on every component, and role="img"
+// declares its own subtree presentational -- an element claiming that while
+// containing real interactive controls is a WCAG 4.1.2 defect (axe-core:
+// nested-interactive). graphics-document is the role built for exactly this
+// case: a structured graphic whose parts are individually reachable.
+//
+// This is emitted statically, here, so it is what a JS-disabled reader and
+// every consumer of the artifact other than the shipped viewer receives.
+// It was previously corrected only at viewer boot, which left the static
+// markup wrong on its own terms and invisible to the axe gate (that gate
+// scans the post-boot DOM and so could never see it). The boot-time
+// assignment has been removed with this change: two mechanisms for one
+// invariant is how they drift apart.
 export function svgRootAttrs(meta, kind) {
   const animation = meta.animation === 'trace' ? ' data-animation="trace"' : '';
   const preset = ` data-preset="${esc(meta.visual_preset || 'classic')}"`;
@@ -175,7 +173,7 @@ export function svgRootAttrs(meta, kind) {
   const requestedProfile = process.env.MIROFY_QUALITY_PROFILE || meta.quality_profile;
   const qualityProfile = requestedProfile === 'showcase' ? 'showcase' : 'standard';
   const advisory = requestedProfile ? '' : ' data-quality-gates="advisory"';
-  return `role="img" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="mirofy-diagram-title mirofy-diagram-description"${animation}${preset}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
+  return `role="graphics-document" lang="${esc(resolveLocale(meta.locale))}" aria-labelledby="mirofy-diagram-title mirofy-diagram-description"${animation}${preset}${engineeringProfile} data-quality-profile="${esc(qualityProfile)}"${advisory}`;
 }
 
 // Keep the accessible name inside the SVG so it survives standalone SVG
