@@ -26,12 +26,14 @@
     "gallery": "node scripts/gallery.mjs",
     "status": "node scripts/status.mjs",
     "status:check": "node scripts/status.mjs --check",
+    "docs:pdf": "node scripts/docs-pdf.mjs",
     "check": "npm run lint && npm run check:changelog && npm run status:check && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
   },
   "devDependencies": {
     "@types/node": "^18",
     "axe-core": "4.10.2",
     "eslint": "^9.15.0",
+    "marked": "14.1.3",
     "typescript": "^5.7.2"
   }
 }
