@@ -24,6 +24,7 @@
     "build:template": "node packages/viewer/build.mjs",
     "check:template": "node scripts/check-template.mjs",
     "gallery": "node scripts/gallery.mjs",
+    "scan": "node packages/scanner/bin/scan.mjs",
     "status": "node scripts/status.mjs",
     "status:check": "node scripts/status.mjs --check",
     "docs:pdf": "node scripts/docs-pdf.mjs",
