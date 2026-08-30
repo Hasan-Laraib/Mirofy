@@ -1,13 +1,14 @@
 # SDD ledger — plan: analysis/future/plans/2026-08-29-p0-foundation.md
 
 Spec: analysis/future/33-MASTER-ROADMAP.md (P0), with 31/32/36/37.
-Build target: L:/Projects/product-p0 (NEW repo — this plan does not modify L:/Projects/archify).
+Build target: L:/Projects/product-p0 (NEW repo — this plan does not modify the upstream repository).
 
 ## Pre-flight rulings
 
 Ruling: Build the new repository at `L:/Projects/product-p0`, local git only, no remote.
-— The plan creates a new repo; a worktree of `archify` is the wrong isolation model, and
-  `archify` itself is never modified by this plan (it is the read-only harvest source).
+— The plan creates a new repo; a worktree of the upstream repository is the wrong isolation
+  model, and the upstream repository itself is never modified by this plan (it is the
+  read-only harvest source).
 — Cost if wrong: a directory move (`mv`) and a `git remote add`. Trivial.
 
 Ruling: Task 9 Steps 4-5 (`git push -u origin main`, branch protection) are DEFERRED, not
@@ -61,7 +62,7 @@ auto-discovers and recurses into `packages/*/test/` — confirmed 2/2 tests foun
 ## Progress
 
 Task 1: implementer DONE (commit ef0e39e, 8 files). Verified: test script landed as
-  `node --test` per ruling; L:/Projects/archify untouched. Review dispatched.
+  `node --test` per ruling; the upstream repository untouched. Review dispatched.
   Note: review package built against the empty tree (4b825dc) — new repo, no BASE commit.
 Task 1: review clean — spec ✅, quality approved.
   Ruling: Conventional Commits scope is OPTIONAL, not mandatory. The reviewer flagged
@@ -75,11 +76,12 @@ Task 1: review clean — spec ✅, quality approved.
 Task 1: complete (commit ef0e39e, review clean)
 Task 2: implementer DONE (commit 4a5de9d, 165 files under packages/core).
   Controller verification (mechanical, stronger than a diff review):
-    - blob-hash compare vs archify@12106be: 163/164 shared files IDENTICAL
+    - blob-hash compare vs the upstream baseline: 163/164 shared files IDENTICAL
     - deviations are EXACTLY the 3 permitted (del test/golden.mjs, del package-lock.json,
       rewrite package.json) + brief-mandated new README.md
     - 0 of 165 committed text blobs contain CR bytes
-    - core.autocrlf=false is repo-LOCAL; system gitconfig untouched (archify still reads true)
+    - core.autocrlf=false is repo-LOCAL; system gitconfig untouched (the upstream repository
+      still reads true)
   NOTE — my Task 2 ruling had a flaw the implementer caught: `git archive | tar -x` is NOT
   eol-neutral. Git applies checkout-style conversion, and this machine's SYSTEM gitconfig
   sets core.autocrlf=true, so the first extraction silently produced CRLF. The implementer
@@ -90,11 +92,13 @@ Task 2: implementer DONE (commit 4a5de9d, 165 files under packages/core).
 Task 2: review clean — spec ✅, quality approved, 0 Critical/Important.
   Reviewer independently reproduced: the CRLF mechanism (plain `git archive` -> CRLF;
   `-c core.autocrlf=false` -> LF matching the blob), the 714,353-byte render, 16/16
-  ARCHIFY_* vars intact, and byte-exact package.json/README.md.
+  16/16 upstream-named (pre-rename) environment variables intact, and byte-exact
+  package.json/README.md.
   Ruling: PLAN DEFECT in Task 2 Step 3 — the brief's literal JSON block changes `name`,
   `version`, `description` and `bin` in addition to `scripts`, contradicting its own prose
   "keep everything else byte-identical". The implementer followed the literal JSON. That is
-  the correct resolution: a scripts-only patch would have shipped `bin: {"archify": ...}`,
+  the correct resolution: a scripts-only patch would have shipped a `bin` entry keyed to the
+  upstream package's own name,
   violating the no-invented-name / @product scope constraint. Ruling stands, no rework.
   — Cost if wrong: packages/core/package.json metadata differs from the ancestor's; trivial
     to amend, and it must differ anyway for the workspace to function.
@@ -219,8 +223,8 @@ Task 7: implementer DONE (1c4a616, 13c33b6, 0691332, 9b249d2). npm test 36/36, g
   reporter honest: proved 40 / browser-deferred 14 (ids listed) / UNPROVEN 1 = 55 total.
   Ruling: row 6.10 (Deterministic ZIP packaging) was MISCATEGORISED IN MY SPEC as H.
   Confirmed its implementation (scripts/build-zip.sh, write-deterministic-zip.mjs,
-  package-smoke.mjs) lives at the ANCESTOR'S REPO ROOT, outside the archify/ subtree the
-  harvest copies — nothing was harvested to have parity with. Doc 32 corrected: 6.10 H->N,
+  package-smoke.mjs) lives at the ANCESTOR'S REPO ROOT, outside the upstream repository's own
+  subtree the harvest copies — nothing was harvested to have parity with. Doc 32 corrected: 6.10 H->N,
   phase P1. Totals now 54 H / 2 H->R / 6 R / 56 N. Implementer's UNPROVEN marking was correct.
   — Cost if wrong: a row is tracked as new rather than harvested; no code impact.
 Task 7: review returned ❌ NOT APPROVED — 2 Critical, 2 Important.
@@ -295,11 +299,12 @@ Tasks 8+10 (batched): implementer DONE — 19175dc, f86ab1a, 0d3b205, 64afa01.
   ~700 KB each = 3.4 MB = **53% of the 6.4 MB tracked tree**.
   This is precisely the anti-pattern doc 32 row 7.1 exists to eliminate ("the ancestor
   carries 22.8 MB of committed HTML"). The Task 2 harvest brought them because they live
-  inside archify/examples/. Verified: NOTHING in our code references them (no renderer, bin,
+  inside the upstream repository's examples/. Verified: NOTHING in our code references them (no renderer, bin,
   script, or conformance reference; the fixtures/sources grep hits are just meta.output
   fields naming an .html path, not a dependency).
   PLAN CONFLICT I MISSED WHEN WRITING IT: Task 2 mandates "import unmodified" while row 7.1
-  mandates "no generated artifacts in git". Both cannot hold for archify/examples/*.html.
+  mandates "no generated artifacts in git". Both cannot hold for the upstream repository's
+  examples/*.html.
   Ruling: do NOT delete them in P0. They are inside the subtree we have proven byte-identical
   to the ancestor; deleting now would break that proof and force re-verification for no P0
   benefit. Instead (a) tighten BUDGET_MB 20 -> 10 so the gate constrains rather than
@@ -400,7 +405,7 @@ FINAL fix wave: complete (commits 50ba394..1daafd3, 11 commits). Scoped re-revie
   cleanAmbiguousCorridor->3.3, cleanBorderRuns->3.4, cleanRouteRhythm->3.5). Assertions check
   the specific composition/* code, not bare exit status.
   harvest-manifest.json verified NON-TAUTOLOGICAL: all 163 hashes cross-checked directly
-  against L:/Projects/archify at 12106be, 163/163 match, 166 ancestor files fully accounted
+  against the upstream baseline, 163/163 match, 166 ancestor files fully accounted
   for (163 identical + 2 removed + 1 added). It is the ancestor's hashes, not self-baselined.
   Tally 38/16/54 consistent across README, CONTRIBUTING, harvest.md; conformance.mjs computes
   counts dynamically so there are no hardcoded numbers to go stale.
@@ -595,7 +600,7 @@ assert, which is why only the Node 24 cell was red.
   this would trade a test-only symptom for a broken harvest boundary, which
   is the whole premise of P0. The same short-path hazard is already handled
   this way at validation-gates.test.mjs:401, so the idiom is established.
-  — Cost if wrong: `archify preview` still aborts for a real user whose own
+  — Cost if wrong: the CLI's pre-rename `preview` command still aborts for a real user whose own
   temp path is short-form. Recorded as P1 debt below rather than hidden.
 
   **P1 debt (core defect, deliberately not fixed here):**
@@ -614,7 +619,8 @@ pipe. This was one launch failure reported 17 times — the earlier reading of
 it as "8 genuine Linux/Chrome platform differences never before exercised"
 was wrong, and no platform difference has been demonstrated yet.
 
-  Ruling: set `ARCHIFY_CHROME_NO_SANDBOX=1` in the browser job.
+  Ruling: set the CHROME_NO_SANDBOX_ENV env var, under its pre-rename name at this point
+  (now `MIROFY_CHROME_NO_SANDBOX`), to `1` in the browser job.
   `visual-check.mjs:22` already defines this as a first-class, supported
   opt-out (`CHROME_NO_SANDBOX_ENV`) that prepends `--no-sandbox` — the same
   branch core already takes automatically for root. `sudo chown root:root`
