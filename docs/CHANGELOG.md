@@ -13,6 +13,30 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1c merged to main
+
+**Commits:** merge commit `211fc05` (PR #10).
+
+Evidence discovery is on `main`. CI 13/13 on the PR (run 33310938667) and
+13/13 on `main` after the merge (run 33311068463).
+
+Two CI failures were fixed on the PR, both invisible locally. `npm ci` broke
+all 13 jobs because the lockfile knew `packages/evidence` but not
+`packages/scanner` — node resolves workspace symlinks without the lockfile,
+so `npm ci` is the command that checks.
+
+And row 6.3's long-running intermittent is **closed**. The instrumentation
+added two occurrences ago did its job: the failure finally named itself,
+`Runtime.evaluate: timed out after 15000ms`. Raising that one call was not
+enough — the next run failed with `Target.getTargets` naming the same limit.
+Two different calls tripping one timeout settles it: a cold Chrome on a
+loaded runner can take over 15s to answer anything, and per-call fixes are
+whack-a-mole. The CDP transport default is now 60s. A gate should prefer
+slow failure on a dead browser over false failure on a healthy one.
+
+71 conformance rows, 70/70 proved with Chrome. `docs/P1C-BUILD-LEDGER.md`
+records the phase.
+
 ## 2026-08-30 — P1c: evidence discovery
 
 **Commits:** `38027bd..` on `p1c-evidence-discovery` (plan, graph, three
