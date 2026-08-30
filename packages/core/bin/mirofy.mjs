@@ -30,6 +30,7 @@ function usage() {
   mirofy doctor
   mirofy demo [output-directory]
   mirofy import mermaid <input.mmd> [output.json] [--json]
+  mirofy repair <type> <input.json> [output.json] --safe [--json]
 
 Types:
   architecture, workflow, sequence, dataflow, lifecycle
@@ -1649,6 +1650,93 @@ async function commandImport(argv) {
   }
 }
 
+async function commandRepair(argv) {
+  const json = argv.includes('--json');
+  const safe = argv.includes('--safe');
+  const positional = argv.filter((value) => !value.startsWith('--'));
+  const [type, input, output] = positional;
+  if (!TYPES.has(type) || !input) {
+    fail('Usage: mirofy repair <type> <input.json> [output.json] --safe [--json]');
+  }
+  if (!safe) {
+    fail('repair: pass --safe. Repair rewrites authored coordinates, and that takes an explicit word.');
+  }
+
+  let document;
+  try {
+    document = JSON.parse(fs.readFileSync(input, 'utf8'));
+  } catch (error) {
+    fail(`repair: could not read ${JSON.stringify(input)}: ${error.message}`);
+  }
+
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { document: repaired, receipt } = repairDocument(document, { safe: true });
+
+  const outPath = output || input;
+  fs.writeFileSync(outPath, `${JSON.stringify(repaired, null, 2)}
+`);
+
+  if (json) {
+    process.stdout.write(`${JSON.stringify({
+      schemaVersion: 1,
+      ok: receipt.unsatisfiable.length === 0,
+      command: 'repair',
+      type,
+      output: path.resolve(outPath),
+      receipt,
+    }, null, 2)}
+`);
+    return;
+  }
+
+  console.log(`repair: ${input} -> ${outPath}`);
+  if (!receipt.moves.length) {
+    console.log('repair: nothing needed moving');
+  } else {
+    console.log(`repair: ${receipt.moves.length} component(s) nudged, ${receipt.passes} pass(es):`);
+    for (const move of receipt.moves) {
+      console.log(`  ${move.id}: [${move.from}] -> [${move.to}] (${move.distance}px) -- ${move.reason}`);
+    }
+  }
+  // Reported, never swallowed: a repair that silently leaves problems behind
+  // is worse than one that refuses, because the next run looks clean.
+  if (receipt.unsatisfiable.length) {
+    console.log(`repair: ${receipt.unsatisfiable.length} overlap(s) a displacement-only repair cannot fix:`);
+    for (const entry of receipt.unsatisfiable) console.log(`  ${entry.a} / ${entry.b}: ${entry.reason}`);
+  }
+
+  // Then re-validate against the REAL validator, not repair's own model of
+  // the world. Repair moves boxes; moving a box changes edge geometry, and a
+  // routing rule can fail on a document whose overlaps are now perfect.
+  // Saying so is the difference between "I fixed it" and "I fixed what I can
+  // fix, and here is what is left".
+  const residual = await validateDocumentQuietly(type, outPath);
+  if (residual.length) {
+    console.log(`repair: ${residual.length} remaining problem(s) outside repair's reach:`);
+    for (const line of residual.slice(0, 6)) console.log(`  ${line}`);
+    if (residual.length > 6) console.log(`  ... and ${residual.length - 6} more`);
+  } else {
+    console.log('repair: the document now validates');
+  }
+}
+
+/**
+ * Run the layout validator and return its problem lines, without exiting.
+ * Repair reports what it could not reach; it does not fail on it.
+ */
+async function validateDocumentQuietly(type, filePath) {
+  const result = spawnSync(process.execPath, [
+    path.join(skillRoot, 'bin/mirofy.mjs'), 'validate', type, filePath, '--json',
+  ], { encoding: 'utf8' });
+  try {
+    const receipt = JSON.parse(result.stdout);
+    if (receipt.ok) return [];
+    return String(receipt.error || '').split(String.fromCharCode(10)).filter((line) => line.trim().startsWith('-'));
+  } catch {
+    return [];
+  }
+}
+
 switch (command) {
   case undefined:
   case '-h':
@@ -1697,6 +1785,9 @@ switch (command) {
     break;
   case 'import':
     await commandImport(args);
+    break;
+  case 'repair':
+    await commandRepair(args);
     break;
   default:
     fail(`Unknown command "${command}".\n\n${usage()}`);

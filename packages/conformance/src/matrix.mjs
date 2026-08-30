@@ -480,6 +480,30 @@ export const IMPORTED_ROWS = [
     proof: 'layout-solver.test.mjs',
     testTitle: '[3.12] the same view solves to the same coordinates twice',
   },
+
+  {
+    id: '3.13',
+    name: 'repair --safe (makeFeasible pattern)',
+    // Minimise displacement, solve feasibility, report what cannot be
+    // satisfied, and NEVER touch topology, labels or semantics. That last
+    // clause is what makes this safe to run on someone's file, so it is
+    // enforced mechanically: the test strips every position from the input
+    // and the output and demands the rest be identical. It was observed
+    // failing on the tempting mistake -- a repair that also "tidied" a label.
+    //
+    // Feasibility means the REAL rule. Repair first separated boxes to zero
+    // gap, which the validator still rejects: architecture's component rule
+    // is rectsOverlap(a, b, 8), so touching boxes fail it. A repair that
+    // reports success while the document still fails validation is the worst
+    // possible outcome, so the clearance is targeted explicitly.
+    //
+    // `--safe` is required, not default: rewriting authored coordinates is a
+    // real edit to someone's file and should take an explicit word.
+    origin: 'N',
+    phase: 'P2',
+    proof: 'repair-safe.test.mjs',
+    testTitle: '[3.13] repair never touches topology, labels, or semantics',
+  },
   {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',

@@ -92,6 +92,24 @@ after importing** and adjust the layout when it complains. Read the Mermaid
 for meaning too — the importer carries topology, not domain judgement, and
 labels or types often deserve rewriting.
 
+## Repairing geometry
+
+When validation reports overlapping components, do not hand-edit coordinates
+one at a time:
+
+```bash
+node bin/mirofy.mjs repair <type> <input.json> [output.json] --safe
+```
+
+`--safe` is required, because this rewrites authored coordinates. Repair moves
+only components involved in an overlap, each by the smallest correction that
+clears the validator's 8px gap, and prints a receipt of every nudge.
+
+It touches geometry and nothing else -- never a label, a type, a connection or
+an id. It then re-validates and reports what it could not reach: displacement
+fixes overlaps, not routing or label placement, and those it names rather than
+leaving for the next run to rediscover.
+
 ## Authoring invariants
 
 - One obvious main path; side branches leave the nearest main-path node. Remove low-value edges before adding routing controls.
