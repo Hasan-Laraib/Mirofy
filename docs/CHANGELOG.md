@@ -13,6 +13,22 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1e merged; the P1 spine is complete end to end
+
+**Commits:** merge commit `b626836` (PR #12).
+
+The view compiler is on `main`. CI 13/13 on the PR (run 33314125402) and
+13/13 on `main` after the merge (run 33314263512).
+
+With it the spine runs end to end: **scan → evidence graph → system model →
+bounded view IR**. A repository is walked for facts, the facts are stored
+append-only with provenance, the model turns them into one inventory with
+stable ids, and the compiler turns that into a view small enough to read —
+recording everything it left out.
+
+76 conformance rows, 56/56 proved without Chrome.
+`docs/P1E-BUILD-LEDGER.md` records the phase.
+
 ## 2026-08-30 — P1e: the view compiler and its planner seam
 
 **Commits:** `3bee34d..` on `p1e-view-compiler`.
