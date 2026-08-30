@@ -13,6 +13,22 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1d merged to main
+
+**Commits:** merge commit `23e2840` (PR #11).
+
+The system model is on `main`. CI 13/13 on the PR (run 33311930856) and
+13/13 on `main` after the merge (run 33312026336) — green on the first
+attempt, because the lockfile discipline P1c paid for in a lost CI round was
+applied up front and verified with `npm ci --dry-run`.
+
+75 conformance rows, 55/55 proved without Chrome, golden 25/25 unchanged.
+`docs/P1D-BUILD-LEDGER.md` records the phase, including why every model
+object resolved `authored`: the fixtures describe a hypothetical shop while
+the scan analysed this repository's source, so the join between them is
+empty by construction. Making it non-empty is the scanner's subject-naming
+problem, not the model's.
+
 ## 2026-08-30 — P1d: the system model
 
 **Commits:** `67347f0..` on `p1d-system-model`.
