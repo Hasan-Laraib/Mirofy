@@ -206,6 +206,11 @@ export function focusNodeAttrs(id, label, metadata = {}, locale) {
     ['data-node-brand-id', metadata.brandId],
     ['data-node-brand-status', metadata.brandStatus],
     ['data-node-brand-source', metadata.brandSource],
+    // The resolved evidence-provenance class (see evidence-provenance.mjs).
+    // Always present once a renderer resolves it, including for subjects
+    // that claimed nothing: a trust signal that is absent when unclaimed
+    // is indistinguishable from one the viewer failed to read.
+    ['data-provenance', metadata.provenance],
   ].filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
     .map(([name, value]) => ` ${name}="${esc(String(value))}"`)
     .join('');
@@ -226,11 +231,13 @@ export function focusNodeTitle(label, metadata = {}) {
   return `<title>${esc(parts.join(' · '))}</title>`;
 }
 
-export function focusEdgeAttrs(from, to, label, key, id) {
+export function focusEdgeAttrs(from, to, label, key, id, provenance) {
   const named = label ? ` data-edge-label="${esc(label)}"` : '';
   const keyed = key !== undefined && key !== null ? ` data-edge-key="${esc(String(key))}"` : '';
   const identified = id !== undefined && id !== null && String(id).trim() !== ''
     ? ` data-edge-id="${esc(String(id))}"`
     : '';
-  return `data-edge-from="${esc(from)}" data-edge-to="${esc(to)}"${named}${keyed}${identified}`;
+  // Same contract as nodes: the resolved class, always, never blank.
+  const provenanced = provenance ? ` data-provenance="${esc(String(provenance))}"` : '';
+  return `data-edge-from="${esc(from)}" data-edge-to="${esc(to)}"${named}${keyed}${identified}${provenanced}`;
 }
