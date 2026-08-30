@@ -11,6 +11,7 @@
   ],
   "scripts": {
     "lint": "eslint .",
+    "check:changelog": "node scripts/check-changelog.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/run-tests.mjs",
     "test:golden": "node scripts/golden.mjs",
@@ -22,7 +23,7 @@
     "check:drift": "node scripts/check-core-drift.mjs",
     "build:template": "node packages/viewer/build.mjs",
     "check:template": "node scripts/check-template.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
+    "check": "npm run lint && npm run check:changelog && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
   },
   "devDependencies": {
     "@types/node": "^18",
