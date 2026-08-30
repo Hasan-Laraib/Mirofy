@@ -117,3 +117,73 @@ test('a malformed fact is refused naming the missing field (2.7)', async () => {
       `a fact with a broken ${field} was accepted, or refused without naming it`);
   }
 });
+
+// ---------------------------------------------------------------------------
+// Row 2.17 — the honest coverage report
+// ---------------------------------------------------------------------------
+
+function coverageFixture() {
+  return {
+    inventories: {
+      imports: ['src/a.js', 'src/b.js', 'src/dynamic.js'],
+      routes: ['src/a.js', 'src/b.js', 'src/dynamic.js', 'src/server.js'],
+    },
+    graphFacts: [
+      fact({ subject: 'src/a.js', object: 'src/b.js', location: { path: 'src/a.js', lines: [1, 1] } }),
+    ],
+    graphGaps: [
+      { adapter: 'imports', path: 'src/dynamic.js', reason: 'computed import specifier at line 2', revision: REVISION },
+    ],
+    allFiles: ['src/a.js', 'src/b.js', 'src/dynamic.js', 'src/server.js', 'assets/logo.svg'],
+  };
+}
+
+async function builtReport() {
+  const { EvidenceGraph } = await import('../../evidence/src/graph.mjs');
+  const { coverageReport } = await import('../../evidence/src/coverage.mjs');
+  const { inventories, graphFacts, graphGaps, allFiles } = coverageFixture();
+  const graph = new EvidenceGraph();
+  for (const f of graphFacts) graph.append(f);
+  for (const g of graphGaps) graph.addGap(g);
+  return coverageReport(graph, { inventories, allFiles });
+}
+
+test('coverage buckets every file exactly once, and the buckets sum to the whole (2.17)', async () => {
+  const report = await builtReport();
+  const { allFiles } = coverageFixture();
+
+  const bucketed = [
+    ...report.analysed.map((entry) => entry.path),
+    ...report.gapped.map((entry) => entry.path),
+    ...report.notAnalysed,
+  ].sort();
+  assert.deepEqual(bucketed, [...allFiles].sort(),
+    'the three buckets must partition the file list -- an uncounted or double-counted file is a lie about coverage');
+
+  // A file with a gap belongs to the gap bucket even though another adapter
+  // analysed it cleanly: a partial analysis is not a complete one.
+  const dynamic = report.gapped.find((entry) => entry.path === 'src/dynamic.js');
+  assert.ok(dynamic, 'the gapped file is missing from the gap bucket');
+  assert.match(dynamic.reasons[0], /computed import/);
+
+  const analysed = report.analysed.find((entry) => entry.path === 'src/a.js');
+  assert.deepEqual(analysed.adapters.sort(), ['imports', 'routes']);
+
+  assert.deepEqual(report.notAnalysed, ['assets/logo.svg'],
+    'a file no adapter examined must appear as not analysed, never silently dropped');
+});
+
+test('the rendered coverage report never fabricates a percentage (2.17)', async () => {
+  const { renderCoverage } = await import('../../evidence/src/coverage.mjs');
+  const report = await builtReport();
+  const text = renderCoverage(report);
+
+  // The spec: "What was derived, inferred, and not analysed. Never a
+  // fabricated percentage." Counts with a stated denominator are honest;
+  // a bare percentage is not, because "82% covered" silently claims the
+  // denominator is the whole system.
+  assert.doesNotMatch(text, /\d+(\.\d+)?\s*%/, 'the report contains a percentage');
+  assert.match(text, /5 files/, 'the report must state its denominator as a count');
+  assert.match(text, /not analysed/i);
+  assert.match(text, /assets\/logo\.svg/, 'the not-analysed list must name the files, not summarise them away');
+});
