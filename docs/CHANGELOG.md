@@ -13,6 +13,42 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b Task 6: the evidence-first visual language
+
+**Commits:** `ee80484..b19fdf4` on `p1b-evidence-spine`.
+
+`data-provenance` is now emitted by all five diagram types from one place —
+wired into `focusNodeAttrs` and `focusEdgeAttrs` rather than into five
+renderers — and every node and edge carries a class. Including subjects that
+claimed nothing: those resolve to `authored`. A trust signal that is simply
+*absent* when unclaimed is indistinguishable from one the viewer failed to
+read, which is the wrong thing for a trust signal to be ambiguous about.
+
+Five treatments, using stroke-dasharray, stroke-width and opacity.
+36-VISUAL-SYSTEM.md's V4 constraint is that the classes stay legible
+**without colour**, because provenance is a trust signal and roughly 8% of
+men have colour-vision deficiency. Colour may reinforce; it never separates
+two classes, and the test measures only the non-colour channels for exactly
+that reason.
+
+`authored` deliberately has no rule. It is what almost every edge in almost
+every existing document resolves to, so giving it a treatment would restyle
+every diagram ever authored in order to say "this is normal". Its
+distinctness is being the untouched baseline — which is also why golden
+moved only where a class was actually claimed.
+
+The rules share specificity with `.a-security` and `.a-dashed` and sit after
+them, so provenance wins over a stylistic variant. That is deliberate: the
+variant is how an author chose to draw a line, provenance is what is known
+about it, and truth outranks spectacle.
+
+Row 4.14 reads **computed styles from a real browser**, not the stylesheet
+text. Parsing the CSS would prove a rule was written, not that it wins the
+cascade — precisely where P1a's print-palette bug lived. It runs across all
+five presets and both themes, and was observed failing: giving
+`config-derived` the same dash pattern as `statically-derived` fails naming
+both classes and the tuple they share.
+
 ## 2026-08-30 — P1b Task 5: the six-class provenance vocabulary
 
 **Commits:** `bbfe407..fe0ed05` on `p1b-evidence-spine`.

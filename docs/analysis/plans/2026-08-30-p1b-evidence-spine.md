@@ -498,19 +498,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 
 > **The binding constraint, from `36-VISUAL-SYSTEM.md` V4:** the six treatments must be distinguishable **without colour**, because provenance is a trust signal. Use stroke treatment, texture and markers — dash patterns, marker shapes, opacity — and let colour reinforce rather than carry. This is why the treatments live in structural CSS rather than the palette: they must survive all five presets and both themes unchanged.
 
-- [ ] **Step 1: Write the failing test** — assert all six classes render with **distinct** non-colour treatments. Concretely: for each class, extract the computed `stroke-dasharray`, `marker-end` and `stroke-width` of an edge carrying it, and assert the six tuples are pairwise distinct. A test that only checked colour would pass a design that fails the spec's central requirement.
+- [x] **Step 1: Write the failing test** — assert all six classes render with **distinct** non-colour treatments. Concretely: for each class, extract the computed `stroke-dasharray`, `marker-end` and `stroke-width` of an edge carrying it, and assert the six tuples are pairwise distinct. A test that only checked colour would pass a design that fails the spec's central requirement.
 
-- [ ] **Step 2: Add a colour-independence assertion** — render the six, convert each treatment's colour to greyscale (luminance only), and assert the six are *still* pairwise distinguishable by their non-colour attributes alone. Reuse `color-science.mjs` for the luminance conversion rather than writing a second implementation.
+- [x] **Step 2: Add a colour-independence assertion** — render the six, convert each treatment's colour to greyscale (luminance only), and assert the six are *still* pairwise distinguishable by their non-colour attributes alone. Reuse `color-science.mjs` for the luminance conversion rather than writing a second implementation.
 
-- [ ] **Step 3: Run both, watch them fail.**
+- [x] **Step 3: Run both, watch them fail.**
 
-- [ ] **Step 4: Emit `data-provenance`** on nodes and edges from all five renderers, using `resolveProvenance` so an unclaimed subject still carries its resolved class.
+- [x] **Step 4: Emit `data-provenance`** on nodes and edges from all five renderers, using `resolveProvenance` so an unclaimed subject still carries its resolved class.
 
-- [ ] **Step 5: Implement the six treatments** in `01-structure.css`, keyed on `[data-provenance="…"]`. Verify each survives all five presets and both themes — the gallery is the fastest way to check this.
+- [x] **Step 5: Implement the six treatments** in `01-structure.css`, keyed on `[data-provenance="…"]`. Verify each survives all five presets and both themes — the gallery is the fastest way to check this.
 
-- [ ] **Step 6: Prove non-vacuity** — make two classes share a dash pattern; confirm the distinctness test fails naming the colliding pair; restore; confirm it passes.
+- [x] **Step 6: Prove non-vacuity** — make two classes share a dash pattern; confirm the distinctness test fails naming the colliding pair; restore; confirm it passes.
 
-- [ ] **Step 7: Register row 4.14. Full gate, re-baselines, gallery, status, commit.** `Refs: 4.14, 2.5`.
+- [x] **Step 7: Register row 4.14. Full gate, re-baselines, gallery, status, commit.** `Refs: 4.14, 2.5`.
 
 ---
 
