@@ -24,7 +24,9 @@
     "build:template": "node packages/viewer/build.mjs",
     "check:template": "node scripts/check-template.mjs",
     "gallery": "node scripts/gallery.mjs",
-    "check": "npm run lint && npm run check:changelog && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
+    "status": "node scripts/status.mjs",
+    "status:check": "node scripts/status.mjs --check",
+    "check": "npm run lint && npm run check:changelog && npm run status:check && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit"
   },
   "devDependencies": {
     "@types/node": "^18",
