@@ -21,8 +21,8 @@ The root `LICENSE` carried a second copyright line naming the source
 project's author. It was belt-and-braces — `packages/core/LICENSE` already
 carries the notice the MIT terms actually require — so the root file now
 names only this project's contributors. `packages/core/LICENSE` is
-unchanged and stays byte-identical to its harvest state; it is the single
-permitted reference and must never be edited.
+unchanged and stays byte-identical to the state it was imported in; it is
+the single permitted reference and must never be edited.
 
 Six URLs in `packages/core` still pointed at the source repository's owner
 and would 404: the `SKILL.md` author field and five rename-artifact
