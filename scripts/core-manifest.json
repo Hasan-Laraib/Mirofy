@@ -12,7 +12,7 @@
     "bin/visual-check.mjs": "3bad65db95fd9ea4d5b0cdd9a51309dfb70205ae",
     "brand-marks/README.md": "2a4dbcf34ca558eec227bcbcc6267fb4320852b2",
     "brand-marks/catalog.json": "ac5698939b0baba2582e3b65556b1ebdbeea8fe6",
-    "delta/architecture-delta.mjs": "491291a37a20bd7f8453bf77e8574f2afa445d23",
+    "delta/architecture-delta.mjs": "8b451a144b89ab75fb8e68c9efa003fd6d62d0f3",
     "examples/agent-run.lifecycle.json": "329208b45946c04607770a6a74d83968121ad757",
     "examples/agent-tool-call.workflow.json": "1144e1d5e0e74180554a854cabd16ecb2c757d4b",
     "examples/async-job-roundtrip.sequence.json": "351104966631e17a490c594c4d614b9547a65576",
