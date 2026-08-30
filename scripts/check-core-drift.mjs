@@ -1,14 +1,16 @@
 // Present-tense drift gate for packages/core/.
 //
-// There are two provenance-shaped checks in this repo and they answer
-// different questions. Keeping them apart matters:
+// This repo used to run two provenance-shaped checks that answered
+// different questions. Keeping them apart mattered:
 //
-//   check:provenance  -- a HISTORICAL claim about the ancestor. "At the
-//                        anchor commit, these 163 files were byte-identical
-//                        to tt-a1i/archify@12106be." It reads an immutable
-//                        commit, so it is a constant function of history: it
-//                        can never fail because of a code change, and it can
-//                        never notice one.
+//   check:provenance (retired) -- a HISTORICAL claim about the ancestor. "At
+//                        the anchor commit, these 163 files were byte-identical
+//                        to the upstream baseline." It read an immutable
+//                        commit, so it was a constant function of history: it
+//                        could never fail because of a code change, and it
+//                        could never notice one. The gate has since been
+//                        retired along with its manifest; the historical claim
+//                        it made is no longer asserted anywhere in this repo.
 //
 //   check:drift       -- a PRESENT-TENSE claim about intentionality. "Every
 //                        file under packages/core/ is exactly what it was the
@@ -18,8 +20,9 @@
 // Before the identifier rename, one script did both jobs, because
 // "identical to the ancestor" and "not quietly edited" were the same
 // sentence. The rename split them, and converting that script to the
-// historical claim left the present-tense one with no owner. This restores
-// it, because that job was always the more operationally useful of the two:
+// historical claim left the present-tense one with no owner. This restored
+// it, because that job was always the more operationally useful of the two,
+// and it is now the sole remaining core-integrity gate:
 //
 //   scripts/golden.mjs renders five fixtures through five renderers. Plenty
 //   of packages/core/ is not on any of those five paths -- most of test/,
