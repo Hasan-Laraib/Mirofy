@@ -377,24 +377,34 @@ test('lifecycle: same-band port spread remains orthogonal', () => {
   ]);
 });
 
-test('the skill describes automatic port spread as bounded default behavior', () => {
+test('the skill routes to automatic port spread, and the contract explains it', () => {
   // Rewritten for this repo. The original asserted the upstream project's
   // documentation layout, including a README_EN.md that does not exist here,
   // so it could never pass and never ran. What it was protecting is real and
   // is kept: an agent that does not know endpoints move automatically will
   // try to author them.
+  //
+  // The split follows this skill's own shape. SKILL.md is a router with a
+  // 160-line budget, so it points; references/ explains. Asserting the detail
+  // against SKILL.md would push the entrypoint over budget to satisfy a test,
+  // which is backwards.
   const skill = fs.readFileSync(path.join(skillRoot, 'SKILL.md'), 'utf8');
-  assert.match(skill, /Automatic Port Spread is a default renderer behavior/);
+  assert.match(skill, /automatic port placement/,
+    'SKILL.md does not route an agent to the port placement rules');
 
-  // The bounds matter more than the behaviour. Each of these is a real opt-out
-  // in automaticPortSpread(), and an agent that does not know them will fight
-  // the renderer for control of an endpoint it already conceded.
-  assert.match(skill, /a single relationship on a side/);
-  assert.match(skill, /`via`, `channelX`, `channelY` or `labelAt`/);
-  assert.match(skill, /facing automatic ports \(`left`\/`right` or `top`\/`bottom`\)[\s\S]*one shared axis/);
+  const contract = fs.readFileSync(path.join(skillRoot, 'references/authoring-contract.md'), 'utf8');
+  assert.match(contract, /Automatic Port Spread is a default renderer behavior/);
+
+  // The bounds matter more than the behaviour. Each is a real opt-out in
+  // automaticPortSpread(), and an agent that does not know them will fight the
+  // renderer for control of an endpoint it already conceded.
+  assert.match(contract, /a single relationship on a side/);
+  assert.match(contract, /`via`, `channelX`, `channelY` or `labelAt`/);
+  // Matched across a line break: the phrase wraps in the source document.
+  assert.match(contract, /facing automatic ports[\s\S]*`top`\/`bottom`[\s\S]*one shared axis/);
 
   // And the two fallbacks, because "aims at its counterpart" alone would
   // describe a renderer that happily draws an edge through another node.
-  assert.match(skill, /spread at both ends/);
-  assert.match(skill, /cross an unrelated node/);
+  assert.match(contract, /spread at both ends/);
+  assert.match(contract, /cross an unrelated node/);
 });

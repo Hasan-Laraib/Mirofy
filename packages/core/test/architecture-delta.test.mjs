@@ -333,25 +333,11 @@ test('compare CLI writes a deterministic three-state artifact and complete sidec
   assert.deepEqual(validateArchitectureDeltaHtml(firstHtml, receipt), { ok: true, checksPassed: 10, checkCount: 10 });
 });
 
-test('checked-in Checkout compare artifact is reproducible from its authoritative inputs', () => {
-  const artifact = path.join(tmp, 'checked-artifact.html');
-  const receipt = path.join(tmp, 'checked-artifact.receipt.json');
-  const result = run([
-    'compare',
-    'architecture',
-    baseFixture,
-    headFixture,
-    artifact,
-    '--receipt',
-    receipt,
-    '--quality',
-    'showcase',
-    '--json',
-  ]);
-  assert.equal(result.status, 0, result.stderr);
-  assert.equal(fs.readFileSync(artifact, 'utf8'), fs.readFileSync(checkedArtifact, 'utf8'));
-  assert.deepEqual(read(receipt), read(checkedReceipt));
-});
+// Removed: this asserted a rendered compare artifact checked into git.
+// Row 7.1 says no generated artifacts in git -- they are built in CI from
+// source and verified by manifest digest -- so there is deliberately nothing
+// tracked for this to compare against. The reproducibility it was protecting
+// is covered by check:artifacts, which rebuilds and checks the digest.
 
 test('artifact validation fails closed on missing, duplicate, or self-blessed review identity', () => {
   const output = path.join(tmp, 'review-identity.html');

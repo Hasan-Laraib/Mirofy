@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const repoRoot = path.resolve(skillRoot, '..');
+const repoRoot = path.resolve(skillRoot, '..', '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-reach-share-card-'));
 
 const CASES = {
@@ -129,21 +129,16 @@ test('Skill, product docs, and READMEs keep the optional truthful boundary expli
   assert.match(viewer, /authored reachability/i);
   assert.match(viewer, /download-only/i);
 
-  for (const readme of ['README.md', 'README_EN.md', 'README_ZH.md']) {
+  for (const readme of ['README.md']) {
     const text = fs.readFileSync(path.join(repoRoot, readme), 'utf8');
     assert.match(text, /Reach Share Card/, readme);
-    assert.match(text, /docs\/assets\/mco-runtime-reach-share-card\.png/, readme);
   }
-  const png = fs.readFileSync(path.join(repoRoot, 'docs/assets/mco-runtime-reach-share-card.png'));
-  assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
-  assert.equal(png.readUInt32BE(16), 1200);
-  assert.equal(png.readUInt32BE(20), 630);
-
-  const product = fs.readFileSync(path.join(repoRoot, 'PRODUCT.md'), 'utf8');
-  const design = fs.readFileSync(path.join(repoRoot, 'DESIGN.md'), 'utf8');
-  assert.match(product, /Reach Share Card/);
-  assert.match(design, /Reach Share Card/);
-  assert.match(design, /not (?:runtime )?(?:impact|causality|breakage)/i);
+  // The upstream README embedded a captured 1200x630 PNG from docs/assets/
+  // and repeated the claim in PRODUCT.md and DESIGN.md. None of those exist
+  // here: docs/ was removed deliberately, and this repo has one README. The
+  // truth boundary they were protecting -- that reachability is AUTHORED,
+  // not runtime impact -- is asserted above against viewer-runtime.md, which
+  // is the document the viewer is actually built from.
 });
 
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));

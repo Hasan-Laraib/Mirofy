@@ -9,6 +9,27 @@ import { startPreview } from '../bin/preview.mjs';
 import { loadDiagram, writeDiagram } from '../renderers/shared/cli.mjs';
 import { pathsAlias } from '../renderers/shared/output-path.mjs';
 
+// Creating a symbolic link on Windows needs a privilege an ordinary account
+// does not have (Developer Mode, or elevation). That is an environment fact,
+// not a verdict on this code: these tests are about how render resolves an
+// output path THROUGH a link, and without the privilege there is no link to
+// resolve. So they skip, visibly, and say why -- a skip is not a pass, and
+// CI on Linux and macOS still runs every one of them.
+const symlinksAllowed = (() => {
+  const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-symlink-probe-'));
+  try {
+    fs.symlinkSync(path.join(probe, 'target'), path.join(probe, 'link'), 'file');
+    return true;
+  } catch {
+    return false;
+  } finally {
+    fs.rmSync(probe, { recursive: true, force: true });
+  }
+})();
+const symlinkTest = symlinksAllowed
+  ? test
+  : (name, fn) => test(name, { skip: 'symlink creation is not permitted in this environment' }, fn);
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
 const cli = path.join(skillRoot, 'bin/mirofy.mjs');
@@ -99,7 +120,7 @@ test('compare rejects case-only future targets before input work when the direct
   assert.equal(receipt.stage, caseInsensitive ? 'prepare' : 'input');
 });
 
-test('render reports an output symlink cycle as a structured output diagnostic', () => {
+symlinkTest('render reports an output symlink cycle as a structured output diagnostic', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-cycle-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'cycle-a.html');
@@ -125,7 +146,7 @@ test('render reports an output symlink cycle as a structured output diagnostic',
   assert.ok(failure.diagnostics[0].supportedFixes.length > 0);
 });
 
-test('render rejects an output symlink that aliases its JSON input', () => {
+symlinkTest('render rejects an output symlink that aliases its JSON input', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-render-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const output = path.join(cwd, 'diagram.html');
@@ -187,7 +208,7 @@ test('render rejects a relative meta.output that escapes the working directory',
   assert.equal(fs.existsSync(output), false);
 });
 
-test('render rejects a meta.output that escapes through a directory symlink', () => {
+symlinkTest('render rejects a meta.output that escapes through a directory symlink', () => {
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-meta-link-'));
   const cwd = path.join(parent, 'work');
   const outside = path.join(parent, 'outside');
@@ -222,7 +243,7 @@ test('render requires a meta.output target with an html extension', () => {
   assert.equal(fs.existsSync(output), false);
 });
 
-test('render rejects a meta.output symlink that resolves to a non-html target', () => {
+symlinkTest('render rejects a meta.output symlink that resolves to a non-html target', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-meta-extension-link-'));
   const input = path.join(cwd, 'diagram.workflow.json');
   const target = path.join(cwd, 'authored.json');
@@ -240,7 +261,7 @@ test('render rejects a meta.output symlink that resolves to a non-html target', 
   assert.equal(fs.readFileSync(target, 'utf8'), 'trusted target');
 });
 
-test('deliver rejects a future-path alias of its JSON input with a structured diagnostic', () => {
+symlinkTest('deliver rejects a future-path alias of its JSON input with a structured diagnostic', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-deliver-'));
   const realDirectory = path.join(cwd, 'real');
   const linkedDirectory = path.join(cwd, 'linked');
@@ -260,7 +281,7 @@ test('deliver rejects a future-path alias of its JSON input with a structured di
   assert.deepEqual(fs.readFileSync(input), source);
 });
 
-test('deliver rechecks aliases immediately before committing a verified candidate', { timeout: 10000 }, async () => {
+symlinkTest('deliver rechecks aliases immediately before committing a verified candidate', { timeout: 10000 }, async () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-deliver-race-'));
   const installedRoot = path.join(cwd, 'skill');
   const installedBin = path.join(installedRoot, 'bin');
@@ -343,7 +364,7 @@ console.log(JSON.stringify({
   assert.deepEqual(fs.readFileSync(input), source);
 });
 
-test('compare rejects an artifact path that aliases either architecture input', () => {
+symlinkTest('compare rejects an artifact path that aliases either architecture input', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-'));
   const realDirectory = path.join(cwd, 'real');
   const linkedDirectory = path.join(cwd, 'linked');
@@ -383,7 +404,7 @@ test('compare rejects a receipt path that aliases either architecture input', ()
   assert.equal(fs.existsSync(output), false);
 });
 
-test('compare rejects a dangling receipt symlink to the future artifact path', () => {
+symlinkTest('compare rejects a dangling receipt symlink to the future artifact path', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-pair-'));
   const output = path.join(cwd, 'delta.html');
   const receiptPath = path.join(cwd, 'delta.receipt.json');
@@ -426,7 +447,7 @@ test('preview applies the meta.output relative-path boundary before starting a s
   assert.equal(fs.existsSync(output), false);
 });
 
-test('the shared renderer rechecks its guarded output immediately before writing', () => {
+symlinkTest('the shared renderer rechecks its guarded output immediately before writing', () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-render-race-'));
   const inputDirectory = path.join(cwd, 'input');
   const initialOutputDirectory = path.join(cwd, 'safe-output');
@@ -462,7 +483,7 @@ test('the shared renderer rechecks its guarded output immediately before writing
   assert.deepEqual(fs.readFileSync(input), source);
 });
 
-test('compare rechecks every target immediately before committing the artifact pair', { timeout: 10000 }, async () => {
+symlinkTest('compare rechecks every target immediately before committing the artifact pair', { timeout: 10000 }, async () => {
   const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-output-compare-race-'));
   const installedRoot = path.join(cwd, 'skill');
   const installedBin = path.join(installedRoot, 'bin');
@@ -481,6 +502,7 @@ test('compare rechecks every target immediately before committing the artifact p
   fs.writeFileSync(path.join(installedRenderer, 'render-architecture.mjs'), `
 import fs from 'node:fs';
 import path from 'node:path';
+
 const [, output] = process.argv.slice(2);
 if (path.basename(output) === 'head.html') {
   const marker = process.env.MIROFY_TEST_RENDER_STARTED;

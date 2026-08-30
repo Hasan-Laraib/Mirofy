@@ -47,26 +47,7 @@ test('artifact SVG extraction follows HTML quoting and preserves SVG document bo
   assert.doesNotThrow(() => parseXml(inheritedNamespace.direct[0]));
 });
 
-test('tracked browsable HTML embeds well-formed XML SVG', () => {
-  const artifacts = trackedHtmlArtifacts();
-  const checkoutArtifact = 'examples/checkout-platform-delta.html';
-  assert.ok(artifacts.includes(checkoutArtifact), 'expected the tracked Checkout compare artifact');
-  let checkoutSvgs;
+// Removed: same reason as the delta artifact above -- it read a rendered HTML
+// tracked in git, and row 7.1 keeps none. The extraction logic it exercised is
+// still covered by the SVG-boundary test above, which renders its own input.
 
-  for (const relative of artifacts) {
-    const html = fs.readFileSync(path.join(repoRoot, relative), 'utf8');
-    const extracted = extractSvgs(html);
-    if (relative === checkoutArtifact) checkoutSvgs = extracted;
-    const svgs = [...extracted.direct, ...extracted.embedded];
-    if (svgs.length === 0) continue;
-    for (const [index, svg] of svgs.entries()) {
-      assert.doesNotThrow(
-        () => parseXml(svg),
-        `${relative}: SVG ${index + 1} must be well-formed XML`,
-      );
-    }
-  }
-
-  assert.equal(checkoutSvgs?.direct.length, 1, 'Checkout must contain one comparison SVG');
-  assert.equal(checkoutSvgs?.embedded.length, 2, 'Checkout must retain its base/head SVG snapshots');
-});

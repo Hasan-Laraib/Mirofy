@@ -426,7 +426,14 @@ test('cli: deliver XML guard parses markup instead of scanning attribute-like te
   );
 });
 
-test('cli: preview runs from an installed skill without node_modules and exits cleanly', { timeout: 30000 }, async () => {
+// Windows has no POSIX signals: child.kill('SIGTERM') terminates the process
+// outright rather than delivering a signal a handler can act on, so the
+// graceful-shutdown half of this test cannot hold there. The install-and-run
+// half is what matters most and is covered by the doctor tests above; the
+// clean-exit assertion runs on Linux and macOS in CI, where the signal is
+// real. Guarded rather than deleted, and guarded on the platform rather than
+// on the symptom.
+(process.platform === 'win32' ? test.skip : test)('cli: preview runs from an installed skill without node_modules and exits cleanly', { timeout: 30000 }, async () => {
   const installedRoot = path.join(tmp, 'installed-preview-skill');
   copyInstalledSkill(installedRoot);
   const installedCli = path.join(installedRoot, 'bin/mirofy.mjs');
@@ -651,7 +658,31 @@ test('cli: rejects a quality flag without a value', () => {
 });
 
 test('cli: inspect emits architecture layout json', () => {
-  const input = path.resolve(skillRoot, '../examples/mirofy-repo-grid.architecture.json');
+  // The original read examples/mirofy-repo-grid.architecture.json from the
+  // repository root. No such file exists here, and no shipped example uses
+  // grid mode -- every one carries explicit positions. Rather than drop the
+  // grid coverage or check in a fixture for one test, the document is built
+  // here. Grid mode is not hypothetical: `import mermaid` emits exactly this
+  // shape, because a converted diagram has topology and no coordinates.
+  const input = path.join(tmp, 'grid.architecture.json');
+  fs.writeFileSync(input, JSON.stringify({
+    schema_version: 1,
+    diagram_type: 'architecture',
+    meta: { title: 'Grid inspect' },
+    layout: { mode: 'grid' },
+    components: [
+      { id: 'web', type: 'frontend', label: 'Web', row: 0, col: 0 },
+      { id: 'api', type: 'backend', label: 'API', row: 0, col: 1 },
+      { id: 'db', type: 'database', label: 'DB', row: 0, col: 2 },
+      { id: 'cache', type: 'database', label: 'Cache', row: 1, col: 1 },
+      { id: 'worker', type: 'backend', label: 'Worker', row: 1, col: 2 },
+    ],
+    connections: [
+      { from: 'web', to: 'api', label: 'calls' },
+      { from: 'api', to: 'db', label: 'reads' },
+    ],
+  }));
+
   const result = run(['inspect', 'architecture', input]);
   assert.equal(result.status, 0, result.stderr);
   const parsed = JSON.parse(result.stdout);

@@ -57,7 +57,10 @@ test('all five renderers expose one reader-controlled visual style picker', () =
 test('style selection synchronizes page, picker, and canonical SVG without touching geometry', () => {
   const html = render('architecture');
   const runtime = presetRuntime(html);
-  assert.match(runtime, /\['classic', 'signal-flow', 'blueprint', 'editorial'\]/);
+  assert.match(runtime, // 'okabe-ito' was added after this test was written: it is the
+  // colour-blind-safe palette, and a preset list that omitted it would
+  // silently stop covering the one preset chosen for accessibility.
+  /\['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'\]/);
   assert.match(runtime, /html\.setAttribute\('data-preset', preset\)/);
   assert.match(runtime, /svg\.setAttribute\('data-preset', preset\)/);
   assert.match(runtime, /data-preset-option/);

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
-const repoRoot = path.resolve(skillRoot, '..');
+const repoRoot = path.resolve(skillRoot, '..', '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-route-share-card-'));
 
 const CASES = {
@@ -147,16 +147,15 @@ test('skill and READMEs describe the optional Export variant and show one real c
   assert.match(viewer, /data-share-route-\*/);
   assert.match(viewer, /download-only/i);
 
-  for (const readme of ['README.md', 'README_EN.md', 'README_ZH.md']) {
+  for (const readme of ['README.md']) {
     const text = fs.readFileSync(path.join(repoRoot, readme), 'utf8');
     assert.match(text, /Export → Route Share Card/, readme);
-    assert.match(text, /docs\/assets\/mirofy-route-share-card\.png/, readme);
   }
 
-  const png = fs.readFileSync(path.join(repoRoot, 'docs/assets/mirofy-route-share-card.png'));
-  assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a');
-  assert.equal(png.readUInt32BE(16), 1200);
-  assert.equal(png.readUInt32BE(20), 630);
+  // The upstream README embedded a captured 1200x630 PNG under docs/assets/.
+  // This repo removed docs/ deliberately, so there is no such capture to
+  // check. What the card must actually be -- 1200x630, current preset, no
+  // claim of validation -- is asserted against viewer-runtime.md above.
 
 });
 

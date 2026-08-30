@@ -143,7 +143,12 @@ test('repair receipt: repository evidence failures retain a stable rule and exac
   const repair = receipt(result).diagnostics[0];
   assert.equal(repair.code, 'repository-evidence/root-required');
   assert.deepEqual(repair.subject, { surface: 'repository-evidence', path: '/meta/repository' });
-  assert.deepEqual(repair.supportedFixes, ['pass --repo-root with the matching local Git checkout']);
+  // Row 2.6 gave this message the flag's argument. With several
+  // repositories declarable, "pass --repo-root" alone left the author
+  // guessing which form was wanted, so the single-repository case now
+  // spells out <repository> exactly as the multi-repository case names
+  // <id>=<path>.
+  assert.deepEqual(repair.supportedFixes, ['pass --repo-root <repository> with the matching local Git checkout']);
 });
 
 test('repair receipt: public validate reports borderline desktop readability with a supported fix', () => {

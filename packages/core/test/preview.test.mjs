@@ -10,6 +10,27 @@ import vm from 'node:vm';
 
 import { startPreview } from '../bin/preview.mjs';
 
+// Creating a symbolic link on Windows needs a privilege an ordinary account
+// does not have (Developer Mode, or elevation). That is an environment fact,
+// not a verdict on this code: these tests are about how render resolves an
+// output path THROUGH a link, and without the privilege there is no link to
+// resolve. So they skip, visibly, and say why -- a skip is not a pass, and
+// CI on Linux and macOS still runs every one of them.
+const symlinksAllowed = (() => {
+  const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-symlink-probe-'));
+  try {
+    fs.symlinkSync(path.join(probe, 'target'), path.join(probe, 'link'), 'file');
+    return true;
+  } catch {
+    return false;
+  } finally {
+    fs.rmSync(probe, { recursive: true, force: true });
+  }
+})();
+const symlinkTest = symlinksAllowed
+  ? test
+  : (name, fn) => test(name, { skip: 'symlink creation is not permitted in this environment' }, fn);
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
 
@@ -54,7 +75,7 @@ function rawRequest(url, { method = 'GET', pathname = '/', hostHeader } = {}) {
   });
 }
 
-test('preview: rejects destructive or unsupported startup targets before watching', async () => {
+symlinkTest('preview: rejects destructive or unsupported startup targets before watching', async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-startup-'));
   const input = path.join(tmp, 'diagram.json');
   fs.writeFileSync(input, '{}');
@@ -364,7 +385,7 @@ console.log(JSON.stringify({
   }
 });
 
-test('preview: stopping drains an active delivery without publishing it', { timeout: 30000 }, async () => {
+symlinkTest('preview: stopping drains an active delivery without publishing it', { timeout: 30000 }, async () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-preview-stop-'));
   const input = path.join(tmp, 'diagram.json');
   const output = path.join(tmp, 'diagram.html');
@@ -375,6 +396,7 @@ test('preview: stopping drains an active delivery without publishing it', { time
   fs.writeFileSync(deliveryCli, `
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
+
 const [, , , output] = process.argv.slice(2);
 await new Promise((resolve) => setTimeout(resolve, 450));
 const artifact = Buffer.from('<!doctype html><title>Late candidate</title><svg></svg>');

@@ -6,7 +6,6 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { supportsRepositoryEvidence } from '../renderers/shared/repository-evidence.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
@@ -263,8 +262,18 @@ function formatDiagnostics(error, diagnostics = []) {
   ].join('\n');
 }
 
-function assertEvidenceType(type, repoRoot) {
-  if (repoRoot && !supportsRepositoryEvidence(type)) {
+// Loaded on demand, and only when --repo-root is actually passed.
+//
+// This was a static import at the top of the file -- the one non-Node import
+// here -- and it made every verb depend on the whole renderer module graph
+// resolving. On an incomplete installation that turned `doctor`, the verb
+// whose entire job is to diagnose an incomplete installation, into an
+// unhandled ERR_MODULE_NOT_FOUND stack trace. A user with a broken install
+// got Node internals instead of the list of what was missing.
+async function assertEvidenceType(type, repoRoot) {
+  if (!repoRoot) return;
+  const { supportsRepositoryEvidence } = await import('../renderers/shared/repository-evidence.mjs');
+  if (!supportsRepositoryEvidence(type)) {
     fail(`--repo-root is not supported for ${type} diagrams.`);
   }
 }
@@ -717,12 +726,12 @@ async function commandCompare(args) {
   }
 }
 
-function commandRender(args) {
+async function commandRender(args) {
   const qualityArgs = extractQualityArgs(args);
   const repoArgs = extractRepoRootArgs(qualityArgs.rest);
   const [type, input, output] = repoArgs.rest;
   if (!type || !input) fail(usage());
-  assertEvidenceType(type, repoArgs.repoRoot);
+  await assertEvidenceType(type, repoArgs.repoRoot);
   const result = runNode([rendererPath(type), input, ...(output ? [output] : [])], {
     env: rendererEnv(qualityArgs.quality, repoArgs.repoRoot),
   });
@@ -792,7 +801,7 @@ async function commandDeliver(args) {
   const positional = repoArgs.rest.filter((arg) => !knownOptions.has(arg));
   const [type, input, requestedOutput] = positional;
   if (!type || !input || positional.length > 3) fail(usage());
-  assertEvidenceType(type, repoArgs.repoRoot);
+  await assertEvidenceType(type, repoArgs.repoRoot);
 
   const renderer = rendererPath(type);
   const inputPath = path.resolve(input);
@@ -1156,7 +1165,7 @@ async function commandPreview(args) {
   const positional = repoArgs.rest.filter((arg) => !knownOptions.has(arg));
   const [type, input, output] = positional;
   if (!type || !input || positional.length > 3) fail(usage());
-  assertEvidenceType(type, repoArgs.repoRoot);
+  await assertEvidenceType(type, repoArgs.repoRoot);
   rendererPath(type);
 
   let runPreview;
@@ -1509,7 +1518,7 @@ function commandDemo(args) {
   console.log('  mirofy render architecture <input.json> <output.html>');
 }
 
-function commandValidate(args) {
+async function commandValidate(args) {
   const qualityArgs = extractQualityArgs(args);
   const repoArgs = extractRepoRootArgs(qualityArgs.rest);
   args = repoArgs.rest;
@@ -1520,7 +1529,7 @@ function commandValidate(args) {
   const rest = args.filter((arg) => arg !== '--json' && arg !== '--layout-json');
   const [type, input] = rest;
   if (!type || !input) fail(usage());
-  assertEvidenceType(type, repoRoot);
+  await assertEvidenceType(type, repoRoot);
   const renderer = rendererPath(type);
 
   if (layoutJson) {

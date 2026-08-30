@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
-const repoRoot = path.resolve(skillRoot, '..');
+const repoRoot = path.resolve(skillRoot, '..', '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-share-card-'));
 
 const CASES = {
@@ -121,7 +121,7 @@ test('the skill and every README make the optional Share Card discoverable', () 
   assert.match(viewer, /never claim(?:s|ing)? validation/i);
   assert.match(viewer, /Copy Share Card/i);
 
-  for (const readme of ['README.md', 'README_EN.md', 'README_ZH.md']) {
+  for (const readme of ['README.md']) {
     const text = fs.readFileSync(path.join(repoRoot, readme), 'utf8');
     assert.match(text, /Share Card/i, readme);
     assert.match(text, /1200(?:×|x)630/, readme);

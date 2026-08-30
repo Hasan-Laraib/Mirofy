@@ -116,6 +116,36 @@ confident link to nothing is worse than admitting the host is unknown.
 **Zero runtime dependencies** in every workspace package. The rendered
 artifact ships nothing but itself.
 
+## In the artifact
+
+The rendered `.html` is the product, and it carries more than a picture. It
+opens offline, from a file, with no server and no network.
+
+- **Node Finder**, **Semantic Lens** and **Semantic Radar** — search, filter
+  and overview a diagram too large to read at once
+- **Route Probe** — resolve a directed path between two nodes and see it
+  traced, with the ordered hops listed
+- **Authored Reachability** — everything upstream or downstream of one node,
+  counted
+- **Semantic Passport** — click any node for its type, tags, and cited
+  evidence, with a **Verified Source Beacon** on anything backed by a pinned
+  commit
+- **Guided views** — authored chapters that walk a reader through the diagram
+- **Presentation stage**, **motion governor** and an **embed mode**
+  (`?embed=1`) for slides, docs and pages
+
+Three exports are copied straight to the clipboard, all optional and all
+generated from what is already on screen:
+
+| Export | What it is |
+|---|---|
+| **Copy Share Card** | A 1200×630 PNG for a README, release or social preview, in the current theme and visual preset |
+| **Export → Route Share Card** | The exact ordered route a Route Probe resolved — available only after one resolves |
+| **Export → Reach Share Card** | The upstream/downstream set a reachability query returned — available only after a non-empty one |
+
+A card shows what the reader actually did. None of them claim validation, and
+none are produced from a query that returned nothing.
+
 ## Viewer source
 
 `packages/core/assets/template.html` is **generated**, not hand-authored — it

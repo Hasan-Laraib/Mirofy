@@ -55,8 +55,6 @@ Use this bounded path for ordinary generation. Do not read the optional Viewer R
 
 Do not read `renderers/shared/geometry.mjs`, renderer source, validator source, tests, or benchmarks before the first candidate. Inspect implementation only for an unsupported internal diagnostic or after two focused repairs fail.
 
-Lifecycle note: phase columns `0..4` occupy the main rail; event/outcome columns `0..2` align beneath later phases. A recoverable state uses `type: "failure"` plus a real transition back to the active state.
-
 ## Type router
 
 | Type | Use for |
@@ -71,26 +69,19 @@ When ambiguous, run `node bin/mirofy.mjs guide "<scenario>" --json`. Scenario pr
 
 ## Mermaid input
 
-Convert it with the command, then improve the result:
-
 ```bash
 node bin/mirofy.mjs import mermaid <input.mmd> [output.json] [--json]
 ```
 
-- `flowchart` / `graph` → `architecture`
-- `sequenceDiagram` → `sequence`
-- `stateDiagram` / `stateDiagram-v2` → `lifecycle`
+`flowchart`/`graph` → `architecture`, `sequenceDiagram` → `sequence`, `stateDiagram`(`-v2`) → `lifecycle`.
 
-The importer never guesses. Any line it cannot read is reported as a gap with
-its line number instead of being dropped, so tell the user what was not
-carried across rather than presenting the result as complete.
-
-It also assigns no positions: a converted architecture uses `layout.mode:
-"grid"`, and a graph that fans out can place an edge through a node. That
-fails `clean-flow`, which is an always-on correctness gate, so **validate
-after importing** and adjust the layout when it complains. Read the Mermaid
-for meaning too — the importer carries topology, not domain judgement, and
-labels or types often deserve rewriting.
+The importer never guesses: any line it cannot read becomes a gap with its
+line number, so report what was not carried across rather than calling the
+result complete. It assigns no positions either — a converted architecture
+uses `layout.mode: "grid"`, and a fan-out can put an edge through a node,
+which fails the always-on `clean-flow` gate. **Always validate after
+importing.** Read the source for meaning too: the importer carries topology,
+not domain judgement, so labels and types often deserve rewriting.
 
 ## Repairing geometry
 
@@ -101,41 +92,12 @@ one at a time:
 node bin/mirofy.mjs repair <type> <input.json> [output.json] --safe
 ```
 
-`--safe` is required, because this rewrites authored coordinates. Repair moves
+`--safe` is required because this rewrites authored coordinates. Repair moves
 only components involved in an overlap, each by the smallest correction that
-clears the validator's 8px gap, and prints a receipt of every nudge.
-
-It touches geometry and nothing else -- never a label, a type, a connection or
-an id. It then re-validates and reports what it could not reach: displacement
-fixes overlaps, not routing or label placement, and those it names rather than
-leaving for the next run to rediscover.
-
-## Automatic port spread
-
-Automatic Port Spread is a default renderer behavior, not something you author.
-When several relationships leave the same side of one node, the renderer gives
-them distinct endpoints on that side so they cannot collapse into a single
-line. You do not set these endpoints and you should not try to.
-
-It is bounded. It applies only where the renderer owns the endpoint:
-
-- a single relationship on a side is left on its plain anchor
-- explicit `via`, `channelX`, `channelY` or `labelAt` opt a relationship out
-  entirely, because those say you are routing it yourself
-- an explicit `route` other than `auto` opts out for the same reason
-
-Each spread endpoint aims at the coordinate that would make its own edge run
-straight, which is wherever its counterpart sits, so facing automatic ports
-(`left`/`right` or `top`/`bottom`) end up sharing one shared axis whenever that
-is reachable. Two cases keep the plain even spread instead: a relationship
-spread at both ends, where moving one endpoint only competes with the other,
-and an endpoint whose straight line would cross an unrelated node. The second
-is not a preference -- an edge through an unrelated node fails Clean Flow, and
-the renderer refuses the document rather than draw it.
-
-The consequence for authoring: place nodes, and let the endpoints follow. If a
-relationship must take a specific path, say so with `via` and it will be left
-alone.
+clears the validator's 8px gap, prints a receipt of every nudge, and touches
+geometry and nothing else -- never a label, type, connection or id. It
+re-validates and names what displacement cannot fix (routing, label
+placement) rather than leaving it for the next run to rediscover.
 
 ## Authoring invariants
 
@@ -156,7 +118,7 @@ alone.
 - Automatic Port Spread is a default renderer behavior for architecture, workflow, data-flow, and lifecycle. It skips single relationships and explicit `via`, `channelX`, `channelY`, `labelAt`, or non-`auto` routes. Near parallel ports use an outside bridge so automatic routing cannot create a sub-8px segment or sub-16px interior turn. Architecture separately keeps unobstructed facing automatic ports (`left`/`right` or `top`/`bottom`) on one shared axis when their offset is under 16px and both ports retain corner clearance. If exactly one endpoint was spread, only the unshared endpoint may move onto that axis; if both endpoints were spread, keep the outside bridge so competing ports remain distinct.
 - Never accept an edge crossing an unrelated opaque node, an ambiguous shared corridor, or a relationship label masking another route.
 
-Read `references/authoring-contract.md` only when you need field enums, spacing math, geometry repair rules, repository evidence, or mode-specific placement.
+Read `references/authoring-contract.md` only when you need field enums, spacing math, automatic port placement, geometry repair rules, repository evidence, or mode-specific placement.
 
 ## Delivery
 
@@ -168,9 +130,7 @@ After delivery, collect bounded desktop evidence without modifying or rerenderin
 node bin/mirofy.mjs visual-check <output.html> --json
 ```
 
-`visual-check` measures containment at 1440×900, 1600×1000, 1920×1080, and 2048×1320; captures light/dark screenshots at the smallest and largest sizes; and writes a relative-path contact sheet plus JSON sidecars beside the artifact. Its automated receipt always reports `visualReview: "pending"`: screenshots are evidence for inspection, never an automatic polish claim. Exit 0 means containment and captures passed, 1 means overflow or capture failure, and 2 means Chrome/Chromium was unavailable and the receipt is `skipped`. The command never changes the delivered HTML.
-
-Add `--open` only when the user wants an immediate local preview. For an active desktop authoring loop, the optional command is:
+`visual-check` measures containment at 1440×900, 1600×1000, 1920×1080, and 2048×1320; captures light/dark screenshots at the smallest and largest sizes; and writes a relative-path contact sheet plus JSON sidecars beside the artifact. Its automated receipt always reports `visualReview: "pending"`: screenshots are evidence for inspection, never an automatic polish claim. Exit 0 means containment and captures passed, 1 means overflow or capture failure, and 2 means Chrome/Chromium was unavailable and the receipt is `skipped`. The command never changes the delivered HTML. Add `--open` only when the user wants an immediate local preview. For an active desktop authoring loop, the optional command is:
 
 ```bash
 node bin/mirofy.mjs preview <type> <input>.json <output>.html --quality showcase
@@ -180,18 +140,13 @@ Never start preview by default. Read `references/delivery-contract.md` when usin
 
 ## Optional viewer capabilities
 
-Generated HTML already contains theme switching, pan/zoom, search, focus, relationship tracing, semantic views, presentation, and truthful exports. These are reader capabilities, not extra authoring work. `meta.animation: "trace"` is opt-in; `meta.views` is optional and should contain at most five curated chapters.
-
-Read `references/viewer-runtime.md` only when the user explicitly asks for Share Cards, Route/Reach cards, motion, guided stories, deep links, presentation, search/focus, or another Viewer Runtime feature.
+Generated HTML already contains theme switching, pan/zoom, search, focus, relationship tracing, semantic views, presentation, and truthful exports. These are reader capabilities, not extra authoring work. `meta.animation: "trace"` is opt-in; `meta.views` is optional and should contain at most five curated chapters. Read `references/viewer-runtime.md` only when the user explicitly asks for Share Cards, Route/Reach cards, motion, guided stories, deep links, presentation, search/focus, or another Viewer Runtime feature.
 
 ## Setup and fallback
 
-**Installing the skill is optional.** Every capability is reachable by running
-the CLI directly from a checkout — `node bin/mirofy.mjs <verb>` — and nothing
-below requires the skill to be installed first. Install it for convenience,
-not as a precondition.
-
-Verify with:
+**Installing the skill is optional.** Every capability runs from a checkout
+with `node bin/mirofy.mjs <verb>`; installing is convenience, never a
+precondition. Verify with:
 
 ```bash
 node bin/mirofy.mjs doctor
