@@ -187,6 +187,31 @@ export const IMPORTED_ROWS = [
   },
 
   {
+    id: '2.3',
+    name: 'Host-agnostic evidence (GitHub, GitLab, Bitbucket, Gitea, Gitee, Azure DevOps)',
+    // Verification was never host-bound -- it runs `git` against a real
+    // checkout, and git does not care where the remote lives. FIVE things
+    // were: the slug regex, an outright rejection of anything not on
+    // github.com, the blob-URL builder, the viewer's repository link, and the
+    // schema's url pattern. All five now go through hosts.mjs.
+    //
+    // The blob URL shapes are asserted as exact strings per forge, because
+    // they genuinely disagree -- GitLab omits the second "L", Bitbucket uses
+    // #lines-a:b, Azure addresses files by query string. A test that only
+    // checked "a URL was produced" would pass every wrong template, and a
+    // wrong template is the worst failure available here: a confident,
+    // clickable link to nothing.
+    //
+    // An unrecognised host is refused BY NAME rather than guessed at, and the
+    // rejection lists the supported forges -- an author cannot guess which
+    // are understood from a refusal that does not say.
+    origin: 'N',
+    phase: 'P1b',
+    proof: 'evidence.test.mjs',
+    testTitle: '[2.3] github repository URLs resolve to the right slug and blob URL',
+  },
+
+  {
     id: '4.14',
     name: 'Evidence-first visual language (six provenance treatments)',
     // 36-VISUAL-SYSTEM.md V4's binding constraint is that the six classes are
