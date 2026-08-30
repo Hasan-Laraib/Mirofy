@@ -212,6 +212,73 @@ export const IMPORTED_ROWS = [
   },
 
   {
+    id: '2.7',
+    name: 'Evidence graph store + query',
+    // 31-V1-ARCHITECTURE.md's contract verbatim: "append-only per revision. A
+    // fact is never edited, only superseded." Enforced structurally -- no
+    // update or delete method exists, stored facts are frozen copies, and
+    // supersede marks the old fact rather than touching it. The tests
+    // exercise every observable mutation route and expect a dead end.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'evidence-graph.test.mjs',
+    testTitle: 'a fact appends and is queryable by subject, predicate and provenance (2.7)',
+  },
+  {
+    id: '2.8',
+    name: 'Scanner: TS/JS imports',
+    // A tokenizer-level extractor, dependency-free (row 6.9). The honesty
+    // line is exactly where the scanner rule draws it: literal specifier ->
+    // fact with its line; computed specifier -> Gap with its line;
+    // unresolvable literal -> Gap, never a fabricated path. Against this
+    // repository at registration: 181 files, ~900 facts, every gap verified
+    // genuine by hand.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'scanners.test.mjs',
+    testTitle: '[2.8] import scanner reports static, re-export, require and literal dynamic imports with exact lines',
+  },
+  {
+    id: '2.9',
+    name: 'Scanner: workspace/package topology',
+    // package.json workspaces -> contains-package and depends-on facts,
+    // config-derived. One malformed manifest is a Gap naming the parse error
+    // while every other package is still analysed; a workspace pattern
+    // fancier than <dir>/* is a Gap rather than a half-implemented matcher
+    // quietly missing packages.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'scanners.test.mjs',
+    testTitle: '[2.9] workspace scanner reports packages and their dependencies as config-derived facts',
+  },
+  {
+    id: '2.10',
+    name: 'Scanner: HTTP routes',
+    // Express/Fastify registrations are statically-derived; Next.js
+    // file-based routes are config-derived, because the path on disk IS the
+    // route. A computed path is a Gap, never a guessed route. Conservative
+    // receiver list on purpose: a missed exotic receiver is invisible noise,
+    // a false route is a lie about the system's surface.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'scanners.test.mjs',
+    testTitle: '[2.10] route scanner reports Express and Fastify registrations with method, path and line',
+  },
+  {
+    id: '2.17',
+    name: 'Honest coverage report',
+    // A partition: analysed / gapped / not-analysed sum to the universe, and
+    // the test fails on an uncounted file. No percentage anywhere, asserted
+    // against the rendered text -- a percentage silently claims its
+    // denominator is the whole system. Not-analysed files are NAMED; a
+    // summary is where omissions go to hide.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'evidence-graph.test.mjs',
+    testTitle: 'coverage buckets every file exactly once, and the buckets sum to the whole (2.17)',
+  },
+
+  {
     id: '4.14',
     name: 'Evidence-first visual language (six provenance treatments)',
     // 36-VISUAL-SYSTEM.md V4's binding constraint is that the six classes are

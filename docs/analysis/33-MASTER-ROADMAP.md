@@ -49,11 +49,11 @@ a chosen name.
 
 | # | Task | Matrix | Effort |
 |---|---|---|---|
-| P1.1 | **Evidence graph.** Append-only fact store: `{subject, predicate, object, provenance, location, revision, adapter}`. Queryable. Conflict-preserving | 2.7 | L |
-| P1.2 | **Scanner adapter 1 — TS/JS imports.** Module graph from real source. Emits Facts **and Gaps** | 2.8 | L |
-| P1.3 | **Scanner adapter 2 — workspace topology.** `package.json` workspaces, monorepo structure | 2.9 | M |
-| P1.4 | **Scanner adapter 3 — HTTP routes.** Express/Fastify/Next → frontend↔backend edges | 2.10 | L |
-| P1.5 | **Honest coverage report.** Derived / inferred / **not analysed**. Never a fabricated percentage | 2.17 | M |
+| P1.1 | ✅ **SHIPPED (P1c)** · **Evidence graph.** Append-only fact store: `{subject, predicate, object, provenance, location, revision, adapter}`. Queryable. Conflict-preserving | 2.7 | L |
+| P1.2 | ✅ **SHIPPED (P1c)** · **Scanner adapter 1 — TS/JS imports.** Module graph from real source. Emits Facts **and Gaps** | 2.8 | L |
+| P1.3 | ✅ **SHIPPED (P1c)** · **Scanner adapter 2 — workspace topology.** `package.json` workspaces, monorepo structure | 2.9 | M |
+| P1.4 | ✅ **SHIPPED (P1c)** · **Scanner adapter 3 — HTTP routes.** Express/Fastify/Next → frontend↔backend edges | 2.10 | L |
+| P1.5 | ✅ **SHIPPED (P1c)** · **Honest coverage report.** Derived / inferred / **not analysed**. Never a fabricated percentage | 2.17 | M |
 | P1.6 | **System model.** Components, relationships, boundaries with `evidenceRefs[]`. **Mandatory stable IDs for every object.** Human overrides recorded as `authored` | 1.14, 1.12, 1.17, 1.15 | L |
 | P1.7 | **View compiler + AI abstraction.** Model → bounded view IR with intent (`group`/`rank`/`mainPath`/`adjacency`). **Contract test: cannot emit a relationship absent from the model** | — | L |
 | P1.8 | ✅ **SHIPPED (P1b)** · ⭐ **Evidence on relationships.** `sources` on connections; then messages, flows, transitions | **2.4** | L |

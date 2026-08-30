@@ -1,0 +1,13 @@
+{
+  "name": "@mirofy/scanner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Scanner adapters: facts and gaps from a real repository, never guesses.",
+  "exports": {
+    "./adapter": "./src/adapter.mjs",
+    "./adapters/workspace": "./src/adapters/workspace.mjs",
+    "./adapters/imports": "./src/adapters/imports.mjs",
+    "./adapters/routes": "./src/adapters/routes.mjs"
+  }
+}
