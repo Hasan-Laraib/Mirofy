@@ -4,7 +4,7 @@ description: Create polished, validated architecture, workflow, sequence, data-f
 license: MIT
 metadata:
   version: "2.16"
-  author: tt-a1i
+  author: Hasan-Laraib
   based_on: Cocoon-AI/architecture-diagram-generator (MIT, v1.0)
 ---
 
