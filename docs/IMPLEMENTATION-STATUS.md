@@ -13,7 +13,7 @@ PLANNED rows are read live from the roadmap document on every run, so they
 cannot silently disagree with it: edit a roadmap row without rerunning
 `npm run status` and the build fails.
 
-**Totals:** 74 SHIPPED (19 browser-proved), 1 UNPROVEN, 44 PLANNED.
+**Totals:** 75 SHIPPED (19 browser-proved), 1 UNPROVEN, 44 PLANNED.
 
 ## Shipped & unproven — from the conformance matrix
 
@@ -42,6 +42,7 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 1.14 | System model (model.json) | N | P1d | SHIPPED | `system-model.test.mjs` |
 | 1.15 | First-class engineering metadata | N | P1d | SHIPPED | `engineering-metadata.test.mjs` |
 | 1.17 | Human overrides recorded as authored | N | P1d | SHIPPED | `system-model.test.mjs` |
+| 1.18 | View compiler (bounded view IR with intent) | N | P1e | SHIPPED | `view-compiler.test.mjs` |
 | 4.14 | Evidence-first visual language (six provenance treatments) | N | P1b | SHIPPED (browser-proved) | `provenance-visual.test.mjs` |
 | 5.20 | Evidence Passport for relationships | N | P1b | SHIPPED (browser-proved) | `evidence-passport.browser.test.mjs` |
 | 5.16 | Modularized viewer source | R | P1 | SHIPPED | `viewer-modules.test.mjs` |

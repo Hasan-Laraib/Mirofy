@@ -50,6 +50,7 @@ Every source-baseline feature is accounted for; none is dropped.
 | 1.15 | First-class engineering metadata | **N** | P1 | `owner`, `deployment{regions, networkScope}` as real fields — ✅ **SHIPPED (P1d)** |
 | 1.16 | Recipe library (100) | **N** | P3 | The source baseline has 11 |
 | 1.17 | Human overrides | **N** | P1 | Recorded as `authored` provenance, never disguised as derived — ✅ **SHIPPED (P1d)** |
+| 1.18 | **View compiler** (bounded view IR with intent) | **N** | P1 | Model → `group`/`rank`/`mainPath`/`adjacency`, no coordinates. May not invent a relationship absent from the model; omissions recorded, never silent — ✅ **SHIPPED (P1e)** |
 
 ## 2 · Scanner & evidence *(the new spine)*
 
