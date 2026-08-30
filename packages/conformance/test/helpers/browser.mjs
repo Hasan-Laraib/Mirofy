@@ -5,18 +5,17 @@
 // written launcher would mean two places "skipped is not passed" could
 // quietly drift apart.
 //
-// Drives real headless Chrome via the same CDP client the ancestor's
-// visual-check uses (ChromeVisualBrowser / findChrome,
-// packages/core/bin/visual-check.mjs).
+// Drives real headless Chrome via the same CDP client
+// packages/core/bin/visual-check.mjs uses (ChromeVisualBrowser / findChrome).
 import { pathToFileURL } from 'node:url';
 
 // Imported with a non-literal specifier (deliberately, not for style) so
 // that tsc --noEmit does not pull packages/core/bin/visual-check.mjs into
 // its checked-files program: the root tsconfig.json excludes packages/core
-// (it is ancestor code, imported unmodified, and is not itself typechecked
-// by this project), but TypeScript's "exclude" only governs root-file
+// (it is not itself typechecked by this project), but TypeScript's "exclude"
+// only governs root-file
 // discovery -- a statically-resolvable relative import from an included
-// file still drags the target file into the program and its ancestor-only
+// file still drags the target file into the program and its own
 // type errors would then fail our typecheck gate. A dynamically-computed
 // specifier is invisible to that static resolution, so the module is loaded
 // at runtime exactly as before with no change to behaviour, while the

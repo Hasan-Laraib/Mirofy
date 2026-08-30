@@ -1,5 +1,5 @@
 // Row 5.17. Two directions, both of which have caught real defects in this
-// codebase's ancestor:
+// codebase:
 //   emitted-but-unconsumed  -- the renderer writes an attribute nothing
 //                              reads (dead weight, or a deleted consumer)
 //   consumed-but-unemitted  -- something reads an attribute no renderer

@@ -1,8 +1,8 @@
 // @ts-check
 // Cross-platform test discovery. Passes explicit file paths to `node --test`.
 //
-// Why not `node --test` bare: it auto-discovers packages/core/test/, which is
-// harvested ancestor code whose tests assert the ancestor's repo structure and
+// Why not `node --test` bare: it auto-discovers packages/core/test/, whose
+// tests assert a repo structure that doesn't match this one and
 // cannot pass here. Why not a shell glob: pwsh on windows-latest does not expand
 // it. Why not `node --test <dir>`: errors with "Cannot find module" on Node 24.
 // Why not Node's own --test glob: requires Node 21+, and the CI matrix includes 18.

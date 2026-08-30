@@ -3,10 +3,9 @@
 > System intelligence for codebases. Point it at a repository and it builds a
 > living, evidence-backed model of the system.
 
-**Status: P0 Foundation.** The rendering and validation core is harvested from
-an MIT-licensed ancestor project — named, with its revision, in `NOTICE` — and
-was proved byte-identical to it at the provenance anchor recorded in
-`docs/harvest.md`. The evidence-first spine lands in P1.
+**Status: P0 Foundation.** The rendering and validation core is proved, by
+`check:drift`, to still match a deliberately re-baselined manifest of
+`packages/core/`. The evidence-first spine lands in P1.
 
 ## Quick start
 
@@ -18,16 +17,17 @@ npm run build      # render every fixture into .artifacts/ (gitignored)
 
 ## What is proved today
 
-The harvested conformance matrix has 56 rows. 39 are proved without a browser;
+The conformance matrix has 56 rows. 39 are proved without a browser;
 16 more require headless Chrome (`MIROFY_CHROME`) and bring the total to 55.
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
-part of this harvest's scope, so there is nothing here to prove parity
-against. See `docs/harvest.md` for the full accounting.
+part of this import's scope, so there is nothing here to prove parity
+against. See `packages/conformance/src/matrix.mjs` for the full per-row
+accounting.
 
 | Gate | Command |
 |---|---|
-| Renderer parity with the ancestor | `npm run test:golden` |
-| Harvested capability conformance | `npm run test:conformance` |
+| Renderer parity against the recorded golden digests | `npm run test:golden` |
+| Imported capability conformance | `npm run test:conformance` |
 | `npm run build`'s own output reproduces the same golden digests | `npm run check:artifacts` |
 | Tracked-tree size budget (10 MB) | `npm run check:size` |
 | Dependency audit | `npm run check:audit` |
@@ -41,18 +41,18 @@ output path is still reproducible, rather than re-proving renderer parity a
 second time.
 
 `npm run check` runs the full gate chain in order: `lint → typecheck → test →
-test:golden → check:provenance → check:drift → test:conformance →
-check:artifacts → check:size → check:audit`. `check:provenance`
-(`scripts/check-provenance.mjs`) proves the founding claim in CI. It no longer
-compares the working tree — since the identifier rename the code carries this
-product's own names, so byte-identity with the ancestor is deliberately no
-longer true. Instead it verifies the *historical* claim against an immutable
-anchor commit recorded in `scripts/harvest-manifest.json`: that all 163 files
-were byte-identical to the ancestor at that commit.
+test:golden → check:template → check:drift → test:conformance →
+check:artifacts → check:size → check:audit`. A historical byte-identity gate
+(`check:provenance`) used to run here too, verifying an immutable anchor
+commit against its own byte-identity manifest: that all 163 imported files
+were byte-identical to their source at that commit. It has since been
+retired along with its manifest — since the identifier rename the code
+carries this product's own names, so byte-identity with the source is
+deliberately no longer true, and that historical claim is no longer asserted
+anywhere in this repo.
 
-Because that claim is a constant function of immutable history, it can never
-fail on a code change — so it is paired with `check:drift`
-(`scripts/check-core-drift.mjs`), which makes the present-tense claim instead:
+The gate that remains, `check:drift`
+(`scripts/check-core-drift.mjs`), makes the present-tense claim instead:
 every file under `packages/core/` still matches `scripts/core-manifest.json`,
 the last state someone deliberately re-baselined. `test:golden` renders only
 five fixtures, so an edit on a path no fixture exercises moves no digest;
@@ -74,17 +74,17 @@ what that source now produces.
 
 ## Layout
 
-- `packages/core/` — the harvested rendering and validation core. Imported
-  unmodified and now carrying the product's own identifiers; see
-  `docs/harvest.md` for what changed on import, and for the provenance anchor
-  up to which it was byte-identical to the ancestor.
+- `packages/core/` — the rendering and validation core. Imported unmodified
+  and now carrying the product's own identifiers; `packages/core/LICENSE`
+  carries the required third-party copyright notice for the imported code.
 - `packages/conformance/` — the parity matrix and its test suites, proving
-  each harvested row still works after the move.
+  each imported row still works after the move.
 - `fixtures/` — golden, source, and negative fixtures used by the golden and
   conformance harnesses.
 - `scripts/` — the gate scripts wired into `npm run check`.
 
 ## Attribution
 
-Substantial portions derive from an MIT-licensed ancestor project, named in
-`NOTICE`. See `NOTICE` and `LICENSE`.
+`packages/core/LICENSE` retains, verbatim, the required third-party copyright
+notice for the imported code under `packages/core/`. See also the root
+`LICENSE`.

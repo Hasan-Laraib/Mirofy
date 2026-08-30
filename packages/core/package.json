@@ -3,7 +3,7 @@
   "version": "2.16.0",
   "private": true,
   "type": "module",
-  "description": "Harvested renderers and validators. MIT-derived from the ancestor project named in /NOTICE.",
+  "description": "Rendering and validation core: five diagram renderers, their schemas, the interactive viewer, and the CLI.",
   "license": "MIT",
   "bin": { "mirofy": "./bin/mirofy.mjs" },
   "engines": { "node": ">=18" },
