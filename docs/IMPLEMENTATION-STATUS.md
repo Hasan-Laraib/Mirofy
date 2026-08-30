@@ -13,7 +13,7 @@ PLANNED rows are read live from the roadmap document on every run, so they
 cannot silently disagree with it: edit a roadmap row without rerunning
 `npm run status` and the build fails.
 
-**Totals:** 75 SHIPPED (19 browser-proved), 1 UNPROVEN, 44 PLANNED.
+**Totals:** 76 SHIPPED (19 browser-proved), 1 UNPROVEN, 43 PLANNED.
 
 ## Shipped & unproven — from the conformance matrix
 
@@ -48,6 +48,7 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 5.16 | Modularized viewer source | R | P1 | SHIPPED | `viewer-modules.test.mjs` |
 | 3.1 | Proper Crossing Gate (edge-vs-edge, showcase-only) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
 | 3.1b | Clean Flow Gate (no edge across unrelated node) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
+| 3.11 | showcase false-negative fix (boundary overlap) | R | P1 | SHIPPED | `frame-composition.test.mjs` |
 | 3.2 | Clean Label Gate (≥4 px) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
 | 3.3 | Ambiguous Corridor Gate (≥8 px lane) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
 | 3.4 | Clear Container Corridor | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
@@ -111,7 +112,6 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 2.14 | Scanner: DB clients | N | P4 |
 | 2.15 | Scanner: queue pub/sub | N | P4 |
 | 2.16 | Additional languages | N | P4 |
-| 3.11 | showcase false-negative fix | R | P1 |
 | 3.12 | Constraint solver | N | P2 |
 | 3.13 | repair --safe | N | P2 |
 | 3.14 | Calibrated thresholds | N | P2 |

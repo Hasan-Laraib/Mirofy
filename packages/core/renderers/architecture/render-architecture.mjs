@@ -447,6 +447,29 @@ function validateArchitecture() {
           `Boundary labels "${left.label}" and "${right.label}" overlap — shorten a label or increase boundary title space.`,
         );
       }
+      // GEOMETRY, every profile that asks for composition quality.
+      //
+      // Two frames that partially overlap are a visual defect whatever their
+      // memberships mean: a component in the intersection sits inside both
+      // borders and the reader cannot tell which one owns it. That is true of
+      // orthogonal scopes as much as of nested ones, so it is checked before
+      // the membership contract below rather than behind it.
+      //
+      // Containment is untouched: nesting is what boundaries are FOR, and
+      // flagging it would refuse every real document.
+      if (enforcesBoundaryTitleComposition
+        && rectsOverlap(left, right)
+        && !rectContains(left, right)
+        && !rectContains(right, left)) {
+        problems.push(
+          `Boundary "${left.label}" and boundary "${right.label}" final frames partially overlap — `
+          + 'adjust wraps, pad, or component positions so the frames are disjoint or one fully contains the other.',
+        );
+        continue;
+      }
+
+      // MEMBERSHIP, deployment profile only.
+      //
       // Ordinary architecture boundaries are sets, not an implied ownership
       // tree: orthogonal scopes such as runtime and compliance may share some
       // components while each contains others. The opt-in deployment profile
@@ -473,6 +496,8 @@ function validateArchitecture() {
       if (!rectsOverlap(left, right)) continue;
       const leftContainsRight = rectContains(left, right);
       const rightContainsLeft = rectContains(right, left);
+      // Reachable only when the geometry check above did not run (no quality
+      // profile set) -- the deployment profile still enforces this on its own.
       if (!leftContainsRight && !rightContainsLeft) {
         problems.push(
           `Boundary "${left.label}" and boundary "${right.label}" final frames partially overlap — `

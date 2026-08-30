@@ -491,6 +491,31 @@ export const IMPORTED_ROWS = [
       'CLI: showcase render rejects an edge routed through an unrelated node with clean-flow/edge-through-node (3.1b)',
     ],
   },
+
+  {
+    id: '3.11',
+    name: 'showcase false-negative fix (boundary overlap)',
+    // A frame-vs-frame check existed, but ALL of it sat behind the opt-in
+    // deployment-ownership profile. That gate's comment justifies the
+    // exclusion for the MEMBERSHIP contract, and correctly -- ordinary
+    // boundaries are sets, not an ownership tree, so orthogonal scopes may
+    // share some components while each contains others.
+    //
+    // The same `continue` also skipped the pure GEOMETRY check, which has
+    // nothing to do with membership semantics. Two frames that partially
+    // overlap are a visual defect whatever their memberships mean: a
+    // component in the intersection sits inside both borders and the reader
+    // cannot tell which owns it. Under `showcase` -- the profile whose whole
+    // job is refusing compositions that merely look plausible -- that went
+    // unreported.
+    //
+    // Containment is deliberately untouched: nesting is what boundaries are
+    // FOR, and flagging it would refuse this repository's own fixtures.
+    origin: 'R',
+    phase: 'P1',
+    proof: 'frame-composition.test.mjs',
+    testTitle: '[3.11] showcase reports boundary frames that partially overlap, with no deployment profile set',
+  },
   {
     id: '3.2',
     name: 'Clean Label Gate (≥4 px)',

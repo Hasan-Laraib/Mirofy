@@ -13,6 +13,44 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1f: the showcase false negative (row 3.11)
+
+**Commits:** on `p1f-frame-composition`.
+
+A frame-vs-frame check existed. **All of it** sat behind
+`requiresNestedBoundaryMembership` — the opt-in deployment-ownership
+profile — including the pure geometry test, which has nothing to do with
+membership semantics.
+
+The gate's own comment justifies that exclusion for the *membership*
+contract, and correctly: ordinary architecture boundaries are sets, not an
+ownership tree, so orthogonal scopes such as runtime and compliance may
+legitimately share some components while each contains others. But the same
+`continue` skipped the geometry too. Two frames that partially overlap are a
+visual defect whatever their memberships mean — a component in the
+intersection sits inside both borders and the reader cannot tell which one
+owns it — and under `showcase`, the profile whose entire job is refusing
+compositions that merely look plausible, it went unreported.
+
+The geometry check now runs for any document that asks for composition
+quality; the membership contract stays deployment-only, where its reasoning
+holds. **Containment is deliberately untouched** — nesting is what
+boundaries are for, and flagging it would refuse this repository's own
+fixtures, where a security-group sits inside a region.
+
+Worth recording about the *test*, not the fix: the first three fixtures
+failed for reasons that had nothing to do with the overlap — a viewBox
+overflow, a border-run, then an endpoint-side complaint — and one of them
+made a second assertion pass **vacuously**. Frames also resolve 140px tall,
+not the 180 the obvious arithmetic suggests (`topPad` is
+`max(pad, labelBaseline + clearance)` plus a 20px bottom), so the fixture
+before that produced frames which merely *touched*. The committed fixture
+carries no connections at all, because frame overlap is a
+boundary-to-boundary property and any edge brings its own routing and label
+rules along.
+
+Golden 25/25 unchanged.
+
 ## 2026-08-30 — P1e merged; the P1 spine is complete end to end
 
 **Commits:** merge commit `b626836` (PR #12).

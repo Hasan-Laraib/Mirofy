@@ -88,7 +88,7 @@ Every source-baseline feature is accounted for; none is dropped.
 | 3.8 | Grid placement validation | **H** | P0 | |
 | 3.9 | `deployment-ownership` profile | **H** | P0 | |
 | 3.10 | **Structured diagnostics + `supportedFixes`** | **H** | P0 | Protected. The agent correction protocol |
-| 3.11 | `showcase` false-negative fix | **R** | P1 | Boundary overlap + collinear frames |
+| 3.11 | `showcase` false-negative fix | **R** | P1 | Boundary overlap + collinear frames — ✅ **SHIPPED (P1f)** |
 | 3.12 | **Constraint solver** | **N** | **P2** | Adaptagrams — `cola::Lock` pins, `libavoid` routes. Dev-time |
 | 3.13 | **`repair --safe`** | **N** | P2 | `makeFeasible()` pattern; receipt for every nudge |
 | 3.14 | Calibrated thresholds | **N** | P2 | Mooney corpus bridging study |
