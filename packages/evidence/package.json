@@ -1,0 +1,12 @@
+{
+  "name": "@mirofy/evidence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Append-only evidence graph: fact store, query, and the honest coverage report.",
+  "exports": {
+    "./graph": "./src/graph.mjs",
+    "./fact": "./src/fact.mjs",
+    "./coverage": "./src/coverage.mjs"
+  }
+}
