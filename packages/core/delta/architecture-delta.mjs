@@ -324,7 +324,13 @@ function esc(value) {
 const safeJson = (value) => JSON.stringify(value, null, 2).replaceAll('<', '\\u003c').replaceAll('>', '\\u003e').replaceAll('&', '\\u0026');
 
 export function extractArchitectureSvg(html) {
-  const match = html.match(/<svg viewBox="0 0 [^"]+" role="img"[\s\S]*?<\/svg>/);
+  // Both roles are accepted deliberately. The renderer emits
+  // role="graphics-document"; it emitted role="img" until the static-role fix,
+  // and `compare` reads a BASE artifact alongside a HEAD one -- a base rendered
+  // before that change is exactly the input this tool exists to handle. The
+  // role is only a discriminator here, picking the diagram svg out of the
+  // document's other svg elements; it is not a claim about either artifact.
+  const match = html.match(/<svg viewBox="0 0 [^"]+" role="(?:graphics-document|img)"[\s\S]*?<\/svg>/);
   if (!match) fail('delta/svg-missing', 'A validated Architecture artifact did not contain its primary SVG.');
   return match[0];
 }

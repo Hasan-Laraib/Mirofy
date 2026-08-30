@@ -231,3 +231,52 @@ test('every Okabe-Ito light-mode stroke clears the WCAG text contrast floor agai
     );
   }
 });
+
+// The print block overrides the palette so that printing from dark theme does
+// not put dark fills and neon strokes on white paper. Whether it actually wins
+// is a cascade question, not a text question: @media contributes no
+// specificity, so the block only overrides a preset palette if its own
+// selector outranks that preset's. Specificity is COMPUTED here rather than
+// pattern-matched against a literal selector string, so a future edit to
+// either selector is evaluated on its merits instead of silently passing.
+function specificity(selector) {
+  const s = selector.trim();
+  const ids = (s.match(/#[\w-]+/g) || []).length;
+  const classes = (s.match(/\.[\w-]+/g) || []).length
+    + (s.match(/\[[^\]]+\]/g) || []).length
+    + (s.match(/:(?!:)[\w-]+/g) || []).length;
+  // :root is a pseudo-class, already counted above; strip it before counting
+  // element names so it is not double-counted as an element.
+  const elements = (s.replace(/:(?!:)[\w-]+/g, ' ').match(/(^|[\s>+~])([a-z][\w-]*)/gi) || []).length;
+  return [ids, classes, elements];
+}
+const beats = (a, b) => {
+  for (let i = 0; i < 3; i += 1) {
+    if (a[i] !== b[i]) return a[i] > b[i];
+  }
+  return false;
+};
+
+test('the print palette outranks every preset palette it must override (4.12)', () => {
+  const css = fs.readFileSync(path.join(SRC_ROOT, 'css/01-structure.css'), 'utf8');
+  const printIndex = css.indexOf('@media print');
+  assert.ok(printIndex > -1, 'no @media print block found in 01-structure.css');
+  const printSelector = css.slice(printIndex).match(/@media print\s*\{\s*(?:\/\*[\s\S]*?\*\/\s*)*([^{]+)\{/)?.[1];
+  assert.ok(printSelector, 'could not read the print palette block selector');
+
+  const printBest = printSelector.split(',')
+    .map((part) => specificity(part))
+    .reduce((best, cur) => (beats(cur, best) ? cur : best), [0, 0, 0]);
+
+  const presetBlocks = BLOCKS.filter((b) => b.selector.includes('data-preset'));
+  assert.ok(presetBlocks.length > 0, 'no preset-qualified palette blocks in the token model');
+
+  const losing = presetBlocks
+    .map((b) => ({ selector: b.selector.trim(), spec: specificity(b.selector) }))
+    .filter(({ spec }) => !beats(printBest, spec));
+
+  assert.deepEqual(losing.map((l) => l.selector), [],
+    `the print palette (specificity ${printBest.join(',')} from "${printSelector.trim()}") does not `
+    + `outrank ${losing.length} preset palette block(s); printing from dark theme in those presets `
+    + 'puts the preset dark palette on white paper.');
+});

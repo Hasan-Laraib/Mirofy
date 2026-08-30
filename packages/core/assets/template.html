@@ -3047,8 +3047,18 @@
     @media print {
       /* Force the FULL light palette — including component fills/strokes and
          lane/arrow colors — so printing from dark theme doesn't put neon
-         strokes and translucent dark fills on white paper. */
-      :root, [data-theme="dark"], [data-theme="light"] {
+         strokes and translucent dark fills on white paper.
+
+         html[data-preset][data-theme] is required, not decorative. @media
+         contributes no specificity, so this block only wins on the cascade.
+         The preset palettes are [data-preset="X"][data-theme="Y"] — two
+         attributes, (0,2,0) — which outrank :root and [data-theme="…"]
+         (0,1,0) on their own. Without the element-qualified selector below,
+         (0,2,1), printing from dark theme in signal-flow, blueprint,
+         editorial or okabe-ito puts that preset's DARK palette on white
+         paper. tokens.test.mjs computes both specificities and fails if
+         this block ever stops outranking them. */
+      :root, [data-theme="dark"], [data-theme="light"], html[data-preset][data-theme] {
         --bg: #ffffff;
         --grid: transparent;
         --panel: #ffffff;
@@ -4151,6 +4161,37 @@
     .a-emphasis  { stroke: var(--arrow-emphasis); fill: none; }
     .a-security  { stroke: var(--security-stroke); fill: none; stroke-dasharray: 5,5; }
     .a-dashed    { stroke: var(--database-stroke); fill: none; stroke-dasharray: 4,4; }
+
+    /* ==========================================================
+       Evidence provenance treatments (V4).
+
+       36-VISUAL-SYSTEM.md's constraint is that the six classes must be
+       distinguishable WITHOUT COLOUR, because provenance is a trust signal
+       and roughly 8% of men have colour-vision deficiency. So the channels
+       used here are stroke-dasharray, stroke-width and opacity. Colour may
+       reinforce; it must never be what separates two classes, and
+       provenance-visual.test.mjs measures only the non-colour channels for
+       exactly that reason.
+
+       `authored` deliberately has NO rule. It is the class every subject
+       resolves to when it claims nothing and carries no evidence, which is
+       almost every edge in almost every existing document -- giving it a
+       treatment would restyle every diagram ever authored in order to say
+       "this is normal". Its distinctness comes from being the untouched
+       baseline.
+
+       These rules sit AFTER .a-security and .a-dashed and share their
+       specificity, so provenance wins the cascade over a stylistic variant.
+       That is deliberate: the variant is how an author chose to draw a line,
+       provenance is what is actually known about it, and truth outranks
+       spectacle. Only subjects that claim a class or carry evidence are
+       affected, so authored documents are untouched.
+       ========================================================== */
+    [data-provenance="source-backed"] { stroke-width: 3; stroke-dasharray: none; }
+    [data-provenance="statically-derived"] { stroke-dasharray: 7 3; }
+    [data-provenance="config-derived"] { stroke-dasharray: 1 4; stroke-linecap: round; }
+    [data-provenance="runtime-observed"] { stroke-dasharray: 9 3 2 3; }
+    [data-provenance="inferred"] { stroke-dasharray: 3 5; opacity: 0.55; }
 
     /* Arrowhead markers reference these */
     .m-default   { fill: var(--arrow); }
@@ -5339,6 +5380,7 @@
             <div class="semantic-passport-evidence" id="focus-evidence" hidden aria-label="{{i18n:viewer.passport.evidence}}">
               <div class="semantic-passport-evidence-head">
                 <span class="semantic-passport-evidence-status">{{i18n:viewer.passport.verified}}</span>
+                <code class="semantic-passport-provenance" id="focus-provenance" data-passport="provenance" hidden></code>
                 <a class="semantic-passport-repository" id="focus-repository" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"></a>
               </div>
               <div class="semantic-passport-evidence-links" id="focus-evidence-links"></div>
@@ -7449,56 +7491,141 @@
           if (parsed && parsed.verified === true && parsed.repository && parsed.nodes) payload = parsed;
         } catch (_) {}
       }
-      function installBeacons() {
-        if (!payload) return 0;
-        var svg = document.querySelector('.diagram-container svg');
-        if (!svg) return 0;
+      /* One beacon builder for nodes and edges alike. Two implementations
+         of the same marker would drift: the count, the marker text, the
+         accessible label and the plate geometry all have to stay identical
+         or the same evidence reads differently depending on what carries
+         it. Only the anchor differs, and that is a parameter. */
+      /* `labelKey` differs for edges: the node string says "focus this
+         node to inspect", which is simply untrue when the beacon sits on
+         a connection. Everything else about the marker is shared. */
+      function buildBeacon(count, labelKey) {
+        var label = viewerCount(labelKey, count);
+        var beacon = document.createElementNS(svgNamespace, 'g');
+        beacon.classList.add('source-evidence-beacon');
+        beacon.setAttribute('data-source-evidence-beacon', '');
+        beacon.setAttribute('aria-hidden', 'true');
+        var title = document.createElementNS(svgNamespace, 'title');
+        title.textContent = label;
+        var plate = document.createElementNS(svgNamespace, 'rect');
+        plate.setAttribute('width', '30');
+        plate.setAttribute('height', '12');
+        plate.setAttribute('rx', '6');
+        var text = document.createElementNS(svgNamespace, 'text');
+        text.setAttribute('x', '15');
+        text.setAttribute('y', '8.25');
+        text.textContent = viewerText('viewer.passport.sourceMarker') + ' ' + count;
+        beacon.appendChild(title);
+        beacon.appendChild(plate);
+        beacon.appendChild(text);
+        return beacon;
+      }
+
+      function announce(element, count) {
+        var originalLabel = element.getAttribute('aria-label') || '';
+        element.setAttribute('data-source-evidence-count', String(count));
+        element.setAttribute('data-source-evidence-original-label', originalLabel);
+        element.setAttribute('aria-label', (originalLabel ? originalLabel + ', ' : '')
+          + viewerCount('viewer.passport.sourceCount', count));
+      }
+
+      function boxOf(element) {
+        var box;
+        try { box = element.getBBox(); } catch (_) { return null; }
+        if (!box || !Number.isFinite(box.x) || !Number.isFinite(box.y) || !Number.isFinite(box.width)) return null;
+        return box;
+      }
+
+      function installNodeBeacons(svg) {
         var installed = 0;
         Array.prototype.forEach.call(svg.querySelectorAll('[data-node-id]'), function (node) {
           var id = node.getAttribute('data-node-id');
           var sources = payload.nodes[id];
           if (!Array.isArray(sources) || !sources.length || node.querySelector('[data-source-evidence-beacon]')) return;
           var shape = node.querySelector('[data-animate="node"]') || node.querySelector('[class*="c-"]');
-          var box;
-          try { box = (shape || node).getBBox(); } catch (_) { return; }
-          if (!box || !Number.isFinite(box.x) || !Number.isFinite(box.y) || !Number.isFinite(box.width) || box.width < 36) return;
+          var box = boxOf(shape || node);
+          if (!box || box.width < 36) return;
 
           var count = sources.length;
-          var label = viewerCount('viewer.passport.beacon', count);
-          var beacon = document.createElementNS(svgNamespace, 'g');
-          beacon.classList.add('source-evidence-beacon');
-          beacon.setAttribute('data-source-evidence-beacon', '');
-          beacon.setAttribute('aria-hidden', 'true');
+          var beacon = buildBeacon(count, 'viewer.passport.beacon');
           var brandOffset = node.hasAttribute('data-node-brand') ? 24 : 0;
           beacon.setAttribute('transform', 'translate(' + (box.x + box.width - 35 - brandOffset) + ' ' + (box.y + 5) + ')');
-          var title = document.createElementNS(svgNamespace, 'title');
-          title.textContent = label;
-          var plate = document.createElementNS(svgNamespace, 'rect');
-          plate.setAttribute('width', '30');
-          plate.setAttribute('height', '12');
-          plate.setAttribute('rx', '6');
-          var text = document.createElementNS(svgNamespace, 'text');
-          text.setAttribute('x', '15');
-          text.setAttribute('y', '8.25');
-          text.textContent = viewerText('viewer.passport.sourceMarker') + ' ' + count;
-          beacon.appendChild(title);
-          beacon.appendChild(plate);
-          beacon.appendChild(text);
           node.appendChild(beacon);
-
-          var originalLabel = node.getAttribute('aria-label') || '';
-          node.setAttribute('data-source-evidence-count', String(count));
-          node.setAttribute('data-source-evidence-original-label', originalLabel);
-          node.setAttribute('aria-label', (originalLabel ? originalLabel + ', ' : '') + viewerCount('viewer.passport.sourceCount', count));
+          announce(node, count);
           installed += 1;
         });
         return installed;
+      }
+
+      /* Edges are keyed by their index in the authored relationship array,
+         which is what data-edge-key already carries (the fourth argument to
+         focusEdgeAttrs) and what evidence resolution keys its edges map by.
+         Keying on data-edge-id would reach only the edges that declare an
+         id, and most authored relationships do not.
+
+         An edge is drawn as more than one element -- typically a <path> and
+         a <g data-detail="context"> sharing the key -- so the beacon goes on
+         the group when there is one. A <path> cannot carry children at all,
+         so when there is no group the beacon is appended to the path's
+         parent and positioned from the path's own box. */
+      function installEdgeBeacons(svg) {
+        if (!payload.edges) return 0;
+        var byKey = Object.create(null);
+        Array.prototype.forEach.call(svg.querySelectorAll('[data-edge-key]'), function (element) {
+          var key = element.getAttribute('data-edge-key');
+          if (!key) return;
+          (byKey[key] || (byKey[key] = [])).push(element);
+        });
+
+        var installed = 0;
+        Object.keys(byKey).forEach(function (key) {
+          var sources = payload.edges[key];
+          if (!Array.isArray(sources) || !sources.length) return;
+          var elements = byKey[key];
+          var i;
+          for (i = 0; i < elements.length; i += 1) {
+            if (elements[i].querySelector && elements[i].querySelector('[data-source-evidence-beacon]')) return;
+          }
+
+          var anchor = null;
+          var host = null;
+          for (i = 0; i < elements.length; i += 1) {
+            var box = boxOf(elements[i]);
+            if (box && !anchor) anchor = box;
+            if (!host && String(elements[i].tagName).toLowerCase() === 'g') host = elements[i];
+          }
+          if (!anchor) return;
+          if (!host) host = elements[0].parentNode;
+          if (!host || !host.appendChild) return;
+
+          var count = sources.length;
+          var beacon = buildBeacon(count, 'viewer.passport.beaconEdge');
+          /* Centre of the edge's own box: the midpoint of the drawn route,
+             which is where an edge label sits when it has one. */
+          beacon.setAttribute('transform', 'translate(' + (anchor.x + (anchor.width / 2) - 15)
+            + ' ' + (anchor.y + (anchor.height / 2) - 6) + ')');
+          host.appendChild(beacon);
+          for (i = 0; i < elements.length; i += 1) announce(elements[i], count);
+          installed += 1;
+        });
+        return installed;
+      }
+
+      function installBeacons() {
+        if (!payload) return 0;
+        var svg = document.querySelector('.diagram-container svg');
+        if (!svg) return 0;
+        return installNodeBeacons(svg) + installEdgeBeacons(svg);
       }
       return {
         available: function () { return Boolean(payload); },
         repository: function () { return payload ? payload.repository : null; },
         node: function (id) {
           var sources = payload && payload.nodes ? payload.nodes[id] : null;
+          return Array.isArray(sources) ? sources.slice() : [];
+        },
+        edge: function (key) {
+          var sources = payload && payload.edges ? payload.edges[String(key)] : null;
           return Array.isArray(sources) ? sources.slice() : [];
         },
         installBeacons: installBeacons
@@ -7525,6 +7652,7 @@
       var evidence = document.getElementById('focus-evidence');
       var repositoryLink = document.getElementById('focus-repository');
       var evidenceLinks = document.getElementById('focus-evidence-links');
+      var provenanceSlot = document.getElementById('focus-provenance');
       var summary = document.getElementById('focus-summary');
       var reachSection = document.getElementById('focus-reach');
       var reachStatus = document.getElementById('focus-reach-status');
@@ -7551,25 +7679,11 @@
       var reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
       var finePointerQuery = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : null;
 
-      // The renderer ships the diagram svg with role="img" (an accessible
-      // name via aria-labelledby, and -- per the ARIA spec -- an implicit
-      // promise that its content is presentational). That promise is false
-      // the moment this module runs: every [data-node-id] the renderer
-      // emits already carries tabindex="0" role="button" (focusNodeAttrs in
-      // packages/core/renderers/shared/cli.mjs), and this module is about to
-      // add more real, individually-focusable controls (the relationship
-      // hit targets below). A container that says "my children are
-      // presentational" while containing real interactive descendants fails
-      // axe-core's nested-interactive rule (WCAG 4.1.2) -- assistive tech is
-      // told there is nothing to interact with here, directly contradicting
-      // what a sighted mouse/keyboard user can actually do. "graphics-document"
-      // (WAI-ARIA Graphics Module) is the role built for exactly this case: a
-      // named, accessible graphic whose descendants remain individually
-      // exposed. It keeps the same aria-labelledby name this svg already
-      // carries, so no name is lost. This runs unconditionally (not only
-      // when relationship hit targets install) because the node buttons
-      // above are present in every mode, embed included.
-      svg.setAttribute('role', 'graphics-document');
+      // The renderer emits role="graphics-document" on the diagram svg
+      // itself (svgRootAttrs in packages/core/renderers/shared/cli.mjs), so
+      // there is nothing to correct at boot. Do not reintroduce a runtime
+      // assignment here: two mechanisms for one invariant drift apart, and
+      // the static markup is the one a JS-disabled reader receives.
 
       function nodes() {
         return Array.prototype.slice.call(svg.querySelectorAll('[data-node-id]'));
@@ -7859,20 +7973,39 @@
         element.textContent = normalized;
         element.hidden = !normalized;
       }
-      function renderSourceEvidence(id) {
+      /* Takes the resolved sources and class rather than an id, so the same
+         renderer serves a node and a relationship. Keeping two would let the
+         two subjects drift into reporting evidence differently, which is the
+         one thing a trust panel must not do. */
+      function renderSourceEvidence(sources, provenanceClass) {
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
         repositoryLink.textContent = '';
-        var sources = Mirofy.sourceEvidence.node(id);
+        provenanceSlot.textContent = '';
+        provenanceSlot.hidden = true;
         var repository = Mirofy.sourceEvidence.repository();
         if (!repository || !sources.length) {
           evidence.hidden = true;
           return;
         }
-        var slug = repository.url.replace(/^https:\/\/github\.com\//, '').replace(/\/$/, '');
-        repositoryLink.href = repository.url + '/tree/' + repository.revision;
+        /* The slug and the revision link come from the payload, which the
+           host adapter built. Deriving them here meant assuming one forge's
+           URL shape: on anything but GitHub the link 404'd and the slug
+           displayed as a full URL. Older artifacts carry neither field, so
+           both fall back to the previous behaviour. */
+        var slug = repository.slug
+          || repository.url.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, '');
+        repositoryLink.href = repository.treeUrl || (repository.url + '/tree/' + repository.revision);
         repositoryLink.textContent = slug + ' @ ' + repository.shortRevision;
         repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
+        /* The class token is shown verbatim: it is published vocabulary the
+           documentation and the legend both use, not prose to localise. The
+           accessible label carries the localised framing instead. */
+        if (provenanceClass) {
+          provenanceSlot.textContent = provenanceClass;
+          provenanceSlot.setAttribute('aria-label', viewerText('viewer.passport.provenance', { class: provenanceClass }));
+          provenanceSlot.hidden = false;
+        }
         sources.forEach(function (source) {
           var link = document.createElement('a');
           link.className = 'semantic-passport-source';
@@ -7904,7 +8037,7 @@
         setPassportValue(document.getElementById('focus-brand'), node.getAttribute('data-node-brand'));
         semanticId.textContent = id;
         semanticId.hidden = false;
-        renderSourceEvidence(id);
+        renderSourceEvidence(Mirofy.sourceEvidence.node(id), node.getAttribute('data-provenance'));
       }
       function relationshipsFor(id, byId) {
         var seen = {};
@@ -8331,6 +8464,19 @@
         var target = relationshipHitTarget(key);
         if (target) target.setAttribute('aria-pressed', 'true');
         renderRelationshipCopyAction();
+        /* Pinning a relationship focuses its SOURCE NODE, so without this the
+           Passport would keep showing that node's evidence while the user is
+           inspecting the edge -- evidence attributed to the wrong subject,
+           which is worse than showing none. The edge's own class and sources
+           replace it, keyed by data-edge-key (its index in the authored
+           array), which is what evidence resolution keys its edges map by. */
+        var pinnedEdge = edges().filter(function (edge) {
+          return edge.getAttribute('data-edge-key') === key;
+        })[0];
+        renderSourceEvidence(
+          Mirofy.sourceEvidence.edge(key),
+          pinnedEdge ? pinnedEdge.getAttribute('data-provenance') : null
+        );
         summary.textContent = viewerText('viewer.passport.relationship.pinned', {
           from: record.fromLabel,
           to: record.toLabel,

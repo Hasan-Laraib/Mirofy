@@ -21,18 +21,7 @@
         "visual_preset": { "enum": ["classic", "signal-flow", "blueprint", "editorial", "okabe-ito"] },
         "quality_profile": { "enum": ["standard", "showcase"] },
         "engineering_profile": { "enum": ["deployment-ownership"] },
-        "repository": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["url", "revision"],
-          "properties": {
-            "url": {
-              "type": "string",
-              "pattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:\\.git)?/?$"
-            },
-            "revision": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" }
-          }
-        },
+        "repository": { "$ref": "common.schema.json#/$defs/repository" },
         "views": { "$ref": "common.schema.json#/$defs/guidedViews" },
         "legend": {
           "type": "object",
@@ -94,22 +83,8 @@
           "sublabel": { "type": "string" },
           "tag": { "type": "string" },
           "brand": { "$ref": "common.schema.json#/$defs/brandMark" },
-          "sources": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 3,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["path"],
-              "properties": {
-                "path": { "type": "string", "minLength": 1, "maxLength": 240 },
-                "line": { "type": "integer", "minimum": 1 },
-                "end_line": { "type": "integer", "minimum": 1 },
-                "label": { "type": "string", "minLength": 1, "maxLength": 48 }
-              }
-            }
-          },
+          "sources": { "$ref": "common.schema.json#/$defs/sources" },
+          "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
           "row": { "type": "integer", "minimum": 0 },
           "col": { "type": "integer", "minimum": 0 },
           "pos": { "$ref": "common.schema.json#/$defs/point" },
@@ -156,6 +131,8 @@
           "to": { "$ref": "common.schema.json#/$defs/id" },
           "label": { "type": "string" },
           "variant": { "$ref": "common.schema.json#/$defs/variant" },
+          "sources": { "$ref": "common.schema.json#/$defs/sources" },
+          "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
           "fromSide": { "enum": ["left", "right", "top", "bottom"] },
           "toSide": { "enum": ["left", "right", "top", "bottom"] },
           "route": { "enum": ["auto", "straight", "orthogonal-h", "orthogonal-v"] },
