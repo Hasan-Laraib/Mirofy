@@ -43,25 +43,11 @@
       var reducedMotionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
       var finePointerQuery = window.matchMedia ? window.matchMedia('(hover: hover) and (pointer: fine)') : null;
 
-      // The renderer ships the diagram svg with role="img" (an accessible
-      // name via aria-labelledby, and -- per the ARIA spec -- an implicit
-      // promise that its content is presentational). That promise is false
-      // the moment this module runs: every [data-node-id] the renderer
-      // emits already carries tabindex="0" role="button" (focusNodeAttrs in
-      // packages/core/renderers/shared/cli.mjs), and this module is about to
-      // add more real, individually-focusable controls (the relationship
-      // hit targets below). A container that says "my children are
-      // presentational" while containing real interactive descendants fails
-      // axe-core's nested-interactive rule (WCAG 4.1.2) -- assistive tech is
-      // told there is nothing to interact with here, directly contradicting
-      // what a sighted mouse/keyboard user can actually do. "graphics-document"
-      // (WAI-ARIA Graphics Module) is the role built for exactly this case: a
-      // named, accessible graphic whose descendants remain individually
-      // exposed. It keeps the same aria-labelledby name this svg already
-      // carries, so no name is lost. This runs unconditionally (not only
-      // when relationship hit targets install) because the node buttons
-      // above are present in every mode, embed included.
-      svg.setAttribute('role', 'graphics-document');
+      // The renderer emits role="graphics-document" on the diagram svg
+      // itself (svgRootAttrs in packages/core/renderers/shared/cli.mjs), so
+      // there is nothing to correct at boot. Do not reintroduce a runtime
+      // assignment here: two mechanisms for one invariant drift apart, and
+      // the static markup is the one a JS-disabled reader receives.
 
       function nodes() {
         return Array.prototype.slice.call(svg.querySelectorAll('[data-node-id]'));

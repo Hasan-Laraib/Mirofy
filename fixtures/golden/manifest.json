@@ -5,151 +5,151 @@
       "mode": "architecture",
       "fixture": "web-app.architecture.json",
       "preset": "classic",
-      "sha256": "e460da29e5d5612beaaf427e1486ec308472cd94ce5fb7916f36495d3386c3fd"
+      "sha256": "4730a4053ae27a720048e2cf9f9627b53cf560a996443d1a8677debba5c9c2a1"
     },
     {
       "mode": "architecture",
       "fixture": "web-app.architecture.json",
       "preset": "signal-flow",
-      "sha256": "7cbabc0e3f564374dfd8c52ad391b77fc3568d49e0a6117d76a25c4615da5f18"
+      "sha256": "31482acad25420aba6c06e5e5cbfceae8b67692836ceb445ddcb6cd67ddb6335"
     },
     {
       "mode": "architecture",
       "fixture": "web-app.architecture.json",
       "preset": "blueprint",
-      "sha256": "58c7dd0e358fa124d980d2fd66ab8c549e098d1dcca3b2ec6a60b3e9667fc0ef"
+      "sha256": "941d9d4ddfd4387b6d48fe322167521545d6e59f402275f92af65b651e6914b7"
     },
     {
       "mode": "architecture",
       "fixture": "web-app.architecture.json",
       "preset": "editorial",
-      "sha256": "9a2a505321d7b8184710ad62061fbf33fde41d6d6e386f8e3801406f19ca1b09"
+      "sha256": "63e205d5755b8fac51d324af28381ff8ebef906ebd32b347652513f6a210a8cf"
     },
     {
       "mode": "architecture",
       "fixture": "web-app.architecture.json",
       "preset": "okabe-ito",
-      "sha256": "6082fd23a65ba29e7e1a5855d4bcf3ff3c8346e683a5fc34b244b9f46fe27a0f"
+      "sha256": "8b899786512df25f432cf71b15a2d9e3a3833641bc0779b6dc56e6017133636c"
     },
     {
       "mode": "workflow",
       "fixture": "agent-tool-call.workflow.json",
       "preset": "classic",
-      "sha256": "02e0b3e3b582fd0ba26b1dfdd248fd6917e849e57debaad46481c648cfa3d013"
+      "sha256": "b9377c8110e78a7f8e9ddfb32223b66a7bf25703ebb93b5a052a2e8b1d78a42b"
     },
     {
       "mode": "workflow",
       "fixture": "agent-tool-call.workflow.json",
       "preset": "signal-flow",
-      "sha256": "0750c6c087ef0dbf6d947031f7fe927d8cd01a6398d0197bbf2d9f49aea09a0a"
+      "sha256": "c2797fbfd98e9c34597f6764eb8bf779ef7d555d651bae6169808257c16dd1ca"
     },
     {
       "mode": "workflow",
       "fixture": "agent-tool-call.workflow.json",
       "preset": "blueprint",
-      "sha256": "852e5171fe686f386a320b3f9c4ba9a0fb187c181a92bdbfef9282f901ce7672"
+      "sha256": "8b8a485116d1e7602e0a01f88eb3dbbebd69831ff037a350107c0ff8dea03ae9"
     },
     {
       "mode": "workflow",
       "fixture": "agent-tool-call.workflow.json",
       "preset": "editorial",
-      "sha256": "654a4c35d9224ffccddf27054970c0fede91582184f59c4dda93f846121ea560"
+      "sha256": "50af48c7111b5d3cd0a4510dacfe37a4214fe7f3e889000b4eb9d881ec77f244"
     },
     {
       "mode": "workflow",
       "fixture": "agent-tool-call.workflow.json",
       "preset": "okabe-ito",
-      "sha256": "7d9c5c6029d7044bec05bca94691dd8718524493996c479a00bf1eb46180aad6"
+      "sha256": "3e8f64d729f348822864947f34097746f258df56685ef64b24a4505cc5abfc6e"
     },
     {
       "mode": "sequence",
       "fixture": "cache-miss-request.sequence.json",
       "preset": "classic",
-      "sha256": "d48a0cb6abeaf6615ca7759d2dd12d5ae5ca4e838a18aab1f055a98cae4150cc"
+      "sha256": "b5788ab40f0b673857f60656410cb9bc78f2c0512ca6381cf195a509f6249169"
     },
     {
       "mode": "sequence",
       "fixture": "cache-miss-request.sequence.json",
       "preset": "signal-flow",
-      "sha256": "cbf38cf8e73a6fc583d4d2eb646a9e5480bf06c3e06429c76c5756c49fca73da"
+      "sha256": "5bf09ff019222d0fa0390f6fbd1b08bff22013d3d744636aa10e665bbe4ab866"
     },
     {
       "mode": "sequence",
       "fixture": "cache-miss-request.sequence.json",
       "preset": "blueprint",
-      "sha256": "e05ac815c31e776e2b8f56ff3ebd4c70b2a9e03ec58065d10d01e4139dbe521e"
+      "sha256": "0436e504d40884f01a87cb35b32570ff7760ee6eeef051181297e181f3acb127"
     },
     {
       "mode": "sequence",
       "fixture": "cache-miss-request.sequence.json",
       "preset": "editorial",
-      "sha256": "aa23126c02592145fe6e4923c457f51f8e53249ec4e91d060b16604bf3dcfc69"
+      "sha256": "2315717ebb7b4dc0200e75c1e1373d434a84372da80c95f65a37545c968be8c2"
     },
     {
       "mode": "sequence",
       "fixture": "cache-miss-request.sequence.json",
       "preset": "okabe-ito",
-      "sha256": "9205d14d15399fa5a7a2b2377e95928009456245217f8b2b1180743a9657e2fb"
+      "sha256": "190d67c1c15b83e7299844323d259224e0d6a576bdbcd44b978a9f082ecf5b32"
     },
     {
       "mode": "dataflow",
       "fixture": "product-analytics.dataflow.json",
       "preset": "classic",
-      "sha256": "eb98a5c48c264a8d7ec3c2779660842a9bfab1d983d8764933ca6e369ec45a85"
+      "sha256": "196a9c2013312d8e3a4d920e14795ce7a1c164cd371289f96181df5e2a20ca08"
     },
     {
       "mode": "dataflow",
       "fixture": "product-analytics.dataflow.json",
       "preset": "signal-flow",
-      "sha256": "e4afffc4c146720bfdfc0854290ea7d592fcdb6479be20c22a64fc37f0906887"
+      "sha256": "736e111c54b006b29bbc235105c57504fedf9ed7089049e6b9f974c3b6c34cdc"
     },
     {
       "mode": "dataflow",
       "fixture": "product-analytics.dataflow.json",
       "preset": "blueprint",
-      "sha256": "ade653b18f483c3819da248b4802a0e1080da081ee3a0af48d4d80e31d1c86f3"
+      "sha256": "683bb1554b61aab9fec4879c24ce0e0416f5ce1d184d51df786a0add1fa8005f"
     },
     {
       "mode": "dataflow",
       "fixture": "product-analytics.dataflow.json",
       "preset": "editorial",
-      "sha256": "ecbaf0a46a903c2f1b8a8d2b5a437f46b9b5ce7fef5117c1af2a288ed2bae16b"
+      "sha256": "311575288f024f1896e72edfbd17b86cdbe2b9a15e9a800fd13ea7ae1029a409"
     },
     {
       "mode": "dataflow",
       "fixture": "product-analytics.dataflow.json",
       "preset": "okabe-ito",
-      "sha256": "e4c5ef526264f2e91358ac335a2c099572fffc57d443b0670d47f828f1394fb2"
+      "sha256": "c02d6e54e84bbc95ced3fa2f96d7f5d7f887cff75dc92ad6d9d8a1ab6f0d646d"
     },
     {
       "mode": "lifecycle",
       "fixture": "agent-run.lifecycle.json",
       "preset": "classic",
-      "sha256": "486dccceac95d79c371318a503cc839ed6696bf6afa39e5ec95d2adb9be036a5"
+      "sha256": "ee8b9e2747a7dea8be3f36b7316e4888e0cc5070d93e82021a7832adf9270041"
     },
     {
       "mode": "lifecycle",
       "fixture": "agent-run.lifecycle.json",
       "preset": "signal-flow",
-      "sha256": "2d40ca5efc4d242515657ffb1412a0f1a25e111c70ca6937aced7d6a56d15b62"
+      "sha256": "3a31146f2dbdd6f8be892501fb53f1450cbe441bd5d5385747e62f664d83e0d9"
     },
     {
       "mode": "lifecycle",
       "fixture": "agent-run.lifecycle.json",
       "preset": "blueprint",
-      "sha256": "60d018658efce7fc9a0727b206a4bd6810fd82d6ee13376dc154e6981af631d3"
+      "sha256": "4285d8c27b231d7b505520c02ce1ed412b9703801ef39111d9ef1e1b3e08eb9c"
     },
     {
       "mode": "lifecycle",
       "fixture": "agent-run.lifecycle.json",
       "preset": "editorial",
-      "sha256": "82ea62dd019dde4f17506c20f9ba9447c40a1b41a4f4117582e065c25c6fc52c"
+      "sha256": "9d48976bb5c5dbe113e979dcf5c06c7f2ccff427ff1820ce6bd3a27b9d9a964e"
     },
     {
       "mode": "lifecycle",
       "fixture": "agent-run.lifecycle.json",
       "preset": "okabe-ito",
-      "sha256": "5a883133d6da1fc3db7e55407e1426cb2334e7b2d8ad4c385e676717b457662e"
+      "sha256": "7a821a63e0f78b91fc0f493973d9e6f5dda2d4d8b68ebc79aeddc3efbad62bb9"
     }
   ]
 }
