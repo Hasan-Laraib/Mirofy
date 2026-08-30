@@ -279,6 +279,70 @@ export const IMPORTED_ROWS = [
   },
 
   {
+    id: '1.12',
+    name: 'Stable semantic IDs',
+    // The row says "mandatory for every object". Satisfied AT THE MODEL, not
+    // by tightening the five authored schemas: requiring `id` there would
+    // break every document ever written, every fixture and all 25 golden
+    // digests, for a capability the model needs and authors do not.
+    //
+    // An authored id is used verbatim and claimed FIRST, so a derived id can
+    // never displace one. A derived id is marked `authoredId: false`, because
+    // it is stable only while the content it derives from is -- rename the
+    // label and it changes. Position is part of the derivation, so two
+    // components sharing a type and label are two ids, not one silent merge.
+    origin: 'R',
+    phase: 'P1d',
+    proof: 'system-model.test.mjs',
+    testTitle: '[1.12] every model object gets an id, and an authored id survives verbatim',
+  },
+  {
+    id: '1.14',
+    name: 'System model (model.json)',
+    // One inventory; diagrams become views of it. The same component
+    // described by two documents is ONE model component carrying both
+    // documents' evidence AND both labels -- a merge that keeps only the last
+    // label seen is a silent overwrite dressed as consolidation.
+    //
+    // Provenance is resolved from cited evidence, and an object with no
+    // evidence is `authored` rather than flattered into a stronger class.
+    origin: 'N',
+    phase: 'P1d',
+    proof: 'system-model.test.mjs',
+    testTitle: '[1.14] components sharing an id across documents merge into one, keeping both labels',
+  },
+  {
+    id: '1.15',
+    name: 'First-class engineering metadata',
+    // `owner` and `deployment{regions, networkScope}` as real optional
+    // fields. They were smuggled before -- owner read out of a component's
+    // display `tag`, regions inferred from boundary membership -- which works
+    // and is legible to nobody. Optional, with the fallbacks kept, because
+    // every document authored before the fields existed uses the old shape;
+    // golden is untouched, which is the proof they are additive.
+    origin: 'N',
+    phase: 'P1d',
+    proof: 'engineering-metadata.test.mjs',
+    testTitle: '[1.15] a component carries owner and deployment as real fields',
+  },
+  {
+    id: '1.17',
+    name: 'Human overrides recorded as authored',
+    // An override is a person disagreeing with the analysis. If the
+    // overridden object keeps saying `statically-derived`, a human decision
+    // is wearing the authority of machine evidence -- so an override always
+    // re-provenances to `authored`, and what it replaced stays on record so
+    // the disagreement is inspectable rather than erased.
+    //
+    // An override naming an unknown id THROWS: a typo'd override that quietly
+    // does nothing is the failure mode worth preventing.
+    origin: 'N',
+    phase: 'P1d',
+    proof: 'system-model.test.mjs',
+    testTitle: '[1.17] an override is recorded as authored even when it replaces derived provenance',
+  },
+
+  {
     id: '4.14',
     name: 'Evidence-first visual language (six provenance treatments)',
     // 36-VISUAL-SYSTEM.md V4's binding constraint is that the six classes are
