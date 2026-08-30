@@ -38,7 +38,7 @@ import {
 } from '../shared/geometry.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const { diagram: workflow, template, outPath } = await loadDiagramWithBrandMarks({
+const { diagram: workflow, template, outPath, sourceEvidence } = await loadDiagramWithBrandMarks({
   rendererDir: __dirname,
   diagramType: 'workflow',
   defaultExample: 'agent-tool-call.workflow.json'
@@ -746,4 +746,5 @@ writeDiagram({
   meta: workflow.meta,
   svg: renderSvg(),
   cards: workflow.cards,
+  sourceEvidence,
 });
