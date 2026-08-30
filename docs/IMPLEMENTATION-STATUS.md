@@ -13,7 +13,7 @@ PLANNED rows are read live from the roadmap document on every run, so they
 cannot silently disagree with it: edit a roadmap row without rerunning
 `npm run status` and the build fails.
 
-**Totals:** 60 SHIPPED (17 browser-proved), 1 UNPROVEN, 58 PLANNED.
+**Totals:** 61 SHIPPED (17 browser-proved), 1 UNPROVEN, 57 PLANNED.
 
 ## Shipped & unproven — from the conformance matrix
 
@@ -31,6 +31,7 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 2.1 | Repository evidence (revision-pinned) | H | P0 | SHIPPED | `validation-gates.test.mjs` |
 | 2.2 | Verified Source Beacon (SRC n) | H | P0 | SHIPPED (browser-proved) | `viewer.browser.test.mjs` |
 | 2.4 | Evidence on relationships (all five diagram types) | N | P1b | SHIPPED | `evidence.test.mjs` |
+| 2.5 | Six-class evidence provenance | N | P1b | SHIPPED | `evidence.test.mjs` |
 | 3.1 | Proper Crossing Gate (edge-vs-edge, showcase-only) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
 | 3.1b | Clean Flow Gate (no edge across unrelated node) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
 | 3.2 | Clean Label Gate (≥4 px) | H | P0 | SHIPPED | `negative-fixtures.test.mjs` |
@@ -94,7 +95,6 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 1.16 | Recipe library (100) | N | P3 |
 | 1.17 | Human overrides | N | P1 |
 | 2.3 | Host-agnostic evidence | N | P1 |
-| 2.5 | Six-class provenance | N | P1 |
 | 2.6 | Multi-repo evidence identity | N | P2 |
 | 2.7 | Evidence graph store + query | N | P1 |
 | 2.8 | Scanner: TS/JS imports | N | P1 |
