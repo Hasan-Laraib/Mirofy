@@ -13,6 +13,51 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b Task 4: evidence reaches the edges
+
+**Commits:** `e60734c..ac4b8e7` on `p1b-evidence-spine`.
+
+Task 3 taught the schema to accept `sources` on a relationship. Nothing
+read them. Resolution walked components only, so an authored edge citation
+validated cleanly and then disappeared — and not quietly: with no component
+source left to count, the render failed claiming `/meta/repository` required
+a *component* source reference.
+
+Three architecture-only restrictions stood in the way, where the plan
+anticipated one. `hasRepositoryEvidence` returned false for every other
+diagram type; the CLI refused `--repo-root` outside architecture; and
+`/meta/repository` existed only in architecture's schema. The CLI's guard
+now reads `supportsRepositoryEvidence()` from the evidence module instead of
+keeping its own list, so a sixth diagram type added without evidence support
+is rejected loudly rather than silently ignoring the flag.
+
+Components and relationships share one verification path. Only the JSON
+pointer differs — `/components/…` against `/connections/…`, `/flows/…`,
+`/transitions/…`, `/messages/…`, `/edges/…` — because an author fixing an
+error must be sent to the place in *their* document where the mistake is.
+The failure codes are unchanged; they are a contract consumers match on.
+
+Relationships key by their index in the authored array, which is already
+what the renderers emit as `data-edge-key`. Keying by `id` would have
+reached only the edges that declare one, and most do not.
+
+In the viewer, one beacon builder serves nodes and edges; only the anchor is
+a parameter. The accessible label is deliberately **not** shared: the node
+string reads "focus this node to inspect", which is untrue on a connection,
+so `beaconEdge` is its own catalogue entry in both locales. A screen reader
+is the only audience for that string, and getting it wrong there is
+invisible to everyone else.
+
+Verified in real Chrome across all five diagram types: one beacon each,
+marker `SRC 1`, label "1 verified source; focus this connection to inspect".
+
+The Task 3 fixture evidence was reverted. A document carrying `sources` must
+also carry `/meta/repository`, so once resolution began seeing relationship
+sources those fixtures stopped rendering at all — caught by the gate, not in
+review. Pinning a revision into a golden fixture would make rendering depend
+on git history a shallow CI clone does not have, so the tests construct
+their own evidenced documents instead.
+
 ## 2026-08-30 — P1b Task 3: relationships can carry evidence
 
 **Commits:** `2ea5302..b10149b` on `p1b-evidence-spine`.

@@ -424,19 +424,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 - Consumes: `$defs.sources` (Task 3); existing `data-edge-id` / `data-edge-from` / `data-edge-to` markup.
 - Produces: `data-source-evidence-count` and `data-source-evidence-beacon` on edge elements, mirroring the node contract that already exists.
 
-- [ ] **Step 1: Write the failing test** — assert that a rendered artifact carries a resolved evidence payload for an *edge*, and that the payload's path and line match the fixture. Assert per diagram type.
+- [x] **Step 1: Write the failing test** — assert that a rendered artifact carries a resolved evidence payload for an *edge*, and that the payload's path and line match the fixture. Assert per diagram type.
 
-- [ ] **Step 2: Run it, watch it fail.** Evidence resolution today walks components only.
+- [x] **Step 2: Run it, watch it fail.** Evidence resolution today walks components only.
 
-- [ ] **Step 3: Extend `repository-evidence.mjs`** to resolve `sources` on the five relationship arrays as well as components, reusing the existing verification path — the same git checks, the same failure codes. Verification is already relationship-agnostic; only the traversal needs widening.
+- [x] **Step 3: Extend `repository-evidence.mjs`** to resolve `sources` on the five relationship arrays as well as components, reusing the existing verification path — the same git checks, the same failure codes. Verification is already relationship-agnostic; only the traversal needs widening.
 
-- [ ] **Step 4: Extend the viewer's beacon installer.** `06-source-evidence.js` currently queries `[data-node-id]`. Add `[data-edge-id]`, positioning the beacon at the edge's label anchor. Keep one code path — two beacon implementations would drift.
+- [x] **Step 4: Extend the viewer's beacon installer.** `06-source-evidence.js` currently queries `[data-node-id]`. Add `[data-edge-id]`, positioning the beacon at the edge's label anchor. Keep one code path — two beacon implementations would drift.
 
-- [ ] **Step 5: Prove the beacon appears on an edge in a real browser**, in the browser suite, with `MIROFY_CHROME` set. Row 2.2 currently proves beacons on nodes; extend it rather than adding a parallel row, and update its `testTitle` if the name changes — verifying via the conformance harness.
+- [x] **Step 5: Prove the beacon appears on an edge in a real browser**, in the browser suite, with `MIROFY_CHROME` set. Row 2.2 currently proves beacons on nodes; extend it rather than adding a parallel row, and update its `testTitle` if the name changes — verifying via the conformance harness.
 
-- [ ] **Step 6: Gallery check.** Run `npm run gallery` and open an architecture diagram: the edge with fixture evidence must show `SRC n`, and clicking it must not throw. Record what you saw.
+- [x] **Step 6: Gallery check.** Run `npm run gallery` and open an architecture diagram: the edge with fixture evidence must show `SRC n`, and clicking it must not throw. Record what you saw.
 
-- [ ] **Step 7: Full gate, re-baselines, status, commit.** `Refs: 2.4, 2.2`.
+- [x] **Step 7: Full gate, re-baselines, status, commit.** `Refs: 2.4, 2.2`.
 
 ---
 
