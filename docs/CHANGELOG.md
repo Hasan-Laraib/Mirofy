@@ -13,6 +13,41 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1b Task 7: the Evidence Passport for relationships
+
+**Commits:** `3bbe832..867afa6` on `p1b-evidence-spine`.
+
+Selecting a relationship focuses its **source node**, so the Passport was
+showing that node's evidence while the user believed they were inspecting
+the edge. Evidence attributed to the wrong subject is worse than no
+evidence at all: the panel looked populated and authoritative while
+describing something else entirely. The edge's own sources and class now
+replace it.
+
+`renderSourceEvidence` takes the resolved sources and class rather than a
+node id, so one renderer serves both subjects. Two would let a node and an
+edge drift into reporting evidence differently, which is the one thing a
+trust panel must not do.
+
+No new interaction was needed. The plan's Step 3 called for making edges
+focusable and selectable; they already were — the hit-target overlay gives
+every relationship `role="button"`, a tabindex and an accessible label.
+Worth recording, because the plan budgeted for an accessibility change that
+turned out to be already met.
+
+Row 5.20 asserts the fixture's **exact** values — path, line range,
+revision, class — never that the panel is non-empty. A panel rendering the
+wrong file's evidence is non-empty too, and that is the defect it exists to
+catch.
+
+Its second test separates two things easy to conflate. The beacon is viewer
+chrome: installed at runtime, stripped on export, and it must never sit in
+the static artifact. `data-provenance` is renderer-emitted *semantics* and
+must **survive**, because the six treatments are keyed on it — stripping it
+would silently flatten every provenance distinction in an exported SVG
+while leaving the diagram looking fine. Asserting only "the export is
+clean" would be satisfied by stripping both.
+
 ## 2026-08-30 — P1b Task 6: the evidence-first visual language
 
 **Commits:** `ee80484..b19fdf4` on `p1b-evidence-spine`.

@@ -524,19 +524,19 @@ Add row `2.4` to `matrix.mjs` — `origin: 'N'`, `phase: 'P1b'`, `proof: 'eviden
 **Interfaces:**
 - Consumes: everything from Tasks 3–6; the browser helper at `packages/conformance/test/helpers/browser.mjs`.
 
-- [ ] **Step 1: Write the failing browser test** — click an edge carrying evidence; the Passport opens and reports the file path, the line range, the revision, and the provenance class. Assert against the *fixture's* values, not merely that the panel is non-empty.
+- [x] **Step 1: Write the failing browser test** — click an edge carrying evidence; the Passport opens and reports the file path, the line range, the revision, and the provenance class. Assert against the *fixture's* values, not merely that the panel is non-empty.
 
-- [ ] **Step 2: Run it with `MIROFY_CHROME`, watch it fail** — today only nodes open the Passport.
+- [x] **Step 2: Run it with `MIROFY_CHROME`, watch it fail** — today only nodes open the Passport.
 
-- [ ] **Step 3: Make edges focusable and selectable**, mirroring the node interaction: keyboard-reachable, visible focus, and the same deep-link behaviour. The accessibility floor in `36-VISUAL-SYSTEM.md` §4 applies — a mouse-only edge Passport is a regression, and the axe gate from P1a will be watching.
+- [x] **Step 3: Make edges focusable and selectable**, mirroring the node interaction: keyboard-reachable, visible focus, and the same deep-link behaviour. The accessibility floor in `36-VISUAL-SYSTEM.md` §4 applies — a mouse-only edge Passport is a regression, and the axe gate from P1a will be watching.
 
-- [ ] **Step 4: Render the evidence** — path, line range, revision, provenance class, and the host link built by Task 8's adapter. Strip it from canonical exports, as node evidence already is (`36-VISUAL-SYSTEM.md` §4.4, *canonical clean*).
+- [x] **Step 4: Render the evidence** — path, line range, revision, provenance class, and the host link built by Task 8's adapter. Strip it from canonical exports, as node evidence already is (`36-VISUAL-SYSTEM.md` §4.4, *canonical clean*).
 
-- [ ] **Step 5: Prove the export stays clean** — assert an exported SVG carries no Passport markup and no beacon.
+- [x] **Step 5: Prove the export stays clean** — assert an exported SVG carries no Passport markup and no beacon.
 
-- [ ] **Step 6: Register row 5.20** with `browser: true` so it defers rather than falsely passes without Chrome. Verify both accountings.
+- [x] **Step 6: Register row 5.20** with `browser: true` so it defers rather than falsely passes without Chrome. Verify both accountings.
 
-- [ ] **Step 7: Full gate both ways, gallery, status, commit.** `Refs: 5.20`.
+- [x] **Step 7: Full gate both ways, gallery, status, commit.** `Refs: 5.20`.
 
 ---
 
