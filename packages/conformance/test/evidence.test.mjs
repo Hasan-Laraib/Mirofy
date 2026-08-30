@@ -196,3 +196,84 @@ test('[2.5] the schema rejects a provenance class outside the six', () => {
   assert.equal(rejected.ok, false, 'the schema accepted a provenance class outside the six');
   assert.match(rejected.message, /provenance/, 'the rejection did not name the provenance field');
 });
+
+// Row 2.3. Host-agnostic evidence.
+//
+// Verification was never GitHub-bound -- it runs `git` against a real
+// checkout. What WAS bound: the slug regex, an outright rejection of any URL
+// not starting with https://github.com/, the blob-URL builder, and the
+// viewer's repository link. Four places, where the plan expected two.
+//
+// The blob URL shapes are asserted as exact strings. A test that only checked
+// "a URL was produced" would pass every wrong template, and a wrong template
+// is the worst failure available here: it produces a confident, clickable
+// link to nothing, which is precisely what evidence must never do.
+const HOST_CASES = [
+  {
+    id: 'github',
+    urls: ['https://github.com/acme/widgets', 'git@github.com:acme/widgets.git', 'ssh://git@github.com/acme/widgets'],
+    slug: 'acme/widgets',
+    blob: 'https://github.com/acme/widgets/blob/abc123/src/app.js#L4-L9',
+  },
+  {
+    id: 'gitlab',
+    urls: ['https://gitlab.com/acme/widgets', 'git@gitlab.com:acme/widgets.git'],
+    slug: 'acme/widgets',
+    blob: 'https://gitlab.com/acme/widgets/-/blob/abc123/src/app.js#L4-9',
+  },
+  {
+    id: 'bitbucket',
+    urls: ['https://bitbucket.org/acme/widgets', 'git@bitbucket.org:acme/widgets.git'],
+    slug: 'acme/widgets',
+    blob: 'https://bitbucket.org/acme/widgets/src/abc123/src/app.js#lines-4:9',
+  },
+  {
+    id: 'gitea',
+    urls: ['https://gitea.com/acme/widgets'],
+    slug: 'acme/widgets',
+    blob: 'https://gitea.com/acme/widgets/src/commit/abc123/src/app.js#L4-L9',
+  },
+  {
+    id: 'gitee',
+    urls: ['https://gitee.com/acme/widgets'],
+    slug: 'acme/widgets',
+    blob: 'https://gitee.com/acme/widgets/src/commit/abc123/src/app.js#L4-L9',
+  },
+  {
+    id: 'azure-devops',
+    urls: ['https://dev.azure.com/acme/widgets/_git/widgets'],
+    slug: 'acme/widgets/_git/widgets',
+    blob: 'https://dev.azure.com/acme/widgets/_git/widgets?path=src%2Fapp.js&version=GCabc123&line=4&lineEnd=9',
+  },
+];
+
+for (const host of HOST_CASES) {
+  test(`[2.3] ${host.id} repository URLs resolve to the right slug and blob URL`, async () => {
+    const { detectHost } = await import('../../core/renderers/shared/hosts.mjs');
+    for (const url of host.urls) {
+      const detected = detectHost(url);
+      assert.ok(detected, `${host.id}: ${url} matched no host adapter`);
+      assert.equal(detected.id, host.id, `${host.id}: ${url} matched the wrong adapter`);
+      assert.equal(detected.slug, host.slug, `${host.id}: ${url} produced the wrong slug`);
+    }
+    // The blob URL is built from the canonical https form.
+    const canonical = detectHost(host.urls[0]);
+    assert.equal(canonical.blobUrl('abc123', 'src/app.js', 4, 9), host.blob);
+  });
+}
+
+test('[2.3] an unsupported host is refused by name rather than linked wrongly', async () => {
+  const { detectHost, HOSTS } = await import('../../core/renderers/shared/hosts.mjs');
+  assert.equal(detectHost('https://sourcehut.example/acme/widgets'), null);
+
+  const source = JSON.parse(fs.readFileSync(path.join(fixturesRoot, FIXTURE.architecture), 'utf8'));
+  source.meta = { ...source.meta, repository: { url: 'https://sourcehut.example/acme/widgets', revision: 'a'.repeat(40) } };
+  source.connections[0].sources = [{ path: 'src/app.js' }];
+  const rejected = validate('architecture', source, { repoRoot });
+  assert.equal(rejected.ok, false, 'an unsupported host was accepted');
+  // Naming the supported hosts is the difference between a dead end and a
+  // fixable error: the author cannot guess which forges are understood.
+  for (const id of HOSTS.map((h) => h.id)) {
+    assert.match(rejected.message, new RegExp(id), `the rejection does not name the ${id} adapter`);
+  }
+});
