@@ -17,6 +17,7 @@
       var evidence = document.getElementById('focus-evidence');
       var repositoryLink = document.getElementById('focus-repository');
       var evidenceLinks = document.getElementById('focus-evidence-links');
+      var provenanceSlot = document.getElementById('focus-provenance');
       var summary = document.getElementById('focus-summary');
       var reachSection = document.getElementById('focus-reach');
       var reachStatus = document.getElementById('focus-reach-status');
@@ -337,11 +338,16 @@
         element.textContent = normalized;
         element.hidden = !normalized;
       }
-      function renderSourceEvidence(id) {
+      /* Takes the resolved sources and class rather than an id, so the same
+         renderer serves a node and a relationship. Keeping two would let the
+         two subjects drift into reporting evidence differently, which is the
+         one thing a trust panel must not do. */
+      function renderSourceEvidence(sources, provenanceClass) {
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
         repositoryLink.textContent = '';
-        var sources = Mirofy.sourceEvidence.node(id);
+        provenanceSlot.textContent = '';
+        provenanceSlot.hidden = true;
         var repository = Mirofy.sourceEvidence.repository();
         if (!repository || !sources.length) {
           evidence.hidden = true;
@@ -351,6 +357,14 @@
         repositoryLink.href = repository.url + '/tree/' + repository.revision;
         repositoryLink.textContent = slug + ' @ ' + repository.shortRevision;
         repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
+        /* The class token is shown verbatim: it is published vocabulary the
+           documentation and the legend both use, not prose to localise. The
+           accessible label carries the localised framing instead. */
+        if (provenanceClass) {
+          provenanceSlot.textContent = provenanceClass;
+          provenanceSlot.setAttribute('aria-label', viewerText('viewer.passport.provenance', { class: provenanceClass }));
+          provenanceSlot.hidden = false;
+        }
         sources.forEach(function (source) {
           var link = document.createElement('a');
           link.className = 'semantic-passport-source';
@@ -382,7 +396,7 @@
         setPassportValue(document.getElementById('focus-brand'), node.getAttribute('data-node-brand'));
         semanticId.textContent = id;
         semanticId.hidden = false;
-        renderSourceEvidence(id);
+        renderSourceEvidence(Mirofy.sourceEvidence.node(id), node.getAttribute('data-provenance'));
       }
       function relationshipsFor(id, byId) {
         var seen = {};
@@ -809,6 +823,19 @@
         var target = relationshipHitTarget(key);
         if (target) target.setAttribute('aria-pressed', 'true');
         renderRelationshipCopyAction();
+        /* Pinning a relationship focuses its SOURCE NODE, so without this the
+           Passport would keep showing that node's evidence while the user is
+           inspecting the edge -- evidence attributed to the wrong subject,
+           which is worse than showing none. The edge's own class and sources
+           replace it, keyed by data-edge-key (its index in the authored
+           array), which is what evidence resolution keys its edges map by. */
+        var pinnedEdge = edges().filter(function (edge) {
+          return edge.getAttribute('data-edge-key') === key;
+        })[0];
+        renderSourceEvidence(
+          Mirofy.sourceEvidence.edge(key),
+          pinnedEdge ? pinnedEdge.getAttribute('data-provenance') : null
+        );
         summary.textContent = viewerText('viewer.passport.relationship.pinned', {
           from: record.fromLabel,
           to: record.toLabel,

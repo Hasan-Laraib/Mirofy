@@ -387,6 +387,7 @@ const MESSAGE_PAIRS = {
   'viewer.passport.sourceCount.one': ['{count} verified source reference', '{count} 个已验证来源引用'],
   'viewer.passport.sourceCount.other': ['{count} verified source references', '{count} 个已验证来源引用'],
   'viewer.passport.sourceMarker': ['SRC', '来源'],
+  'viewer.passport.provenance': ['Provenance: {class}', '来源类别：{class}'],
   'viewer.passport.beacon.one': ['{count} verified source; focus this node to inspect', '{count} 个已验证来源；聚焦此节点以检查'],
   'viewer.passport.beacon.other': ['{count} verified sources; focus this node to inspect', '{count} 个已验证来源；聚焦此节点以检查'],
   'viewer.passport.beaconEdge.one': ['{count} verified source; focus this connection to inspect', '{count} 个已验证来源；聚焦此连接以检查'],
