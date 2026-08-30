@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { detectHost, HOST_IDS } from './hosts.mjs';
 import { throwDiagnosticError } from './diagnostics.mjs';
 
 const FULL_SHA_RE = /^[a-f0-9]{40}$/i;
@@ -38,10 +39,12 @@ function gitValue(repoRoot, args, failure) {
   return result.stdout.trim();
 }
 
-function githubSlug(value) {
-  const raw = String(value || '').trim();
-  const match = raw.match(/^(?:https:\/\/github\.com\/|git@github\.com:|ssh:\/\/git@github\.com\/)([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/i);
-  return match ? `${match[1]}/${match[2]}`.toLowerCase() : null;
+// Kept as a thin wrapper so the origin comparison below reads the same for
+// every forge: two remotes match when they resolve to the same host and the
+// same slug, whether they were written as https, ssh:// or git@.
+function remoteSlug(value) {
+  const host = detectHost(value);
+  return host ? `${host.id}:${host.slug}` : null;
 }
 
 function verifiedSourcePath(value, where) {
@@ -64,12 +67,12 @@ function verifiedSourcePath(value, where) {
   return segments.join('/');
 }
 
-function sourceHref(repositoryUrl, revision, source) {
-  const encodedPath = source.path.split('/').map(encodeURIComponent).join('/');
-  const lineFragment = source.line
-    ? `#L${source.line}${source.endLine && source.endLine !== source.line ? `-L${source.endLine}` : ''}`
-    : '';
-  return `${repositoryUrl}/blob/${revision}/${encodedPath}${lineFragment}`;
+// The forge decides how a line range is addressed, and they genuinely
+// disagree: GitLab omits the second "L", Bitbucket uses #lines-a:b, Azure
+// uses query parameters. Building this shape here would mean one template
+// for six forges.
+function sourceHref(host, revision, source) {
+  return host.blobUrl(revision, source.path, source.line, source.endLine);
 }
 
 function sourceLineCount(content) {
@@ -123,14 +126,18 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
       supportedFixes: ['pin one full 40-character commit SHA'],
     });
   }
-  const authoredSlug = githubSlug(repository.url);
-  if (!authoredSlug || !String(repository.url).startsWith('https://github.com/')) {
-    evidenceFailure('repository-evidence/url-invalid', '/meta/repository/url must be a public https://github.com owner/repository URL.', {
+  const authoredHost = detectHost(repository.url);
+  if (!authoredHost) {
+    // Named alternatives, not a bare refusal: an author cannot guess which
+    // forges are understood, and a wrong guess here yields a confident link
+    // to nothing -- the one thing evidence must never produce.
+    evidenceFailure('repository-evidence/url-invalid', `/meta/repository/url must be a public repository URL on a supported host (${HOST_IDS.join(', ')}).`, {
       subject: { path: '/meta/repository/url' },
-      evidence: { repositoryUrl: repository.url },
-      supportedFixes: ['use the canonical public GitHub HTTPS repository URL'],
+      evidence: { repositoryUrl: repository.url, supportedHosts: HOST_IDS },
+      supportedFixes: [`use a canonical public repository URL on one of: ${HOST_IDS.join(', ')}`],
     });
   }
+  const authoredSlug = remoteSlug(repository.url);
   if (!repoRootInput) {
     evidenceFailure('repository-evidence/root-required', 'This diagram declares source evidence. Pass --repo-root <repository> so Mirofy can verify it before rendering.', {
       subject: { path: '/meta/repository' },
@@ -158,7 +165,7 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     });
   }
   const origin = gitValue(realRoot, ['remote', 'get-url', 'origin'], 'Evidence repository must have an origin remote.');
-  if (githubSlug(origin) !== authoredSlug) {
+  if (remoteSlug(origin) !== authoredSlug) {
     evidenceFailure('repository-evidence/origin-mismatch', `Evidence repository origin ${JSON.stringify(origin)} does not match ${JSON.stringify(repository.url)}.`, {
       subject: { repoRoot: realRoot },
       evidence: { localOrigin: origin, authoredRepository: repository.url },
@@ -233,7 +240,7 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
           });
         }
       }
-      verified.push({ ...source, href: sourceHref(repoUrl, revision, source) });
+      verified.push({ ...source, href: sourceHref(authoredHost, revision, source) });
     }
     return verified;
   }
@@ -281,6 +288,13 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
       url: repoUrl,
       revision,
       shortRevision: revision.slice(0, 7),
+      // Built here, by the host adapter, rather than in the viewer. The viewer
+      // used to append "/tree/<revision>" and strip a github.com prefix, which
+      // is right for exactly one forge and a broken link plus a full-URL slug
+      // on every other.
+      host: authoredHost.id,
+      slug: authoredHost.slug,
+      treeUrl: authoredHost.treeUrl(revision),
     },
     referenceCount,
     nodes,
