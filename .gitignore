@@ -24,3 +24,6 @@ scan/
 
 # System model output from `npm run model`.
 scan/model.json
+
+# View compiler output from `npm run compile`.
+scan/view.json
