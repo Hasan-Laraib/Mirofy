@@ -141,7 +141,7 @@ export const IMPORTED_ROWS = [
     // ("SRC 1"), its absence on a node with no sources, and the aria-label
     // update -- see viewer.browser.test.mjs's "[2.2]" test.
     browser: true,
-    testTitle: '[2.2] Verified Source Beacon renders "SRC n" on a node with verified repository evidence, and stays off a node without it',
+    testTitle: '[2.2] Verified Source Beacon renders "SRC n" on a node and on a relationship with verified repository evidence, and stays off ones without it',
   },
 
   {
