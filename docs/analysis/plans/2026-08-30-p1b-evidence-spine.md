@@ -608,7 +608,10 @@ Assert the exact strings. A test asserting only "a URL was produced" would pass 
 - [x] P1a debt cleared: static role fixed at the renderer, print block correct, leak gate replaced with a real one
 - [x] `npm run gallery`, `npm run status`, `npm run docs:pdf` all work; `status:check` is in the `check` chain
 - [x] Every new gate has been observed failing on a deliberate break, with the transcript recorded
-- [x] `npm run check` exit 0 with and without Chrome; all 13 CI jobs green
+- [x] `npm run check` exit 0 with and without Chrome
+- [ ] All 13 CI jobs green — **not yet verifiable**: this branch is
+  deliberately unpushed ("Do not push. The operator merges."), so CI has
+  never run on it. Local runs pass both ways; that is not the same claim.
 - [x] No commit carries a `Co-Authored-By: Claude` trailer
 
 ---

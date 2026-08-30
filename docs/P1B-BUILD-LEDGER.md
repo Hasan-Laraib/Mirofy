@@ -263,3 +263,8 @@ Measured at the close of Task 9.
   rather than duplicated, its `testTitle` updated in `matrix.mjs` to match
   character-for-character
 - No commit carries a `Co-Authored-By: Claude` trailer
+- **CI has not run on this branch.** It is deliberately unpushed, so the
+  "13 jobs green" claim in the plan's definition of done is unverified.
+  `npm run check` passing locally both with and without Chrome is a
+  weaker claim than CI green across 4 Node versions × 3 platforms, and is
+  recorded here as the weaker claim it is.
