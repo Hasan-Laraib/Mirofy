@@ -36,7 +36,7 @@
     { "id": "ops", "type": "external", "label": "On-call", "sublabel": "DLQ owner", "stage": 4, "row": 3, "yOffset": -18, "tag": "SRE" }
   ],
   "flows": [
-    { "from": "checkout", "to": "orders", "label": "OrderPlaced", "classification": "schema v1", "variant": "emphasis", "route": "straight" },
+    { "from": "checkout", "to": "orders", "label": "OrderPlaced", "classification": "schema v1", "variant": "emphasis", "route": "straight", "sources": [{ "path": "packages/core/renderers/dataflow/render-dataflow.mjs", "line": 1, "end_line": 40, "label": "dataflow renderer" }] },
     { "from": "billing", "to": "payments", "label": "PaymentCaptured", "classification": "schema v2", "variant": "emphasis", "route": "straight" },
     { "from": "orders", "to": "validate", "label": "ordered orders", "classification": "consumer group", "variant": "emphasis", "route": "straight" },
     { "from": "payments", "to": "enrich", "label": "payment facts", "classification": "at-least-once", "variant": "emphasis", "route": "straight" },

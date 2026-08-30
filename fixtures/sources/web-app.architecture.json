@@ -23,7 +23,7 @@
     { "kind": "security-group", "label": "sg-api :443/:8000", "wraps": ["lb", "api"] }
   ],
   "connections": [
-    { "from": "users", "to": "cdn", "label": "HTTPS", "variant": "emphasis" },
+    { "from": "users", "to": "cdn", "label": "HTTPS", "variant": "emphasis", "sources": [{ "path": "packages/core/renderers/architecture/render-architecture.mjs", "line": 1, "end_line": 40, "label": "architecture renderer" }] },
     { "from": "auth", "to": "api", "label": "verify JWT", "variant": "security", "fromSide": "right", "toSide": "left", "via": [[620, 142], [620, 330]] },
     { "from": "cdn", "to": "lb" },
     { "from": "cdn", "to": "s3", "label": "static", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDy": 58 },

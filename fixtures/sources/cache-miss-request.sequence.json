@@ -22,7 +22,7 @@
     { "from": 525, "to": 665, "label": "Response + trace" }
   ],
   "messages": [
-    { "from": "user", "to": "web", "y": 185, "label": "open page", "variant": "default" },
+    { "from": "user", "to": "web", "y": 185, "label": "open page", "variant": "default", "sources": [{ "path": "packages/core/renderers/sequence/render-sequence.mjs", "line": 1, "end_line": 40, "label": "sequence renderer" }] },
     { "from": "web", "to": "api", "y": 228, "label": "GET /dashboard", "variant": "emphasis" },
     { "from": "api", "to": "auth", "y": 270, "label": "verify JWT", "variant": "security" },
     { "from": "auth", "to": "api", "y": 305, "label": "claims ok", "variant": "return" },
