@@ -149,7 +149,14 @@ before(async () => {
       },
       { id: 'db', type: 'database', label: 'DB', pos: [340, 100], size: [160, 60] },
     ],
-    connections: [{ from: evidenceNodeId, to: 'db' }],
+    connections: [
+      // Evidence on the relationship itself, not just its endpoints: the
+      // claim "these two are connected" is what most needs a citation.
+      { from: evidenceNodeId, to: 'db', sources: [{ path: 'src/app.js', line: 1, end_line: 5 }] },
+      // A second relationship with no sources, so the test can show the
+      // beacon stays off rather than appearing on every edge.
+      { from: 'db', to: evidenceNodeId },
+    ],
   };
   const evidenceInput = path.join(tmp, 'beacon-source.architecture.json');
   fs.writeFileSync(evidenceInput, JSON.stringify(evidenceDoc));
@@ -441,7 +448,7 @@ test('[5.14b] print media emulation hides the toolbar chrome', { skip }, async (
 // none of the other fixtures carry sources/repository evidence.
 // ---------------------------------------------------------------------
 
-test('[2.2] Verified Source Beacon renders "SRC n" on a node with verified repository evidence, and stays off a node without it', { skip }, async () => {
+test('[2.2] Verified Source Beacon renders "SRC n" on a node and on a relationship with verified repository evidence, and stays off ones without it', { skip }, async () => {
   await navigate(evidenceFileUrl);
   const beacon = await evaluate(`(function () {
     var withSource = document.querySelector('[data-node-id="${evidenceNodeId}"] [data-source-evidence-beacon]');
@@ -457,6 +464,30 @@ test('[2.2] Verified Source Beacon renders "SRC n" on a node with verified repos
   assert.equal(beacon.text, 'SRC 1', 'the beacon did not render the expected "SRC n" marker text');
   assert.match(beacon.ariaLabel || '', /source/i, 'the node\'s aria-label was not updated to mention the source evidence');
   assert.equal(beacon.absentOnUnrelatedNode, true, 'a beacon was installed on a node with no sources at all');
+
+  // Relationships carry evidence too, keyed by their index in the authored
+  // array -- the same data-edge-key the renderers already emit.
+  const edge = await evaluate(`(function () {
+    var keyed = document.querySelector('[data-edge-key="0"]');
+    var withSource = keyed && (keyed.querySelector
+      ? keyed.querySelector('[data-source-evidence-beacon]')
+      : null);
+    if (!withSource && keyed && keyed.parentNode) {
+      withSource = keyed.parentNode.querySelector('[data-source-evidence-beacon]');
+    }
+    var marked = document.querySelector('[data-edge-key="0"][data-source-evidence-count]');
+    var unmarked = document.querySelector('[data-edge-key="1"][data-source-evidence-count]');
+    return {
+      installed: Boolean(withSource),
+      text: withSource ? withSource.querySelector('text').textContent : null,
+      ariaLabel: marked ? marked.getAttribute('aria-label') : null,
+      absentOnUnrelatedEdge: !unmarked,
+    };
+  })()`);
+  assert.equal(edge.installed, true, 'no beacon was installed on the relationship with verified sources');
+  assert.equal(edge.text, 'SRC 1', 'the edge beacon did not render the expected "SRC n" marker text');
+  assert.match(edge.ariaLabel || '', /source/i, "the relationship's aria-label was not updated to mention the source evidence");
+  assert.equal(edge.absentOnUnrelatedEdge, true, 'a beacon was installed on a relationship with no sources at all');
 });
 
 test('viewer raised no uncaught exceptions or console.error calls during the whole run', { skip }, async () => {
