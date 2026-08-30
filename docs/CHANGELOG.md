@@ -13,6 +13,46 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1e: the view compiler and its planner seam
+
+**Commits:** `3bee34d..` on `p1e-view-compiler`.
+
+The model becomes a **bounded** view carrying intent — `group`, `rank`,
+`mainPath`, `adjacency` — with no coordinates, under a contract the compiler
+enforces rather than assumes.
+
+**The AI lives behind a planner seam, and the seam ships before the model
+that fills it.** Operator decision: seam plus a deterministic default
+planner, no LLM call. That is the honest v1 — the contract becomes
+enforceable and testable without a network dependency, which row 6.9 forbids
+anyway, and an LLM planner later implements the same `plan(model, request)`
+interface and is policed by the same compiler.
+
+**Every contract assertion runs against a planner written specifically to
+violate it.** A contract proven only against the well-behaved default is not
+proven at all: the default planner is the one implementation guaranteed not
+to be the problem. So a planner proposing an edge the model does not contain
+makes `compileView` **throw**, naming the invention. Filtering it out quietly
+would have been easier and worse — a planner emitting relationships that do
+not exist is broken, and a compiler that tidies up after it hides the
+breakage forever.
+
+Omissions are recorded whoever decided them, including edges the *compiler*
+dropped because an endpoint was not selected. And the "no coordinates" rule
+is asserted by walking the whole IR rather than checking a known field list,
+so a positional field added later cannot slip in.
+
+Against this repository: a 62-component model compiles to a 12-node view
+with 11 edges — 50 components and 60 relationships omitted, **each with a
+recorded reason**. `mainPath` was verified against the live model: every
+consecutive pair is a real relationship. That is the 12-node ceiling being
+answered by bounded views rather than a denser canvas.
+
+**Row 1.18 was created with the capability.** P1.7 shipped with no matrix row
+(the roadmap's rows column reads `—`), and a capability delivered without a
+row is invisible to every gate downstream of the matrix — exactly how row
+5.16 sat in PLANNED for a full phase after it shipped.
+
 ## 2026-08-30 — P1d merged to main
 
 **Commits:** merge commit `23e2840` (PR #11).

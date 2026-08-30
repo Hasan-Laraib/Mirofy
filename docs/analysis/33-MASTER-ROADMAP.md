@@ -55,7 +55,7 @@ a chosen name.
 | P1.4 | ✅ **SHIPPED (P1c)** · **Scanner adapter 3 — HTTP routes.** Express/Fastify/Next → frontend↔backend edges | 2.10 | L |
 | P1.5 | ✅ **SHIPPED (P1c)** · **Honest coverage report.** Derived / inferred / **not analysed**. Never a fabricated percentage | 2.17 | M |
 | P1.6 | ✅ **SHIPPED (P1d)** · **System model.** Components, relationships, boundaries with `evidenceRefs[]`. **Mandatory stable IDs for every object.** Human overrides recorded as `authored` | 1.14, 1.12, 1.17, 1.15 | L |
-| P1.7 | **View compiler + AI abstraction.** Model → bounded view IR with intent (`group`/`rank`/`mainPath`/`adjacency`). **Contract test: cannot emit a relationship absent from the model** | — | L |
+| P1.7 | ✅ **SHIPPED (P1e)** · **View compiler + AI abstraction.** Model → bounded view IR with intent (`group`/`rank`/`mainPath`/`adjacency`). **Contract test: cannot emit a relationship absent from the model** | — | L |
 | P1.8 | ✅ **SHIPPED (P1b)** · ⭐ **Evidence on relationships.** `sources` on connections; then messages, flows, transitions | **2.4** | L |
 | P1.9 | ✅ **SHIPPED (P1b)** · ⭐ **Six-class provenance.** Carried independently of the fact, on nodes *and* edges | **2.5** | M |
 | P1.10 | ✅ **SHIPPED (P1b)** · **Evidence Passport + visual language.** Click an edge → file, lines, revision, derivation, provenance. Six distinguishable treatments, **not colour-dependent** | 5.20, 4.14 | L |
