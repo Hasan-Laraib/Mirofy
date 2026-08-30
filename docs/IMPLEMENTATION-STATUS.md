@@ -13,7 +13,7 @@ PLANNED rows are read live from the roadmap document on every run, so they
 cannot silently disagree with it: edit a roadmap row without rerunning
 `npm run status` and the build fails.
 
-**Totals:** 65 SHIPPED (19 browser-proved), 1 UNPROVEN, 53 PLANNED.
+**Totals:** 70 SHIPPED (19 browser-proved), 1 UNPROVEN, 48 PLANNED.
 
 ## Shipped & unproven — from the conformance matrix
 
@@ -33,6 +33,11 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 2.4 | Evidence on relationships (all five diagram types) | N | P1b | SHIPPED | `evidence.test.mjs` |
 | 2.5 | Six-class evidence provenance | N | P1b | SHIPPED | `evidence.test.mjs` |
 | 2.3 | Host-agnostic evidence (GitHub, GitLab, Bitbucket, Gitea, Gitee, Azure DevOps) | N | P1b | SHIPPED | `evidence.test.mjs` |
+| 2.7 | Evidence graph store + query | N | P1c | SHIPPED | `evidence-graph.test.mjs` |
+| 2.8 | Scanner: TS/JS imports | N | P1c | SHIPPED | `scanners.test.mjs` |
+| 2.9 | Scanner: workspace/package topology | N | P1c | SHIPPED | `scanners.test.mjs` |
+| 2.10 | Scanner: HTTP routes | N | P1c | SHIPPED | `scanners.test.mjs` |
+| 2.17 | Honest coverage report | N | P1c | SHIPPED | `evidence-graph.test.mjs` |
 | 4.14 | Evidence-first visual language (six provenance treatments) | N | P1b | SHIPPED (browser-proved) | `provenance-visual.test.mjs` |
 | 5.20 | Evidence Passport for relationships | N | P1b | SHIPPED (browser-proved) | `evidence-passport.browser.test.mjs` |
 | 5.16 | Modularized viewer source | R | P1 | SHIPPED | `viewer-modules.test.mjs` |
@@ -99,17 +104,12 @@ cannot silently disagree with it: edit a roadmap row without rerunning
 | 1.16 | Recipe library (100) | N | P3 |
 | 1.17 | Human overrides | N | P1 |
 | 2.6 | Multi-repo evidence identity | N | P2 |
-| 2.7 | Evidence graph store + query | N | P1 |
-| 2.8 | Scanner: TS/JS imports | N | P1 |
-| 2.9 | Scanner: workspace/package topology | N | P1 |
-| 2.10 | Scanner: HTTP routes | N | P1 |
 | 2.11 | Scanner: OpenAPI / gRPC | N | P4 |
 | 2.12 | Scanner: Docker Compose | N | P4 |
 | 2.13 | Scanner: Terraform / K8s | N | P4 |
 | 2.14 | Scanner: DB clients | N | P4 |
 | 2.15 | Scanner: queue pub/sub | N | P4 |
 | 2.16 | Additional languages | N | P4 |
-| 2.17 | Honest coverage report | N | P1 |
 | 3.11 | showcase false-negative fix | R | P1 |
 | 3.12 | Constraint solver | N | P2 |
 | 3.13 | repair --safe | N | P2 |

@@ -13,6 +13,40 @@ any good, complete, or well written — that is left to review.
 
 Every task updates this file before its final commit (see `CONTRIBUTING.md`).
 
+## 2026-08-30 — P1c: evidence discovery
+
+**Commits:** `38027bd..` on `p1c-evidence-discovery` (plan, graph, three
+adapters, coverage, the `scan` entry point).
+
+The machinery that discovers evidence, now that P1b built the place it
+lives. Two new workspace packages, both dependency-free, nothing in
+`packages/core` touched — the phase is entirely additive, so drift and
+golden never moved.
+
+**The evidence graph** (row 2.7) enforces "append-only per revision" 
+structurally: no update or delete method exists, stored facts are frozen
+copies, and `supersede` marks the old fact rather than touching it.
+Scanners may claim exactly two of the six provenance classes —
+`statically-derived` and `config-derived`. `authored` from a scanner would
+be a lie about a human; `inferred` a guess dressed as a finding.
+
+**Three adapters** (rows 2.8–2.10), each tested in both directions: the
+facts it must find, and the Gap it must record where analysis honestly
+stops. The import extractor is tokenizer-level, not a parser — row 6.9
+forbids the dependency, and the honesty rule makes the trade cheap.
+
+**The coverage report** (row 2.17) is a partition — analysed / gapped /
+not-analysed sum to the universe, the test fails on an uncounted file —
+and contains no percentage anywhere, asserted against the rendered text.
+
+`npm run scan` runs the lot. Against this repository: 919 facts, 9 gaps,
+190 files, 0 not analysed, ~300 ms. Every gap was verified genuine by
+hand, and three of them told the truth in an unexpected way: mid-phase,
+the import scanner reported the test suite's imports of
+`adapters/routes.mjs` as unresolvable — because that adapter did not exist
+yet. The scanner's first real finding was this plan's own incompleteness,
+and the gaps healed when Task 4 landed.
+
 ## 2026-08-30 — Roadmap sync: a shipped capability was invisible to the accounting
 
 **Commits:** `91f58ec`.

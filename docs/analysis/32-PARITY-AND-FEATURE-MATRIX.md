@@ -61,17 +61,17 @@ Every source-baseline feature is accounted for; none is dropped.
 | 2.4 | **Evidence on relationships** | **N** | **P1** | ⭐ The core differentiator. Every edge answers *"why do I believe this?"* — ✅ **SHIPPED (P1b)** |
 | 2.5 | **Six-class provenance** | **N** | **P1** | `authored` · `source-backed` · `statically-derived` · `config-derived` · `runtime-observed` · `inferred` — ✅ **SHIPPED (P1b)** |
 | 2.6 | Multi-repo evidence identity | **N** | P2 | `{repository, revision, path, symbol/range}` |
-| 2.7 | Evidence graph store + query | **N** | P1 | Append-only, provenance-first |
-| 2.8 | Scanner: TS/JS imports | **N** | P1 | v1 core adapter |
-| 2.9 | Scanner: workspace/package topology | **N** | P1 | v1 core adapter |
-| 2.10 | Scanner: HTTP routes | **N** | P1 | Express/Fastify/Next — v1 core adapter |
+| 2.7 | Evidence graph store + query | **N** | P1 | Append-only, provenance-first — ✅ **SHIPPED (P1c)** |
+| 2.8 | Scanner: TS/JS imports | **N** | P1 | v1 core adapter — ✅ **SHIPPED (P1c)** |
+| 2.9 | Scanner: workspace/package topology | **N** | P1 | v1 core adapter — ✅ **SHIPPED (P1c)** |
+| 2.10 | Scanner: HTTP routes | **N** | P1 | Express/Fastify/Next — v1 core adapter — ✅ **SHIPPED (P1c)** |
 | 2.11 | Scanner: OpenAPI / gRPC | **N** | P4 | |
 | 2.12 | Scanner: Docker Compose | **N** | P4 | |
 | 2.13 | Scanner: Terraform / K8s | **N** | P4 | |
 | 2.14 | Scanner: DB clients | **N** | P4 | |
 | 2.15 | Scanner: queue pub/sub | **N** | P4 | |
 | 2.16 | Additional languages | **N** | P4 | Python, Go, Java, C# |
-| 2.17 | **Honest coverage report** | **N** | P1 | What was derived, inferred, and *not analysed*. Never a fabricated percentage |
+| 2.17 | **Honest coverage report** | **N** | P1 | What was derived, inferred, and *not analysed*. Never a fabricated percentage — ✅ **SHIPPED (P1c)** |
 
 ## 3 · Layout & validation
 
