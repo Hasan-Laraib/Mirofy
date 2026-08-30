@@ -2,7 +2,7 @@
 
 ## Non-negotiables
 
-1. **Every feature has a test.** Every row in the parity matrix — harvested,
+1. **Every feature has a test.** Every row in the parity matrix — imported,
    rebuilt, or new — carries at least one automated test before it is
    delivered. A test file covering many rows must let each row fail on its
    own: `scripts/conformance.mjs` verifies a named `testTitle` per row inside
@@ -25,10 +25,10 @@
    by id, not folded into the proved count. A row with no real proof is
    `proof: null` with a `note` explaining why — never silently marked
    covered.
-5. **`packages/core/` is harvested code.** Do not refactor it during P0.
+5. **`packages/core/` is imported code.** Do not refactor it during P0.
    Import unmodified, prove parity, refactor in P1 — never both at once.
-6. **`MIROFY_*` is the environment-variable namespace.** The ancestor's
-   prefix was retired in P1; do not reintroduce it.
+6. **`MIROFY_*` is the environment-variable namespace.** Do not reintroduce
+   any earlier prefix.
 7. **`packages/core/assets/template.html` is generated, never hand-edited.**
    It is built from `packages/viewer/`; `npm run check:template` enforces
    this by rebuilding from source and failing on drift. Edit design-token
@@ -40,7 +40,7 @@
 ## Test types
 
 - New behaviour → TDD: failing test, then implementation.
-- Harvested code → characterisation test first, locking current behaviour.
+- Imported code → characterisation test first, locking current behaviour.
 - Rebuilt behaviour → characterisation, then new test, then a migration test.
 
 ## Running the gates
@@ -49,8 +49,7 @@
 npm run lint              # eslint .
 npm run typecheck         # tsc --noEmit
 npm run test              # node:test suites outside the conformance matrix
-npm run test:golden       # digest parity against the ancestor's renders
-npm run check:provenance  # the harvest claim, verified at the recorded anchor
+npm run test:golden       # digest parity against the recorded golden renders
 npm run check:drift       # packages/core/ matches its reviewed manifest
 npm run test:conformance  # the 56-row parity matrix
 npm run check:artifacts   # npm run build's own output reproduces the golden digests
@@ -65,9 +64,8 @@ npm run check             # all of the above, in order
 - Zero runtime dependencies (`dependencies` absent from every workspace
   `package.json` — this is itself a proved conformance row, 6.9).
 - The product name is `Mirofy`, scope `@mirofy/*` (P0.8, decided). The
-  ancestor's name survives only in `LICENSE`, `NOTICE`, `packages/core/LICENSE`,
-  `docs/harvest.md` and `docs/P0-BUILD-LEDGER.md`, where it is attribution or
-  historical record rather than product identity — do not rename it there.
+  original project's name survives only in `packages/core/LICENSE`, its
+  required third-party copyright notice — do not rename it there.
 - Nothing under `packages/core/` is modified as part of ordinary feature
   work. If a fix there is genuinely required, it needs its own explicit,
   reviewed exception — not a drive-by edit alongside unrelated work.
