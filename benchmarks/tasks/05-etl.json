@@ -1,0 +1,5 @@
+{
+  "id": "05-etl",
+  "diagramType": "dataflow",
+  "prompt": "Raw events land in an S3 bucket, a scheduled job normalises them into Parquet, a warehouse loader writes them to Snowflake, and a BI tool reads aggregate tables."
+}

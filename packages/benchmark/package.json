@@ -1,0 +1,8 @@
+{
+  "name": "@mirofy/benchmark",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "First-pass usable rate: measured on a schedule, never per PR.",
+  "exports": { "./harness": "./src/harness.mjs" }
+}

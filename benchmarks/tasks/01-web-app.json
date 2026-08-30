@@ -1,0 +1,5 @@
+{
+  "id": "01-web-app",
+  "diagramType": "architecture",
+  "prompt": "A React single-page app talks to a Node API, which reads and writes a PostgreSQL database and caches sessions in Redis. Static assets are served from a CDN."
+}

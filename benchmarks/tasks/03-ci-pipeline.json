@@ -1,0 +1,5 @@
+{
+  "id": "03-ci-pipeline",
+  "diagramType": "workflow",
+  "prompt": "A push triggers lint, unit tests and a build in parallel. If all three pass, an integration suite runs, then a deploy to staging, then a manual approval gate before production."
+}

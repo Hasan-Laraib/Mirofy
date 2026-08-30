@@ -1,0 +1,5 @@
+{
+  "id": "08-incident",
+  "diagramType": "workflow",
+  "prompt": "An alert fires and pages the on-call engineer. They acknowledge, triage, and either mitigate directly or escalate to a second responder. After mitigation a postmortem is written and reviewed."
+}

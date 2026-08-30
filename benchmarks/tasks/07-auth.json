@@ -1,0 +1,5 @@
+{
+  "id": "07-auth",
+  "diagramType": "sequence",
+  "prompt": "A user signs in with an identity provider. The browser is redirected, the provider returns an authorisation code, the backend exchanges it for tokens and sets a session cookie."
+}

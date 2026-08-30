@@ -1,0 +1,5 @@
+{
+  "id": "04-order-state",
+  "diagramType": "lifecycle",
+  "prompt": "An order is created as pending, moves to paid on successful payment, then to shipped, then delivered. From pending or paid it can be cancelled. A delivered order can be returned."
+}

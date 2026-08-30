@@ -563,6 +563,45 @@ export const IMPORTED_ROWS = [
     testTitle: '[3.16] a port that can make its edge straight, does',
   },
   {
+    id: '7.8',
+    name: 'First-pass usable benchmark (scheduled, never per PR)',
+    // The only number in this repo that moves without a commit, because it
+    // measures what an external model does with the tool. That one fact
+    // drives every requirement on the row.
+    //
+    // It must never gate a pull request. A contributor cannot see, reproduce
+    // or fix a drop caused by a provider changing a model, so a required
+    // check would fail them for someone else's deploy. The rule is enforced
+    // rather than documented: a test reads the workflow's trigger block and
+    // refuses `pull_request` and `push`. Observed failing on a planted
+    // pull_request trigger.
+    //
+    // It must never report a rate it did not measure. When the author fails
+    // often enough -- an outage, an expired key, a refusal -- the run comes
+    // back `inconclusive` with a null rate rather than a low score, because a
+    // depressed number attributed to this repo looks exactly like a
+    // regression and someone will go hunting for the commit. Observed failing
+    // on a planted `usable / total` that reported 20% during an outage.
+    //
+    // And it must never blame the tool for the author's failures, or the
+    // author for the tool's. Those are separate outcome classes that are
+    // never summed. A validation refusal arrives with the same exit code and
+    // the same stage whichever it was, so the split is drawn on the
+    // diagnostic code namespace -- `schema/*` is a malformed document,
+    // anything else is a rejected composition. An end-to-end run caught that
+    // one: every overlapping diagram was being filed as malformed, blaming
+    // the author for the layout engine's verdict.
+    //
+    // The rate divides by every task, including ones the author lost, because
+    // that is what a user experiences. Dividing by what the author managed to
+    // answer would let a model that skipped its hard tasks post a perfect
+    // score. Observed failing on exactly that divisor.
+    origin: 'N',
+    phase: 'P2',
+    proof: 'benchmark-harness.test.mjs',
+    testTitle: '[7.8] the benchmark workflow is not, and cannot become, a per-PR gate',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

@@ -1,0 +1,63 @@
+name: benchmark
+
+# First-pass usable rate (row 7.8).
+#
+# There is deliberately no `pull_request` trigger here, and adding one is a
+# mistake this repo has decided against once already. The number moves when an
+# external model changes behaviour, with no commit in this repo -- so a PR
+# could go red for reasons its author cannot see, cannot reproduce, and cannot
+# fix. A scheduled run treats that movement as information; a required check
+# treats it as the contributor's fault.
+#
+# packages/conformance/test/benchmark-harness.test.mjs asserts the absence of
+# that trigger, so this comment cannot quietly stop being true.
+on:
+  schedule:
+    # Weekly, Monday 06:00 UTC. Frequent enough to see a trend, rare enough
+    # that nobody is tempted to read one run as a regression.
+    - cron: '0 6 * * 1'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Identifier recorded with the run
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 22
+      - run: npm ci
+
+      - name: Measure
+        id: measure
+        env:
+          BENCHMARK_AUTHOR_CMD: ${{ secrets.BENCHMARK_AUTHOR_CMD }}
+          BENCHMARK_MODEL: ${{ inputs.model || secrets.BENCHMARK_MODEL }}
+        run: |
+          if [ -z "$BENCHMARK_AUTHOR_CMD" ]; then
+            # Not measured is not a pass and not a failure. Saying so beats
+            # emitting a zero that would chart as a collapse.
+            echo "NOT MEASURED: no BENCHMARK_AUTHOR_CMD secret is configured." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          node scripts/benchmark.mjs \
+            --author "$BENCHMARK_AUTHOR_CMD" \
+            --model "${BENCHMARK_MODEL:-unnamed}" \
+            --out benchmark-run.json | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload run record
+        if: hashFiles('benchmark-run.json') != ''
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: benchmark-run
+          path: benchmark-run.json
+          retention-days: 90

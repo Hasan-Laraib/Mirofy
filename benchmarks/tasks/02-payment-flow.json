@@ -1,0 +1,5 @@
+{
+  "id": "02-payment-flow",
+  "diagramType": "sequence",
+  "prompt": "A customer submits a payment. The checkout service reserves stock, calls the payment gateway, waits for the authorisation callback, then emits an order-confirmed event."
+}

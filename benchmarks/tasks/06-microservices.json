@@ -1,0 +1,5 @@
+{
+  "id": "06-microservices",
+  "diagramType": "architecture",
+  "prompt": "An API gateway fronts four services: accounts, catalogue, orders and notifications. Orders publishes to a message queue that notifications consumes. Each service owns its own database."
+}
