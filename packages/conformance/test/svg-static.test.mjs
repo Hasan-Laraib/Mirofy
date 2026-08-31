@@ -26,6 +26,7 @@ import { Buffer } from 'node:buffer';
 import { coreRoot } from '../src/render.mjs';
 import {
   toStaticSvg, parseRules, selectorTouchesSvg, classesUsed, resolveVars, minifyCss,
+  selectorCanMatchStatic, flattenTarget, PRESENTATION_PROPERTIES,
 } from '../../core/renderers/shared/svg-static.mjs';
 import { chromeAvailable, openArtifact } from './helpers/browser.mjs';
 
@@ -71,25 +72,37 @@ test('[6.13] no variable is left dangling', async () => {
   assert.doesNotMatch(svg, /var\(--/, 'the output still references custom properties');
 });
 
-test('[4.15] every style that applied in the artifact still applies', async () => {
-  // The assertion that stops tree-shaking becoming deletion. Take every class
-  // the SVG actually uses, find every rule in the FULL stylesheet that targets
-  // one, and require all of them to survive into the export.
+test('[4.15] every rule that could still match survives', async () => {
+  // The assertion that stops tree-shaking becoming deletion -- sharpened.
+  //
+  // It first required every rule targeting a used class to survive, which was
+  // too strong: the export strips every `data-*`, so a rule like
+  // `svg[data-chapter-handoff] .c-backend` targets a used class and can never
+  // match anything. Dropping it is correct, and it is 149 of 183 selector
+  // parts.
+  //
+  // So the invariant is now "could still match", and the premise it rests on
+  // is PROVED below rather than assumed.
   const { svg } = toStaticSvg(artifact, { tokens: await baseTokens() });
+  const body = svg.slice(svg.indexOf('</style>'));
+  assert.doesNotMatch(body, /\sdata-[a-z0-9-]+=/,
+    'the output still carries data-* attributes, so dropping their rules was not safe');
+
   const used = classesUsed(svg);
   const fullCss = [...artifact.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n');
 
-  const applied = parseRules(fullCss).filter((rule) => {
+  const couldMatch = parseRules(fullCss).filter((rule) => {
+    if (!selectorCanMatchStatic(rule.selector)) return false;
     const classes = [...rule.selector.matchAll(/\.([a-zA-Z0-9_-]+)/g)].map((m) => m[1]);
     return classes.length > 0 && classes.some((name) => used.has(name));
   });
-  assert.ok(applied.length > 0, 'the fixture exercises no class-based rules; it proves nothing');
+  assert.ok(couldMatch.length > 0, 'the fixture exercises no matchable class rules; it proves nothing');
 
   const exported = svg.slice(svg.indexOf('<style>'), svg.indexOf('</style>'));
-  const missing = applied
+  const missing = couldMatch
     .map((rule) => rule.selector)
     .filter((selector) => !exported.includes(minifyCss(selector)));
-  assert.deepEqual(missing, [], `rules that applied in the artifact were dropped: ${missing.slice(0, 3).join(' | ')}`);
+  assert.deepEqual(missing, [], `rules that could still match were dropped: ${missing.slice(0, 3).join(' | ')}`);
 });
 
 test('[4.15] rules that cannot match are dropped, and most of them can not', async () => {
@@ -220,4 +233,90 @@ test('[6.13] the CLI writes a real .svg file, and refuses a format it does not h
     path.join(coreRoot, 'examples/web-app.architecture.json'), path.join(tmp, 'x.svg'),
     '--format', 'not-a-format',
   ], { stdio: ['ignore', 'pipe', 'pipe'] }), /./, 'an unknown format was accepted');
+});
+
+test('[4.15] the export carries its styling as attributes, not only as CSS', async () => {
+  // The bug this was written against. The export styled everything through a
+  // <style> block and carried almost no presentation attributes. Browsers
+  // handle that; Figma, Canva and Illustrator do not reliably apply CSS inside
+  // an SVG, so the diagram imported shape-correct and COLOUR-DEAD -- black
+  // fills, no strokes, and no way for the reader to tell it had gone wrong
+  // except by looking.
+  const { svg, elementsStyled } = toStaticSvg(artifact, { tokens: await baseTokens() });
+  const body = svg.slice(svg.indexOf('</style>'));
+
+  assert.ok(elementsStyled > 40, `only ${elementsStyled} elements were given attributes`);
+  assert.ok((body.match(/\sfill="/g) || []).length > 40, 'the body carries almost no fill attributes');
+  assert.ok((body.match(/\sstroke="/g) || []).length > 20, 'the body carries almost no stroke attributes');
+
+  // Real colours, not one repeated default. A flattener that wrote the same
+  // value everywhere would satisfy a count and lose the whole palette.
+  const fills = new Set([...body.matchAll(/\sfill="(#[0-9a-fA-F]{3,8})"/g)].map((m) => m[1]));
+  assert.ok(fills.size >= 6, `only ${fills.size} distinct fill colours survived as attributes`);
+
+  // Text needs more than a colour to survive a font-less importer.
+  const texts = [...body.matchAll(/<text[^>]*>/g)].map((m) => m[0]);
+  assert.ok(texts.length > 10, 'the fixture has too little text to prove anything');
+  for (const text of texts) {
+    assert.match(text, /\sfill="/, 'a text element would import with no colour');
+    assert.match(text, /\sfont-size="/, 'a text element would import at a default size');
+  }
+});
+
+test('[4.15] flattening never overrides what the element already said', async () => {
+  // A presentation attribute already on the element came from the renderer and
+  // is more specific than a class rule. Overwriting it would repaint something
+  // the author positioned deliberately.
+  const { flattenToAttributes } = await import('../../core/renderers/shared/svg-static.mjs');
+  const svg = '<svg><rect class="c-backend" fill="#123456"/><rect class="c-backend"/></svg>';
+  const rules = [{ selector: '.c-backend', body: 'fill: #abcdef; stroke: #000000;', at: false }];
+  const out = flattenToAttributes(svg, rules).svg;
+
+  assert.match(out, /fill="#123456"/, 'an authored fill was overwritten');
+  assert.doesNotMatch(out, /fill="#123456"[^>]*fill="#abcdef"/, 'a second fill was added beside the authored one');
+  assert.match(out, /class="c-backend" fill="#abcdef"/, 'the unstyled element got no fill');
+  // The stroke was absent from both, so both receive it.
+  assert.equal((out.match(/stroke="#000000"/g) || []).length, 2);
+});
+
+test('[4.15] only properties SVG accepts as attributes are flattened', async () => {
+  const { flattenToAttributes } = await import('../../core/renderers/shared/svg-static.mjs');
+  // `transition` and `cursor` have no attribute form. Writing them would
+  // produce invalid markup that some importers reject outright.
+  const rules = [{ selector: '.x', body: 'fill: red; transition: all 0.2s; cursor: pointer;', at: false }];
+  const out = flattenToAttributes('<svg><rect class="x"/></svg>', rules).svg;
+  assert.match(out, /fill="red"/);
+  assert.doesNotMatch(out, /transition=/);
+  assert.doesNotMatch(out, /cursor=/);
+  assert.ok(PRESENTATION_PROPERTIES.includes('fill'));
+  assert.ok(!PRESENTATION_PROPERTIES.includes('transition'));
+});
+
+test('[4.15] a selector too complex to flatten is reported, not guessed at', async () => {
+  const { flattenToAttributes } = await import('../../core/renderers/shared/svg-static.mjs');
+  // Flattening a selector this misread would paint the wrong element, which is
+  // worse than leaving it to the stylesheet.
+  assert.equal(flattenTarget('.c-backend').className, 'c-backend');
+  assert.equal(flattenTarget('svg .s-database').className, 's-database');
+  assert.equal(flattenTarget('rect.c-cloud').tag, 'rect');
+  assert.equal(flattenTarget('.a > *'), null);
+  assert.equal(flattenTarget('.a .b'), null);
+  assert.equal(flattenTarget('svg[data-x] .b'), null);
+
+  const report = flattenToAttributes('<svg><rect class="a"/></svg>',
+    [{ selector: '.a > *', body: 'fill: red;', at: false }]);
+  assert.equal(report.selectorsNotFlattened, 1, 'an unflattenable selector was not reported');
+  assert.doesNotMatch(report.svg, /fill=/, 'a selector that was not understood was applied anyway');
+});
+
+test('[4.15] rules that require a stripped attribute are dropped', () => {
+  // 149 of 183 selector parts in a real artifact require a data-* attribute.
+  // With those attributes gone the rules are unmatchable, not merely unused.
+  assert.equal(selectorCanMatchStatic('.c-backend'), true);
+  assert.equal(selectorCanMatchStatic('svg[data-animation="trace"] [data-animate]'), false);
+  assert.equal(selectorCanMatchStatic('svg[data-chapter-handoff] .c-backend'), false);
+  // A grouped selector survives if any part can still match.
+  assert.equal(selectorCanMatchStatic('.c-backend, svg[data-x] .y'), true);
+  // ...and with the attributes kept, nothing is dropped on this ground.
+  assert.equal(selectorCanMatchStatic('svg[data-x] .y', { attributesStripped: false }), true);
 });

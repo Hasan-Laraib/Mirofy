@@ -124,7 +124,7 @@ The interactive file is ~715 KB and earns it. None of that survives a README, a
 pull request or a Notion page, though — all of them strip scripts. So:
 
 ```bash
-# 27 KB standalone SVG: styles inlined, no scripts
+# 19 KB standalone SVG: no scripts, no stylesheet needed
 node packages/core/bin/mirofy.mjs render architecture in.json out.svg --format svg-static
 
 # or open it in an editor you already own
@@ -132,9 +132,22 @@ npm run export -- drawio     architecture in.json
 npm run export -- excalidraw architecture in.json
 ```
 
-Both exports say exactly what they lost, computed from *your* document rather
-than recited as a disclaimer. A diagram you can only edit in the tool that made
-it is a diagram held hostage.
+| where it goes | how |
+|---|---|
+| README, pull request, Notion, Confluence | `svg-static` |
+| Figma, Canva, Illustrator, Sketch | `svg-static` — styling is written as attributes, so it arrives with its colours |
+| diagrams.net · draw.io VS Code extension | `drawio` — real shapes and connectors |
+| Excalidraw · Obsidian · VS Code | `excalidraw` — bound arrows, movable boxes |
+
+The SVG carries its styling **twice**: in a stylesheet and on the elements. In
+SVG a stylesheet outranks an attribute, so a browser renders from the CSS, and
+the attributes speak only where the CSS is ignored — which is exactly what
+Figma, Canva and Illustrator do. Without them the diagram imports shape-correct
+and colour-dead.
+
+Both editor exports say exactly what they lost, computed from *your* document
+rather than recited as a disclaimer. A diagram you can only edit in the tool
+that made it is a diagram held hostage.
 
 ## What is proved
 

@@ -165,19 +165,156 @@ export function minifyCss(css) {
 }
 
 /**
+ * Properties that SVG also accepts as attributes.
+ *
+ * Only these can be flattened. `transform` and geometry are already
+ * attributes; layout properties like `transition` have no attribute form and
+ * mean nothing in a static file.
+ */
+export const PRESENTATION_PROPERTIES = Object.freeze([
+  'fill', 'fill-opacity', 'fill-rule', 'stroke', 'stroke-width', 'stroke-opacity',
+  'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin',
+  'opacity', 'color', 'font-family', 'font-size', 'font-weight', 'font-style',
+  'text-anchor', 'dominant-baseline', 'letter-spacing', 'paint-order',
+  'visibility', 'display',
+]);
+
+/**
+ * Can this selector still match once viewer attributes are stripped?
+ *
+ * The export removes every `data-*`, so a selector that requires one can never
+ * match anything in the output. Those rules are not merely unused -- they are
+ * unmatchable, and carrying them is 149 of the 183 selector parts in a typical
+ * artifact: most of the stylesheet, kept for elements that no longer exist.
+ */
+export function selectorCanMatchStatic(selector, { attributesStripped = true } = {}) {
+  if (!attributesStripped) return true;
+  const parts = stripComments(selector).split(',').map((part) => part.trim()).filter(Boolean);
+  if (parts.length === 0) return false;
+  // A grouped selector survives if ANY of its parts can still match.
+  return parts.some((part) => !/\[data-/.test(part));
+}
+
+/** Remove CSS comments from a selector so it can be reasoned about. */
+export function stripComments(text) {
+  return String(text).replace(/\/\*[\s\S]*?\*\//g, '');
+}
+
+/**
+ * Reduce a selector part to the single class or tag it targets, or null.
+ *
+ * Handles the three shapes this stylesheet actually uses: `.name`,
+ * `tag.name`, and `svg .name` -- the last of which is the same as `.name`
+ * here, because everything in the document IS inside the svg root. Anything
+ * more complex is reported rather than guessed at: flattening a selector this
+ * misread would paint the wrong element.
+ */
+export function flattenTarget(selectorPart) {
+  const part = stripComments(selectorPart).trim().replace(/^svg\s+/, '');
+  if (/[>+~]/.test(part) || part.includes(':') || /\[/.test(part)) return null;
+  const words = part.split(/\s+/).filter(Boolean);
+  if (words.length !== 1) return null;
+  const single = words[0];
+  const match = /^([a-zA-Z][a-zA-Z0-9]*)?(?:\.([a-zA-Z0-9_-]+))?$/.exec(single);
+  if (!match) return null;
+  const [, tag, className] = match;
+  if (!tag && !className) return null;
+  return { tag: tag ?? null, className: className ?? null };
+}
+
+/** Parse a declaration body into `{property: value}`, last wins. */
+function declarationsOf(body) {
+  const out = {};
+  for (const chunk of stripComments(body).split(';')) {
+    const colon = chunk.indexOf(':');
+    if (colon === -1) continue;
+    const property = chunk.slice(0, colon).trim();
+    const value = chunk.slice(colon + 1).trim();
+    if (!property || !value) continue;
+    if (!PRESENTATION_PROPERTIES.includes(property)) continue;
+    if (value.includes('!important')) continue;
+    out[property] = value;
+  }
+  return out;
+}
+
+/**
+ * Write the computed styles onto elements as presentation attributes.
+ *
+ * Additive on purpose. In SVG a stylesheet BEATS a presentation attribute, so
+ * a browser renders exactly as it did before this existed -- the attributes
+ * only speak where the CSS does not. That is precisely the situation in Figma,
+ * Canva and Illustrator, which import SVG but do not reliably apply a `<style>`
+ * block, and would otherwise show the diagram shape-correct and colour-dead.
+ *
+ * Attributes already on the element are never overwritten: an authored value
+ * is more specific than a class rule and outranks it here as it would there.
+ */
+export function flattenToAttributes(svg, rules) {
+  /** @type {Map<string, Record<string, string>>} */
+  const byClass = new Map();
+  /** @type {Map<string, Record<string, string>>} */
+  const byTag = new Map();
+  let skipped = 0;
+
+  for (const rule of rules) {
+    if (rule.at) { skipped += 1; continue; }
+    const declarations = declarationsOf(rule.body);
+    if (Object.keys(declarations).length === 0) continue;
+    for (const part of stripComments(rule.selector).split(',')) {
+      if (!part.trim()) continue;
+      const target = flattenTarget(part);
+      if (!target) { skipped += 1; continue; }
+      const bucket = target.className ? byClass : byTag;
+      const key = target.className ?? target.tag;
+      bucket.set(key, { ...(bucket.get(key) ?? {}), ...declarations });
+    }
+  }
+
+  let applied = 0;
+  const out = svg.replace(/<([a-zA-Z][a-zA-Z0-9]*)\b([^>]*?)(\/?)>/g, (whole, tag, attrs, selfClose) => {
+    const classMatch = /class="([^"]*)"/.exec(attrs);
+    const classes = classMatch ? classMatch[1].split(/\s+/).filter(Boolean) : [];
+    const computed = { ...(byTag.get(tag) ?? {}) };
+    for (const name of classes) Object.assign(computed, byClass.get(name) ?? {});
+    const additions = [];
+    for (const [property, value] of Object.entries(computed)) {
+      // No regex: `\s` inside a template literal is just the letter s, so the
+      // first version of this guard never matched and emitted a second `fill`
+      // beside the authored one -- duplicate attributes, and invalid XML.
+      if (attrs.includes(` ${property}="`) || attrs.trimStart().startsWith(`${property}="`)) continue;
+      additions.push(`${property}="${value.replaceAll('"', "'")}"`);
+    }
+    if (additions.length === 0) return whole;
+    applied += 1;
+    return `<${tag}${attrs} ${additions.join(' ')}${selfClose}>`;
+  });
+
+  return { svg: out, elementsStyled: applied, selectorsNotFlattened: skipped };
+}
+
+/**
  * Build a standalone SVG from a rendered artifact.
  *
  * @param {string} html the interactive artifact
- * @param {{tokens: Record<string, string>, keepInteractiveAttributes?: boolean}} options
- * @returns {{svg: string, bytes: number, rulesKept: number, rulesDropped: number, unresolved: string[]}}
+ * @param {{tokens: Record<string, string>, keepInteractiveAttributes?: boolean, flatten?: boolean}} options
+ * @returns {{svg: string, bytes: number, rulesKept: number, rulesDropped: number,
+ *            unresolved: string[], elementsStyled: number, selectorsNotFlattened: number}}
  */
-export function toStaticSvg(html, { tokens, keepInteractiveAttributes = false }) {
+export function toStaticSvg(html, { tokens, keepInteractiveAttributes = false, flatten = true }) {
   let svg = extractSvg(html);
   const used = classesUsed(svg);
 
   const styleBlocks = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]);
   const rules = parseRules(styleBlocks.join('\n'));
-  const kept = rules.filter((rule) => selectorTouchesSvg(rule.selector, used));
+  const kept = rules
+    .filter((rule) => selectorTouchesSvg(rule.selector, used))
+    // Viewer attributes are stripped below, so a rule that requires one can
+    // never match anything here. Not "probably unused" -- unmatchable, and it
+    // is most of the stylesheet: 149 of 183 selector parts in a typical
+    // artifact target elements that no longer exist.
+    .filter((rule) => selectorCanMatchStatic(rule.selector,
+      { attributesStripped: !keepInteractiveAttributes }));
 
   const stylesheet = kept.map((rule) => `${rule.selector}{${rule.body}}`).join('\n');
   const resolved = resolveVars(minifyCss(stylesheet), tokens);
@@ -194,7 +331,16 @@ export function toStaticSvg(html, { tokens, keepInteractiveAttributes = false })
     svg = svg.replace(/^<svg/, `<svg xmlns="${SVG_NS}"`);
   }
 
-  const styled = svg.replace(/^(<svg[^>]*>)/, `$1<style>${resolved.css}</style>`);
+  // Written onto the elements as well as into the stylesheet. CSS beats a
+  // presentation attribute, so a browser is unaffected; the attributes speak
+  // only where the stylesheet is ignored -- which is exactly Figma, Canva and
+  // Illustrator, where the diagram otherwise imports shape-correct and
+  // colour-dead.
+  const flattened = flatten
+    ? flattenToAttributes(svg, kept.map((rule) => ({ ...rule, body: resolveVars(minifyCss(rule.body), tokens).css })))
+    : { svg, elementsStyled: 0, selectorsNotFlattened: 0 };
+
+  const styled = flattened.svg.replace(/^(<svg[^>]*>)/, `$1<style>${resolved.css}</style>`);
   const document = `<?xml version="1.0" encoding="UTF-8"?>\n${styled}\n`;
 
   return {
@@ -203,5 +349,7 @@ export function toStaticSvg(html, { tokens, keepInteractiveAttributes = false })
     rulesKept: kept.length,
     rulesDropped: rules.length - kept.length,
     unresolved: resolved.unresolved,
+    elementsStyled: flattened.elementsStyled,
+    selectorsNotFlattened: flattened.selectorsNotFlattened,
   };
 }

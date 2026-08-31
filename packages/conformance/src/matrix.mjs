@@ -681,13 +681,32 @@ export const IMPORTED_ROWS = [
     // only single-class selectors.
     //
     // Viewer-only attributes go too -- data-node-id, tabindex, role, aria-*
-    // are hooks for JavaScript that is not there. `data-name` is spared,
-    // because stylesheets select on it and stripping it would change the
-    // picture rather than only the size.
+    // are hooks for JavaScript that is not there.
+    //
+    // Two later findings sharpened this row.
+    //
+    // Because every data-* is stripped, a rule REQUIRING one can never match:
+    // 149 of 183 selector parts in a real artifact. Those are unmatchable, not
+    // merely unused, and dropping them took the export from 27 KB to 19 KB.
+    // The completeness gate was sharpened to match -- "every rule that could
+    // still match survives" -- and it now PROVES its premise by asserting the
+    // output carries no data-* at all, rather than assuming it.
+    //
+    // And the export styled everything through a <style> block, carrying 100
+    // class references and one fill attribute. Browsers handle that; Figma,
+    // Canva and Illustrator do not reliably apply CSS inside an SVG, so the
+    // diagram imported shape-correct and COLOUR-DEAD. Styles are now written
+    // as presentation attributes as well. This is safe precisely because CSS
+    // BEATS a presentation attribute in SVG: a browser renders exactly as
+    // before, and the attributes speak only where the stylesheet is ignored.
+    // An authored attribute is never overwritten -- observed failing on a
+    // planted missing guard that emitted a duplicate `fill`, which is invalid
+    // XML, and on a planted flatten of `transition`, which has no attribute
+    // form at all.
     origin: 'N',
     phase: 'P3',
     proof: 'svg-static.test.mjs',
-    testTitle: '[4.15] every style that applied in the artifact still applies',
+    testTitle: '[4.15] every rule that could still match survives',
   },
   {
     id: '6.19',
