@@ -1772,6 +1772,12 @@ async function commandRepair(argv) {
   }
 
   const { repairDocument } = await import('../../layout/src/repair.mjs');
+  // What was already wrong, before repair touched anything. Without this the
+  // report cannot tell a problem repair FAILED to fix from one it CAUSED --
+  // and widening a component to fit its label really can change which side an
+  // edge leaves from.
+  const before = await validateDocumentQuietly(type, input);
+
   const { document: repaired, receipt } = repairDocument(document, { safe: true });
 
   const outPath = output || input;
@@ -1813,12 +1819,31 @@ async function commandRepair(argv) {
   // Saying so is the difference between "I fixed it" and "I fixed what I can
   // fix, and here is what is left".
   const residual = await validateDocumentQuietly(type, outPath);
-  if (residual.length) {
-    console.log(`repair: ${residual.length} remaining problem(s) outside repair's reach:`);
-    for (const line of residual.slice(0, 6)) console.log(`  ${line}`);
-    if (residual.length > 6) console.log(`  ... and ${residual.length - 6} more`);
-  } else {
+  const known = new Set(before);
+  const introduced = residual.filter((line) => !known.has(line));
+  const outstanding = residual.filter((line) => known.has(line));
+
+  if (!residual.length) {
     console.log('repair: the document now validates');
+  } else {
+    if (outstanding.length) {
+      console.log(`repair: ${outstanding.length} problem(s) outside repair's reach:`);
+      for (const line of outstanding.slice(0, 6)) console.log(`  ${line}`);
+      if (outstanding.length > 6) console.log(`  ... and ${outstanding.length - 6} more`);
+    }
+    if (introduced.length) {
+      // The loudest thing this command can say. A repair that trades one
+      // failure class for another while reporting success is worse than one
+      // that refuses, and only a before/after comparison can tell them apart.
+      console.log(`repair: ${introduced.length} problem(s) INTRODUCED by this repair:`);
+      for (const line of introduced.slice(0, 6)) console.log(`  ${line}`);
+      console.log('repair: widening a component changes its geometry, and an edge can leave a '
+        + 'different side as a result. Review these before keeping the result.');
+    }
+  }
+  if (before.length && residual.length > before.length) {
+    console.log(`repair: this document had ${before.length} problem(s) and now has ${residual.length}. `
+      + 'That is worse, not better.');
   }
 }
 

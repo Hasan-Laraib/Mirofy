@@ -53,10 +53,15 @@ const INCONCLUSIVE_AUTHOR_ERROR_SHARE = 0.2;
  *   validates and composes one document, returning what it found.
  * @param {string} options.model identifier of what authored the run, recorded
  *   with the result so a trend line can never silently compare two models.
+ * @param {((document: object, task: object) => Promise<{usable: boolean, reason?: string}>)|null} [options.repair]
+ *   runs the tool's own repair step and re-validates, producing the second,
+ *   separately reported measure.
  * @param {() => Date} [options.now]
  * @returns {Promise<object>} the run record
  */
-export async function runBenchmark({ tasks, author, evaluate, model, now = () => new Date() }) {
+export async function runBenchmark({
+  tasks, author, evaluate, model, repair = null, now = () => new Date(),
+}) {
   if (typeof author !== 'function') {
     throw new TypeError('benchmark: an author is required; the harness does not invent one');
   }
@@ -74,7 +79,7 @@ export async function runBenchmark({ tasks, author, evaluate, model, now = () =>
   for (const task of tasks) {
     // Sequential on purpose. Concurrent authoring would measure the provider's
     // rate limiter as much as the tool, and the run is scheduled, not urgent.
-    results.push(await measureTask(task, author, evaluate));
+    results.push(await measureTask(task, author, evaluate, repair));
   }
 
   const counted = (outcome) => results.filter((result) => result.outcome === outcome).length;
@@ -82,6 +87,9 @@ export async function runBenchmark({ tasks, author, evaluate, model, now = () =>
   const usable = counted(OUTCOMES.USABLE);
 
   const inconclusive = authorErrors / tasks.length > INCONCLUSIVE_AUTHOR_ERROR_SHARE;
+  const rescued = results.filter((result) => (
+    /** @type {{afterRepair?: {usable?: boolean}}} */ (result).afterRepair?.usable
+  )).length;
 
   return {
     schemaVersion: 1,
@@ -97,6 +105,11 @@ export async function runBenchmark({ tasks, author, evaluate, model, now = () =>
     firstPassUsableRate: inconclusive ? null : usable / tasks.length,
     total: tasks.length,
     usable,
+    // Counted separately and never folded into the headline. A document that
+    // needed repair did not pass first, and blurring the two would answer a
+    // question nobody asked.
+    usableAfterRepair: usable + rescued,
+    toolAssistedRate: inconclusive ? null : (usable + rescued) / tasks.length,
     byOutcome: {
       [OUTCOMES.USABLE]: usable,
       [OUTCOMES.AUTHOR_ERROR]: authorErrors,
@@ -115,7 +128,7 @@ export async function runBenchmark({ tasks, author, evaluate, model, now = () =>
 }
 
 /** Run one task all the way through, classifying wherever it stops. */
-async function measureTask(task, author, evaluate) {
+async function measureTask(task, author, evaluate, repair) {
   let document;
   try {
     document = await author(task);
@@ -143,12 +156,24 @@ async function measureTask(task, author, evaluate) {
   const errors = report?.errors ?? [];
   const warnings = report?.warnings ?? [];
   if (errors.length > 0 || warnings.length > 0) {
+    // A second, separately reported measure: what the same document becomes
+    // once the tool's own repair step has run.
+    //
+    // This is what a comparable upstream benchmark actually measures -- its
+    // agent is instructed to "validate and repair the candidate" before
+    // freezing it -- so a first-pass rate alone compares two different things.
+    // Reporting both keeps the harder number honest AND makes the comparison
+    // possible, and the DIFFERENCE between them is the tooling's contribution.
+    const repaired = repair ? await repair(document, task) : null;
+    /** @type {{id: string, outcome: string, detail: string, errors: number,
+     *          warnings: number, afterRepair?: object}} */
     return {
       id: task.id,
       outcome: OUTCOMES.COMPOSITION,
       detail: [...errors, ...warnings].slice(0, 5).join('; '),
       errors: errors.length,
       warnings: warnings.length,
+      ...(repaired ? { afterRepair: repaired } : {}),
     };
   }
 
@@ -205,6 +230,12 @@ export function formatRun(run) {
     lines.push(`  ${run.inconclusiveReason}`);
   } else {
     lines.push(`  first-pass usable: ${(run.firstPassUsableRate * 100).toFixed(1)}% (${run.usable}/${run.total})`);
+    if (typeof run.toolAssistedRate === 'number') {
+      lines.push(`  after repair     : ${(run.toolAssistedRate * 100).toFixed(1)}% `
+        + `(${run.usableAfterRepair}/${run.total})`);
+      const gain = run.usableAfterRepair - run.usable;
+      lines.push(`  the tool's contribution is that difference: ${gain} document(s) repair rescued.`);
+    }
   }
   for (const [outcome, count] of Object.entries(run.byOutcome)) {
     lines.push(`    ${outcome.padEnd(13)} ${count}`);

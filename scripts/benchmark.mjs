@@ -103,7 +103,42 @@ function safeParse(text) {
   }
 }
 
-const run = await runBenchmark({ tasks, author, evaluate, model: args.model });
+/**
+ * Run the tool's own repair step, then validate again.
+ *
+ * The second number this benchmark reports. It exists because a comparable
+ * upstream benchmark instructs its agent to "validate and repair the candidate"
+ * before freezing it -- so a first-pass rate alone is not the same measurement,
+ * and comparing them would be comparing two different questions.
+ */
+async function repair(document, task) {
+  const before = path.join(tmp, `${task.id}.before.json`);
+  const after = path.join(tmp, `${task.id}.after.json`);
+  fs.writeFileSync(before, JSON.stringify(document));
+  try {
+    execFileSync(process.execPath, [cli, 'repair', task.diagramType, before, after, '--safe', '--json'], {
+      stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8',
+    });
+  } catch {
+    return { usable: false, reason: 'repair refused this document' };
+  }
+  try {
+    const receipt = safeParse(execFileSync(
+      process.execPath, [cli, 'validate', task.diagramType, after, '--json'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+    ));
+    const summary = receipt?.composition?.summary ?? { errors: 0, warnings: 0 };
+    return { usable: (summary.errors ?? 0) === 0 && (summary.warnings ?? 0) === 0 };
+  } catch (error) {
+    const verdict = classifyValidationFailure(safeParse(error.stdout)?.diagnostics);
+    return {
+      usable: false,
+      reason: verdict.kind === 'invalid' ? verdict.message : `${verdict.errors.length} composition error(s)`,
+    };
+  }
+}
+
+const run = await runBenchmark({ tasks, author, evaluate, repair, model: args.model });
 console.log(formatRun(run));
 
 if (args.out && args.out !== 'true') {

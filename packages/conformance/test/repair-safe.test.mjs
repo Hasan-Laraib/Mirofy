@@ -34,10 +34,20 @@ function overlapping() {
   };
 }
 
-/** Everything except geometry — the part repair must never touch. */
+/**
+ * Everything except geometry — the part repair must never touch.
+ *
+ * `size` counts as geometry, and that is a deliberate call rather than a
+ * convenience. A component's width decides how much room it has, not what it
+ * is or what it says: widening one to fit its own label changes no meaning.
+ * Repair needs that lever, because a label wider than its component was the
+ * single most common reason a model-authored diagram was rejected, and nothing
+ * else can fix it.
+ */
 function semantics(document) {
+  const GEOMETRY = new Set(['pos', 'size', 'via', 'channelX', 'channelY']);
   return JSON.parse(JSON.stringify(document, (key, value) => (
-    key === 'pos' || key === 'via' || key === 'channelX' || key === 'channelY' ? undefined : value
+    GEOMETRY.has(key) ? undefined : value
   )));
 }
 
@@ -157,4 +167,92 @@ test('[3.13] repair is deterministic', async () => {
   const second = repairDocument(overlapping(), { safe: true });
   assert.deepEqual(first.document, second.document);
   assert.deepEqual(first.receipt, second.receipt);
+});
+
+// ---------------------------------------------------------------------------
+// Fitting labels. The benchmark found that "label wider than its component"
+// was the most common reason a model-authored diagram was rejected -- and that
+// repair could not touch it, because repair only moved boxes.
+//
+// Worse, repair did NOTHING AT ALL for a grid-placed document: its box list
+// required both `pos` and `size`, and a grid document declares neither. That is
+// the mode `import mermaid` produces and the mode a model told to avoid
+// coordinates produces, so repair was blind to precisely the documents most
+// likely to need it.
+// ---------------------------------------------------------------------------
+
+/** A grid document whose labels do not fit the default 120px component. */
+function gridWithLongLabels() {
+  return {
+    schema_version: 1,
+    diagram_type: 'architecture',
+    meta: { title: 'Grid' },
+    layout: { mode: 'grid', cols: 2 },
+    components: [
+      { id: 'notifications_service', type: 'backend', label: 'Notifications Service', row: 0, col: 1 },
+      { id: 'notifications_db', type: 'database', label: 'Notifications Database', row: 1, col: 1 },
+      { id: 'api', type: 'backend', label: 'API', row: 0, col: 0 },
+    ],
+    connections: [{ from: 'notifications_service', to: 'notifications_db', label: 'writes' }],
+  };
+}
+
+test('[3.13] a component too narrow for its own label is widened', async () => {
+  const { repairDocument, widthForLabel } = await import('../../layout/src/repair.mjs');
+  const { document, receipt } = repairDocument(gridWithLongLabels(), { safe: true });
+
+  const widened = document.components.find((c) => c.id === 'notifications_service');
+  assert.ok(Array.isArray(widened.size), 'a grid component was left with no explicit size');
+  assert.ok(widened.size[0] >= widthForLabel('Notifications Service'),
+    'the component is still narrower than its label needs');
+  assert.equal(receipt.widened.length, 2, 'the widening was not reported');
+});
+
+test('[3.13] a grid document is repaired at all', async () => {
+  // The regression this guards. Repair used to require pos AND size, so a grid
+  // document produced an empty box list and the whole pass did nothing --
+  // silently, while reporting success.
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { receipt } = repairDocument(gridWithLongLabels(), { safe: true });
+  assert.ok(receipt.widened.length > 0, 'repair did nothing for a grid-placed document');
+});
+
+test('[3.13] grid widening is uniform, so the grid stays aligned', async () => {
+  // Widening individually was worse than doing nothing. Two components stacked
+  // in one column grew to 131 and 138, their centres stopped aligning, and the
+  // vertical edge between them stopped leaving a perpendicular side -- trading
+  // two label failures for two routing failures. A grid's whole value is that
+  // things line up.
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { document } = repairDocument(gridWithLongLabels(), { safe: true });
+  const widths = document.components.filter((c) => c.size).map((c) => c.size[0]);
+  assert.ok(widths.length >= 2, 'not enough components were widened to prove anything');
+  assert.equal(new Set(widths).size, 1, `grid components were widened to different widths: ${widths}`);
+});
+
+test('[3.13] a component that already fits is left alone', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { document } = repairDocument(gridWithLongLabels(), { safe: true });
+  // "API" fits the default width. Widening it would grow the diagram for
+  // nothing, and minimal displacement is this module's whole discipline.
+  const api = document.components.find((c) => c.id === 'api');
+  assert.equal(api.size, undefined, 'a component that already fits was given a size anyway');
+});
+
+test('[3.13] widening changes geometry and nothing else', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const input = gridWithLongLabels();
+  const { document } = repairDocument(input, { safe: true });
+  // The same mechanical promise as before, now exercised on a document that
+  // really is rewritten: strip geometry from both sides and they must match.
+  assert.deepEqual(semantics(document), semantics(input),
+    'widening changed something other than geometry');
+  assert.deepEqual(document.components.map((c) => c.label),
+    ['Notifications Service', 'Notifications Database', 'API']);
+});
+
+test('[3.13] fitLabels can be turned off', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { receipt } = repairDocument(gridWithLongLabels(), { safe: true, fitLabels: false });
+  assert.deepEqual(receipt.widened, []);
 });

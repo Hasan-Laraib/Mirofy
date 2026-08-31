@@ -20,7 +20,41 @@
 // positions with identical sizes cannot be separated by direction alone;
 // repair says so instead of looping or nudging at random.
 
+import { textUnits } from '../../core/renderers/shared/utils.mjs';
+
 const DEFAULT_MAX_PASSES = 12;
+
+// The renderer's own label rule, not an approximation of it. architecture
+// rejects a component when `textUnits(label) * 6.6 > width + 8`, so repair
+// solves that inequality rather than guessing a comfortable margin -- a repair
+// that used its own estimate would fix documents the validator still rejects,
+// which is the failure this module already learned once with the 8px
+// clearance.
+const LABEL_UNIT_PX = 6.6;
+const LABEL_SLACK_PX = 8;
+
+/** The narrowest width at which this label passes. */
+export function widthForLabel(label) {
+  return Math.ceil(textUnits(label) * LABEL_UNIT_PX) - LABEL_SLACK_PX;
+}
+
+// The renderer's default when a component declares no size. A grid-placed
+// component usually declares none, so this is the width its label is actually
+// measured against.
+const DEFAULT_COMPONENT_SIZE = [120, 60];
+
+/**
+ * The width a component is measured at today.
+ *
+ * A grid document declares neither pos nor size, which is why repair used to
+ * do NOTHING for one: its box list required both, so the whole pass skipped
+ * every component. That is the mode `import mermaid` produces and the mode a
+ * model asked to avoid coordinates produces -- so repair was blind to exactly
+ * the documents most likely to need it.
+ */
+export function effectiveWidth(component) {
+  return Array.isArray(component.size) ? component.size[0] : DEFAULT_COMPONENT_SIZE[0];
+}
 
 // The validator does not ask for "not overlapping" -- it asks for CLEARANCE.
 // architecture's component rule is rectsOverlap(a, b, 8), so two boxes that
@@ -77,9 +111,10 @@ function separate(mover, other, clearance = 0) {
  * Repair a document's geometry.
  *
  * @param {object} document
- * @param {{safe?: boolean, maxPasses?: number, clearance?: number}} [options]
- * @returns {{document: object, receipt: {moves: Array<object>, resolved: Array<object>,
- *            unsatisfiable: Array<object>, passes: number}}}
+ * @param {{safe?: boolean, maxPasses?: number, clearance?: number,
+ *          fitLabels?: boolean}} [options]
+ * @returns {{document: object, receipt: {moves: Array<object>, widened: Array<object>,
+ *            resolved: Array<object>, unsatisfiable: Array<object>, passes: number}}}
  */
 export function repairDocument(document, options = {}) {
   // Rewriting authored coordinates is a real edit to someone's file. It takes
@@ -92,6 +127,7 @@ export function repairDocument(document, options = {}) {
   }
 
   const maxPasses = options.maxPasses ?? DEFAULT_MAX_PASSES;
+  const fitLabels = options.fitLabels !== false;
   const clearance = options.clearance ?? DEFAULT_CLEARANCE;
   const original = new Map(document.components.map((component) => [component.id, component.pos ? [...component.pos] : null]));
 
@@ -100,6 +136,54 @@ export function repairDocument(document, options = {}) {
   const boxes = document.components
     .filter((component) => Array.isArray(component.pos) && Array.isArray(component.size))
     .map(boxOf);
+
+  // Widening happens FIRST, and separation runs after it. A component that
+  // grows to fit its label can collide with a neighbour that was clear before,
+  // and separating first would leave those collisions behind.
+  //
+  // This is the failure class the benchmark found: labels wider than their
+  // component were the single most common reason a model-authored diagram was
+  // rejected, and repair could not touch them. Widening is geometry -- it
+  // changes how much room a thing has, never what it is or what it says.
+  const widened = [];
+  if (fitLabels) {
+    const sized = new Map(boxes.map((box) => [box.id, box]));
+    const needed = document.components
+      .filter((component) => component.label)
+      .map((component) => ({
+        component,
+        current: effectiveWidth(component),
+        required: widthForLabel(component.label),
+      }))
+      .filter((entry) => entry.current < entry.required);
+
+    // In a grid, EVERY widened component gets the SAME width.
+    //
+    // Widening them individually was worse than doing nothing: two components
+    // stacked in one column grew to 131 and 138, their centres stopped
+    // aligning, and the vertical edge between them stopped leaving a
+    // perpendicular side -- trading two label failures for two routing
+    // failures. A grid's whole value is that things line up, and a repair that
+    // breaks the alignment has misunderstood what it is repairing.
+    //
+    // Free-placed components have explicit coordinates and a separation pass
+    // behind them, so each can take exactly the width it needs.
+    const gridPlaced = document.layout?.mode === 'grid';
+    const uniform = gridPlaced && needed.length > 0
+      ? Math.max(...needed.map((entry) => entry.required))
+      : null;
+
+    for (const entry of needed) {
+      const width = uniform ?? entry.required;
+      widened.push({
+        id: entry.component.id, from: entry.current, to: width, label: entry.component.label,
+      });
+      // Keep the free-placement box in step so separation sees the new width;
+      // a grid component has no box, and needs none -- the grid places it.
+      const box = sized.get(entry.component.id);
+      if (box) box.w = width;
+    }
+  }
 
   /** @type {Array<{a: string, b: string, reason: string}>} */
   const unsatisfiable = [];
@@ -153,9 +237,17 @@ export function repairDocument(document, options = {}) {
 
   // The output document. Geometry is replaced; everything else is the input,
   // carried through by reference-free copy so nothing is shared or mutated.
+  const grownBy = new Map(widened.map((entry) => [entry.id, entry.to]));
   const repaired = {
     ...document,
     components: document.components.map((component) => {
+      const width = grownBy.get(component.id);
+      if (width !== undefined) {
+        // Setting an explicit size is what makes this work in grid mode: the
+        // renderer honours a declared size there, and measures the label
+        // against it.
+        component = { ...component, size: [width, component.size?.[1] ?? DEFAULT_COMPONENT_SIZE[1]] };
+      }
       const position = solved.get(component.id);
       if (!position) return { ...component };
       return { ...component, pos: position };
@@ -181,6 +273,7 @@ export function repairDocument(document, options = {}) {
     document: repaired,
     receipt: {
       moves,
+      widened,
       resolved: [...resolvedPairs].map((key) => {
         const [a, b] = key.split('|');
         return { a, b };
