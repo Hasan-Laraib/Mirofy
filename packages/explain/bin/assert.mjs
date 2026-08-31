@@ -50,6 +50,7 @@ try {
     index: indexModel(model),
     incompleteness: incompletenessFor(graph),
     rules: ruleFile.rules ?? ruleFile,
+    acknowledgements: ruleFile.acknowledgedGaps ?? [],
     allowUnproven,
   });
 } catch (error) {
@@ -76,6 +77,12 @@ for (const result of report.results) {
 }
 
 console.log(`\n${report.passed} passed, ${report.failed} failed, ${report.unproven} unproven of ${report.total}`);
+if (report.acknowledged > 0) {
+  // Never silent. A pass resting on a human judgement must not read like a
+  // pass resting on a complete scan.
+  console.log(`${report.acknowledged} of those rule(s) rest on acknowledged gaps, not on evidence. `
+    + 'See acknowledgedGaps in the rule file.');
+}
 if (report.unproven > 0 && !allowUnproven) {
   console.log('An unproven rule is not a passing rule. Fix the scan gaps, or pass --allow-unproven '
     + 'to accept them deliberately.');

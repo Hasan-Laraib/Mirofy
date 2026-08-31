@@ -17,7 +17,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { indexModel, incompletenessFor } from '../../explain/src/query.mjs';
 import {
-  assertRules, evaluateRule, resolveSelector, scopedRelationships, OUTCOMES, RULE_KINDS,
+  assertRules, evaluateRule, resolveSelector, scopedRelationships, partitionGaps,
+  OUTCOMES, RULE_KINDS,
 } from '../../explain/src/assert.mjs';
 
 /** web -> api -> db, plus a direct web -> db that most rules should dislike. */
@@ -183,4 +184,113 @@ test('[3.15] an unknown rule kind and an empty rule file are both refused', () =
   assert.throws(() => assertRules({ index: indexModel(model()), incompleteness: complete, rules: [] }),
     /at least one rule/);
   assert.ok(RULE_KINDS.length >= 5, 'the rule vocabulary shrank');
+});
+
+// ---------------------------------------------------------------------------
+// Acknowledged gaps. `unproven` is the right default, but a repository can
+// have gaps that are genuinely permanent -- this one has eight, every one a
+// dynamic import whose base path is a variable, which no scanner can resolve
+// without guessing. Leaving every rule unproven forever teaches people to pass
+// --allow-unproven, and that switch turns the distinction off entirely.
+//
+// So a gap can be acknowledged. The whole design question is making that hard
+// to abuse, which is what the tests below are about.
+// ---------------------------------------------------------------------------
+
+const REASON = 'Read every call site; the target is a fixed file in this repository, not user input.';
+const ack = (path, extra = {}) => ({
+  path, reasonContains: 'computed import specifier', because: REASON, ...extra,
+});
+const gapAt = (path, reason = 'computed import specifier at line 12') => incompletenessFor({
+  gaps: [{ path, reason }],
+});
+
+test('[3.15] an acknowledged gap lets a rule pass, and the pass says what it rests on', () => {
+  const index = indexModel(model({ direct: false }));
+  const result = evaluateRule(forbidDirect, index, gapAt('src/worker.js'), [ack('src/worker.js')]);
+  assert.equal(result.outcome, OUTCOMES.PASS);
+  // A human judgement standing in for evidence must never be indistinguishable
+  // from a clean scan.
+  assert.equal(result.restsOnAcknowledgements, 1);
+  assert.match(result.reason, /rests on that judgement, not on a complete scan/);
+});
+
+test('[3.15] an acknowledgement covers one path and no others', () => {
+  // No wildcard exists. An acknowledgement written for one file must not
+  // quietly cover the next file that fails.
+  const index = indexModel(model({ direct: false }));
+  const result = evaluateRule(forbidDirect, index, gapAt('src/other.js'), [ack('src/worker.js')]);
+  assert.equal(result.outcome, OUTCOMES.UNPROVEN);
+});
+
+test('[3.15] an acknowledgement stops applying when the reason changes', () => {
+  // The load-bearing constraint. An acknowledgement written for a dynamic
+  // import says nothing about that file failing to parse, and must not carry
+  // over to a failure nobody examined.
+  const index = indexModel(model({ direct: false }));
+  const different = gapAt('src/worker.js', 'syntax error at line 4');
+  const result = evaluateRule(forbidDirect, index, different, [ack('src/worker.js')]);
+  assert.equal(result.outcome, OUTCOMES.UNPROVEN,
+    'an acknowledgement covered a failure it was not written for');
+});
+
+test('[3.15] an acknowledgement with no real reason is refused', () => {
+  // "because: ok" is not a review. The threshold is deliberately crude but
+  // real: an acknowledgement has to carry an argument someone can disagree
+  // with.
+  const index = indexModel(model({ direct: false }));
+  for (const because of [undefined, '', 'ok', 'wontfix']) {
+    const result = evaluateRule(forbidDirect, index, gapAt('src/worker.js'),
+      [{ path: 'src/worker.js', reasonContains: 'computed import specifier', because }]);
+    assert.equal(result.outcome, OUTCOMES.UNPROVEN, `an empty reason (${because}) was accepted`);
+  }
+});
+
+test('[3.15] an acknowledgement never hides a real violation', () => {
+  // Acknowledging a gap says "nothing can hide here". It says nothing about
+  // the violations that are in plain sight.
+  const index = indexModel(model());
+  const result = evaluateRule(forbidDirect, index, gapAt('src/worker.js'), [ack('src/worker.js')]);
+  assert.equal(result.outcome, OUTCOMES.FAIL);
+  assert.equal(result.violations.length, 1);
+});
+
+test('[3.15] one unacknowledged gap is enough to hold a rule unproven', () => {
+  const index = indexModel(model({ direct: false }));
+  const two = incompletenessFor({
+    gaps: [
+      { path: 'src/worker.js', reason: 'computed import specifier at line 12' },
+      { path: 'src/new.js', reason: 'computed import specifier at line 3' },
+    ],
+  });
+  const result = evaluateRule(forbidDirect, index, two, [ack('src/worker.js')]);
+  assert.equal(result.outcome, OUTCOMES.UNPROVEN);
+  assert.match(result.reason, /1 file\(s\).*not acknowledged/);
+});
+
+test('[3.15] the run reports how many rules rest on a judgement rather than evidence', () => {
+  const index = indexModel(model({ direct: false }));
+  const report = assertRules({
+    index,
+    incompleteness: gapAt('src/worker.js'),
+    rules: [forbidDirect, { id: 'cycles', kind: 'no-cycles' }],
+    acknowledgements: [ack('src/worker.js')],
+  });
+  assert.equal(report.ok, true);
+  assert.equal(report.passed, 2);
+  // Counted in RULES. Summing gaps across rules gave 16 for eight gaps and two
+  // rules, which is a number nobody can act on.
+  assert.equal(report.acknowledged, 2);
+});
+
+test('[3.15] partitionGaps separates what was examined from what was not', () => {
+  const gaps = [
+    { path: 'a.js', reason: 'computed import specifier at line 1' },
+    { path: 'b.js', reason: 'computed import specifier at line 2' },
+  ];
+  const { acknowledged, outstanding } = partitionGaps(gaps, [ack('a.js')]);
+  assert.equal(acknowledged.length, 1);
+  assert.equal(acknowledged[0].gap.path, 'a.js');
+  assert.equal(acknowledged[0].by.because, REASON);
+  assert.deepEqual(outstanding.map((g) => g.path), ['b.js']);
 });

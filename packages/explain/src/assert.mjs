@@ -137,11 +137,53 @@ function citations(index, id) {
 }
 
 /**
+ * Gaps a human has examined and judged unable to hide a violation.
+ *
+ * `unproven` is the right default: a rule that found nothing over a scan with
+ * unread files has not been shown to hold. But a repository can have gaps that
+ * are genuinely permanent -- this one has eight, every, one a dynamic import
+ * whose base path is a variable, which no scanner can resolve without
+ * guessing. Leaving every rule unproven forever teaches people to pass
+ * --allow-unproven, and that switch turns off the distinction entirely.
+ *
+ * So a gap can be acknowledged, and the acknowledgement is deliberately hard
+ * to abuse:
+ *
+ *   * it names ONE path -- there is no wildcard
+ *   * it must quote part of the gap's reason, so an acknowledgement written
+ *     for a dynamic import stops applying the day that file fails to parse
+ *     for a different cause
+ *   * it carries a written reason of its own, and the rule refuses one that
+ *     does not
+ *   * a rule that passes on the strength of one SAYS SO, and names how many
+ *
+ * That last point matters most. An acknowledged pass is a human judgement
+ * standing in for evidence, and it should never be indistinguishable from a
+ * clean one.
+ */
+export function partitionGaps(gaps, acknowledgements) {
+  const acknowledged = [];
+  const outstanding = [];
+  for (const gap of asArray(gaps)) {
+    const match = asArray(acknowledgements).find((entry) => {
+      if (entry.path !== gap.path) return false;
+      if (!entry.reasonContains) return false;
+      return String(gap.reason ?? '').includes(entry.reasonContains);
+    });
+    if (match && String(match.because ?? '').trim().length > 20) acknowledged.push({ gap, by: match });
+    else outstanding.push(gap);
+  }
+  return { acknowledged, outstanding };
+}
+
+/**
  * Evaluate one rule.
  *
- * @returns {{id: string, kind: string, outcome: string, violations: Array<object>, reason: string}}
+ * @param {Array<object>} [acknowledgements] gaps a human has examined
+ * @returns {{id: string, kind: string, outcome: string, violations: Array<object>,
+ *            reason: string, restsOnAcknowledgements?: number}}
  */
-export function evaluateRule(rule, index, incompleteness) {
+export function evaluateRule(rule, index, incompleteness, acknowledgements = []) {
   if (!RULE_KINDS.includes(rule.kind)) {
     throw new TypeError(`assert: unknown rule kind ${JSON.stringify(rule.kind)}; expected one of ${RULE_KINDS.join(', ')}`);
   }
@@ -194,15 +236,30 @@ export function evaluateRule(rule, index, incompleteness) {
     return { id, kind: rule.kind, outcome: OUTCOMES.FAIL, violations, reason: `${violations.length} violation(s)` };
   }
   if (!incompleteness.complete) {
-    // The heart of this module. No violations found is not the same as no
-    // violations, and the difference is exactly the unread files.
+    const { acknowledged, outstanding } = partitionGaps(incompleteness.gaps, acknowledgements);
+    if (outstanding.length > 0) {
+      // The heart of this module. No violations found is not the same as no
+      // violations, and the difference is exactly the unread files.
+      return {
+        id,
+        kind: rule.kind,
+        outcome: OUTCOMES.UNPROVEN,
+        violations: [],
+        reason: `No violation found, but ${outstanding.length} file(s) could not be analysed and are `
+          + 'not acknowledged, so this rule has not been shown to hold.',
+      };
+    }
+    // Every gap is acknowledged. This passes, and says what it rests on: a
+    // human judgement standing in for evidence must never look like a clean
+    // scan.
     return {
       id,
       kind: rule.kind,
-      outcome: OUTCOMES.UNPROVEN,
+      outcome: OUTCOMES.PASS,
       violations: [],
-      reason: `No violation found, but ${incompleteness.gaps.length} file(s) could not be analysed, `
-        + 'so this rule has not been shown to hold. Fix the gaps or accept it explicitly.',
+      restsOnAcknowledgements: acknowledged.length,
+      reason: `No violation. ${acknowledged.length} unread file(s) are acknowledged as unable to hide `
+        + 'one; this rests on that judgement, not on a complete scan.',
     };
   }
   return { id, kind: rule.kind, outcome: OUTCOMES.PASS, violations: [], reason: 'No violation, over a complete scan.' };
@@ -215,14 +272,15 @@ export function evaluateRule(rule, index, incompleteness) {
  * @param {object} options.index from indexModel(); it carries the model
  * @param {object} options.incompleteness from incompletenessFor()
  * @param {Array<object>} options.rules
+ * @param {Array<object>} [options.acknowledgements] gaps a human has examined
  * @param {boolean} [options.allowUnproven] treat unproven as tolerable
  * @returns {object}
  */
-export function assertRules({ index, incompleteness, rules, allowUnproven = false }) {
+export function assertRules({ index, incompleteness, rules, acknowledgements = [], allowUnproven = false }) {
   if (!Array.isArray(rules) || rules.length === 0) {
     throw new TypeError('assert: at least one rule is required; a rule file with no rules asserts nothing');
   }
-  const results = rules.map((rule) => evaluateRule(rule, index, incompleteness));
+  const results = rules.map((rule) => evaluateRule(rule, index, incompleteness, acknowledgements));
   const counted = (outcome) => results.filter((r) => r.outcome === outcome).length;
   const failed = counted(OUTCOMES.FAIL);
   const unproven = counted(OUTCOMES.UNPROVEN);
@@ -237,6 +295,9 @@ export function assertRules({ index, incompleteness, rules, allowUnproven = fals
     // an unchecked rule into a green check, and green checks are acted on.
     ok: failed === 0 && (allowUnproven || unproven === 0),
     allowUnproven,
+    // Counted in RULES, not gap-instances. Summing the gaps across rules gave
+    // 16 for eight gaps and two rules, which is a number nobody can act on.
+    acknowledged: results.filter((r) => (r.restsOnAcknowledgements ?? 0) > 0).length,
     incompleteness,
     results,
   };

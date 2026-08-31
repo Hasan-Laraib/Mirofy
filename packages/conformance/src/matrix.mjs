@@ -776,6 +776,24 @@ export const IMPORTED_ROWS = [
     // Cycles report the loop and not the path into it: a node that leads to a
     // cycle without being in it sends the reader somewhere that is not the
     // problem.
+    //
+    // ACKNOWLEDGED GAPS came later, from running this against its own
+    // repository. Eight gaps here are permanent -- every one a dynamic import
+    // whose base path is a variable, which no scanner can resolve without
+    // guessing -- so every rule was unproven forever, and a rule that can
+    // never be proven teaches people to pass --allow-unproven, which turns the
+    // whole distinction off.
+    //
+    // So a gap can be acknowledged, and the design is entirely about making
+    // that hard to abuse. An acknowledgement names ONE path with no wildcard;
+    // it must quote part of the gap's reason, so one written for a dynamic
+    // import stops applying the day that file fails to parse instead; it needs
+    // a written argument of its own, not "wontfix"; and a rule that passes on
+    // the strength of one SAYS SO rather than reading like a clean scan.
+    //
+    // Observed failing on all three shortcuts: matching by path alone,
+    // accepting an empty reason, and letting an acknowledgement suppress a
+    // violation that was in plain sight.
     origin: 'N',
     phase: 'P5',
     proof: 'assert-rules.test.mjs',

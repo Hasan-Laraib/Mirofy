@@ -91,9 +91,23 @@ npm run assert     # reads architecture-rules.json
 ```
 
 `pass`, `fail`, and **`unproven`**. A rule that found no violation over a scan
-with unread files has not been *shown* to hold, so it never counts as passing
-and fails the run unless you write `--allow-unproven`. Turning a gap into a
-green check is the one failure this project exists to avoid.
+with unread files has not been *shown* to hold, so it never counts as passing.
+Turning a gap into a green check is the one failure this project exists to
+avoid.
+
+Some gaps are permanent — a dynamic import whose base path is a variable cannot
+be resolved without guessing. Those can be **acknowledged**, one path at a
+time, quoting the gap's reason and carrying a written argument. An
+acknowledgement written for a dynamic import stops applying the day that file
+fails to parse instead. And a rule that passes on the strength of one says so:
+
+```
+[ok  ] no-cycles — No violation. 8 unread file(s) are acknowledged as unable
+       to hide one; this rests on that judgement, not on a complete scan.
+
+2 passed, 0 failed, 0 unproven of 2
+2 of those rule(s) rest on acknowledged gaps, not on evidence.
+```
 
 ### It tells you what is moving
 

@@ -16,5 +16,50 @@
       "limit": 4,
       "$why": "An external system with many outbound edges is usually a modelling mistake: the arrows belong to something inside the boundary."
     }
+  ],
+  "$acknowledgedGapsNote": "Each entry is a gap a human has read and judged unable to hide a violation. It names one path, must quote part of the gap reason so it stops applying if that file fails for a different cause, and carries its own reason. A rule that passes on one says so.",
+  "acknowledgedGaps": [
+    {
+      "path": "packages/conformance/test/delivery.test.mjs",
+      "reasonContains": "computed import specifier",
+      "because": "Dynamic import of a literal module path whose base is a local variable (await import(pathToFileURL(path.join(root, \"literal.mjs\")).href)). The target is a fixed file inside this repository, not user input, so it cannot introduce an architecture dependency the scanner has not already recorded statically elsewhere. Reviewed by reading every call site.",
+      "reviewedAt": "2026-08-31"
+    },
+    {
+      "path": "packages/conformance/test/evidence-passport.browser.test.mjs",
+      "reasonContains": "computed import specifier",
+      "because": "Dynamic import of a literal module path whose base is a local variable (await import(pathToFileURL(path.join(root, \"literal.mjs\")).href)). The target is a fixed file inside this repository, not user input, so it cannot introduce an architecture dependency the scanner has not already recorded statically elsewhere. Reviewed by reading every call site.",
+      "reviewedAt": "2026-08-31"
+    },
+    {
+      "path": "packages/conformance/test/helpers/browser.mjs",
+      "reasonContains": "computed import specifier",
+      "because": "Dynamic import of a literal module path whose base is a local variable (await import(pathToFileURL(path.join(root, \"literal.mjs\")).href)). The target is a fixed file inside this repository, not user input, so it cannot introduce an architecture dependency the scanner has not already recorded statically elsewhere. Reviewed by reading every call site.",
+      "reviewedAt": "2026-08-31"
+    },
+    {
+      "path": "packages/conformance/test/negative-fixtures.test.mjs",
+      "reasonContains": "computed import specifier",
+      "because": "Dynamic import of a literal module path whose base is a local variable (await import(pathToFileURL(path.join(root, \"literal.mjs\")).href)). The target is a fixed file inside this repository, not user input, so it cannot introduce an architecture dependency the scanner has not already recorded statically elsewhere. Reviewed by reading every call site.",
+      "reviewedAt": "2026-08-31"
+    },
+    {
+      "path": "packages/conformance/test/provenance-visual.test.mjs",
+      "reasonContains": "computed import specifier",
+      "because": "Dynamic import of a literal module path whose base is a local variable (await import(pathToFileURL(path.join(root, \"literal.mjs\")).href)). The target is a fixed file inside this repository, not user input, so it cannot introduce an architecture dependency the scanner has not already recorded statically elsewhere. Reviewed by reading every call site.",
+      "reviewedAt": "2026-08-31"
+    },
+    {
+      "path": "packages/conformance/test/validation-gates.test.mjs",
+      "reasonContains": "computed import specifier",
+      "because": "Dynamic import of a literal module path whose base is a local variable (await import(pathToFileURL(path.join(root, \"literal.mjs\")).href)). The target is a fixed file inside this repository, not user input, so it cannot introduce an architecture dependency the scanner has not already recorded statically elsewhere. Reviewed by reading every call site.",
+      "reviewedAt": "2026-08-31"
+    },
+    {
+      "path": "packages/core/bin/mirofy.mjs",
+      "reasonContains": "computed import specifier",
+      "because": "Dynamic import of a literal module path whose base is a local variable (await import(pathToFileURL(path.join(root, \"literal.mjs\")).href)). The target is a fixed file inside this repository, not user input, so it cannot introduce an architecture dependency the scanner has not already recorded statically elsewhere. Reviewed by reading every call site.",
+      "reviewedAt": "2026-08-31"
+    }
   ]
 }
