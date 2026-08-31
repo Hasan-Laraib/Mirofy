@@ -1,7 +1,19 @@
-<h1 align="center">Mirofy</h1>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.png">
+    <img src="assets/logo.png" alt="Mirofy — connect, model, insight" width="380">
+  </picture>
+</p>
 
 <p align="center">
   <strong>Diagrams of your system that cite their sources — and say what they could not see.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square" alt="MIT licensed">
+  <img src="https://img.shields.io/badge/runtime%20dependencies-0-7c3aed?style=flat-square" alt="Zero runtime dependencies">
+  <img src="https://img.shields.io/badge/conformance-79%20rows%20proved-3b82f6?style=flat-square" alt="79 conformance rows proved without a browser">
+  <img src="https://img.shields.io/badge/output-one%20HTML%20file-7c3aed?style=flat-square" alt="Output is one HTML file">
 </p>
 
 <p align="center">
@@ -30,10 +42,33 @@ nothing is known, the diagram **says so** instead of filling the gap.
   <img src="assets/pipeline.svg" alt="scan to model to compile to layout to render" width="880">
 </p>
 
+## Install
+
+**As an agent skill** — `packages/core/` is a skill directory with its own
+`SKILL.md`. Copy it where your agent looks:
+
+```bash
+git clone https://github.com/Hasan-Laraib/Mirofy.git
+cp -r Mirofy/packages/core ~/.claude/skills/mirofy      # Claude Code
+cp -r Mirofy/packages/core ~/.agents/skills/mirofy      # Codex CLI, opencode
+```
+
+Then ask: `Use mirofy to map this repository's runtime architecture.`
+
+**As a CLI** — no agent required:
+
+```bash
+cd Mirofy && npm install
+node packages/core/bin/mirofy.mjs --help
+```
+
+Nothing is downloaded at runtime and nothing phones home. There is no update
+check, because a tool that reaches the network to tell you about itself is a
+tool that reaches the network.
+
 ## Try it in five commands
 
 ```bash
-npm install
 npm run scan                    # repository  → evidence graph
 npm run model -- --from-graph --graph scan/evidence-graph.json
 npm run compile                 # model       → a bounded view
@@ -48,6 +83,14 @@ line it came from — and draws twelve, recording what it left out and why.
 Those commands reproduce the diagram at the top of this page. It is checked in
 under `assets/` as documentation; the interactive artifacts are built, never
 stored.
+
+No repository? Author a JSON document, or convert a Mermaid diagram:
+
+```bash
+node packages/core/bin/mirofy.mjs import mermaid design.mmd
+node packages/core/bin/mirofy.mjs render architecture design.json out.html
+node packages/core/bin/mirofy.mjs validate architecture design.json --json
+```
 
 ## What you get
 
@@ -73,14 +116,6 @@ dataflow, lifecycle.</em></p>
 <p align="center">
   <em>One file. Opens offline, from disk, with no server and no network.</em>
 </p>
-
-No repository? Author a JSON document, or convert a Mermaid diagram:
-
-```bash
-node packages/core/bin/mirofy.mjs import mermaid design.mmd
-node packages/core/bin/mirofy.mjs render architecture design.json out.html
-node packages/core/bin/mirofy.mjs validate architecture design.json --json
-```
 
 ---
 
@@ -166,6 +201,47 @@ recommendation. It runs on every pull request and can never fail one.
 
 ---
 
+## The number we would rather not publish
+
+A benchmark asks one question: hand a model a written brief, and how often does
+the diagram it writes come out **usable on the first attempt**?
+
+Right now, over eight briefs authored by Claude Code: **2 of 8**.
+
+```bash
+node scripts/benchmark.mjs --author "<your command>" --model "<id>" --keep benchmarks/corpus/mine
+node scripts/benchmark.mjs --replay benchmarks/corpus/mine
+```
+
+That is not a good number and it is the real one. Three things make it worth
+printing anyway.
+
+**Usable means clean, not accepted.** A warning is the diagram telling you it
+needs a second look, which is exactly what a first-pass rate is supposed to
+exclude. Two more documents in that set validate with zero errors and are still
+not counted.
+
+**It is measured against a saved corpus, not a fresh one.** `--keep` stores what
+the model produced; `--replay` re-runs the tool over those exact documents
+without calling the model again. Without that split, every re-run changes both
+the documents and the tool, and any movement can be attributed to either — which
+is why the rate sat at zero for weeks without anyone being able to say what was
+wrong. A replay cannot even claim a different author: the model is read from the
+saved manifest, and `--model` is refused if it disagrees.
+
+**It moves for reasons you can name.** The last change to the layout engine took
+the same eight documents from 0 of 8 to 2 of 8, and total composition errors
+from 121 to 34, because a diagnostic that said *"shorten the label or widen
+size"* was asking an author to rename part of their system to fit a box the
+renderer had picked. The renderer now widens the box.
+
+If you compare this to a number published elsewhere, check what was measured.
+A rate for an agent that can call a validator and repair its own output, reviewed
+by a person at the end, is a different measurement from a blind single-shot
+model — not a worse one, a different one. Ours is the second kind.
+
+---
+
 ## Inside the artifact
 
 - **Node Finder**, **Semantic Lens**, **Semantic Radar** — search, filter and
@@ -188,7 +264,7 @@ npm run gallery    # every type in every preset → preview/index.html
 
 ## Taking it elsewhere
 
-The interactive file is ~715 KB and earns it. None of that survives a README, a
+The interactive file is ~720 KB and earns it. None of that survives a README, a
 pull request or a Notion page, though — all of them strip scripts. So:
 
 ```bash
@@ -219,11 +295,11 @@ that made it is a diagram held hostage.
 
 ## What is proved
 
-The conformance matrix has **97 rows. 77 are proved without a browser**; 19 more
-need headless Chrome (`MIROFY_CHROME`), bringing the total to 96.
+The conformance matrix has **99 rows**. **79 are proved without a browser**;
+19 more need headless Chrome (`MIROFY_CHROME`), bringing the total to 98.
 
 ```bash
-npm run check    # lint, types, 978 tests, golden parity, conformance, size, audit
+npm run check    # lint, types, 1,000+ tests, golden parity, conformance, size, audit
 ```
 
 Every row names a test, and the title must match character-for-character — a row
@@ -233,6 +309,18 @@ counted as such rather than quietly dropped.
 
 **Skipped is not passed.** Browser rows never count toward the proved total
 unless a browser actually ran them.
+
+And the numbers on this page are checked too:
+
+```bash
+node scripts/check-readme-claims.mjs
+```
+
+It counts the matrix, reads the tool list the MCP server serves, renders an
+artifact to measure it, and re-runs the benchmark. This exists because a review
+found three numbers here wrong at once — none of them dishonest, all of them
+true when written and left behind by the repository. A page that argues for
+checking claims has no business making unchecked ones.
 
 ## Evidence and provenance
 
@@ -270,7 +358,7 @@ a path from a sibling repo passes as evidence for this one.
 | `layout` | constraint layout: intent to coordinates (dev-time) |
 | `core` | renderers, schemas, validators, CLI |
 | `viewer` | the interactive viewer, built into one template |
-| `benchmark` | first-pass usable rate, measured on a schedule |
+| `benchmark` | first-pass usable rate, over a saved corpus |
 | `conformance` | the matrix, and the tests every row names |
 
 **Zero runtime dependencies** in every package. The artifact ships nothing but

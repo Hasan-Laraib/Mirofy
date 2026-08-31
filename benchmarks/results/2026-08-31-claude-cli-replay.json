@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-08-31T16:05:26.452Z",
+  "model": "claude-code-cli-2.1.251",
+  "status": "measured",
+  "firstPassUsableRate": 0.25,
+  "total": 8,
+  "usable": 2,
+  "usableAfterRepair": 2,
+  "toolAssistedRate": 0.25,
+  "byOutcome": {
+    "usable": 2,
+    "author-error": 0,
+    "invalid": 1,
+    "composition": 5
+  },
+  "results": [
+    {
+      "id": "01-web-app",
+      "outcome": "usable"
+    },
+    {
+      "id": "02-payment-flow",
+      "outcome": "composition",
+      "detail": "composition warning; composition warning; composition warning; composition warning; composition warning",
+      "errors": 0,
+      "warnings": 6,
+      "afterRepair": {
+        "usable": false
+      }
+    },
+    {
+      "id": "03-ci-pipeline",
+      "outcome": "usable"
+    },
+    {
+      "id": "04-order-state",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[2] id \"t_shipped_delivered\" \"shipped\" -> \"delivered\" first segment 0 [773, 307] -> [647, 307] does not honor fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[2] id \"t_shipped_delivered\" \"shipped\" -> \"delivered\" final segment 0 [773, 307] -> [647, 307] does not honor toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[3] id \"t_pending_cancelled\" \"pending\" -> \"cancelled\" first segment 0 [402, 336] -> [402, 307] does not honor fromSide \"bottom\" — it must run vertical downward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[4] id \"t_paid_cancelled\" \"paid\" -> \"cancelled\" first segment 0 [556, 336] -> [556, 278] does not honor fromSide \"bottom\" — it must run vertical downward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[4] id \"t_paid_cancelled\" \"paid\" -> \"cancelled\" final segment 0 [556, 336] -> [556, 278] does not honor toSide \"top\" — it must run vertical downward from above; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.",
+      "errors": 23,
+      "warnings": 0,
+      "afterRepair": {
+        "usable": false,
+        "reason": "23 composition error(s)"
+      }
+    },
+    {
+      "id": "05-etl",
+      "outcome": "invalid",
+      "detail": "/stages must NOT have more than 5 items {\"limit\":5}"
+    },
+    {
+      "id": "06-microservices",
+      "outcome": "composition",
+      "detail": "composition warning; composition warning; composition warning",
+      "errors": 0,
+      "warnings": 3,
+      "afterRepair": {
+        "usable": false,
+        "reason": "2 composition error(s)"
+      }
+    },
+    {
+      "id": "07-auth",
+      "outcome": "composition",
+      "detail": "layout/constraint: Message \"Verifies state matches the stored value\" spans 0px (minimum 60px) — give its participants more column distance.; layout/constraint: Message \"POST /token (code, verifier, client secret)\" sits outside the readable timeline — keep y between 160 and 677.; layout/constraint: Message \"access_token, id_token, refresh_token\" sits outside the readable timeline — keep y between 160 and 677.; layout/constraint: Message \"Validates id_token signature, nonce, claims\" sits outside the readable timeline — keep y between 160 and 677.; layout/constraint: Message \"Validates id_token signature, nonce, claims\" spans 0px (minimum 60px) — give its participants more column distance.",
+      "errors": 8,
+      "warnings": 0,
+      "afterRepair": {
+        "usable": false,
+        "reason": "8 composition error(s)"
+      }
+    },
+    {
+      "id": "08-incident",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[6] id \"e_mitigate_postmortem\" \"mitigate\" -> \"postmortem\" first segment 0 [556, 243] -> [556, 352] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[6] id \"e_mitigate_postmortem\" \"mitigate\" -> \"postmortem\" final segment 2 [593.5, 352] -> [593.5, 491] does not honor inferred toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/edge-through-node: [clean-flow/edge-through-node] workflow edges[6] id \"e_mitigate_postmortem\" \"mitigate\" -> \"postmortem\" crosses node \"assistedFix\" (unrelated to this relationship) on segment 1 [556, 352] -> [594, 352] (2px clearance) — adjust fromSide/toSide, set route/via or channel coordinates, or move the node to a clearer lane/column.",
+      "errors": 3,
+      "warnings": 0,
+      "afterRepair": {
+        "usable": false,
+        "reason": "3 composition error(s)"
+      }
+    }
+  ]
+}
