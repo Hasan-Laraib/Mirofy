@@ -641,6 +641,55 @@ export const IMPORTED_ROWS = [
     testTitle: '[6.12] card attribution is drawn after the diagram, so nothing can cover it',
   },
   {
+    id: '6.13',
+    name: '--format svg-static',
+    // The interactive artifact is ~715 KB and earns it. None of that survives
+    // where a diagram most needs to go: GitHub, a pull request, Notion and
+    // Confluence all strip scripts and render an image, so the full artifact
+    // shows nothing at all.
+    //
+    // The export is DERIVED from the rendered artifact, never laid out again.
+    // A second layout path is a second thing to keep correct, and the first
+    // time the two disagreed the static file would quietly stop being the
+    // diagram it claims to be.
+    //
+    // Three things make it a file rather than a fragment: an XML declaration,
+    // an explicit SVG namespace (inside HTML the parser supplies one; a file
+    // on disk gets no such help and browsers refuse to paint it), and every
+    // var(--token) resolved -- there is no :root left, so an unresolved
+    // property is an element with no colour. Observed failing on a planted
+    // missing namespace, which broke both the document test and the browser
+    // test, and on a planted skip of variable resolution.
+    origin: 'N',
+    phase: 'P3',
+    proof: 'svg-static.test.mjs',
+    testTitle: '[6.13] the export is a standalone SVG document, not an HTML fragment',
+  },
+  {
+    id: '4.15',
+    name: 'Tree-shaken artifacts',
+    // 685 of 818 stylesheet rules cannot match anything in the diagram --
+    // toolbars, panels, docks, the export menu. Dropping them takes the file
+    // from 715 KB to 27 KB, which is the difference between an artifact you
+    // commit next to your code and one you do not.
+    //
+    // The danger is obvious: shaking is deletion with a nicer name, and a
+    // smaller file is always one delete away. So the gate is not the size, it
+    // is the completeness. Every rule in the FULL stylesheet that targets a
+    // class the diagram actually uses must survive into the export, compared
+    // set against set. Observed failing on a planted over-shake that kept
+    // only single-class selectors.
+    //
+    // Viewer-only attributes go too -- data-node-id, tabindex, role, aria-*
+    // are hooks for JavaScript that is not there. `data-name` is spared,
+    // because stylesheets select on it and stripping it would change the
+    // picture rather than only the size.
+    origin: 'N',
+    phase: 'P3',
+    proof: 'svg-static.test.mjs',
+    testTitle: '[4.15] every style that applied in the artifact still applies',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

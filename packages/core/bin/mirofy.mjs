@@ -726,16 +726,87 @@ async function commandCompare(args) {
   }
 }
 
+/** `--format <name>`; the default is the interactive artifact. */
+function extractFormatArg(args) {
+  const rest = [];
+  let format = 'html';
+  for (let i = 0; i < args.length; i += 1) {
+    if (args[i] === '--format') {
+      format = args[i + 1];
+      i += 1;
+      continue;
+    }
+    rest.push(args[i]);
+  }
+  if (format !== 'html' && format !== 'svg-static') {
+    fail(`--format must be html or svg-static (got ${JSON.stringify(format)}).`);
+  }
+  return { format, rest };
+}
+
 async function commandRender(args) {
-  const qualityArgs = extractQualityArgs(args);
+  const formatArgs = extractFormatArg(args);
+  const qualityArgs = extractQualityArgs(formatArgs.rest);
   const repoArgs = extractRepoRootArgs(qualityArgs.rest);
   const [type, input, output] = repoArgs.rest;
   if (!type || !input) fail(usage());
   await assertEvidenceType(type, repoArgs.repoRoot);
+
+  if (formatArgs.format === 'svg-static') {
+    await renderStaticSvg({ type, input, output, quality: qualityArgs.quality, repoRoot: repoArgs.repoRoot });
+    return;
+  }
+
   const result = runNode([rendererPath(type), input, ...(output ? [output] : [])], {
     env: rendererEnv(qualityArgs.quality, repoArgs.repoRoot),
   });
   if (result.status !== 0) exitFrom(result);
+}
+
+/**
+ * Render the interactive artifact, then reduce it to a standalone SVG.
+ *
+ * Deliberately derived rather than laid out again. A second layout path would
+ * be a second thing to keep correct, and the first time the two disagreed the
+ * static export would quietly stop matching the diagram it claims to be.
+ */
+async function renderStaticSvg({ type, input, output, quality, repoRoot }) {
+  const [{ toStaticSvg }, { BLOCKS }] = await Promise.all([
+    import('../renderers/shared/svg-static.mjs'),
+    import('../../viewer/src/tokens/tokens.mjs'),
+  ]);
+
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-svg-static-'));
+  const intermediate = path.join(scratch, 'artifact.html');
+  // The intermediate render is scaffolding, not output. Its "wrote <temp
+  // path>" line would tell the caller about a file that is deleted moments
+  // later, so its stdout is captured and only surfaced on failure.
+  const result = runNode([rendererPath(type), input, intermediate], {
+    env: rendererEnv(quality, repoRoot),
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  if (result.status !== 0) exitFrom(result);
+
+  const tokens = {};
+  for (const block of BLOCKS) {
+    if (/data-preset/.test(block.selector)) continue;
+    for (const [name, value] of block.props) tokens[name] = value;
+  }
+
+  const artifact = fs.readFileSync(intermediate, 'utf8');
+  const staticSvg = toStaticSvg(artifact, { tokens });
+  if (staticSvg.unresolved.length > 0) {
+    // An unresolved custom property is an element with no colour, and a
+    // silently colourless diagram is worse than a refusal.
+    fail(`svg-static: ${staticSvg.unresolved.length} unresolved custom propert`
+      + `${staticSvg.unresolved.length === 1 ? 'y' : 'ies'}: ${staticSvg.unresolved.join(', ')}`);
+  }
+
+  const target = output || `${input.replace(/\.json$/i, '')}.svg`;
+  fs.writeFileSync(target, staticSvg.svg);
+  fs.rmSync(scratch, { recursive: true, force: true });
+  console.log(`svg-static: wrote ${target} (${Math.round(staticSvg.bytes / 1024)} KB, `
+    + `${staticSvg.rulesKept} style rules kept, ${staticSvg.rulesDropped} dropped)`);
 }
 
 function reportDeliveryFailure({ json, stage, type, input, output, error, diagnostics = [], status = 1, checker }) {

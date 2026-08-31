@@ -50,8 +50,8 @@ external requests, and no runtime dependencies.
 
 ## What is proved
 
-The conformance matrix has **87 rows. 67 are proved without a browser**; 19
-more need headless Chrome (`MIROFY_CHROME`), bringing the total to 86.
+The conformance matrix has **89 rows. 69 are proved without a browser**; 19
+more need headless Chrome (`MIROFY_CHROME`), bringing the total to 88.
 
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this import's scope, so there is nothing here to prove parity against.
@@ -115,6 +115,22 @@ confident link to nothing is worse than admitting the host is unknown.
 
 **Zero runtime dependencies** in every workspace package. The rendered
 artifact ships nothing but itself.
+
+## Embedding a diagram
+
+The interactive artifact is ~715 KB and earns it. None of that survives a
+README, a pull request, a Notion page or a Confluence page — all of them strip
+scripts and render an image, so the full file shows nothing at all.
+
+```bash
+node packages/core/bin/mirofy.mjs render architecture in.json out.svg --format svg-static
+```
+
+**~27 KB**, one standalone `.svg`, no scripts. It is derived from the rendered
+artifact rather than laid out a second time, so it cannot disagree with the
+diagram it came from. 685 of 818 stylesheet rules are shaken out — every rule
+that actually applied is kept, and a test compares the two sets rather than
+trusting the claim.
 
 ## In the artifact
 
