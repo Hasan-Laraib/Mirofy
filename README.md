@@ -47,19 +47,27 @@ nothing is known, the diagram **says so** instead of filling the gap.
 
 ## Install
 
-**Nothing to install** — one command, and you have a diagram open:
+**Nothing to install** — clone it and run. There is no build step and no
+`npm install`, because every package here has zero runtime dependencies:
 
 ```bash
-npx mirofy demo                 # a finished artifact, to see what this produces
-npx mirofy init                 # a starter document of your own to edit
-npx mirofy validate architecture architecture.json
-npx mirofy render architecture architecture.json
+git clone https://github.com/Hasan-Laraib/Mirofy.git
+cd Mirofy
+
+node packages/core/bin/mirofy.mjs demo    # a finished artifact, to see what this produces
+node packages/core/bin/mirofy.mjs init    # a starter document of your own to edit
+node packages/core/bin/mirofy.mjs validate architecture architecture.json
+node packages/core/bin/mirofy.mjs render architecture architecture.json
 ```
 
-`npx mirofy guide "show an API request with a cache miss"` picks the diagram
-type for you if you are not sure which one you want.
+`… guide "show an API request with a cache miss"` picks the diagram type for
+you if you are not sure which one you want.
 
-**As a CLI you keep** — `npm install -g mirofy`, then `mirofy` anywhere.
+> **`npx mirofy` is not live yet.** `mirofy` is reserved on npm and `0.1.0` is
+> packed and verified, but nothing is published, so this README does not tell
+> you to run a command that would 404. `scripts/check-readme-claims.mjs` checks
+> the registry and will fail this file the day that stops being true — the
+> shorter instructions go in then, not before.
 
 **As an agent skill** — build the bundle and copy it where your agent looks:
 

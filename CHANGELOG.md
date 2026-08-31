@@ -38,6 +38,24 @@ all — which is the worst shape a green check can have. `check:lockfile` compar
 every workspace's name and version against the lockfile, then asks npm itself
 with `npm ci --dry-run`.
 
+### The README stopped promising a command that 404s
+
+It told readers to run `npx mirofy demo`. `mirofy` is not published yet, so
+that was a 404 on somebody's **first contact** with the project. The install
+section now uses the from-source commands, which work today, and says plainly
+why there is no npx line.
+
+`check-readme-claims.mjs` asks the registry and enforces whichever of the two
+is currently true — including the opposite mistake, a caveat still apologising
+a month after publication, which is likelier because nobody goes back to delete
+one.
+
+The first version of that check **passed both planted faults**. It resolved npm
+by name and ran `node npm view …`, which fails for a reason that is not a 404,
+so it concluded "could not reach the registry" and reported ok. A check that
+cannot run is not a check that succeeded, and it now says so in its own name
+rather than quietly counting as a pass.
+
 ### The repository presents itself
 
 It was public with an **empty description**, no homepage link, and no topics —

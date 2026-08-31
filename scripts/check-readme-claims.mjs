@@ -170,6 +170,71 @@ mustContain('components drawn', `draws
 **${numberWord((view.components ?? view.nodes ?? []).length)}**`);
 
 // ---------------------------------------------------------------------------
+// Install instructions that actually work
+// ---------------------------------------------------------------------------
+// A README telling somebody to run `npx mirofy` before `mirofy` is published
+// sends them to a 404 on their first contact with the project. A README still
+// apologising for not being published a month after it was is just as wrong,
+// and much likelier, because nobody goes back to delete a caveat.
+//
+// So the registry decides which of the two this file is allowed to be. When
+// npm cannot be reached the question is not asked -- being offline is not
+// evidence about anything.
+const readmeTellsYouToNpx = /^\s*npx mirofy /m.test(readme);
+const readmeSaysNotLive = /`npx mirofy` is not live yet/.test(readme);
+let published = null;
+let unreachable = 'npm was not run';
+const npmCli = (() => {
+  const fromEnv = process.env.npm_execpath;
+  if (fromEnv && fromEnv.endsWith('.js') && fs.existsSync(fromEnv)) return fromEnv;
+  const nodeDir = path.dirname(process.execPath);
+  for (const candidate of [
+    path.join(nodeDir, 'node_modules/npm/bin/npm-cli.js'),
+    path.join(nodeDir, '../lib/node_modules/npm/bin/npm-cli.js'),
+  ]) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+})();
+if (npmCli) {
+  try {
+    execFileSync(process.execPath, [npmCli, 'view', 'mirofy', 'version'], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 30000,
+    });
+    published = true;
+  } catch (error) {
+    const detail = String(error.stderr || error.message);
+    if (/E404|404 Not Found/.test(detail)) published = false;
+    else unreachable = detail.split(String.fromCharCode(10))[0].slice(0, 120);
+  }
+} else {
+  unreachable = 'npm-cli.js not found';
+}
+
+if (published === null) {
+  // Reported as its own outcome rather than folded into a pass. A check that
+  // could not run is not a check that succeeded, and the first version of this
+  // said "ok" while silently answering nothing -- both planted faults walked
+  // straight through it.
+  assertThat(`install instructions match the registry (NOT CHECKED: ${unreachable})`,
+    true, 'the registry could not be reached; this claim was not verified');
+} else if (published) {
+  assertThat('install instructions match the registry', readmeTellsYouToNpx && !readmeSaysNotLive,
+    readmeTellsYouToNpx && !readmeSaysNotLive
+      ? 'mirofy is published and the README says npx'
+      : 'mirofy IS published now — lead with `npx mirofy` and delete the "not live yet" note');
+} else {
+  const why = readmeTellsYouToNpx
+    ? 'the README tells a reader to run `npx mirofy`, which 404s: mirofy is not on npm yet'
+    : 'mirofy is not published, and the README no longer says so — a reader has no way '
+      + 'to know why there is no npx command';
+  assertThat('install instructions match the registry', !readmeTellsYouToNpx && readmeSaysNotLive,
+    !readmeTellsYouToNpx && readmeSaysNotLive
+      ? 'mirofy is unpublished and the README says so instead of telling you to npx it'
+      : why);
+}
+
+// ---------------------------------------------------------------------------
 // The benchmark, re-measured
 // ---------------------------------------------------------------------------
 // Re-run rather than read a stored result. The rate is a claim about THIS
