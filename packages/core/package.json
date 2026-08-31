@@ -1,22 +1,74 @@
 {
-  "name": "@mirofy/core",
-  "version": "2.16.0",
-  "private": true,
+  "name": "mirofy",
+  "version": "0.1.0",
   "type": "module",
-  "description": "Rendering and validation core: five diagram renderers, their schemas, the interactive viewer, and the CLI.",
+  "description": "Diagrams of your system that cite their sources - and say what they could not see. Five diagram types, validated, rendered to one self-contained HTML file.",
   "license": "MIT",
-  "bin": { "mirofy": "./bin/mirofy.mjs" },
-  "engines": { "node": ">=18" },
+  "bin": {
+    "mirofy": "./bin/mirofy.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "generate:brand-marks": "node scripts/generate-brand-marks.mjs",
     "check:brand-marks": "node scripts/generate-brand-marks.mjs --check",
     "generate:validators": "node scripts/generate-validators.mjs",
-    "check:validators": "node scripts/generate-validators.mjs --check"
+    "check:validators": "node scripts/generate-validators.mjs --check",
+    "prepublishOnly": "node ../../scripts/prepublish-guard.mjs"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
     "parse5": "7.3.0",
     "saxes": "6.0.0",
     "simple-icons": "16.28.0"
-  }
+  },
+  "keywords": [
+    "diagram",
+    "architecture",
+    "architecture-diagram",
+    "system-design",
+    "svg",
+    "mermaid",
+    "sequence-diagram",
+    "dataflow",
+    "state-machine",
+    "workflow",
+    "documentation",
+    "cli",
+    "agent-skill",
+    "claude",
+    "mcp"
+  ],
+  "homepage": "https://hasan-laraib.github.io/Mirofy/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hasan-Laraib/Mirofy.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/Hasan-Laraib/Mirofy/issues"
+  },
+  "author": "Hasan-Laraib",
+  "exports": {
+    ".": "./bin/mirofy.mjs",
+    "./schemas/*": "./schemas/*",
+    "./examples/*": "./examples/*",
+    "./renderers/shared/*": "./renderers/shared/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "LICENSE",
+    "bin",
+    "renderers",
+    "schemas",
+    "assets",
+    "brand-marks",
+    "references",
+    "recipes",
+    "delta",
+    "examples"
+  ]
 }

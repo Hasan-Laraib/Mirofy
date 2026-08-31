@@ -47,6 +47,20 @@ nothing is known, the diagram **says so** instead of filling the gap.
 
 ## Install
 
+**Nothing to install** — one command, and you have a diagram open:
+
+```bash
+npx mirofy demo                 # a finished artifact, to see what this produces
+npx mirofy init                 # a starter document of your own to edit
+npx mirofy validate architecture architecture.json
+npx mirofy render architecture architecture.json
+```
+
+`npx mirofy guide "show an API request with a cache miss"` picks the diagram
+type for you if you are not sure which one you want.
+
+**As a CLI you keep** — `npm install -g mirofy`, then `mirofy` anywhere.
+
 **As an agent skill** — build the bundle and copy it where your agent looks:
 
 ```bash
@@ -66,16 +80,17 @@ bundle, `build:skill` copies it somewhere with no repository around it and
 renders a diagram: a bundle that only works inside its own checkout is not a
 bundle.
 
-**As a CLI** — no agent required:
+**From source** — no install at all, because there is nothing to install:
 
 ```bash
-cd Mirofy && npm install
-node packages/core/bin/mirofy.mjs --help
+git clone https://github.com/Hasan-Laraib/Mirofy.git
+node Mirofy/packages/core/bin/mirofy.mjs demo
 ```
 
-Nothing is downloaded at runtime and nothing phones home. There is no update
-check, because a tool that reaches the network to tell you about itself is a
-tool that reaches the network.
+That works on a bare checkout with no `npm install`, because every package here
+has zero runtime dependencies. Nothing is downloaded at runtime and nothing
+phones home — there is no update check, because a tool that reaches the network
+to tell you about itself is a tool that reaches the network.
 
 ## Try it in five commands
 

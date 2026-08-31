@@ -131,10 +131,32 @@ checkout is not a bundle, it is a directory. It also refuses a directory in
 `packages/core` that it neither ships nor records a reason for skipping — the
 decision belongs to whoever adds it, not to a user who finds it missing.
 
-### First tag, and one removed
+### Publishable as `mirofy`, and versioned from its own line
 
-`v2.16.0` — 197 commits with nothing to pin, until now. The number continues the
-one `packages/core` already declares; it is not a claim that 2.15 existed here.
+The package is `mirofy` — one word, so `npx mirofy` is the whole installation
+step. `npx mirofy demo` produces a finished artifact and `npx mirofy init`
+writes a starter document of your own, which is the gap between them that
+nothing filled: `demo` shows what the tool does and teaches nothing about the
+document behind it.
+
+**`0.1.0`, not `2.16.0`.** The old number came down the fork's version line, and
+publishing a brand-new package at 2.16.0 implies a 2.15 that never existed
+publicly. This is release one of something whose benchmark is 2 of 8; calling it
+1.0 would be a claim about stability nobody has earned.
+
+`prepublishOnly` refuses to publish unless the whole gate passes, the working
+tree is clean, and the packed tarball installs into an empty directory and
+renders. Deliberately slow: npm allows an unpublish for 72 hours and then the
+version number is spent forever.
+
+`.github/workflows/publish.yml` publishes on a version tag **with provenance** —
+npm records which repository and commit built the tarball, a signed claim a
+reader can check rather than take on trust. That is what this project asks of
+every diagram it draws, and shipping the tool itself on "I ran it on my laptop"
+would be strange. It needs one manual publish first, because npm cannot
+configure a trusted publisher for a package that does not exist.
+
+### One tag removed
 
 `provenance-anchor` is deleted. It was local-only, never pushed, and asserted
 that `packages/core` was byte-identical to an upstream commit — which stopped

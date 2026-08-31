@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn, spawnSync, execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -728,3 +728,66 @@ test('cli: validate rejects an unknown type without leaking a temp directory', (
 });
 
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
+
+// ---------------------------------------------------------------------------
+// `mirofy init`, which exists to close the first five minutes.
+//
+// `demo` produces a finished artifact and teaches nothing about the document
+// behind it. `examples` lists files inside an installed package a reader then
+// has to find. Neither leaves you holding something of your own to edit.
+// ---------------------------------------------------------------------------
+
+test('[cli] init writes a document that validates and renders', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-init-'));
+  try {
+    execFileSync(process.execPath, [cli, 'init'], { cwd: tmp, stdio: ['ignore', 'pipe', 'pipe'] });
+    const written = path.join(tmp, 'architecture.json');
+    assert.ok(fs.existsSync(written), 'init reported success but wrote nothing');
+
+    // The whole point is that the starter is a good starting point. A file the
+    // tool then rejects would be worse than no file.
+    execFileSync(process.execPath, [cli, 'validate', 'architecture', written],
+      { stdio: ['ignore', 'ignore', 'pipe'] });
+    execFileSync(process.execPath, [cli, 'render', 'architecture', written,
+      path.join(tmp, 'out.html')], { stdio: ['ignore', 'ignore', 'pipe'] });
+    assert.ok(fs.existsSync(path.join(tmp, 'out.html')));
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('[cli] init carries no empty keys', () => {
+  // An absent key is correct and an empty one is rejected. A starter full of
+  // empty strings teaches the opposite of what the schema wants.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-init-empty-'));
+  try {
+    execFileSync(process.execPath, [cli, 'init'], { cwd: tmp, stdio: ['ignore', 'ignore', 'pipe'] });
+    const document = JSON.parse(fs.readFileSync(path.join(tmp, 'architecture.json'), 'utf8'));
+    const walk = (node, at) => {
+      if (node === null) assert.fail(`null at ${at}`);
+      if (typeof node === 'string') assert.notEqual(node, '', `empty string at ${at}`);
+      if (Array.isArray(node)) {
+        assert.notEqual(node.length, 0, `empty array at ${at}`);
+        node.forEach((item, index) => walk(item, `${at}[${index}]`));
+      } else if (node && typeof node === 'object') {
+        for (const [key, value] of Object.entries(node)) walk(value, `${at}.${key}`);
+      }
+    };
+    walk(document, 'document');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
+test('[cli] init refuses to overwrite a file that is already there', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-init-clobber-'));
+  try {
+    fs.writeFileSync(path.join(tmp, 'architecture.json'), '{"mine":true}\n');
+    assert.throws(() => execFileSync(process.execPath, [cli, 'init'],
+      { cwd: tmp, stdio: ['ignore', 'ignore', 'pipe'] }));
+    assert.equal(fs.readFileSync(path.join(tmp, 'architecture.json'), 'utf8'), '{"mine":true}\n',
+      'init overwrote a document somebody was working on');
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

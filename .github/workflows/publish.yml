@@ -1,0 +1,84 @@
+name: Publish
+
+# Publishes `mirofy` to npm when a version tag is pushed.
+#
+# WITH PROVENANCE, which is the reason this workflow exists rather than a
+# `npm publish` from somebody's laptop. npm records, and shows on the package
+# page, which repository and which commit built the tarball — a signed claim a
+# reader can check rather than take on trust. That is the same thing this
+# project asks of every diagram it draws, and it would be strange to ship the
+# tool itself on nothing but "I ran it on my machine".
+#
+# BEFORE THIS CAN RUN, TWO ONE-TIME STEPS:
+#
+#   1. Publish 0.1.0 by hand once, to create the package:
+#        cd packages/core && npm publish --access public
+#      npm has no way to configure a trusted publisher for a package that does
+#      not exist yet.
+#
+#   2. On npmjs.com → the package → Settings → Trusted Publisher, add:
+#        Organization or user:  Hasan-Laraib
+#        Repository:            Mirofy
+#        Workflow filename:     publish.yml
+#
+# After that there is no npm token anywhere: the job proves who it is with a
+# short-lived OIDC token GitHub mints for this workflow, and nothing long-lived
+# has to be stored in repository secrets or rotated.
+#
+# To release: bump the version in packages/core/package.json, commit, then
+#   git tag -a v0.2.0 -m "..." && git push origin v0.2.0
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # Mints the OIDC token that proves to npm this build came from this
+      # repository and this workflow. Provenance does not work without it.
+      id-token: write
+    steps:
+      # Full history: the renderer verifies source citations against the commit
+      # they name, and the prepublish guard reads the working tree's state.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - run: npm ci
+
+      # The tag is the release. A tag that does not match the version being
+      # published means somebody bumped one and forgot the other, and the
+      # wrong number would be on npm permanently.
+      - name: The tag and the manifest have to agree
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          manifest="$(node -p "require('./packages/core/package.json').version")"
+          if [ "$tag" != "$manifest" ]; then
+            echo "tag ${GITHUB_REF_NAME} does not match mirofy@${manifest}" >&2
+            exit 1
+          fi
+          echo "publishing mirofy@${manifest}"
+
+      # prepublishOnly runs the full gate, then packs the tarball and installs
+      # it into a clean directory to check it actually renders. It is slow on
+      # purpose: npm allows an unpublish for 72 hours and then the version
+      # number is spent forever.
+      - name: Publish
+        run: npm publish --provenance --access public
+        working-directory: packages/core
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

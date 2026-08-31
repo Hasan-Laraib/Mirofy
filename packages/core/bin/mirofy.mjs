@@ -28,6 +28,7 @@ function usage() {
   mirofy examples
   mirofy doctor
   mirofy demo [output-directory]
+  mirofy init [type] [output.json]
   mirofy import mermaid <input.mmd> [output.json] [--json]
   mirofy repair <type> <input.json> [output.json] --safe [--json]
 
@@ -1330,6 +1331,72 @@ async function commandVisualCheck(args) {
   process.exitCode = result.exitCode;
 }
 
+/**
+ * Write a starter document you can edit, rather than a blank file.
+ *
+ * The gap this closes is the first five minutes. `demo` produces a finished
+ * artifact, which shows what the tool does and teaches nothing about the
+ * document behind it; `examples` lists files inside an installed package that
+ * a reader then has to go and find. Neither leaves you with something of your
+ * own to change.
+ *
+ * The starter is deliberately SMALL -- three components and two connections --
+ * because a first document you can hold in your head is worth more than one
+ * that shows off every key. Every optional key is left out: an absent key is
+ * correct and an empty one is rejected, and a starter full of empty strings
+ * teaches the opposite.
+ */
+function commandInit(argv) {
+  const types = ['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle'];
+  const type = argv.find((arg) => types.includes(arg)) ?? 'architecture';
+  const explicit = argv.find((arg) => !arg.startsWith('--') && !types.includes(arg));
+  const target = path.resolve(explicit ?? `${type}.json`);
+
+  if (fs.existsSync(target)) {
+    fail(`${target} already exists. Name a different file, or delete that one.`);
+  }
+
+  const starters = {
+    architecture: {
+      components: [
+        { id: 'web', type: 'frontend', label: 'Web App', sublabel: 'browser' },
+        { id: 'api', type: 'backend', label: 'API', sublabel: 'HTTP' },
+        { id: 'db', type: 'database', label: 'Postgres', sublabel: 'primary' },
+      ],
+      connections: [
+        { from: 'web', to: 'api', label: 'requests' },
+        { from: 'api', to: 'db', label: 'reads / writes' },
+      ],
+      layout: { mode: 'grid', cols: 3 },
+    },
+  };
+  const body = starters[type] ?? starters.architecture;
+  if (!starters[type]) {
+    console.log(`init: no starter for ${type} yet, writing an architecture one.`);
+  }
+
+  const document = {
+    schema_version: 1,
+    diagram_type: 'architecture',
+    meta: { title: 'My system' },
+    ...(body.layout ? { layout: body.layout } : {}),
+    components: body.components.map((component, index) => ({
+      ...component,
+      row: Math.floor(index / 3),
+      col: index % 3,
+    })),
+    connections: body.connections,
+  };
+
+  fs.writeFileSync(target, `${JSON.stringify(document, null, 2)}${String.fromCharCode(10)}`);
+  const shown = path.relative(process.cwd(), target) || target;
+  console.log(`Wrote ${shown}`);
+  console.log('');
+  console.log('Edit it, then:');
+  console.log(`  mirofy validate architecture ${shown}     # says what is wrong, and how to fix it`);
+  console.log(`  mirofy render architecture ${shown}       # one HTML file you can open`);
+}
+
 function commandExamples() {
   const result = runNode([path.join(skillRoot, 'scripts/render-examples.mjs')], { cwd: skillRoot });
   if (result.status !== 0) exitFrom(result);
@@ -1928,6 +1995,9 @@ switch (command) {
     break;
   case 'demo':
     commandDemo(args);
+    break;
+  case 'init':
+    commandInit(args);
     break;
   case 'import':
     await commandImport(args);
