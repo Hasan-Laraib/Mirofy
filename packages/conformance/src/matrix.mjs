@@ -914,6 +914,39 @@ export const IMPORTED_ROWS = [
     testTitle: '[4.16] every meridian stroke and text pair clears its legibility floor',
   },
   {
+    id: '6.25',
+    name: 'draw.io / Excalidraw export (escape hatch)',
+    // Every diagram tool eventually asks its users to trust it will still be
+    // here next year. The honest answer is to make leaving cheap: a diagram
+    // you can only edit in the tool that made it is a diagram held hostage.
+    //
+    // Two things are proved, and the second matters more.
+    //
+    // The output must OPEN. draw.io is checked as parseable XML with real
+    // vertices and edges referencing node ids; Excalidraw as JSON whose arrows
+    // are bound at both ends, because an unbound arrow does not move when the
+    // reader drags a box and the first edit produces a broken diagram. An edge
+    // pointing at a missing node is dropped rather than exported bound to an
+    // id that is not there, which makes the file fail to load entirely.
+    //
+    // And the export must be HONEST. Conversion is lossy by necessity --
+    // citations, provenance, guided views, boundary membership and authored
+    // routing have no counterpart in either format -- and a converter that
+    // stayed quiet hands someone a file that looks complete and is not. The
+    // loss report is COMPUTED from the document, so a document with nothing to
+    // lose reports nothing: a disclaimer printed unconditionally is noise, and
+    // noise gets skipped on the day it matters. Observed failing on a planted
+    // empty report.
+    //
+    // Labels like `API <prod>` and a title like `Checkout & "billing"` are
+    // ordinary and lethal unescaped. Observed failing on a planted identity
+    // escape.
+    origin: 'N',
+    phase: 'P5',
+    proof: 'export-formats.test.mjs',
+    testTitle: '[6.25] the export says what it could not carry, computed from the document',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

@@ -50,8 +50,8 @@ external requests, and no runtime dependencies.
 
 ## What is proved
 
-The conformance matrix has **95 rows. 75 are proved without a browser**; 19
-more need headless Chrome (`MIROFY_CHROME`), bringing the total to 94.
+The conformance matrix has **96 rows. 76 are proved without a browser**; 19
+more need headless Chrome (`MIROFY_CHROME`), bringing the total to 95.
 
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this import's scope, so there is nothing here to prove parity against.
@@ -99,6 +99,21 @@ it — an empty result means *not found*, never *does not exist*.
 `impact` answers as reachability and refuses to be more. What is connected
 downstream is a fact about the graph; whether a change breaks any of it is a
 judgement about a running system, and this has no evidence for that.
+
+## Leaving
+
+A diagram you can only edit in the tool that made it is a diagram held
+hostage, so leaving is cheap:
+
+```bash
+npm run export -- drawio     architecture in.json   # opens in diagrams.net
+npm run export -- excalidraw architecture in.json   # opens in Excalidraw
+```
+
+The conversion is lossy and says exactly what it lost, computed from your
+document rather than recited as a disclaimer — citations, guided views,
+boundary rules and authored routing have no counterpart in either format. A
+document with nothing to lose is told nothing was lost.
 
 ## Agent access (MCP)
 

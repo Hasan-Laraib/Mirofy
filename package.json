@@ -32,7 +32,8 @@
     "assert": "node packages/explain/bin/assert.mjs",
     "mcp": "node packages/mcp/bin/mcp.mjs",
     "timeline": "node packages/explain/bin/timeline.mjs",
-    "drift": "node packages/explain/bin/drift.mjs"
+    "drift": "node packages/explain/bin/drift.mjs",
+    "export": "node packages/export/bin/export.mjs"
   },
   "devDependencies": {
     "@types/node": "^18",

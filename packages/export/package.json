@@ -1,0 +1,8 @@
+{
+  "name": "@mirofy/export",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Escape hatches: draw.io and Excalidraw export, with an explicit loss report.",
+  "exports": { "./drawio": "./src/drawio.mjs" }
+}
