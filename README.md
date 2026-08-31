@@ -50,8 +50,8 @@ external requests, and no runtime dependencies.
 
 ## What is proved
 
-The conformance matrix has **92 rows. 72 are proved without a browser**; 19
-more need headless Chrome (`MIROFY_CHROME`), bringing the total to 91.
+The conformance matrix has **93 rows. 73 are proved without a browser**; 19
+more need headless Chrome (`MIROFY_CHROME`), bringing the total to 92.
 
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this import's scope, so there is nothing here to prove parity against.
@@ -88,6 +88,7 @@ npm run explain -- path web db          # a directed route between two component
 npm run explain -- find payment         # id, label, kind or metadata match
 npm run explain -- orphans              # components nothing connects to
 npm run explain -- gaps                 # what the scan could not read
+npm run timeline                        # what is moving, from cited-file churn
 ```
 
 Every answer carries what it could be **wrong** about. "Nothing calls

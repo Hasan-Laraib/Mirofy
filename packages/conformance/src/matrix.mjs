@@ -805,6 +805,41 @@ export const IMPORTED_ROWS = [
     testTitle: '[6.18] a tool answer carries its incompleteness in the text an agent reads',
   },
   {
+    id: '6.20',
+    name: 'timeline (evolution across git history)',
+    // The obvious implementation checks out every commit and re-scans. It is
+    // also the wrong one: a full scan per commit, a clean worktree nobody has,
+    // and an answer to a question nobody asked, since most components do not
+    // change in most commits.
+    //
+    // The model knows which files each component cites; git knows which
+    // commits touched which files. Joining those answers "what is moving" for
+    // one `git log` per path.
+    //
+    // Which makes the naming the load-bearing part. This measures CITED-FILE
+    // CHURN and says so: a commit that touched a cited file changed something
+    // in that file, not necessarily the component's shape, relationships or
+    // meaning. Claiming otherwise would be an assertion about intent that a
+    // file path cannot support.
+    //
+    // A component with no citations is reported as UNKNOWN, in its own list,
+    // never as an entry with zero commits. In a table "no commits" and "no
+    // information" look identical and only one is a fact. Observed failing on
+    // a planted zero-entry.
+    //
+    // A commit touching two cited files counts once. Counting per path would
+    // make a component look twice as volatile as it is. Observed failing on
+    // the planted double count.
+    //
+    // Run against this repository it reports 62 uncited components and no
+    // history, which is correct and worth knowing: the model here is built
+    // from authored documents whose sources name a document, not a path.
+    origin: 'N',
+    phase: 'P5',
+    proof: 'timeline.test.mjs',
+    testTitle: '[6.20] a component with no cited paths is UNKNOWN, not unchanged',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +
