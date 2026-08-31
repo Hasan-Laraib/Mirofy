@@ -19,8 +19,9 @@ import { runAdapter } from '../src/adapter.mjs';
 import { workspaceAdapter } from '../src/adapters/workspace.mjs';
 import { importsAdapter } from '../src/adapters/imports.mjs';
 import { routesAdapter } from '../src/adapters/routes.mjs';
+import { composeAdapter } from '../src/adapters/compose.mjs';
 
-const ADAPTERS = [workspaceAdapter, importsAdapter, routesAdapter];
+const ADAPTERS = [workspaceAdapter, importsAdapter, routesAdapter, composeAdapter];
 
 function parseArgs(argv) {
   const args = { repoRoot: process.cwd(), out: null };

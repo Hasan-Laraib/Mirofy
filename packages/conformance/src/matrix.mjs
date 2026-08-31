@@ -947,6 +947,41 @@ export const IMPORTED_ROWS = [
     testTitle: '[6.25] the export says what it could not carry, computed from the document',
   },
   {
+    id: '2.12',
+    name: 'Docker Compose adapter',
+    // A compose file is the closest thing most repositories have to a written
+    // deployment topology, and it is configuration rather than code, so every
+    // fact is config-derived. Calling it statically-derived would claim the
+    // scanner read code and reached a conclusion, which it did not.
+    //
+    // Compose is YAML and row 6.9 keeps this repository at zero runtime
+    // dependencies, so there is no parser to reach for. The adapter reads the
+    // SUBSET compose files use for topology and turns everything else into a
+    // Gap naming the line -- the scanner rule applied to its own limits. A
+    // service silently dropped is a service missing from the diagram with
+    // nothing to explain the hole. Observed failing on a planted silent read
+    // of YAML anchors.
+    //
+    // The line it refuses to cross is the point of the row. `depends_on` is a
+    // DECLARED dependency and becomes a fact. Two services sharing a network
+    // are not recorded as talking to each other: a shared network is
+    // permission, not communication, and drawing that difference wrongly is
+    // worse than omitting it. Observed failing on a planted shares-network
+    // fact.
+    //
+    // Absence of a compose file is not a gap. A gap means "there was something
+    // here I could not read"; one per Docker-less repository would drown the
+    // real ones.
+    //
+    // One bug caught by its own test: a block sequence must attach to the key
+    // that opened it, not to the frame inside. Attached wrongly, `ports`
+    // becomes an empty object -- present, plausible, and silently wrong.
+    origin: 'N',
+    phase: 'P4',
+    proof: 'compose-adapter.test.mjs',
+    testTitle: '[2.12] a shared network is not recorded as communication',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +
