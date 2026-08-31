@@ -17,13 +17,16 @@
 </p>
 
 <p align="center">
-  <img src="assets/self-model.svg" alt="Mirofy's own architecture, derived from its own source code" width="880">
+  <a href="https://hasan-laraib.github.io/Mirofy/self-model.html"><img src="assets/self-model.svg" alt="Mirofy's own architecture, derived from its own source code" width="880"></a>
 </p>
 
 <p align="center">
   <em>That diagram is not a mock-up. It is this repository, scanned by itself —
   every box citing the manifest it came from, every arrow citing the import
   lines that produced it.</em>
+  <br>
+  <strong><a href="https://hasan-laraib.github.io/Mirofy/self-model.html">Open the live one ↗</a></strong> — click any
+  node for the file, line range and commit behind it.
 </p>
 
 ---
@@ -103,12 +106,14 @@ node packages/core/bin/mirofy.mjs validate architecture design.json --json
 <td width="50%" valign="top">
 <img src="assets/meridian.png" alt="An architecture diagram in the meridian preset" width="100%">
 <p align="center"><em>Six presets, light and dark. <code>meridian</code> keeps
-arrows graphite so colour means <strong>what a node is</strong>.</em></p>
+arrows graphite so colour means <strong>what a node is</strong>.
+<a href="https://hasan-laraib.github.io/Mirofy/gallery/architecture--meridian.html">Open ↗</a></em></p>
 </td>
 <td width="50%" valign="top">
 <img src="assets/sequence.png" alt="A sequence diagram with lifelines and messages" width="100%">
 <p align="center"><em>Five diagram types — architecture, workflow, sequence,
-dataflow, lifecycle.</em></p>
+dataflow, lifecycle.
+<a href="https://hasan-laraib.github.io/Mirofy/gallery/sequence--meridian.html">Open ↗</a></em></p>
 </td>
 </tr>
 </table>
@@ -119,6 +124,9 @@ dataflow, lifecycle.</em></p>
 
 <p align="center">
   <em>One file. Opens offline, from disk, with no server and no network.</em>
+  <br>
+  <strong><a href="https://hasan-laraib.github.io/Mirofy/">All thirty are live ↗</a></strong> — five types × six
+  presets, rebuilt from every commit.
 </p>
 
 ---
@@ -263,8 +271,14 @@ A card shows what the reader actually did. None of them claim validation, and
 none are produced from a query that returned nothing.
 
 ```bash
-npm run gallery    # every type in every preset → preview/index.html
+npm run gallery      # every type in every preset → preview/index.html
+npm run build:site   # the same, plus this repo's self-model → site/
 ```
+
+The second is what CI publishes to
+**[hasan-laraib.github.io/Mirofy](https://hasan-laraib.github.io/Mirofy/)** on every commit. Nothing
+is committed: the site is built from the code at the commit it describes, so it
+cannot go on quietly describing an older one.
 
 ## Taking it elsewhere
 
