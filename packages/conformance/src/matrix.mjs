@@ -763,6 +763,48 @@ export const IMPORTED_ROWS = [
     testTitle: '[3.15] no violation over a scan with gaps is UNPROVEN, not passing',
   },
   {
+    id: '6.18',
+    name: 'MCP server (system model as agent context)',
+    // An agent asked to change a codebase answers questions first: what calls
+    // this, what is downstream, which components touch the payment data.
+    // Today it answers with grep, which finds strings, cannot tell a call from
+    // a comment, and has no way to report what it missed.
+    //
+    // This serves the SAME engine `explain` uses rather than a second
+    // implementation that could disagree with it, so an agent and a human get
+    // the same answer to the same question.
+    //
+    // The reason it is worth building rather than convenient: an agent that
+    // reads "nothing calls PaymentService" and deletes it has done real damage
+    // if six files failed to parse. So the incompleteness report is in the
+    // TEXT an agent reads, not only the structured payload -- most clients
+    // feed the prose to the model and drop the rest. Observed failing on a
+    // planted silence.
+    //
+    // Tool descriptions are held to the same boundary as the answers. `impact`
+    // says REACHABILITY and "not a prediction of breakage"; a test forbids
+    // "will break", "guarantee" and "safe to" in any description, because a
+    // description that oversells is how a careful engine produces a confident
+    // wrong action.
+    //
+    // A bad component id returns tool content with isError, never a JSON-RPC
+    // error: most clients never show a protocol error to the model, so an
+    // error there is a silent failure the agent cannot correct. Observed
+    // failing on a planted protocol error.
+    //
+    // Notifications draw no response -- the absence is the behaviour, and
+    // answering one is a protocol violation clients report as a stray
+    // message. Observed failing on a planted reply.
+    //
+    // The protocol is implemented directly, because row 6.9 keeps this
+    // repository at zero runtime dependencies and MCP over stdio is
+    // newline-delimited JSON-RPC 2.0.
+    origin: 'N',
+    phase: 'P5',
+    proof: 'mcp-server.test.mjs',
+    testTitle: '[6.18] a tool answer carries its incompleteness in the text an agent reads',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

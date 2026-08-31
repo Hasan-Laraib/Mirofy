@@ -29,7 +29,8 @@
     "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:size && npm run check:audit",
     "test:quarantine": "node scripts/run-tests.mjs --quarantine",
     "explain": "node packages/explain/bin/explain.mjs",
-    "assert": "node packages/explain/bin/assert.mjs"
+    "assert": "node packages/explain/bin/assert.mjs",
+    "mcp": "node packages/mcp/bin/mcp.mjs"
   },
   "devDependencies": {
     "@types/node": "^18",

@@ -50,8 +50,8 @@ external requests, and no runtime dependencies.
 
 ## What is proved
 
-The conformance matrix has **91 rows. 71 are proved without a browser**; 19
-more need headless Chrome (`MIROFY_CHROME`), bringing the total to 90.
+The conformance matrix has **92 rows. 72 are proved without a browser**; 19
+more need headless Chrome (`MIROFY_CHROME`), bringing the total to 91.
 
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this import's scope, so there is nothing here to prove parity against.
@@ -98,6 +98,32 @@ it — an empty result means *not found*, never *does not exist*.
 `impact` answers as reachability and refuses to be more. What is connected
 downstream is a fact about the graph; whether a change breaks any of it is a
 judgement about a running system, and this has no evidence for that.
+
+## Agent access (MCP)
+
+The same queries over the Model Context Protocol, so an agent gets the answers
+the CLI gives instead of grepping for strings:
+
+```json
+{
+  "mcpServers": {
+    "mirofy": { "command": "node", "args": ["packages/mcp/bin/mcp.mjs"] }
+  }
+}
+```
+
+Nine tools — `callers`, `dependencies`, `impact`, `upstream`, `path`, `find`,
+`orphans`, `gaps`, `summary` — served from the same engine `explain` uses, not
+a second implementation that could disagree with it.
+
+Every result carries its incompleteness **in the prose an agent reads**, not
+only in the structured payload: most clients feed the text to the model and
+drop the rest. An agent that reads *"nothing calls PaymentService"* and deletes
+it has done real damage if six files failed to parse.
+
+Tool descriptions are held to the same boundary as the answers. `impact` says
+*reachability*, never *what will break* — a description that oversells is how a
+careful engine produces a confident wrong action.
 
 ## Architecture rules
 

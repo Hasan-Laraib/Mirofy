@@ -1,0 +1,9 @@
+{
+  "name": "@mirofy/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server: the system model as agent context, with an incompleteness report on every answer.",
+  "exports": { "./server": "./src/server.mjs" },
+  "bin": { "mirofy-mcp": "./bin/mcp.mjs" }
+}
