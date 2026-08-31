@@ -1428,3 +1428,86 @@ test('sequence: segment title badge clears a nearby first message label', () => 
 });
 
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
+
+// ---------------------------------------------------------------------------
+// The router and the gates it is filtered by.
+//
+// Clean Flow has three rules about a route: it must leave and arrive through
+// the sides its endpoints declare, it must not cross an unrelated node, and it
+// must cross a container's border rather than run along it. The architecture
+// router checked the first two and knew nothing about the third, so it chose
+// corridors that lay exactly on a boundary edge -- and the gate then reported a
+// diagram the router had every means to avoid.
+//
+// The workflow router had a worse version of the same gap: its cross-lane
+// fallback was returned WITHOUT ANY CHECK AT ALL.
+//
+// Both fixtures are frozen copies of documents that reproduced the defect. The
+// first hand-written fixture for each rendered clean on the broken code, which
+// is the failure mode these tests exist to avoid -- see
+// fixtures/regression/README.md.
+// ---------------------------------------------------------------------------
+
+const regressionRoot = path.join(skillRoot, '..', '..', 'fixtures', 'regression');
+
+/** @param {string} name */
+function regression(name) {
+  return JSON.parse(fs.readFileSync(path.join(regressionRoot, name), 'utf8'));
+}
+
+/** The composition issue codes `validate` reports, counted. */
+function compositionCodes(type, document) {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-composition-'));
+  const input = path.join(tmp, 'input.json');
+  fs.writeFileSync(input, JSON.stringify(document));
+  try {
+    const stdout = execFileSync('node', [
+      path.join(skillRoot, 'bin/mirofy.mjs'), 'validate', type, input, '--json',
+    ], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    /** @type {Record<string, number>} */
+    const counts = {};
+    for (const issue of JSON.parse(stdout).composition?.issues ?? []) {
+      counts[issue.code] = (counts[issue.code] ?? 0) + 1;
+    }
+    return counts;
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
+test('architecture: an automatic route does not run along a boundary border', () => {
+  // Asked of the validate receipt, not of the rendered HTML. A standard-profile
+  // warning never reaches the artifact, so a first version of this test grepped
+  // the SVG for a string that was never going to be there and passed against
+  // the very code it was written to catch.
+  const codes = compositionCodes('architecture', regression('boundary-border-run.architecture.json'));
+  assert.equal(codes['composition/container-border-run'], undefined,
+    `the router still routes along a boundary edge: ${JSON.stringify(codes)}`);
+});
+
+test('workflow: the cross-lane fallback is checked before it is returned', () => {
+  // Six endpoint-side failures and three edge-through-node failures came out of
+  // one unchecked drop through the lane gap.
+  const { code, stderr } = render('workflow', regression('unchecked-cross-lane.workflow.json'));
+  assert.equal(code, 0, `the fallback produced a route its own gates reject:
+${stderr}`);
+});
+
+test('workflow: a right-to-left edge routes through the gap between its endpoints', () => {
+  // An edge leaving a right side and arriving at a left side can only put its
+  // vertical leg BETWEEN the two x values -- an outside channel would approach
+  // the target from the wrong side. Leaving that shape out of the candidates is
+  // why the edge above fell through to the unchecked fallback.
+  const { code, stderr, outPath } = render('workflow', regression('unchecked-cross-lane.workflow.json'));
+  assert.equal(code, 0, stderr);
+  const html = fs.readFileSync(outPath, 'utf8');
+  const route = /data-edge-id="e_mitigate_postmortem"[^>]*data-composition-points="([^"]+)"/.exec(html);
+  assert.ok(route, 'the edge emitted no route points');
+  // The attribute separates points with a semicolon, not a space.
+  const xs = route[1].split(';').map((pair) => Number(pair.split(',')[0]));
+  const corridor = xs[1];
+  const low = Math.min(xs[0], xs.at(-1));
+  const high = Math.max(xs[0], xs.at(-1));
+  assert.ok(corridor > low && corridor < high,
+    `the corridor at ${corridor} is outside the span ${low}..${high} (${route[1]})`);
+});

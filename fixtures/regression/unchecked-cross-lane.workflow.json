@@ -1,0 +1,200 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Incident Response: Alert to Postmortem"
+  },
+  "phases": [
+    {
+      "id": "detect",
+      "label": "Detect & Notify",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "respond",
+      "label": "Respond",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "learn",
+      "label": "Learn",
+      "fromCol": 4,
+      "toCol": 5
+    }
+  ],
+  "lanes": [
+    {
+      "id": "monitoring",
+      "label": "Monitoring & Paging"
+    },
+    {
+      "id": "primary",
+      "label": "On-Call Engineer"
+    },
+    {
+      "id": "secondary",
+      "label": "Second Responder",
+      "variant": "exception"
+    },
+    {
+      "id": "followup",
+      "label": "Follow-Up"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "alert",
+      "lane": "monitoring",
+      "col": 0,
+      "type": "cloud",
+      "label": "Alert Fires",
+      "sublabel": "Threshold breached",
+      "tag": "trigger"
+    },
+    {
+      "id": "page",
+      "lane": "monitoring",
+      "col": 1,
+      "type": "messagebus",
+      "label": "Page On-Call",
+      "sublabel": "Notification dispatched"
+    },
+    {
+      "id": "ack",
+      "lane": "primary",
+      "col": 1,
+      "type": "frontend",
+      "label": "Acknowledge",
+      "sublabel": "On-call claims the page"
+    },
+    {
+      "id": "triage",
+      "lane": "primary",
+      "col": 2,
+      "type": "backend",
+      "label": "Triage",
+      "sublabel": "Assess scope and severity",
+      "tag": "decision"
+    },
+    {
+      "id": "mitigate",
+      "lane": "primary",
+      "col": 3,
+      "type": "backend",
+      "label": "Mitigate Directly",
+      "sublabel": "Apply fix or rollback"
+    },
+    {
+      "id": "escalate",
+      "lane": "secondary",
+      "col": 3,
+      "type": "security",
+      "label": "Escalate",
+      "sublabel": "Engage second responder",
+      "tag": "exception"
+    },
+    {
+      "id": "assistedFix",
+      "lane": "secondary",
+      "col": 4,
+      "type": "backend",
+      "label": "Joint Mitigation",
+      "sublabel": "Second responder drives fix"
+    },
+    {
+      "id": "postmortem",
+      "lane": "followup",
+      "col": 4,
+      "type": "database",
+      "label": "Write Postmortem",
+      "sublabel": "Timeline, cause, actions"
+    },
+    {
+      "id": "review",
+      "lane": "followup",
+      "col": 5,
+      "type": "external",
+      "label": "Review Postmortem",
+      "sublabel": "Team sign-off"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_alert_page",
+      "from": "alert",
+      "to": "page",
+      "label": "fires",
+      "role": "main",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_page_ack",
+      "from": "page",
+      "to": "ack",
+      "label": "pages on-call",
+      "role": "main",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_ack_triage",
+      "from": "ack",
+      "to": "triage",
+      "label": "acknowledged",
+      "role": "main",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_triage_mitigate",
+      "from": "triage",
+      "to": "mitigate",
+      "label": "handled solo",
+      "variant": "emphasis",
+      "role": "main",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_triage_escalate",
+      "from": "triage",
+      "to": "escalate",
+      "label": "needs backup",
+      "variant": "dashed",
+      "role": "branch",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_escalate_assist",
+      "from": "escalate",
+      "to": "assistedFix",
+      "label": "hands off context",
+      "role": "branch",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_mitigate_postmortem",
+      "from": "mitigate",
+      "to": "postmortem",
+      "label": "mitigated",
+      "role": "main",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_assist_postmortem",
+      "from": "assistedFix",
+      "to": "postmortem",
+      "label": "mitigated",
+      "role": "branch",
+      "provenance": "authored"
+    },
+    {
+      "id": "e_postmortem_review",
+      "from": "postmortem",
+      "to": "review",
+      "label": "submitted for review",
+      "role": "main",
+      "provenance": "authored"
+    }
+  ]
+}

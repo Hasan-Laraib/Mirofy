@@ -42,6 +42,7 @@ import {
   componentText,
   arrowClassMap,
   variantAccent,
+  collectBorderRuns,
 } from '../shared/geometry.mjs';
 
 const componentTextFit = {
@@ -934,6 +935,45 @@ function alignFacingPorts(conn, from, to, start, end, fromSide, toSide, ports) {
   return { start, end };
 }
 
+/**
+ * Whether a route runs along the border of a boundary instead of crossing it.
+ *
+ * Asked with the gate's own collector rather than a second implementation. The
+ * router was previously filtered by two of the three Clean Flow rules -- it
+ * checked that a candidate honoured its endpoint sides and that it cleared
+ * unrelated components, and knew nothing about container borders. So it would
+ * pick a dogleg whose corridor happened to lie exactly on a boundary edge, and
+ * the gate would then report a diagram the router had every means to avoid.
+ */
+function runsAlongFrameBorder(points) {
+  if (compositionFrames.length === 0) return false;
+  return collectBorderRuns({ routedRelations: [{ points }], frames: compositionFrames }).length > 0;
+}
+
+/**
+ * Corridor positions between two coordinates, nearest the midpoint first.
+ *
+ * The midpoint is the right answer almost always, and is tried first so that
+ * every route which is already clean stays byte-identical. The nudges exist
+ * for the case the midpoint lands on a boundary edge -- which is not a
+ * coincidence but a consequence: a boundary is drawn a fixed pad outside its
+ * members, and that pad often falls near the middle of the gap between a row
+ * inside it and a row outside.
+ *
+ * Every candidate keeps an 8px stub at each end, so a nudged corridor still
+ * reads as a dogleg rather than as a kink against a border.
+ */
+function corridorPositions(a, b) {
+  const mid = (a + b) / 2;
+  const room = Math.abs(a - b) / 2 - 8;
+  const positions = [mid];
+  for (const step of [8, 16, 24]) {
+    if (step > room) break;
+    positions.push(mid - step, mid + step);
+  }
+  return positions;
+}
+
 function routeVia(conn, from, to, start, end, fromSide, toSide) {
   if (conn.via) return conn.via;
   switch (conn.route || 'auto') {
@@ -1017,9 +1057,44 @@ function routeVia(conn, from, to, start, end, fromSide, toSide) {
         ...(nearParallelPorts ? sideSafe : sideAware),
         ...candidates.filter((candidate) => !sideSafe.includes(candidate)),
       ];
-      for (const candidate of ordered) {
+      const clears = (candidate) => {
         const points = [start, ...candidate, end];
-        if (routeClearsEndpointComponents(points, from, to) && routeClearsComponents(conn, points)) return candidate;
+        return routeClearsEndpointComponents(points, from, to) && routeClearsComponents(conn, points);
+      };
+      // First pass: everything the router already required, AND clear of every
+      // boundary border. A route that was already clean satisfies this and is
+      // returned unchanged, so no correct diagram moves.
+      //
+      // The endpoint-side test is explicit here, where the third pass leaves it
+      // to the ordering. `ordered` puts the side-safe candidates first and the
+      // old loop took the first that cleared the components, so the side rule
+      // was enforced by position alone. Adding a filter broke that: rejecting
+      // the side-safe candidate for a border run let the loop fall through to
+      // one that left its endpoints sideways.
+      for (const candidate of ordered) {
+        if (!routeHonorsEndpointSides([start, ...candidate, end], fromSide, toSide)) continue;
+        if (clears(candidate) && !runsAlongFrameBorder([start, ...candidate, end])) return candidate;
+      }
+      // Second pass: the two plain doglegs with their corridor nudged off the
+      // border it landed on. Only these two shapes -- the side-aware bridges
+      // above are built to their own rules, and shifting a shape this does not
+      // understand produced routes that left their endpoints sideways.
+      const shiftedCandidates = [
+        ...corridorPositions(start[0], end[0]).slice(1)
+          .map((x) => [[x, start[1]], [x, end[1]]]),
+        ...corridorPositions(start[1], end[1]).slice(1)
+          .map((y) => [[start[0], y], [end[0], y]]),
+      ];
+      for (const shifted of shiftedCandidates) {
+        if (!routeHonorsEndpointSides([start, ...shifted, end], fromSide, toSide)) continue;
+        if (clears(shifted) && !runsAlongFrameBorder([start, ...shifted, end])) return shifted;
+      }
+      // Third pass: no corridor avoids every border. Take the best route that
+      // clears the components, exactly as before, and let the border-run gate
+      // report what is left -- a diagram routed through a node to dodge a
+      // border would be a worse answer than the one being reported.
+      for (const candidate of ordered) {
+        if (clears(candidate)) return candidate;
       }
 
       // Both bounded doglegs are blocked. Keep the best endpoint-safe route

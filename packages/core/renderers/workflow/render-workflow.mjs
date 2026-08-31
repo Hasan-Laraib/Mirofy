@@ -711,6 +711,62 @@ function automaticOneBendSides(edge, from, to) {
   }) || null;
 }
 
+/**
+ * A cross-lane route that has been checked before it is returned.
+ *
+ * The old fallback returned a drop through the lane gap WITHOUT TESTING IT --
+ * no endpoint-side test, no node-clearance test, unlike every other route this
+ * renderer produces. One edge in a benchmark document failed all three Clean
+ * Flow rules at once for exactly that reason: `oneBendCrossLaneVia` correctly
+ * declined, and the unchecked fallback took over.
+ *
+ * The order matters. The drop at the edge's own bias is tried FIRST, so any
+ * diagram whose route already works keeps it to the pixel. Only when that is
+ * rejected does this look elsewhere: other points in the lane gap first, since
+ * a drop is the shape a reader expects between lanes, then a channel outside
+ * the columns, which is the shape that survives when the gap is full.
+ *
+ * If nothing passes, the original drop is returned unchanged. A route that
+ * fails a gate and says so beats a route bent somewhere arbitrary to look
+ * clean.
+ */
+function checkedCrossLaneVia(edge, from, to, start, end, fromSide, toSide) {
+  const drop = (y) => [[start[0], y], [end[0], y]];
+  const channel = (x) => [[x, start[1]], [x, end[1]]];
+  const bias = edge.bias ?? 0.5;
+  const preferred = drop(gapYBetween(from.lane, to.lane, bias));
+
+  // A channel BETWEEN the two endpoints, which is the shape a right-to-left
+  // edge needs: it has to leave rightward and arrive rightward, so its vertical
+  // leg can only sit in the gap between the two x values. The outside channels
+  // below cannot satisfy that -- they approach the target from the wrong side --
+  // and leaving this out was why an edge with a perfectly good route available
+  // fell through to an unchecked drop.
+  const between = [];
+  const low = Math.min(start[0], end[0]);
+  const high = Math.max(start[0], end[0]);
+  if (high - low > 8) {
+    for (const fraction of [0.5, 0.35, 0.65]) {
+      between.push(channel(low + (high - low) * fraction));
+    }
+  }
+
+  const candidates = [
+    preferred,
+    ...[0.35, 0.65, 0.2, 0.8].map((b) => drop(gapYBetween(from.lane, to.lane, b))),
+    ...between,
+    channel(Math.min(from.x, to.x) - 28),
+    channel(Math.max(from.x + from.width, to.x + to.width) + 28),
+  ];
+  for (const via of candidates) {
+    const points = [start, ...via, end];
+    if (!routeHonorsEndpointSides(points, fromSide, toSide)) continue;
+    if (!routeClearsUnrelatedNodes(edge, points)) continue;
+    return via;
+  }
+  return preferred;
+}
+
 function routeVia(edge, from, to, start, end, fromSide, toSide) {
   if (edge.via) return edge.via;
   switch (edge.route || 'auto') {
@@ -741,8 +797,7 @@ function routeVia(edge, from, to, start, end, fromSide, toSide) {
       if (from.lane === to.lane) return sameLaneAutoVia(start, end);
       const oneBendVia = oneBendCrossLaneVia(edge, start, end, fromSide, toSide);
       if (oneBendVia) return oneBendVia;
-      const y = gapYBetween(from.lane, to.lane, edge.bias ?? 0.5);
-      return [[start[0], y], [end[0], y]];
+      return checkedCrossLaneVia(edge, from, to, start, end, fromSide, toSide);
     }
   }
 }
