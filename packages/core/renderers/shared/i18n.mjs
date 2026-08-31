@@ -98,6 +98,7 @@ const MESSAGE_PAIRS = {
   'viewer.preset.editorial': ['Editorial', '编辑风格'],
   'viewer.preset.editorial.hint': ['Publication and launch notes', '适合发布与上线说明'],
   'viewer.preset.okabeIto': ['Accessible', '无障碍'],
+  'viewer.preset.meridian': ['Meridian', 'Meridian'],
   'viewer.preset.okabeIto.hint': ['Colour-vision-deficiency friendly', '色觉友好设计'],
   'viewer.preset.badge.signalFlow': ['SIGNAL FLOW', '信号流'],
   'viewer.preset.badge.blueprint': ['BLUEPRINT / REV 01', '蓝图 / 修订 01'],

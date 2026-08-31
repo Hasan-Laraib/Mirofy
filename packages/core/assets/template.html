@@ -427,6 +427,85 @@
       --toolbar-menu-bg: #ffffff;
     }
 
+    /* ==========================================================
+       MERIDIAN — an editorial preset for documentation.
+       Near-neutral ground, low-chroma fills, darker light-mode strokes,
+       and GRAPHITE arrows: relationships read as structure, and colour
+       is reserved for what a node is. ADDED, never substituted — every
+       existing preset still renders byte-for-byte as before.
+       ========================================================== */
+    [data-preset="meridian"][data-theme="dark"] {
+
+      --bg: #0d1117;
+      --grid: #1c2430;
+      --text: #e9eef5;
+      --text-muted: #9aa7b6;
+      --text-dim: #67727f;
+      --text-faint: #7e8a97;
+      --panel: rgba(15, 20, 27, 0.94);
+      --panel-border: #2b3440;
+      --lane-fill: rgba(22, 28, 36, 0.5);
+      --lane-stroke: #333d4b;
+      --arrow: #7d8794;
+      --arrow-emphasis: #6cb6ff;
+      --mask: #0d1117;
+      --frontend-fill: rgba(88, 166, 255, 0.10);
+      --frontend-stroke: #6cb6ff;
+      --backend-fill: rgba(63, 185, 80, 0.10);
+      --backend-stroke: #57cc6a;
+      --database-fill: rgba(163, 113, 247, 0.10);
+      --database-stroke: #b487ff;
+      --cloud-fill: rgba(210, 153, 34, 0.10);
+      --cloud-stroke: #e3b341;
+      --security-fill: rgba(248, 81, 73, 0.10);
+      --security-stroke: #ff7b72;
+      --messagebus-fill: rgba(219, 109, 40, 0.10);
+      --messagebus-stroke: #f0883e;
+      --external-fill: rgba(110, 118, 129, 0.16);
+      --external-stroke: #9aa5b1;
+      --toolbar-bg: rgba(15, 20, 27, 0.94);
+      --toolbar-border: #2b3440;
+      --toolbar-text: #e9eef5;
+      --toolbar-hover: rgba(33, 41, 52, 0.96);
+      --toolbar-menu-bg: #111720;
+        }
+
+    [data-preset="meridian"][data-theme="light"] {
+
+      --bg: #ffffff;
+      --grid: #e8ebef;
+      --text: #1b1f24;
+      --text-muted: #4d5763;
+      --text-dim: #79828d;
+      --text-faint: #616b76;
+      --panel: #ffffff;
+      --panel-border: #d3d9e0;
+      --lane-fill: rgba(246, 248, 250, 0.75);
+      --lane-stroke: #cfd6dd;
+      --arrow: #5c6672;
+      --arrow-emphasis: #0757ba;
+      --mask: #ffffff;
+      --frontend-fill: rgba(9, 105, 218, 0.07);
+      --frontend-stroke: #0757ba;
+      --backend-fill: rgba(26, 127, 55, 0.07);
+      --backend-stroke: #166b2e;
+      --database-fill: rgba(130, 80, 223, 0.07);
+      --database-stroke: #6b3fbe;
+      --cloud-fill: rgba(154, 103, 0, 0.08);
+      --cloud-stroke: #7d5400;
+      --security-fill: rgba(207, 34, 46, 0.07);
+      --security-stroke: #ab1c26;
+      --messagebus-fill: rgba(191, 87, 0, 0.07);
+      --messagebus-stroke: #9c3f00;
+      --external-fill: rgba(110, 118, 129, 0.10);
+      --external-stroke: #5c6672;
+      --toolbar-bg: rgba(255, 255, 255, 0.95);
+      --toolbar-border: #d3d9e0;
+      --toolbar-text: #1b1f24;
+      --toolbar-hover: rgba(236, 240, 244, 0.98);
+      --toolbar-menu-bg: #ffffff;
+        }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -5626,13 +5705,14 @@
        URL, or a later diagram's authored default.
        ============================================================ */
     Mirofy.preset = (function () {
-      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'];
+      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito', 'meridian'];
       var LABELS = {
         classic: viewerText('viewer.preset.classic.short'),
         'signal-flow': viewerText('viewer.preset.flow.short'),
         blueprint: viewerText('viewer.preset.blueprint'),
         editorial: viewerText('viewer.preset.editorial'),
-        'okabe-ito': viewerText('viewer.preset.okabeIto')
+        'okabe-ito': viewerText('viewer.preset.okabeIto'),
+        meridian: viewerText('viewer.preset.meridian')
       };
       var html = document.documentElement;
       var svg = document.querySelector('.diagram-container svg');

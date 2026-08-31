@@ -45,7 +45,7 @@ test('every part listed in the manifest is a file that exists, and every file is
   }
 });
 
-test('the palette file holds exactly the ten preset/theme blocks (4.12)', () => {
+test('the palette file holds exactly the twelve preset/theme blocks (4.12)', () => {
   // Task 6 replaced the hand-written css/00-palette.css with a generated
   // emitter (see packages/viewer/src/tokens/); this test now reads the
   // emitter's output rather than a file on disk, but keeps every original
@@ -59,7 +59,7 @@ test('the palette file holds exactly the ten preset/theme blocks (4.12)', () => 
   // unanchored [a-z:] start would also catch mid-comment continuation
   // lines like "so the arrows drawn underneath...".
   const selectors = css.match(/^ {4}\[?[a-z:][^{]*\{/gm) ?? [];
-  assert.equal(selectors.length, 10, `expected 10 palette blocks, found ${selectors.length}`);
+  assert.equal(selectors.length, 12, `expected 12 palette blocks, found ${selectors.length}`);
   for (const needle of [
     ':root',
     '[data-theme="light"]',

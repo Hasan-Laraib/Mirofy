@@ -54,7 +54,8 @@
             "signal-flow",
             "blueprint",
             "editorial",
-            "okabe-ito"
+            "okabe-ito",
+            "meridian"
           ]
         },
         "quality_profile": {

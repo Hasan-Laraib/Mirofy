@@ -23,7 +23,7 @@ if (writeMode && process.env.CI) {
   process.exit(1);
 }
 
-const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'];
+const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito', 'meridian'];
 
 // meta.visual_preset is the only render-time visual input; theme is a
 // runtime toggle the viewer applies from localStorage, so it is covered by

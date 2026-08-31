@@ -1,11 +1,12 @@
     Mirofy.preset = (function () {
-      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'];
+      var PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito', 'meridian'];
       var LABELS = {
         classic: viewerText('viewer.preset.classic.short'),
         'signal-flow': viewerText('viewer.preset.flow.short'),
         blueprint: viewerText('viewer.preset.blueprint'),
         editorial: viewerText('viewer.preset.editorial'),
-        'okabe-ito': viewerText('viewer.preset.okabeIto')
+        'okabe-ito': viewerText('viewer.preset.okabeIto'),
+        meridian: viewerText('viewer.preset.meridian')
       };
       var html = document.documentElement;
       var svg = document.querySelector('.diagram-container svg');

@@ -60,7 +60,7 @@ test('style selection synchronizes page, picker, and canonical SVG without touch
   assert.match(runtime, // 'okabe-ito' was added after this test was written: it is the
   // colour-blind-safe palette, and a preset list that omitted it would
   // silently stop covering the one preset chosen for accessibility.
-  /\['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'\]/);
+  /\['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito', 'meridian'\]/);
   assert.match(runtime, /html\.setAttribute\('data-preset', preset\)/);
   assert.match(runtime, /svg\.setAttribute\('data-preset', preset\)/);
   assert.match(runtime, /data-preset-option/);

@@ -18,7 +18,7 @@
         "subtitle": { "type": "string" },
         "output": { "type": "string" },
         "animation": { "enum": ["trace", "none"] },
-        "visual_preset": { "enum": ["classic", "signal-flow", "blueprint", "editorial", "okabe-ito"] },
+        "visual_preset": { "enum": ["classic", "signal-flow", "blueprint", "editorial", "okabe-ito", "meridian"] },
         "quality_profile": { "enum": ["standard", "showcase"] },
         "engineering_profile": { "enum": ["deployment-ownership"] },
         "repository": { "$ref": "common.schema.json#/$defs/repository" },

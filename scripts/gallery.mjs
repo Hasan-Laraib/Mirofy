@@ -14,7 +14,7 @@ import { MODES, renderFixture, fixturesRoot } from '../packages/conformance/src/
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
 const outRoot = path.join(repoRoot, 'preview');
-const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito'];
+const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito', 'meridian'];
 
 fs.rmSync(outRoot, { recursive: true, force: true });
 fs.mkdirSync(outRoot, { recursive: true });

@@ -19,12 +19,14 @@ import { CVD_TYPES, contrastRatio, deltaE2000, hexToLab } from '../src/color-sci
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-tokens-'));
 process.on('exit', () => fs.rmSync(tmp, { recursive: true, force: true }));
 
-test('the token model covers 10 blocks and 32 distinct properties (4.12)', () => {
-  // Grew from 8 to 10 blocks in P1a Task 7 (the okabe-ito preset's dark/light
+test('the token model covers 12 blocks and 32 distinct properties (4.12)', () => {
+  // Grew from 8 to 10 in P1a Task 7 (okabe-ito), and to 12 with the meridian
+  // preset. The count is pinned so a preset cannot appear or vanish quietly.
+  // (the okabe-ito preset's dark/light
   // pair). Fix round 1 updated this title (and matrix.mjs's row 4.12
   // testTitle, kept in lockstep) to match, instead of leaving a stale '8'
   // next to an assertion of 10.
-  assert.equal(BLOCKS.length, 10);
+  assert.equal(BLOCKS.length, 12);
   assert.equal(PROPERTY_NAMES.length, 32);
 });
 
@@ -279,4 +281,117 @@ test('the print palette outranks every preset palette it must override (4.12)', 
     `the print palette (specificity ${printBest.join(',')} from "${printSelector.trim()}") does not `
     + `outrank ${losing.length} preset palette block(s); printing from dark theme in those presets `
     + 'puts the preset dark palette on white paper.');
+});
+
+// Row 4.16. The `meridian` preset.
+//
+// Added because the inherited presets all share one visual habit: saturated
+// component fills and coloured arrows, which reads as a dashboard. An
+// architecture diagram that goes into a design document, a review, or a
+// printout wants the opposite -- a near-neutral ground, low-chroma fills, and
+// arrows that carry no hue at all, so that colour means "what this node IS"
+// and nothing else competes with it.
+//
+// It is ADDED, never substituted. Every existing preset renders byte-for-byte
+// as it did; a reader who liked `classic` still has `classic`.
+//
+// And it is measured rather than admired. A palette that looks right on the
+// author's monitor and fails in a bright room or on paper is not a
+// professional palette, so the floors below are asserted, not assumed.
+test('[4.16] every meridian stroke and text pair clears its legibility floor', async () => {
+  const { contrastRatio } = await import('../src/color-science.mjs');
+  const { BLOCKS } = await import('../../viewer/src/tokens/tokens.mjs');
+
+  const SEMANTIC = ['frontend', 'backend', 'database', 'cloud', 'security', 'messagebus', 'external'];
+  for (const theme of ['dark', 'light']) {
+    const block = BLOCKS.find((b) => b.selector.includes('meridian') && b.selector.includes(theme));
+    assert.ok(block, `meridian ${theme} block is missing`);
+    const token = Object.fromEntries(block.props);
+    const bg = token['--bg'];
+
+    // WCAG AAA for body text is 7:1. Both themes are built well past it,
+    // because a diagram is read at a glance and often at a distance.
+    assert.ok(contrastRatio(token['--text'], bg) >= 7,
+      `meridian ${theme} body text is ${contrastRatio(token['--text'], bg).toFixed(2)}:1 against its ground`);
+    assert.ok(contrastRatio(token['--text-muted'], bg) >= 4.5,
+      `meridian ${theme} muted text falls below the AA floor`);
+
+    for (const kind of SEMANTIC) {
+      // 3:1 is the WCAG floor for a graphical object's boundary. A stroke that
+      // fails it is a component with no visible edge.
+      const ratio = contrastRatio(token[`--${kind}-stroke`], bg);
+      assert.ok(ratio >= 3,
+        `meridian ${theme} ${kind} stroke is ${ratio.toFixed(2)}:1, below the 3:1 graphics floor`);
+    }
+  }
+});
+
+test('[4.16] meridian semantic hues stay far enough apart to tell apart', async () => {
+  const { hexToLab, deltaE2000 } = await import('../src/color-science.mjs');
+  const { BLOCKS } = await import('../../viewer/src/tokens/tokens.mjs');
+
+  const SEMANTIC = ['frontend', 'backend', 'database', 'cloud', 'security', 'messagebus', 'external'];
+  for (const theme of ['dark', 'light']) {
+    const token = Object.fromEntries(
+      BLOCKS.find((b) => b.selector.includes('meridian') && b.selector.includes(theme)).props,
+    );
+    for (let i = 0; i < SEMANTIC.length; i += 1) {
+      for (let j = i + 1; j < SEMANTIC.length; j += 1) {
+        const delta = deltaE2000(
+          hexToLab(token[`--${SEMANTIC[i]}-stroke`]),
+          hexToLab(token[`--${SEMANTIC[j]}-stroke`]),
+        );
+        // Just-noticeable difference is about 2.3. A restrained palette risks
+        // collapsing two component types into the same apparent colour, which
+        // is worse than a garish one: the reader cannot tell a database from a
+        // queue and does not know they cannot.
+        assert.ok(delta >= 8,
+          `meridian ${theme}: ${SEMANTIC[i]} and ${SEMANTIC[j]} differ by only ${delta.toFixed(1)} deltaE`);
+      }
+    }
+  }
+});
+
+test('[4.16] meridian arrows carry no component hue', async () => {
+  const { hexToLab, deltaE2000 } = await import('../src/color-science.mjs');
+  const { BLOCKS } = await import('../../viewer/src/tokens/tokens.mjs');
+
+  // The point of the preset. If the arrow colour drifted towards one of the
+  // component hues, a relationship would start looking like a category, which
+  // is exactly the ambiguity this palette exists to remove.
+  for (const theme of ['dark', 'light']) {
+    const token = Object.fromEntries(
+      BLOCKS.find((b) => b.selector.includes('meridian') && b.selector.includes(theme)).props,
+    );
+    const arrow = hexToLab(token['--arrow']);
+    for (const kind of ['frontend', 'backend', 'database', 'cloud', 'security', 'messagebus']) {
+      const delta = deltaE2000(arrow, hexToLab(token[`--${kind}-stroke`]));
+      assert.ok(delta >= 10,
+        `meridian ${theme}: the arrow reads as ${kind} (${delta.toFixed(1)} deltaE apart)`);
+    }
+  }
+});
+
+test('[4.16] adding meridian changed no existing preset', async () => {
+  const { BLOCKS } = await import('../../viewer/src/tokens/tokens.mjs');
+  // The whole safety argument for this addition. Every inherited preset keeps
+  // its exact token set; the golden digests for those 25 artifacts are
+  // unchanged, and only the 5 new meridian ones were added.
+  //
+  // Counts are pinned per preset rather than assumed uniform. `signal-flow`
+  // overrides 30 tokens dark and 27 light and inherits the rest -- a preset is
+  // allowed to be partial, and an earlier version of this test asserted a flat
+  // 32 and failed on a preset that was always like that.
+  const EXPECTED = {
+    'signal-flow': [30, 27],
+    blueprint: [32, 32],
+    editorial: [32, 32],
+    'okabe-ito': [32, 32],
+  };
+  for (const [name, counts] of Object.entries(EXPECTED)) {
+    const found = BLOCKS.filter((b) => b.selector.includes(name));
+    assert.equal(found.length, 2, `${name} no longer has exactly a dark and a light block`);
+    assert.deepEqual(found.map((b) => b.props.length), counts,
+      `${name} gained or lost tokens when meridian was added`);
+  }
 });

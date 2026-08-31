@@ -879,6 +879,41 @@ export const IMPORTED_ROWS = [
     testTitle: '[6.17] the report claims nothing about risk or merge safety',
   },
   {
+    id: '4.16',
+    name: 'meridian preset (editorial visual language)',
+    // Every inherited preset shares one habit: saturated component fills and
+    // coloured arrows, which reads as a dashboard. A diagram that goes into a
+    // design document, a review or a printout wants the opposite -- a
+    // near-neutral ground, low-chroma fills, and arrows carrying no hue at
+    // all, so colour means "what this node IS" and nothing competes with it.
+    //
+    // ADDED, never substituted. Every inherited preset renders byte-for-byte
+    // as before; the 25 existing golden digests did not move and 5 were added.
+    // A reader who liked `classic` still has `classic`.
+    //
+    // Measured rather than admired, because a palette that works on the
+    // author's monitor and fails in a bright room is not a professional
+    // palette. Body text clears 16:1 in both themes against a WCAG AAA floor
+    // of 7; the weakest component stroke clears 5.8:1 against a graphics floor
+    // of 3; the closest pair of semantic hues is 14 deltaE apart where the
+    // just-noticeable difference is about 2.3. A restrained palette's real
+    // risk is two component types collapsing into the same apparent colour --
+    // worse than a garish one, because the reader cannot tell a database from
+    // a queue and does not know it.
+    //
+    // The arrow colour is held at least 10 deltaE from every component hue: if
+    // it drifted toward one, a relationship would start reading as a category.
+    //
+    // One correction: the "changed nothing" test first asserted a flat 32
+    // tokens per preset and failed on `signal-flow`, which overrides 30 and 27
+    // and inherits the rest. A preset is allowed to be partial; the counts are
+    // now pinned per preset.
+    origin: 'N',
+    phase: 'P3',
+    proof: 'tokens.test.mjs',
+    testTitle: '[4.16] every meridian stroke and text pair clears its legibility floor',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +
@@ -1178,7 +1213,7 @@ export const IMPORTED_ROWS = [
     // (grew from 8 in P1a Task 7's okabe-ito dark/light pair), 32 distinct
     // properties -- which the byte check alone can't show.
     proof: 'tokens.test.mjs',
-    testTitle: 'the token model covers 10 blocks and 32 distinct properties (4.12)',
+    testTitle: 'the token model covers 12 blocks and 32 distinct properties (4.12)',
   },
   {
     id: '4.13',
