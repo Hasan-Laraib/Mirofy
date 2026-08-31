@@ -1778,7 +1778,7 @@ async function commandRepair(argv) {
   // edge leaves from.
   const before = await validateDocumentQuietly(type, input);
 
-  const { document: repaired, receipt } = repairDocument(document, { safe: true });
+  const { document: repaired, receipt } = repairDocument(document, { safe: true, diagramType: type });
 
   const outPath = output || input;
   fs.writeFileSync(outPath, `${JSON.stringify(repaired, null, 2)}
@@ -1798,7 +1798,12 @@ async function commandRepair(argv) {
   }
 
   console.log(`repair: ${input} -> ${outPath}`);
-  if (!receipt.moves.length) {
+  if (receipt.nothingToRepair) {
+    // Distinct from "nothing needed fixing". This type offers repair no lever
+    // at all, and reporting a clean run over a document it never touched would
+    // be a claim it has not earned.
+    console.log(`repair: nothing to repair in a ${type} document -- ${receipt.nothingToRepair}`);
+  } else if (!receipt.moves.length) {
     console.log('repair: nothing needed moving');
   } else {
     console.log(`repair: ${receipt.moves.length} component(s) nudged, ${receipt.passes} pass(es):`);

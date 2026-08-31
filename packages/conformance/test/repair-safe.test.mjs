@@ -336,3 +336,80 @@ test('[3.13] correcting sides changes routing, not meaning', async () => {
   assert.deepEqual(document.connections.map((c) => [c.from, c.to, c.label]),
     input.connections.map((c) => [c.from, c.to, c.label]));
 });
+
+// ---------------------------------------------------------------------------
+// All five types. Repair used to refuse everything but architecture, so six of
+// eight benchmark tasks came back "repair refused this document" -- the tool's
+// own repair step contributed nothing to four fifths of its own surface.
+//
+// Extending it exposed a boundary worth naming rather than working around.
+// ---------------------------------------------------------------------------
+
+test('[3.13] every diagram type is accepted, none is refused outright', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const documents = {
+    workflow: { diagram_type: 'workflow', lanes: [{ id: 'l' }], nodes: [{ id: 'a', lane: 'l', col: 0 }], edges: [] },
+    lifecycle: { diagram_type: 'lifecycle', lanes: [{ id: 'l' }], states: [{ id: 'a', lane: 'l', col: 0 }], transitions: [] },
+    dataflow: { diagram_type: 'dataflow', stages: [{ id: 's' }], nodes: [{ id: 'a', stage: 's', row: 0 }], flows: [] },
+    sequence: { diagram_type: 'sequence', participants: [{ id: 'a' }], messages: [] },
+    architecture: { diagram_type: 'architecture', components: [{ id: 'a', label: 'A', pos: [0, 0], size: [180, 60] }], connections: [] },
+  };
+  for (const [type, document] of Object.entries(documents)) {
+    const result = repairDocument(document, { safe: true, diagramType: type });
+    assert.ok(result.receipt, `${type} was refused`);
+  }
+});
+
+test('[3.13] a type repair cannot help is told so, not reported as clean', async () => {
+  // The distinction that matters. "Nothing needed fixing" and "there is nothing
+  // here I can fix" look identical in a log, and only one of them is a fact
+  // about the document.
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { receipt } = repairDocument(
+    { diagram_type: 'sequence', participants: [{ id: 'a' }], messages: [{ from: 'a', to: 'a' }] },
+    { safe: true, diagramType: 'sequence' },
+  );
+  assert.ok(receipt.nothingToRepair, 'a sequence document was reported as a clean repair');
+  assert.match(receipt.nothingToRepair, /carry no side/);
+});
+
+test('[3.13] a side is corrected in a lane-and-column type too', async () => {
+  // Ordinals are enough: a side asks only which node is further left or
+  // further down, and every renderer places columns and lanes in increasing
+  // order.
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const document = {
+    diagram_type: 'workflow',
+    lanes: [{ id: 'ci' }],
+    nodes: [{ id: 'build', lane: 'ci', col: 0 }, { id: 'test', lane: 'ci', col: 3 }],
+    edges: [{ id: 'e1', from: 'build', to: 'test', fromSide: 'top', toSide: 'bottom' }],
+  };
+  const { document: fixed, receipt } = repairDocument(document, { safe: true, diagramType: 'workflow' });
+  assert.equal(fixed.edges[0].fromSide, 'right', 'a side facing away was left in a workflow');
+  assert.equal(fixed.edges[0].toSide, 'left');
+  assert.equal(receipt.resided.length, 1);
+});
+
+test('[3.13] widening and nudging stay architecture-only, because the schema says so', async () => {
+  // Not an omission. Only architecture lets a node declare `pos` and `size`;
+  // elsewhere placement is derived from a lane and a column, and there is no
+  // width to widen. Pretending otherwise would emit keys the schema rejects.
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const document = {
+    diagram_type: 'workflow',
+    lanes: [{ id: 'ci' }],
+    nodes: [{ id: 'a', lane: 'ci', col: 0, label: 'An extremely long node label indeed' }],
+    edges: [],
+  };
+  const { document: fixed, receipt } = repairDocument(document, { safe: true, diagramType: 'workflow' });
+  assert.deepEqual(receipt.widened, [], 'repair tried to widen a node that cannot carry a size');
+  assert.equal(fixed.nodes[0].size, undefined, 'a size was written where the schema forbids one');
+});
+
+test('[3.13] an unknown diagram type is refused rather than guessed at', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  assert.throws(
+    () => repairDocument({ diagram_type: 'mindmap', components: [] }, { safe: true }),
+    /unknown diagram type/,
+  );
+});

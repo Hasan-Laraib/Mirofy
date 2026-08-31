@@ -23,6 +23,7 @@
 import { textUnits } from '../../core/renderers/shared/utils.mjs';
 import { defaultFromSide, defaultToSide } from '../../core/renderers/shared/geometry.mjs';
 import { gridLayout, resolveComponentPos } from '../../core/renderers/architecture/grid.mjs';
+import { shapeFor } from './types.mjs';
 
 const DEFAULT_MAX_PASSES = 12;
 
@@ -128,15 +129,27 @@ function separate(mover, other, clearance = 0) {
  * A side is a routing hint, in the same class as `via`: it changes how an edge
  * is drawn, never what it connects or what it means.
  */
-export function correctSides(document, relationships) {
-  const grid = document.layout?.mode === 'grid' ? gridLayout(document) : null;
+export function correctSides(document, relationships, shape) {
   const rects = new Map();
-  for (const component of asArray(document.components)) {
-    const [x, y] = resolveComponentPos(component, grid);
-    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
-    const w = Array.isArray(component.size) ? component.size[0] : DEFAULT_COMPONENT_SIZE[0];
-    const h = Array.isArray(component.size) ? component.size[1] : DEFAULT_COMPONENT_SIZE[1];
-    rects.set(component.id, { id: component.id, x, y, width: w, height: h, cx: x + w / 2, cy: y + h / 2 });
+
+  if (shape.axes) {
+    // Derived placement: compare ordinals. A side asks only which node is
+    // further left or further down, and every renderer places columns and
+    // lanes in increasing order, so ordinals and coordinates agree.
+    for (const node of asArray(document[shape.nodes])) {
+      const { x, y } = shape.axes(node, document);
+      if (x === null || y === null) continue;
+      rects.set(node.id, { id: node.id, cx: x, cy: y });
+    }
+  } else {
+    const grid = document.layout?.mode === 'grid' ? gridLayout(document) : null;
+    for (const component of asArray(document[shape.nodes])) {
+      const [x, y] = resolveComponentPos(component, grid);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      const w = Array.isArray(component.size) ? component.size[0] : DEFAULT_COMPONENT_SIZE[0];
+      const h = Array.isArray(component.size) ? component.size[1] : DEFAULT_COMPONENT_SIZE[1];
+      rects.set(component.id, { id: component.id, x, y, width: w, height: h, cx: x + w / 2, cy: y + h / 2 });
+    }
   }
 
   const corrections = [];
@@ -180,10 +193,11 @@ export function correctSides(document, relationships) {
  *
  * @param {object} document
  * @param {{safe?: boolean, maxPasses?: number, clearance?: number,
- *          fitLabels?: boolean}} [options]
+ *          fitLabels?: boolean, diagramType?: string}} [options]
  * @returns {{document: object, receipt: {moves: Array<object>, widened: Array<object>,
  *            resided: Array<object>, resolved: Array<object>,
- *            unsatisfiable: Array<object>, passes: number}}}
+ *            unsatisfiable: Array<object>, passes: number,
+ *            nothingToRepair?: string}}}
  */
 export function repairDocument(document, options = {}) {
   // Rewriting authored coordinates is a real edit to someone's file. It takes
@@ -191,18 +205,31 @@ export function repairDocument(document, options = {}) {
   if (options.safe !== true) {
     throw new TypeError('repair: pass --safe to rewrite authored geometry; repair does not run by default');
   }
-  if (!document || !Array.isArray(document.components)) {
-    throw new TypeError('repair: a document with components[] is required');
+  const shape = shapeFor(options.diagramType ?? document?.diagram_type);
+  if (!document || !Array.isArray(document[shape.nodes])) {
+    throw new TypeError(`repair: a document with ${shape.nodes}[] is required`);
+  }
+
+  // Said out loud rather than reported as a clean run. A document repair could
+  // not touch at all must not look like one it inspected and found perfect.
+  if (!shape.canCorrectSides && !shape.canResize && !shape.canReposition) {
+    return {
+      document,
+      receipt: {
+        moves: [], widened: [], resided: [], resolved: [], unsatisfiable: [], passes: 0,
+        nothingToRepair: shape.nothingToRepair,
+      },
+    };
   }
 
   const maxPasses = options.maxPasses ?? DEFAULT_MAX_PASSES;
   const fitLabels = options.fitLabels !== false;
   const clearance = options.clearance ?? DEFAULT_CLEARANCE;
-  const original = new Map(document.components.map((component) => [component.id, component.pos ? [...component.pos] : null]));
+  const original = new Map(asArray(document[shape.nodes]).map((component) => [component.id, component.pos ? [...component.pos] : null]));
 
   // Only positioned, sized components take part. Anything else is copied
   // through: repair has no basis for placing what was never placed.
-  const boxes = document.components
+  const boxes = (shape.canReposition ? document[shape.nodes] : [])
     .filter((component) => Array.isArray(component.pos) && Array.isArray(component.size))
     .map(boxOf);
 
@@ -217,7 +244,7 @@ export function repairDocument(document, options = {}) {
   const widened = [];
   if (fitLabels) {
     const sized = new Map(boxes.map((box) => [box.id, box]));
-    const needed = document.components
+    const needed = (shape.canResize ? asArray(document[shape.nodes]) : [])
       .filter((component) => component.label)
       .map((component) => ({
         component,
@@ -310,12 +337,14 @@ export function repairDocument(document, options = {}) {
   // Sides are corrected against the ORIGINAL geometry, before widening moves
   // anything: a side faces whichever component is to its left or right, and
   // widening does not change which side that is.
-  const sided = correctSides(document, asArray(document.connections));
+  const sided = shape.canCorrectSides
+    ? correctSides(document, asArray(document[shape.edges]), shape)
+    : { relationships: asArray(document[shape.edges]), corrections: [] };
 
   const repaired = {
     ...document,
-    ...(sided.corrections.length > 0 ? { connections: sided.relationships } : {}),
-    components: document.components.map((component) => {
+    ...(sided.corrections.length > 0 ? { [shape.edges]: sided.relationships } : {}),
+    [shape.nodes]: asArray(document[shape.nodes]).map((component) => {
       const width = grownBy.get(component.id);
       if (width !== undefined) {
         // Setting an explicit size is what makes this work in grid mode: the
@@ -330,7 +359,7 @@ export function repairDocument(document, options = {}) {
   };
 
   const moves = [];
-  for (const component of repaired.components) {
+  for (const component of asArray(repaired[shape.nodes])) {
     const before = original.get(component.id);
     const after = component.pos;
     if (!before || !after) continue;
