@@ -256,3 +256,83 @@ test('[3.13] fitLabels can be turned off', async () => {
   const { receipt } = repairDocument(gridWithLongLabels(), { safe: true, fitLabels: false });
   assert.deepEqual(receipt.widened, []);
 });
+
+// ---------------------------------------------------------------------------
+// Correcting a side that faces the wrong way.
+//
+// The largest failure class a model-authored diagram hits, and it is not a
+// routing problem at all: a model writes `fromSide: "top"` for two components
+// sitting SIDE BY SIDE. A side is a direction contract -- the first segment has
+// to leave perpendicular to it -- so no amount of rerouting can satisfy a side
+// that faces away. The instruction is impossible, not merely awkward.
+// ---------------------------------------------------------------------------
+
+/** Two components side by side, with sides authored as if they were stacked. */
+function sidewaysDocument() {
+  return {
+    schema_version: 1,
+    diagram_type: 'architecture',
+    meta: { title: 'Wrong sides' },
+    layout: { mode: 'grid', cols: 3 },
+    components: [
+      { id: 'web', type: 'frontend', label: 'Web', row: 0, col: 0 },
+      { id: 'cdn', type: 'cloud', label: 'CDN', row: 0, col: 2 },
+    ],
+    connections: [
+      { id: 'web_to_cdn', from: 'web', to: 'cdn', label: 'assets', fromSide: 'top', toSide: 'bottom' },
+    ],
+  };
+}
+
+test('[3.13] a side that faces away from the other component is corrected', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { document, receipt } = repairDocument(sidewaysDocument(), { safe: true });
+  const edge = document.connections[0];
+  // `cdn` is to the right of `web`, so the sides that face are right and left.
+  assert.equal(edge.fromSide, 'right');
+  assert.equal(edge.toSide, 'left');
+  assert.equal(receipt.resided.length, 1, 'the correction was not reported');
+  assert.equal(receipt.resided[0].fromSide.from, 'top');
+  assert.equal(receipt.resided[0].fromSide.to, 'right');
+});
+
+test('[3.13] a side that already faces correctly is left alone', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const input = sidewaysDocument();
+  input.connections[0].fromSide = 'right';
+  input.connections[0].toSide = 'left';
+  const { document, receipt } = repairDocument(input, { safe: true });
+  assert.deepEqual(receipt.resided, []);
+  assert.equal(document.connections[0].fromSide, 'right');
+});
+
+test('[3.13] an authored route is steering, and repair does not overrule it', async () => {
+  // `via` is the author taking the wheel. Correcting sides underneath a hand
+  // routed edge would fight a decision someone made deliberately.
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const input = sidewaysDocument();
+  input.connections[0].via = [[300, 40]];
+  const { document, receipt } = repairDocument(input, { safe: true });
+  assert.deepEqual(receipt.resided, []);
+  assert.equal(document.connections[0].fromSide, 'top', 'a hand-routed edge was overruled');
+});
+
+test('[3.13] a side is never invented where there is nothing to compare', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const input = sidewaysDocument();
+  input.connections.push(/** @type {any} */ ({ id: 'ghost', from: 'web', to: 'missing', fromSide: 'top' }));
+  const { document, receipt } = repairDocument(input, { safe: true });
+  const ghost = document.connections.find((c) => c.id === 'ghost');
+  assert.equal(ghost.fromSide, 'top', 'a side was chosen for an endpoint that does not exist');
+  assert.ok(!receipt.resided.some((entry) => entry.id === 'ghost'));
+});
+
+test('[3.13] correcting sides changes routing, not meaning', async () => {
+  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const input = sidewaysDocument();
+  const { document } = repairDocument(input, { safe: true });
+  // A side decides how an edge is drawn, never what it connects. Topology and
+  // labels come through untouched.
+  assert.deepEqual(document.connections.map((c) => [c.from, c.to, c.label]),
+    input.connections.map((c) => [c.from, c.to, c.label]));
+});

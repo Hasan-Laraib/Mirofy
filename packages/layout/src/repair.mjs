@@ -21,6 +21,8 @@
 // repair says so instead of looping or nudging at random.
 
 import { textUnits } from '../../core/renderers/shared/utils.mjs';
+import { defaultFromSide, defaultToSide } from '../../core/renderers/shared/geometry.mjs';
+import { gridLayout, resolveComponentPos } from '../../core/renderers/architecture/grid.mjs';
 
 const DEFAULT_MAX_PASSES = 12;
 
@@ -65,6 +67,8 @@ export function effectiveWidth(component) {
 // intuitive one.
 const DEFAULT_CLEARANCE = 8;
 
+const asArray = (value) => (Array.isArray(value) ? value : []);
+
 const boxOf = (component) => ({
   id: component.id,
   x: component.pos[0],
@@ -108,13 +112,78 @@ function separate(mover, other, clearance = 0) {
 }
 
 /**
+ * Correct an authored side that contradicts where the components actually are.
+ *
+ * This is the largest failure class a model-authored diagram hits, and it is
+ * not a routing problem at all. A model writes `fromSide: "top"` for two
+ * components sitting SIDE BY SIDE, and the renderer cannot honour it: a side is
+ * a direction contract, and the first segment has to leave perpendicular to it.
+ * No amount of rerouting satisfies a side that faces the wrong way.
+ *
+ * So repair asks the renderer's OWN question -- which side faces the other
+ * component -- and answers it with the renderer's own function. It does not
+ * invent a preference; it replaces an impossible instruction with the one the
+ * geometry already implies.
+ *
+ * A side is a routing hint, in the same class as `via`: it changes how an edge
+ * is drawn, never what it connects or what it means.
+ */
+export function correctSides(document, relationships) {
+  const grid = document.layout?.mode === 'grid' ? gridLayout(document) : null;
+  const rects = new Map();
+  for (const component of asArray(document.components)) {
+    const [x, y] = resolveComponentPos(component, grid);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+    const w = Array.isArray(component.size) ? component.size[0] : DEFAULT_COMPONENT_SIZE[0];
+    const h = Array.isArray(component.size) ? component.size[1] : DEFAULT_COMPONENT_SIZE[1];
+    rects.set(component.id, { id: component.id, x, y, width: w, height: h, cx: x + w / 2, cy: y + h / 2 });
+  }
+
+  const corrections = [];
+  const corrected = relationships.map((relationship) => {
+    const from = rects.get(relationship.from);
+    const to = rects.get(relationship.to);
+    // Without both rects there is nothing to compare against, and guessing a
+    // side from nothing is exactly what this must not do.
+    if (!from || !to) return relationship;
+    // An authored route is the author steering deliberately; leave it alone.
+    if (relationship.via || relationship.channelX !== undefined || relationship.channelY !== undefined) {
+      return relationship;
+    }
+
+    const wantFrom = defaultFromSide(from, to);
+    const wantTo = defaultToSide(from, to);
+    const hasFrom = relationship.fromSide && relationship.fromSide !== 'auto';
+    const hasTo = relationship.toSide && relationship.toSide !== 'auto';
+    const fromWrong = hasFrom && relationship.fromSide !== wantFrom;
+    const toWrong = hasTo && relationship.toSide !== wantTo;
+    if (!fromWrong && !toWrong) return relationship;
+
+    corrections.push({
+      id: relationship.id ?? `${relationship.from}->${relationship.to}`,
+      ...(fromWrong ? { fromSide: { from: relationship.fromSide, to: wantFrom } } : {}),
+      ...(toWrong ? { toSide: { from: relationship.toSide, to: wantTo } } : {}),
+      reason: 'the authored side faces away from the other component, which no route can honour',
+    });
+    return {
+      ...relationship,
+      ...(fromWrong ? { fromSide: wantFrom } : {}),
+      ...(toWrong ? { toSide: wantTo } : {}),
+    };
+  });
+
+  return { relationships: corrected, corrections };
+}
+
+/**
  * Repair a document's geometry.
  *
  * @param {object} document
  * @param {{safe?: boolean, maxPasses?: number, clearance?: number,
  *          fitLabels?: boolean}} [options]
  * @returns {{document: object, receipt: {moves: Array<object>, widened: Array<object>,
- *            resolved: Array<object>, unsatisfiable: Array<object>, passes: number}}}
+ *            resided: Array<object>, resolved: Array<object>,
+ *            unsatisfiable: Array<object>, passes: number}}}
  */
 export function repairDocument(document, options = {}) {
   // Rewriting authored coordinates is a real edit to someone's file. It takes
@@ -238,8 +307,14 @@ export function repairDocument(document, options = {}) {
   // The output document. Geometry is replaced; everything else is the input,
   // carried through by reference-free copy so nothing is shared or mutated.
   const grownBy = new Map(widened.map((entry) => [entry.id, entry.to]));
+  // Sides are corrected against the ORIGINAL geometry, before widening moves
+  // anything: a side faces whichever component is to its left or right, and
+  // widening does not change which side that is.
+  const sided = correctSides(document, asArray(document.connections));
+
   const repaired = {
     ...document,
+    ...(sided.corrections.length > 0 ? { connections: sided.relationships } : {}),
     components: document.components.map((component) => {
       const width = grownBy.get(component.id);
       if (width !== undefined) {
@@ -274,6 +349,7 @@ export function repairDocument(document, options = {}) {
     receipt: {
       moves,
       widened,
+      resided: sided.corrections,
       resolved: [...resolvedPairs].map((key) => {
         const [a, b] = key.split('|');
         return { a, b };
