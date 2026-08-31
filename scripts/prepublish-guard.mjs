@@ -19,6 +19,11 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const corePath = path.join(repoRoot, 'packages/core');
 
+// npm is a shell script on POSIX and a .cmd on Windows. Naming the right one
+// beats `shell: true`, which Node now warns about because it concatenates
+// arguments instead of escaping them.
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+
 /** @param {string} step */
 function say(step) {
   console.log(`prepublish: ${step}`);
@@ -73,16 +78,15 @@ say('  passed');
 say('packing and installing the tarball into a clean directory');
 const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-prepublish-'));
 try {
-  const packed = execFileSync('npm', ['pack', '--pack-destination', probe], {
-    cwd: corePath, encoding: 'utf8', shell: process.platform === 'win32',
+  const packed = execFileSync(npm, ['pack', '--pack-destination', probe], {
+    cwd: corePath, encoding: 'utf8',
   }).trim().split('\n').pop();
   const tarball = path.join(probe, String(packed));
   if (!fs.existsSync(tarball)) refuse(`npm pack reported ${packed} but wrote nothing`);
 
   fs.writeFileSync(path.join(probe, 'package.json'), '{"name":"probe","private":true}\n');
-  execFileSync('npm', ['install', '--no-audit', '--no-fund', tarball], {
+  execFileSync(npm, ['install', '--no-audit', '--no-fund', tarball], {
     cwd: probe, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'],
-    shell: process.platform === 'win32',
   });
 
   const installed = path.join(probe, 'node_modules/mirofy');
