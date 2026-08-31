@@ -15,6 +15,17 @@ stops being one.
 
 ## 2026-09-01
 
+### `bin` entries are executable, and one of them could not have run
+
+`npm ci` sets the executable bit on every declared `bin`, and git tracks that —
+so a bin committed as `644` is *modified* the moment CI installs, and the
+publish guard refused a perfectly good tree on a fresh checkout.
+
+Fixing that turned up the real one: `packages/mcp/bin/mcp.mjs` is declared as a
+`bin` and had **no shebang**. Installed globally on POSIX, `mirofy-mcp` would
+have installed cleanly and then failed the first time anyone typed it. Both are
+now checked.
+
 ### The gate now checks the lockfile
 
 Renaming the workspace package from `@mirofy/core` to `mirofy` passed

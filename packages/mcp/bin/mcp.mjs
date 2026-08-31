@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // MCP server over stdio (row 6.18).
 //
 //   node packages/mcp/bin/mcp.mjs [--model scan/model.json] [--graph scan/evidence-graph.json]

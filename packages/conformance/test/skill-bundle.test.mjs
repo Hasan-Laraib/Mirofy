@@ -130,3 +130,58 @@ test('the temporary bundle is not committed', () => {
   assert.match(ignored, /^dist\/$/m,
     'dist/ is not ignored, so a build would commit a generated artifact (row 7.1)');
 });
+
+// ---------------------------------------------------------------------------
+// Declared `bin` entries.
+//
+// npm creates a launcher for each one at install time, and on POSIX that
+// launcher runs the file directly -- so a bin without a shebang is a command
+// that installs cleanly and then fails the first time somebody types it.
+//
+// npm also sets the executable bit, which git tracks. A bin committed as 644 is
+// therefore MODIFIED the moment `npm ci` runs, and any check that expects a
+// clean tree fails on a fresh CI checkout for reasons that have nothing to do
+// with the change being tested. That is what this pair is really guarding.
+// ---------------------------------------------------------------------------
+
+/** Every `bin` a workspace manifest declares, as absolute paths. */
+function declaredBins() {
+  const packagesDir = path.join(repoRoot, 'packages');
+  const found = [];
+  for (const name of fs.readdirSync(packagesDir)) {
+    const manifestPath = path.join(packagesDir, name, 'package.json');
+    if (!fs.existsSync(manifestPath)) continue;
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    for (const relative of Object.values(manifest.bin ?? {})) {
+      found.push(path.join(packagesDir, name, String(relative)));
+    }
+  }
+  return found;
+}
+
+test('every declared bin starts with a shebang', () => {
+  const bins = declaredBins();
+  assert.ok(bins.length > 0, 'no bin entries found, so this proves nothing');
+  for (const file of bins) {
+    const first = fs.readFileSync(file, 'utf8').split('\n')[0];
+    assert.match(first, /^#!\/usr\/bin\/env node/,
+      `${path.relative(repoRoot, file)} is a bin with no shebang — it would install and then not run`);
+  }
+});
+
+test('every declared bin is committed executable', () => {
+  const modes = execFileSync('git', ['ls-files', '-s', '--', 'packages'],
+    { cwd: repoRoot, encoding: 'utf8' })
+    .split('\n').filter(Boolean)
+    .reduce((map, line) => {
+      const [meta, file] = line.split('\t');
+      map.set(file, meta.split(' ')[0]);
+      return map;
+    }, new Map());
+
+  for (const file of declaredBins()) {
+    const key = path.relative(repoRoot, file).split(path.sep).join('/');
+    assert.equal(modes.get(key), '100755',
+      `${key} is committed ${modes.get(key)}; npm sets it executable, so git reports it modified on a fresh checkout`);
+  }
+});
