@@ -1001,6 +1001,70 @@ export const IMPORTED_ROWS = [
     testTitle: '[2.12] a shared network is not recorded as communication',
   },
   {
+    id: '1.19',
+    name: 'Model derived from the evidence graph',
+    // The headline claim -- point it at a repository and it builds a model of
+    // the system -- was not what happened. Components came only from AUTHORED
+    // documents, and the graph was used solely to attach citations to names
+    // that already matched. This repository's 987 scanned facts joined to
+    // nothing, and `timeline` reported 62 of 62 components as uncited.
+    //
+    // Now a component is a package a manifest was found for, and a
+    // relationship is an import that was read, carrying the file and line that
+    // produced it. Against this repository that is 19 components and 21
+    // relationships, all cited.
+    //
+    // A derived component's kind is `package`. The scanner knows a manifest
+    // exists; it does not know whether something is a backend or a database,
+    // and labelling it would dress a guess as a fact.
+    //
+    // Two imports of the same package are ONE edge with two citations, not two
+    // edges; and a package importing its own files is the inside of a
+    // component, not an edge between two.
+    //
+    // What is not modelled is reported with a reason. 734 of this
+    // repository's dependency facts point at Node builtins, and drawing them
+    // would bury the architecture -- so they are counted, not vanished.
+    // Observed failing on a planted silent drop.
+    origin: 'N',
+    phase: 'P4',
+    proof: 'derive-model.test.mjs',
+    testTitle: '[1.19] what is not modelled is reported, with its reason',
+  },
+  {
+    id: '1.20',
+    name: 'View IR to a renderable document',
+    // The other end of the same gap. `compile` wrote a view IR the renderer
+    // refused -- `schemaVersion` against a required `schema_version`, `nodes`
+    // against `components`, and no coordinates at all -- so the pipeline
+    // stopped one step short of a diagram and the README documented a command
+    // that could not work.
+    //
+    // Ids are made schema-safe consistently: a real id is `@mirofy/core`, the
+    // schema requires ^[a-zA-Z][a-zA-Z0-9_-]*$, and renaming components
+    // without renaming the edges yields a diagram of disconnected boxes that
+    // is valid and wrong. Observed failing on exactly that.
+    //
+    // `package` is not a schema type, so it becomes `external` -- the type
+    // that claims least -- with the original kept as a tag. Observed failing
+    // on a planted guess of `backend`.
+    //
+    // Citations are kept only where a pinned repository can verify them, and
+    // dropped with a count otherwise: a citation that cannot be checked is
+    // worse than none. Observed failing on a planted emit-anyway.
+    //
+    // Placement is LAYERED rather than force-directed, because these views are
+    // dependency DAGs whose edges all mean one directed thing; the physical
+    // solver scattered them into routes that doubled back and the composition
+    // gates rejected the result, correctly. Depth is the longest path, not the
+    // shortest, or a node reachable both directly and through two hops lands
+    // in column one with its long edge running backwards.
+    origin: 'N',
+    phase: 'P4',
+    proof: 'derive-model.test.mjs',
+    testTitle: '[1.20] ids are made schema-safe consistently, and edges follow',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

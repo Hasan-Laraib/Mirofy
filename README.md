@@ -12,15 +12,20 @@ nothing is known, the diagram says so instead of filling the gap.
 
 ```bash
 npm install
-npm run scan       # repository  → evidence graph
-npm run model      # graph       → system model
-npm run compile    # model       → a bounded view
-node packages/core/bin/mirofy.mjs render architecture scan/view.json out.html
+npm run scan                    # repository  → evidence graph
+npm run model -- --from-graph --graph scan/evidence-graph.json
+npm run compile                 # model       → a bounded view
+npm run layout                  # view        → positioned document
+node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html --repo-root .
 ```
 
-Against this repository that reads **230 files into 987 facts and 8 gaps**, then
-compiles a **62-component** model into a **12-node** view — recording all 110
-omissions with a reason each.
+Run against **this repository**, that reads **230 files into 987 facts and 8
+gaps**, derives **19 components and 21 relationships** from them — every one
+citing the file and line it came from — and draws twelve of them, recording
+what it left out and why.
+
+The result is checked in at [`preview/self-model.svg`](preview/self-model.svg):
+Mirofy's own architecture, derived from Mirofy's own code.
 
 No repository? Author a JSON document, or convert a Mermaid diagram:
 
@@ -39,6 +44,13 @@ node packages/core/bin/mirofy.mjs validate architecture design.json --json
 A file the scanner cannot parse becomes a recorded **gap**, never a silent
 omission. Every fact is labelled with one of six provenance classes, so
 `source-backed` and `inferred` never look alike.
+
+The same rule holds where a decision has to be made that evidence cannot
+settle. A derived component's kind is `package` — the scanner knows a manifest
+exists, not whether something is a "backend". 734 imports of `node:fs` are
+*counted and named*, not drawn and not dropped in silence. A citation with no
+pinned commit to verify against is discarded rather than shown, because a
+citation nobody can check is worse than none.
 
 ### It answers questions about your system
 

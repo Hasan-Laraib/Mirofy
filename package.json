@@ -33,7 +33,8 @@
     "mcp": "node packages/mcp/bin/mcp.mjs",
     "timeline": "node packages/explain/bin/timeline.mjs",
     "drift": "node packages/explain/bin/drift.mjs",
-    "export": "node packages/export/bin/export.mjs"
+    "export": "node packages/export/bin/export.mjs",
+    "layout": "node packages/layout/bin/layout.mjs"
   },
   "devDependencies": {
     "@types/node": "^18",
