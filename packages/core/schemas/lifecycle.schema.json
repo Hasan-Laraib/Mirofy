@@ -71,19 +71,37 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "mode": { "$ref": "common.schema.json#/$defs/legendMode" },
+            "mode": {
+              "$ref": "common.schema.json#/$defs/legendMode"
+            },
             "entries": {
               "type": "object",
               "additionalProperties": false,
               "properties": {
-                "start": { "$ref": "common.schema.json#/$defs/legendEntry" },
-                "active": { "$ref": "common.schema.json#/$defs/legendEntry" },
-                "waiting": { "$ref": "common.schema.json#/$defs/legendEntry" },
-                "decision": { "$ref": "common.schema.json#/$defs/legendEntry" },
-                "success": { "$ref": "common.schema.json#/$defs/legendEntry" },
-                "failure": { "$ref": "common.schema.json#/$defs/legendEntry" },
-                "neutral": { "$ref": "common.schema.json#/$defs/legendEntry" },
-                "external": { "$ref": "common.schema.json#/$defs/legendEntry" }
+                "start": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                },
+                "active": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                },
+                "waiting": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                },
+                "decision": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                },
+                "success": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                },
+                "failure": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                },
+                "neutral": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                },
+                "external": {
+                  "$ref": "common.schema.json#/$defs/legendEntry"
+                }
               }
             }
           }
@@ -124,6 +142,18 @@
           "label": {
             "type": "string",
             "minLength": 1
+          }
+        }
+      },
+      "description": "Lane ids \"main\" and \"terminal\" are reserved: \"main\" is the top phase rail and is REQUIRED, \"terminal\" is the bottom outcome band, and every other lane takes a row of its own in the middle event band.",
+      "contains": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "const": "main"
           }
         }
       }

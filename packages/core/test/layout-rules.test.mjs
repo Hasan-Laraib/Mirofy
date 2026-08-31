@@ -17,6 +17,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { briefFor } from '../../../benchmarks/authors/schema-brief.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
@@ -1607,4 +1608,47 @@ test('lifecycle: an authored yOffset is never replaced by the derived row', () =
   const html = fs.readFileSync(outPath, 'utf8');
   assert.equal(stateY(html, 'hold'), 356,
     'the derived row overrode a position the author wrote');
+});
+
+// ---------------------------------------------------------------------------
+// The "main" lane, which the renderer required and nothing told you about.
+//
+// A lifecycle diagram must have a lane called "main" -- it is the phase rail.
+// The schema said lanes were 1..4 entries with any id, so a document could be
+// schema-valid and then refused by a rule the author had no way to read.
+// ---------------------------------------------------------------------------
+
+test('lifecycle: the schema requires the main lane the renderer demands', () => {
+  const schema = JSON.parse(fs.readFileSync(path.join(skillRoot, 'schemas/lifecycle.schema.json'), 'utf8'));
+  assert.equal(schema.properties.lanes.contains?.properties?.id?.const, 'main',
+    'the renderer requires a main lane and the schema does not say so');
+
+  const d = load('lifecycle');
+  d.lanes = d.lanes.map((lane) => (lane.id === 'main' ? { ...lane, id: 'phases' } : lane));
+  for (const state of d.states) if (state.lane === 'main') state.lane = 'phases';
+  const { code, stderr } = render('lifecycle', d);
+  assert.notEqual(code, 0);
+  assert.match(stderr, /schema validation failed/);
+});
+
+test('lifecycle: a missing main lane reads as one requirement, not one per lane', () => {
+  // Ajv reports `contains` by listing every way each candidate failed and then
+  // saying none matched. Unfiltered that reads as "every lane must be called
+  // main" -- the opposite of what the schema says.
+  const d = load('lifecycle');
+  d.lanes = d.lanes.map((lane) => (lane.id === 'main' ? { ...lane, id: 'phases' } : lane));
+  for (const state of d.states) if (state.lane === 'main') state.lane = 'phases';
+  const { stderr } = render('lifecycle', d);
+
+  assert.match(stderr, /\/lanes must include one entry with id "main"/);
+  assert.doesNotMatch(stderr, /\/lanes\/\d+\/id/,
+    'the per-candidate noise is still being reported as though each lane were wrong');
+});
+
+test('the author brief carries a collection rule the validator enforces', () => {
+  // The point of putting the requirement in the schema was that the brief is
+  // generated FROM the schema. A rule the brief cannot show is a rule the
+  // author learns by being rejected.
+  assert.match(briefFor('lifecycle'), /MUST include one entry with id "main"/);
+  assert.match(briefFor('lifecycle'), /reserved/);
 });

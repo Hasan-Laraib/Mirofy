@@ -91,6 +91,8 @@ function describeItem(item, common, indent = '    ') {
  * @param {string} diagramType
  * @returns {string}
  */
+const NEWLINE = String.fromCharCode(10);
+
 export function briefFor(diagramType) {
   const schema = loadSchema(diagramType);
   const common = loadSchema('common');
@@ -100,7 +102,22 @@ export function briefFor(diagramType) {
   for (const [name, spec] of Object.entries(schema.properties ?? {})) {
     if (spec.type !== 'array') continue;
     const marker = required.has(name) ? 'REQUIRED' : 'optional';
-    sections.push(`  "${name}" (${marker}) — each entry:\n${describeItem(spec.items, common)}`);
+    // A collection's own rules -- its description, and anything it must
+    // contain -- belong in the brief. They are constraints the validator
+    // enforces, and an author who is not told them can only discover them by
+    // being rejected. Lifecycle's "one lane must be called main" was exactly
+    // that: a hard requirement expressed nowhere the author could read.
+    const notes = [];
+    if (typeof spec.description === 'string' && spec.description.trim()) {
+      notes.push(`    ${spec.description.trim()}`);
+    }
+    const mustContain = Object.entries(spec.contains?.properties ?? {})
+      .filter(([, rule]) => rule && Object.prototype.hasOwnProperty.call(rule, 'const'))
+      .map(([key, rule]) => `${key} ${JSON.stringify(rule.const)}`);
+    if (mustContain.length) {
+      notes.push(`    MUST include one entry with ${mustContain.join(' and ')}.`);
+    }
+    sections.push(`  "${name}" (${marker}) — each entry:${notes.length ? NEWLINE + notes.join(NEWLINE) : ''}\n${describeItem(spec.items, common)}`);
   }
 
   return [
