@@ -19,10 +19,44 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const corePath = path.join(repoRoot, 'packages/core');
 
-// npm is a shell script on POSIX and a .cmd on Windows. Naming the right one
-// beats `shell: true`, which Node now warns about because it concatenates
-// arguments instead of escaping them.
-const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+/**
+ * Run npm without going through a shell.
+ *
+ * `shell: true` works and Node warns about it, because it concatenates
+ * arguments rather than escaping them. Naming npm.cmd directly does not work
+ * either: Node refuses to spawn a .cmd without a shell -- the mitigation for
+ * CVE-2024-27980 -- and fails with EINVAL.
+ *
+ * The way through is npm's own JavaScript entry point, run on the Node that is
+ * already here. npm sets npm_execpath to exactly that when it runs a script,
+ * which is the context this guard executes in; the fallbacks are for running
+ * it by hand.
+ */
+function npmCli() {
+  const fromEnv = process.env.npm_execpath;
+  if (fromEnv && fromEnv.endsWith('.js') && fs.existsSync(fromEnv)) return fromEnv;
+  const nodeDir = path.dirname(process.execPath);
+  for (const candidate of [
+    path.join(nodeDir, 'node_modules/npm/bin/npm-cli.js'),
+    path.join(nodeDir, '../lib/node_modules/npm/bin/npm-cli.js'),
+  ]) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+/** @param {string[]} argv @param {object} options */
+function runNpm(argv, options) {
+  const cli = npmCli();
+  if (cli) return execFileSync(process.execPath, [cli, ...argv], options);
+  // No entry point found. On POSIX `npm` is an ordinary executable and this
+  // works; on Windows it will not, and saying so beats a bare EINVAL.
+  if (process.platform === 'win32') {
+    refuse('could not locate npm-cli.js, and Windows will not spawn npm.cmd directly. '
+      + 'Run this through `npm publish` rather than by hand.');
+  }
+  return execFileSync('npm', argv, options);
+}
 
 /** @param {string} step */
 function say(step) {
@@ -78,14 +112,14 @@ say('  passed');
 say('packing and installing the tarball into a clean directory');
 const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-prepublish-'));
 try {
-  const packed = execFileSync(npm, ['pack', '--pack-destination', probe], {
+  const packed = runNpm( ['pack', '--pack-destination', probe], {
     cwd: corePath, encoding: 'utf8',
   }).trim().split('\n').pop();
   const tarball = path.join(probe, String(packed));
   if (!fs.existsSync(tarball)) refuse(`npm pack reported ${packed} but wrote nothing`);
 
   fs.writeFileSync(path.join(probe, 'package.json'), '{"name":"probe","private":true}\n');
-  execFileSync(npm, ['install', '--no-audit', '--no-fund', tarball], {
+  runNpm( ['install', '--no-audit', '--no-fund', tarball], {
     cwd: probe, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'],
   });
 
