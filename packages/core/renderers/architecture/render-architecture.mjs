@@ -5,6 +5,7 @@ import { animateAttr, focusEdgeAttrs, focusNodeAttrs, focusNodeTitle, loadDiagra
 import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { componentBox, boundaryBox, connectionPath } from '../shared/layout-report.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
+import { solveLabelPlacements, hasAuthoredLabelPosition } from '../shared/label-placement.mjs';
 import { legendFootprint, relationshipLegendObstacles, resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
 import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
@@ -335,6 +336,52 @@ const viewBox = arch.meta?.viewBox || autoViewBoxFor(boundaries);
 const legendY = () => viewBox[1] - 16;
 
 // ---- Validation: mechanical correctness, never layout taste -----------------
+/** The rect each connection label occupies, in connection order. */
+function buildLabelRects() {
+  const rects = [];
+  for (const [connectionIndex, conn] of asArray(arch.connections).entries()) {
+    if (!conn.label || !components.has(conn.from) || !components.has(conn.to)) continue;
+    const [lx, ly] = labelPoint(conn, pathFor(conn).points);
+    const w = Math.max(30, textUnits(conn.label) * 4.8 + 10);
+    rects.push({ relation: conn, relationIndex: connectionIndex, label: conn.label, x: lx - w / 2, y: ly - 10, width: w, height: 14, lx, ly });
+  }
+  return rects;
+}
+
+/**
+ * Move automatically-placed connection labels clear of the components.
+ *
+ * This runs BEFORE validation, and writes its choice back as labelDx/labelDy
+ * on the connection -- so every later reader, the collision check and the
+ * renderer alike, sees one position through the ordinary labelPoint path.
+ * There is no second code path to keep in step, and the choice ends up
+ * spelled out in the document rather than hidden in the renderer.
+ *
+ * A label the author positioned is left exactly where they put it.
+ */
+function solveConnectionLabels() {
+  const rects = buildLabelRects();
+  if (rects.length === 0) return;
+  const { placements } = solveLabelPlacements({
+    labels: rects.map((rect) => ({
+      key: String(rect.relationIndex),
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+      pinned: hasAuthoredLabelPosition(rect.relation),
+    })),
+    obstacles: [...components.values()],
+    bounds: { width: viewBox[0], height: viewBox[1] },
+  });
+  for (const rect of rects) {
+    const move = placements.get(String(rect.relationIndex));
+    if (!move || (move.dx === 0 && move.dy === 0)) continue;
+    rect.relation.labelDx = (rect.relation.labelDx || 0) + move.dx;
+    rect.relation.labelDy = (rect.relation.labelDy || 0) + move.dy;
+  }
+}
+
 function validateArchitecture() {
   const problems = [];
   if (resolvedBoundaryTitles.readabilityProblem) {
@@ -601,13 +648,7 @@ function validateArchitecture() {
   }));
 
   // Connection labels must not land on top of components.
-  const labelRects = [];
-  for (const [connectionIndex, conn] of asArray(arch.connections).entries()) {
-    if (!conn.label || !components.has(conn.from) || !components.has(conn.to)) continue;
-    const [lx, ly] = labelPoint(conn, pathFor(conn).points);
-    const w = Math.max(30, textUnits(conn.label) * 4.8 + 10);
-    labelRects.push({ relation: conn, relationIndex: connectionIndex, label: conn.label, x: lx - w / 2, y: ly - 10, width: w, height: 14, lx, ly });
-  }
+  const labelRects = buildLabelRects();
   for (const rect of labelRects) {
     for (const c of components.values()) {
       if (rectsOverlap(rect, c, -2)) {
@@ -1099,6 +1140,7 @@ ${renderLegend()}
       </svg>`;
 }
 
+solveConnectionLabels();
 validateArchitecture();
 if (layoutJsonMode) {
   console.log(JSON.stringify(buildLayoutReport(), null, 2));

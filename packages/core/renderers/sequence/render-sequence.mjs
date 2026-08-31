@@ -6,7 +6,7 @@ import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
 import { resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
 import { componentFill, arrowClassMap, rectsOverlap, cleanFlowProblems, cleanCrossingProblems, cleanAmbiguousCorridorProblems, cleanBorderRunProblems, cleanRouteRhythmProblems, cleanLabelRouteClearanceProblems, routePointsValue, asArray, isFinitePoint } from '../shared/geometry.mjs';
-import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
+import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth, requiredNodeWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
 import { translateMessage as i18nText } from '../shared/i18n.mjs';
 
@@ -22,7 +22,7 @@ const { diagram: sequence, template, outPath, sourceEvidence } = await loadDiagr
   defaultExample: 'cache-miss-request.sequence.json'
 });
 
-const viewBox = sequence.meta?.viewBox || [920, 760];
+const authoredViewBox = sequence.meta?.viewBox || [920, 760];
 // The timeline scales with viewBox height: a taller viewBox gains message room,
 // a shorter one shrinks the readable band (validated below) instead of clipping.
 // `column_fit: "spread"` widens the lanes with the viewBox instead of keeping
@@ -32,12 +32,71 @@ const viewBox = sequence.meta?.viewBox || [920, 760];
 const columnFit = sequence.meta?.column_fit === 'spread' ? 'spread' : 'fixed';
 const participantCount = Math.max(1, asArray(sequence.participants).length);
 const sideMargin = 62;
-const participantW = columnFit === 'spread'
-  ? Math.max(86, Math.min(190, Math.round((viewBox[0] - sideMargin * 2) / participantCount) - 24))
+// The widest a participant box may grow.
+//
+// Growth has to stop somewhere, and this is the same 190px ceiling the spread
+// layout has always used, so there is one answer to "how wide may a participant
+// be" rather than two. Past it, widening is no longer a fix: the columns march
+// off the canvas and the diagram becomes a different, worse problem than the
+// one being solved. Text that still does not fit at 190px genuinely cannot be
+// rescued by geometry, and saying so is the honest outcome.
+const MAX_PARTICIPANT_W = 190;
+
+const baseParticipantW = columnFit === 'spread'
+  ? Math.max(86, Math.min(MAX_PARTICIPANT_W, Math.round((authoredViewBox[0] - sideMargin * 2) / participantCount) - 24))
   : 86;
-const colGap = columnFit === 'spread' && participantCount > 1
-  ? Math.max(108, (viewBox[0] - 40 - sideMargin - participantW) / (participantCount - 1))
+
+// The gap the fixed layout has always left between two 86px boxes at a 108px
+// column pitch. Widening a box without widening the pitch by the same amount
+// would close it.
+const COLUMN_GUTTER = 22;
+
+
+/**
+ * The narrowest participant box that still holds every participant's text.
+ *
+ * A participant's label is its name in the system being drawn, and its
+ * sublabel is what that name means. Both are the author's, and neither is
+ * this renderer's to truncate -- so when the standard 86px box is too small,
+ * the box grows. Every column grows together: participants sit on a single
+ * pitch, and a row of boxes at differing widths reads as a mistake.
+ *
+ * The 6.8 and the -6 mirror the label check further down exactly. They are the
+ * same rule read backwards -- that check asks whether the box is wide enough,
+ * this asks how wide would be -- and if the two ever disagree, a document
+ * would be widened to a size still reported as too narrow.
+ */
+function requiredParticipantWidth() {
+  let required = 0;
+  for (const participant of asArray(sequence.participants)) {
+    required = Math.max(required, Math.ceil(textUnits(participant.label) * 6.8 - 6));
+    if (participant.sublabel) {
+      required = Math.max(required,
+        requiredNodeWidth(participant.sublabel, participantTextFit.sublabelMinimum));
+    }
+    // A brand mark takes 48px off the top rail before the label starts.
+    if (participant.brand) {
+      required = Math.max(required, Math.ceil(textUnits(participant.label) * 8 * 0.6) + 48);
+    }
+  }
+  return required;
+}
+
+const participantW = Math.min(MAX_PARTICIPANT_W, Math.max(baseParticipantW, requiredParticipantWidth()));
+const baseColGap = columnFit === 'spread' && participantCount > 1
+  ? Math.max(108, (authoredViewBox[0] - 40 - sideMargin - participantW) / (participantCount - 1))
   : 108;
+const colGap = Math.max(baseColGap, participantW + COLUMN_GUTTER);
+const leftX = columnFit === 'spread' ? sideMargin + participantW / 2 : sideMargin;
+
+// Widening the columns can push the last lifeline off the right edge. The
+// canvas grows to hold them rather than clipping, and never shrinks below what
+// the author asked for -- a viewBox wider than its contents is a deliberate
+// margin, not a mistake to correct.
+const viewBox = [
+  Math.max(authoredViewBox[0], Math.ceil(leftX + (participantCount - 1) * colGap + participantW / 2 + 40)),
+  authoredViewBox[1],
+];
 
 const layout = {
   topY: 72,
@@ -46,7 +105,7 @@ const layout = {
   lifelineTop: 142,
   lifelineBottom: viewBox[1] - 65,
   legendY: viewBox[1] - 54,
-  leftX: columnFit === 'spread' ? sideMargin + participantW / 2 : sideMargin,
+  leftX,
   colGap,
   labelH: 16
 };

@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "React SPA / Node API Web Platform"
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 3
+  },
+  "components": [
+    {
+      "id": "cdn",
+      "type": "cloud",
+      "label": "CDN",
+      "sublabel": "Static asset delivery",
+      "tag": "edge",
+      "provenance": "authored",
+      "row": 0,
+      "col": 0
+    },
+    {
+      "id": "spa",
+      "type": "frontend",
+      "label": "React SPA",
+      "sublabel": "Single-page app in the browser",
+      "tag": "react",
+      "provenance": "authored",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Node API",
+      "sublabel": "Application server",
+      "tag": "node",
+      "provenance": "authored",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "Primary datastore",
+      "tag": "sql",
+      "provenance": "authored",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "redis",
+      "type": "database",
+      "label": "Redis",
+      "sublabel": "Session cache",
+      "tag": "cache",
+      "provenance": "authored",
+      "row": 2,
+      "col": 1
+    }
+  ],
+  "connections": [
+    {
+      "id": "cdn_to_spa",
+      "from": "cdn",
+      "to": "spa",
+      "label": "static assets",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "orthogonal-v",
+      "provenance": "authored"
+    },
+    {
+      "id": "spa_to_api",
+      "from": "spa",
+      "to": "api",
+      "label": "HTTPS / JSON",
+      "variant": "emphasis",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "provenance": "authored"
+    },
+    {
+      "id": "api_to_postgres",
+      "from": "api",
+      "to": "postgres",
+      "label": "reads / writes",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "provenance": "authored"
+    },
+    {
+      "id": "api_to_redis",
+      "from": "api",
+      "to": "redis",
+      "label": "session cache",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "orthogonal-v",
+      "provenance": "authored"
+    }
+  ]
+}

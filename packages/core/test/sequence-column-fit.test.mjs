@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { textUnits } from '../renderers/shared/utils.mjs';
+import { requiredNodeWidth } from '../renderers/shared/text-fit.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
@@ -96,20 +97,30 @@ function labelledSequence(columnFit) {
   return doc;
 }
 
-test('a label the fixed box rejects fits the spread box on the same viewBox', () => {
+test('a label too wide for the standard box widens the box, not the label', () => {
+  // This used to assert the opposite: that the fixed box REJECTED such a
+  // label, and that the author had to find meta.column_fit "spread" to keep
+  // their wording. That put a naming decision about the system being drawn at
+  // the mercy of a rendering default nobody had heard of. A participant box is
+  // never authored -- 86px is this renderer's own choice -- so the renderer
+  // changes its choice rather than asking for a shorter word.
   const estimatedLabelW = textUnits(wideLabel) * 6.8;
-  assert.ok(estimatedLabelW > 86 + 6, 'the fixture label must actually exceed the fixed box');
+  assert.ok(estimatedLabelW > 86 + 6, 'the fixture label must actually exceed the standard box');
 
-  const fixed = renderOutcome(labelledSequence());
-  assert.notEqual(fixed.code, 0, 'the fixed box still rejects a label it cannot hold');
-  assert.ok(fixed.stderr.includes(`Label "${wideLabel}"`), `expected the label in stderr:\n${fixed.stderr}`);
-  assert.ok(fixed.stderr.includes('86px participant box'), `expected the fixed box width in stderr:\n${fixed.stderr}`);
+  const fitted = renderOutcome(labelledSequence());
+  assert.equal(fitted.code, 0, fitted.stderr);
+  const box = participantBoxes(fitted.html)[1];
+  assert.ok(box.width > 86, `the box should have grown past the standard 86px, got ${box.width}`);
+  assert.ok(estimatedLabelW <= box.width + 6, `label ~${estimatedLabelW}px must fit the ${box.width}px box`);
+  assert.ok(fitted.html.includes(`>${wideLabel}</text>`), 'the label renders unshortened');
 
+  // spread still has a job of its own, and it is a different one: fitting
+  // grows a box until the text fits, spread grows it until the canvas is used.
   const spread = renderOutcome(labelledSequence('spread'));
   assert.equal(spread.code, 0, spread.stderr);
-  const box = participantBoxes(spread.html)[1];
-  assert.ok(estimatedLabelW <= box.width + 6, `label ~${estimatedLabelW}px must fit the ${box.width}px spread box`);
-  assert.ok(spread.html.includes(`>${wideLabel}</text>`), 'the label renders unshortened');
+  const spreadBox = participantBoxes(spread.html)[1];
+  assert.ok(spreadBox.width > box.width,
+    `spread (${spreadBox.width}px) should still claim more than a snug fit (${box.width}px)`);
 });
 
 test('the sublabel diagnostic reports the width in force, not the historical constant', () => {
@@ -134,4 +145,35 @@ test('the fast authoring path explains when to opt into spread', () => {
   assert.match(skill, /do not shorten semantic labels before trying `spread`/);
   assert.match(rendererReadme, /Use `"spread"` when a wide/);
   assert.match(rendererReadme, /try `meta\.column_fit: "spread"` before shortening/);
+});
+
+test('a sublabel too wide for the standard box widens it too', () => {
+  // A sublabel says what a participant IS. Shrink-to-fit handles the ordinary
+  // overrun; past the legible minimum the box has to grow, or the only advice
+  // left is "say less about it".
+  const sublabel = 'OIDC authorisation server for staff';
+  const doc = wideSequence();
+  doc.participants[2].sublabel = sublabel;
+
+  const { code, html, stderr } = renderOutcome(doc);
+  assert.equal(code, 0, stderr);
+  const box = participantBoxes(html)[2];
+  assert.ok(box.width >= requiredNodeWidth(sublabel, 6),
+    `box ${box.width}px must hold a sublabel needing ${requiredNodeWidth(sublabel, 6)}px`);
+  assert.ok(html.includes(`>${sublabel}</text>`), 'the sublabel renders unshortened');
+});
+
+test('widening the box widens the column pitch, so boxes never collide', () => {
+  const doc = wideSequence();
+  doc.participants[1].label = 'Payment Gateway Service';
+
+  const { code, html, stderr } = renderOutcome(doc);
+  assert.equal(code, 0, stderr);
+  const boxes = participantBoxes(html);
+  assert.ok(boxes[0].width > 86, 'the fixture must actually have widened the boxes');
+  for (let i = 1; i < boxes.length; i += 1) {
+    const gap = boxes[i].x - (boxes[i - 1].x + boxes[i - 1].width);
+    assert.ok(gap > 0,
+      `boxes ${i - 1} and ${i} overlap by ${-gap}px — the pitch did not follow the width`);
+  }
 });

@@ -1,0 +1,15 @@
+{
+  "model": "claude-code-cli-2.1.251",
+  "author": "node benchmarks/authors/claude-cli.mjs",
+  "savedAt": "2026-08-31T14:54:32.595Z",
+  "tasks": [
+    "01-web-app",
+    "02-payment-flow",
+    "03-ci-pipeline",
+    "04-order-state",
+    "05-etl",
+    "06-microservices",
+    "07-auth",
+    "08-incident"
+  ]
+}

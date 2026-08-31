@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Sign-in via identity provider: authorisation code exchange"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "User",
+      "sublabel": "Human at the keyboard"
+    },
+    {
+      "id": "browser",
+      "type": "frontend",
+      "label": "Browser",
+      "sublabel": "User agent, follows redirects"
+    },
+    {
+      "id": "idp",
+      "type": "security",
+      "label": "Identity Provider",
+      "sublabel": "OIDC authorisation server"
+    },
+    {
+      "id": "backend",
+      "type": "backend",
+      "label": "Backend",
+      "sublabel": "Confidential client, session issuer"
+    }
+  ],
+  "segments": [
+    {
+      "from": 140,
+      "to": 320,
+      "label": "Initiate sign-in"
+    },
+    {
+      "from": 320,
+      "to": 560,
+      "label": "Authenticate at the provider"
+    },
+    {
+      "from": 560,
+      "to": 900,
+      "label": "Exchange code, establish session"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m01",
+      "from": "user",
+      "to": "browser",
+      "y": 160,
+      "label": "Chooses \"Sign in with provider\"",
+      "provenance": "authored"
+    },
+    {
+      "id": "m02",
+      "from": "browser",
+      "to": "backend",
+      "y": 220,
+      "label": "GET /auth/login",
+      "provenance": "authored"
+    },
+    {
+      "id": "m03",
+      "from": "backend",
+      "to": "browser",
+      "y": 280,
+      "label": "302 to provider (state, PKCE challenge)",
+      "variant": "return",
+      "provenance": "authored",
+      "note": "State and code_verifier are stored server-side against the pre-session."
+    },
+    {
+      "id": "m04",
+      "from": "browser",
+      "to": "idp",
+      "y": 340,
+      "label": "GET /authorize?client_id&redirect_uri&state",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "m05",
+      "from": "idp",
+      "to": "user",
+      "y": 400,
+      "label": "Presents credential prompt",
+      "provenance": "authored"
+    },
+    {
+      "id": "m06",
+      "from": "user",
+      "to": "idp",
+      "y": 460,
+      "label": "Submits credentials and consent",
+      "variant": "security",
+      "provenance": "authored"
+    },
+    {
+      "id": "m07",
+      "from": "idp",
+      "to": "browser",
+      "y": 520,
+      "label": "302 to /auth/callback?code&state",
+      "variant": "return",
+      "provenance": "authored"
+    },
+    {
+      "id": "m08",
+      "from": "browser",
+      "to": "backend",
+      "y": 580,
+      "label": "GET /auth/callback?code&state",
+      "provenance": "authored"
+    },
+    {
+      "id": "m09",
+      "from": "backend",
+      "to": "backend",
+      "y": 640,
+      "label": "Verifies state matches the stored value",
+      "variant": "emphasis",
+      "provenance": "authored",
+      "note": "A mismatch aborts here; the code is never redeemed."
+    },
+    {
+      "id": "m10",
+      "from": "backend",
+      "to": "idp",
+      "y": 700,
+      "label": "POST /token (code, verifier, client secret)",
+      "variant": "security",
+      "provenance": "authored"
+    },
+    {
+      "id": "m11",
+      "from": "idp",
+      "to": "backend",
+      "y": 760,
+      "label": "access_token, id_token, refresh_token",
+      "variant": "return",
+      "provenance": "authored"
+    },
+    {
+      "id": "m12",
+      "from": "backend",
+      "to": "backend",
+      "y": 820,
+      "label": "Validates id_token signature, nonce, claims",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "m13",
+      "from": "backend",
+      "to": "browser",
+      "y": 880,
+      "label": "Set-Cookie: session (HttpOnly, Secure, SameSite)",
+      "variant": "security",
+      "provenance": "authored"
+    },
+    {
+      "id": "m14",
+      "from": "browser",
+      "to": "user",
+      "y": 940,
+      "label": "Signed in, lands on the application",
+      "variant": "return",
+      "provenance": "authored"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "browser",
+      "from": 160,
+      "to": 940,
+      "type": "frontend"
+    },
+    {
+      "participant": "backend",
+      "from": 220,
+      "to": 280,
+      "type": "backend"
+    },
+    {
+      "participant": "idp",
+      "from": 340,
+      "to": 520,
+      "type": "security"
+    },
+    {
+      "participant": "backend",
+      "from": 580,
+      "to": 880,
+      "type": "backend"
+    },
+    {
+      "participant": "idp",
+      "from": 700,
+      "to": 760,
+      "type": "security"
+    }
+  ]
+}

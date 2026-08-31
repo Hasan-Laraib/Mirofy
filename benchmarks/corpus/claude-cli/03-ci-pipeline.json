@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Push-to-Production Pipeline"
+  },
+  "lanes": [
+    {
+      "id": "ci",
+      "label": "Continuous Integration",
+      "variant": "normal"
+    },
+    {
+      "id": "delivery",
+      "label": "Delivery",
+      "variant": "normal"
+    }
+  ],
+  "phases": [
+    {
+      "id": "phaseVerify",
+      "label": "Verify",
+      "fromCol": 0,
+      "toCol": 2,
+      "variant": "default"
+    },
+    {
+      "id": "phaseRelease",
+      "label": "Release",
+      "fromCol": 3,
+      "toCol": 5,
+      "variant": "emphasis"
+    }
+  ],
+  "groups": [
+    {
+      "id": "grpParallel",
+      "label": "Parallel checks",
+      "lane": "ci",
+      "fromCol": 1,
+      "toCol": 1,
+      "variant": "dashed"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "push",
+      "lane": "ci",
+      "col": 0,
+      "type": "external",
+      "label": "Push",
+      "sublabel": "commit to branch",
+      "tag": "trigger"
+    },
+    {
+      "id": "lint",
+      "lane": "ci",
+      "col": 1,
+      "type": "backend",
+      "label": "Lint",
+      "sublabel": "static analysis",
+      "yOffset": -110
+    },
+    {
+      "id": "unit",
+      "lane": "ci",
+      "col": 1,
+      "type": "backend",
+      "label": "Unit tests"
+    },
+    {
+      "id": "build",
+      "lane": "ci",
+      "col": 1,
+      "type": "backend",
+      "label": "Build",
+      "sublabel": "compile artifact",
+      "yOffset": 110
+    },
+    {
+      "id": "integration",
+      "lane": "ci",
+      "col": 2,
+      "type": "backend",
+      "label": "Integration suite",
+      "sublabel": "runs on green",
+      "tag": "gated"
+    },
+    {
+      "id": "staging",
+      "lane": "delivery",
+      "col": 3,
+      "type": "cloud",
+      "label": "Deploy to staging"
+    },
+    {
+      "id": "approval",
+      "lane": "delivery",
+      "col": 4,
+      "type": "security",
+      "label": "Manual approval",
+      "sublabel": "human gate",
+      "tag": "required"
+    },
+    {
+      "id": "production",
+      "lane": "delivery",
+      "col": 5,
+      "type": "cloud",
+      "label": "Deploy to production",
+      "tag": "prod"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "push",
+      "to": "lint",
+      "role": "branch",
+      "provenance": "authored"
+    },
+    {
+      "id": "e2",
+      "from": "push",
+      "to": "unit",
+      "role": "main",
+      "provenance": "authored"
+    },
+    {
+      "id": "e3",
+      "from": "push",
+      "to": "build",
+      "role": "branch",
+      "provenance": "authored"
+    },
+    {
+      "id": "e4",
+      "from": "lint",
+      "to": "integration",
+      "label": "pass",
+      "role": "branch",
+      "provenance": "authored"
+    },
+    {
+      "id": "e5",
+      "from": "unit",
+      "to": "integration",
+      "label": "all three pass",
+      "role": "main",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "e6",
+      "from": "build",
+      "to": "integration",
+      "label": "pass",
+      "role": "branch",
+      "provenance": "authored"
+    },
+    {
+      "id": "e7",
+      "from": "integration",
+      "to": "staging",
+      "role": "main",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "e8",
+      "from": "staging",
+      "to": "approval",
+      "role": "main",
+      "provenance": "authored"
+    },
+    {
+      "id": "e9",
+      "from": "approval",
+      "to": "production",
+      "label": "approved",
+      "role": "main",
+      "variant": "emphasis",
+      "provenance": "authored"
+    }
+  ]
+}

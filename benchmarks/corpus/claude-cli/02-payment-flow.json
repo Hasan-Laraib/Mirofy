@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Payment Submission to Order Confirmation"
+  },
+  "participants": [
+    {
+      "id": "customer",
+      "type": "frontend",
+      "label": "Customer",
+      "sublabel": "Checkout UI"
+    },
+    {
+      "id": "checkout",
+      "type": "backend",
+      "label": "Checkout Service"
+    },
+    {
+      "id": "inventory",
+      "type": "database",
+      "label": "Inventory Store",
+      "sublabel": "Stock reservations"
+    },
+    {
+      "id": "gateway",
+      "type": "external",
+      "label": "Payment Gateway"
+    },
+    {
+      "id": "events",
+      "type": "messagebus",
+      "label": "Event Bus",
+      "sublabel": "order-confirmed topic"
+    }
+  ],
+  "segments": [
+    {
+      "from": 160,
+      "to": 280,
+      "label": "Reserve"
+    },
+    {
+      "from": 280,
+      "to": 460,
+      "label": "Authorise"
+    },
+    {
+      "from": 460,
+      "to": 520,
+      "label": "Confirm"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m1",
+      "from": "customer",
+      "to": "checkout",
+      "y": 160,
+      "label": "Submit payment",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "m2",
+      "from": "checkout",
+      "to": "inventory",
+      "y": 220,
+      "label": "Reserve stock",
+      "provenance": "authored"
+    },
+    {
+      "id": "m3",
+      "from": "inventory",
+      "to": "checkout",
+      "y": 280,
+      "label": "Reservation held",
+      "variant": "return",
+      "provenance": "authored"
+    },
+    {
+      "id": "m4",
+      "from": "checkout",
+      "to": "gateway",
+      "y": 340,
+      "label": "Authorise payment",
+      "variant": "security",
+      "provenance": "authored"
+    },
+    {
+      "id": "m5",
+      "from": "gateway",
+      "to": "checkout",
+      "y": 400,
+      "label": "Accepted, pending authorisation",
+      "variant": "dashed",
+      "note": "Checkout waits for the callback; no funds captured yet.",
+      "provenance": "authored"
+    },
+    {
+      "id": "m6",
+      "from": "gateway",
+      "to": "checkout",
+      "y": 460,
+      "label": "Authorisation callback",
+      "variant": "security",
+      "provenance": "authored"
+    },
+    {
+      "id": "m7",
+      "from": "checkout",
+      "to": "events",
+      "y": 520,
+      "label": "Emit order-confirmed",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "m8",
+      "from": "checkout",
+      "to": "customer",
+      "y": 580,
+      "label": "Order confirmed",
+      "variant": "return",
+      "provenance": "authored"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "checkout",
+      "from": 160,
+      "to": 580,
+      "type": "backend"
+    },
+    {
+      "participant": "inventory",
+      "from": 220,
+      "to": 280,
+      "type": "database"
+    },
+    {
+      "participant": "gateway",
+      "from": 340,
+      "to": 460,
+      "type": "external"
+    },
+    {
+      "participant": "events",
+      "from": 520,
+      "to": 580,
+      "type": "messagebus"
+    }
+  ]
+}

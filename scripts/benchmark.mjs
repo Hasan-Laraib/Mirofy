@@ -2,6 +2,20 @@
 // Runs the first-pass usable benchmark (row 7.8).
 //
 //   node scripts/benchmark.mjs --author <command> --model <id> [--out run.json]
+//   node scripts/benchmark.mjs --author <command> --model <id> --keep <dir>
+//   node scripts/benchmark.mjs --replay <dir> [--out run.json]
+//
+// `--keep` saves the documents the author produced; `--replay` re-runs the
+// tool over saved documents WITHOUT calling the author again.
+//
+// That separation is what makes a change to this tool measurable. A model is
+// not deterministic, so two ordinary runs differ in both the documents and the
+// tool -- and the difference in the rate cannot be attributed to either. A
+// replay holds the documents fixed, so the only thing that moved is the tool.
+//
+// A REPLAY CANNOT CLAIM A DIFFERENT AUTHOR. The model is read from the saved
+// manifest, and --model is refused if it disagrees: a rate measured over one
+// model's documents is that model's rate, whatever the flag says.
 //
 // `--author` is a command that receives one task as JSON on stdin and prints
 // one diagram document as JSON on stdout. Keeping the model behind a process
@@ -35,13 +49,37 @@ function parseArgs(argv) {
 }
 
 const args = parseArgs(process.argv.slice(2));
-if (!args.author || args.author === 'true') {
-  console.error('benchmark: --author <command> is required. The harness does not invent an author.');
-  process.exit(2);
-}
-if (!args.model || args.model === 'true') {
-  console.error('benchmark: --model <id> is required. An unattributed rate cannot be compared to anything.');
-  process.exit(2);
+const replayDir = args.replay && args.replay !== 'true' ? path.resolve(args.replay) : null;
+const keepDir = args.keep && args.keep !== 'true' ? path.resolve(args.keep) : null;
+
+/** What a --keep directory records about the run that produced it. */
+const MANIFEST = 'authored-by.json';
+
+let model = args.model && args.model !== 'true' ? args.model : null;
+
+if (replayDir) {
+  if (!fs.existsSync(path.join(replayDir, MANIFEST))) {
+    console.error(`benchmark: ${replayDir} has no ${MANIFEST}, so nothing there can be attributed. `
+      + 'Produce it with --keep.');
+    process.exit(2);
+  }
+  const manifest = JSON.parse(fs.readFileSync(path.join(replayDir, MANIFEST), 'utf8'));
+  if (model && model !== manifest.model) {
+    console.error(`benchmark: --model ${model} contradicts the saved documents, which `
+      + `${manifest.model} wrote. A replay measures this tool over those documents; it cannot `
+      + 'reattribute them.');
+    process.exit(2);
+  }
+  model = manifest.model;
+} else {
+  if (!args.author || args.author === 'true') {
+    console.error('benchmark: --author <command> is required. The harness does not invent an author.');
+    process.exit(2);
+  }
+  if (!model) {
+    console.error('benchmark: --model <id> is required. An unattributed rate cannot be compared to anything.');
+    process.exit(2);
+  }
 }
 
 const tasks = fs.readdirSync(tasksDir)
@@ -51,14 +89,33 @@ const tasks = fs.readdirSync(tasksDir)
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-benchmark-'));
 
-/** Ask the author for one document. Anything unreadable is the author's failure. */
+/**
+ * Ask the author for one document. Anything unreadable is the author's failure.
+ *
+ * In replay mode the "author" is the saved file. A task with no saved document
+ * is an error rather than a skip: quietly dropping it would shrink the
+ * denominator and inflate the rate.
+ */
 async function author(task) {
+  if (replayDir) {
+    const saved = path.join(replayDir, `${task.id}.json`);
+    if (!fs.existsSync(saved)) {
+      throw new Error(`no saved document for ${task.id} in ${replayDir}`);
+    }
+    return JSON.parse(fs.readFileSync(saved, 'utf8'));
+  }
   const result = spawnSync(args.author, { input: JSON.stringify(task), encoding: 'utf8', shell: true });
   if (result.status !== 0) {
     throw new Error(`author exited ${result.status}: ${(result.stderr || '').trim().slice(0, 200)}`);
   }
   try {
-    return JSON.parse(result.stdout);
+    const document = JSON.parse(result.stdout);
+    if (keepDir) {
+      fs.mkdirSync(keepDir, { recursive: true });
+      fs.writeFileSync(path.join(keepDir, `${task.id}.json`), `${JSON.stringify(document, null, 2)}
+`);
+    }
+    return document;
   } catch {
     // Prose instead of JSON is the single most common author failure, and it
     // is the author's, not this tool's. Saying so is the point of the class.
@@ -138,7 +195,19 @@ async function repair(document, task) {
   }
 }
 
-const run = await runBenchmark({ tasks, author, evaluate, repair, model: args.model });
+const run = await runBenchmark({ tasks, author, evaluate, repair, model });
+
+if (keepDir) {
+  // Written last, so a directory carrying a manifest is a directory whose
+  // documents are all present -- a replay never runs over half a corpus.
+  fs.writeFileSync(path.join(keepDir, MANIFEST), `${JSON.stringify({
+    model,
+    author: args.author,
+    savedAt: run.measuredAt,
+    tasks: tasks.map((task) => task.id),
+  }, null, 2)}
+`);
+}
 console.log(formatRun(run));
 
 if (args.out && args.out !== 'true') {

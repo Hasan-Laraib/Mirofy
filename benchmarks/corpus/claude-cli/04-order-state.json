@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Order Lifecycle"
+  },
+  "lanes": [
+    {
+      "id": "fulfillment",
+      "label": "Fulfillment path"
+    },
+    {
+      "id": "exceptions",
+      "label": "Exception paths"
+    }
+  ],
+  "states": [
+    {
+      "id": "pending",
+      "type": "start",
+      "label": "Pending",
+      "sublabel": "Order created, awaiting payment",
+      "step": "1",
+      "lane": "fulfillment",
+      "col": 0
+    },
+    {
+      "id": "paid",
+      "type": "active",
+      "label": "Paid",
+      "sublabel": "Payment captured",
+      "step": "2",
+      "lane": "fulfillment",
+      "col": 1
+    },
+    {
+      "id": "shipped",
+      "type": "active",
+      "label": "Shipped",
+      "sublabel": "Handed to carrier",
+      "step": "3",
+      "lane": "fulfillment",
+      "col": 2
+    },
+    {
+      "id": "delivered",
+      "type": "success",
+      "label": "Delivered",
+      "sublabel": "Received by customer",
+      "step": "4",
+      "lane": "fulfillment",
+      "col": 3
+    },
+    {
+      "id": "cancelled",
+      "type": "failure",
+      "label": "Cancelled",
+      "sublabel": "Terminal, before shipment",
+      "tag": "terminal",
+      "lane": "exceptions",
+      "col": 1
+    },
+    {
+      "id": "returned",
+      "type": "neutral",
+      "label": "Returned",
+      "sublabel": "Sent back after delivery",
+      "tag": "terminal",
+      "lane": "exceptions",
+      "col": 3
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t_pending_paid",
+      "from": "pending",
+      "to": "paid",
+      "label": "payment succeeds",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "provenance": "authored"
+    },
+    {
+      "id": "t_paid_shipped",
+      "from": "paid",
+      "to": "shipped",
+      "label": "dispatched",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "provenance": "authored"
+    },
+    {
+      "id": "t_shipped_delivered",
+      "from": "shipped",
+      "to": "delivered",
+      "label": "delivery confirmed",
+      "fromSide": "right",
+      "toSide": "left",
+      "route": "straight",
+      "provenance": "authored"
+    },
+    {
+      "id": "t_pending_cancelled",
+      "from": "pending",
+      "to": "cancelled",
+      "label": "cancelled",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "left",
+      "route": "auto",
+      "provenance": "authored"
+    },
+    {
+      "id": "t_paid_cancelled",
+      "from": "paid",
+      "to": "cancelled",
+      "label": "cancelled, refund issued",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "drop",
+      "provenance": "authored"
+    },
+    {
+      "id": "t_delivered_returned",
+      "from": "delivered",
+      "to": "returned",
+      "label": "return requested",
+      "variant": "dashed",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "route": "drop",
+      "provenance": "authored"
+    }
+  ]
+}

@@ -181,9 +181,16 @@ test('a branded node fails before its semantic sigil, label, and brand badge can
 });
 
 test('every renderer enforces the same collision-free brand top rail', () => {
-  for (const type of ['architecture', 'sequence', 'dataflow', 'lifecycle']) {
+  // The RULE is one rule: a brand mark takes 48px off the top rail, and what
+  // is left must still hold the label at its legible minimum. What differs
+  // between renderers is who owns the width it is measured against.
+  //
+  // Here the author sized the box, and an authored size is a fact about the
+  // document -- so the only thing left to report is that the label does not
+  // fit in it.
+  for (const type of ['architecture', 'dataflow', 'lifecycle']) {
     const input = writeFixture(type, `narrow-brand-rail-${type}`, 'openai', (_diagram, node) => {
-      node.label = type === 'sequence' ? 'ABCDEFGHI' : 'A';
+      node.label = 'A';
       delete node.sublabel;
       delete node.tag;
       if (type === 'architecture') node.size = [32, 60];
@@ -194,6 +201,32 @@ test('every renderer enforces the same collision-free brand top rail', () => {
     assert.match(result.stderr, /brand top rail/i, type);
     assert.equal(html, '', type);
   }
+
+  // A sequence participant has no authored width -- 86px is the renderer's own
+  // default -- so the same rule resolves the other way: the box widens until
+  // the rail fits, and nobody is asked to rename a participant to make room
+  // for a logo.
+  const fitting = writeFixture('sequence', 'narrow-brand-rail-sequence', 'openai', (_diagram, node) => {
+    node.label = 'ABCDEFGHI';
+    delete node.sublabel;
+    delete node.tag;
+  });
+  const fitted = renderSync('sequence', fitting, 'narrow-brand-rail-sequence');
+  assert.equal(fitted.result.status, 0, fitted.result.stderr || fitted.result.stdout);
+  assert.doesNotMatch(fitted.result.stderr, /brand top rail/i);
+  const width = Number(/<rect x="[\d.]+" y="72" width="([\d.]+)" height="54"/.exec(fitted.html)?.[1]);
+  assert.ok(width > 86, `the participant box should have widened for the rail, got ${width}`);
+
+  // And the rule is still live in sequence: past the 190px ceiling the box may
+  // not grow any further, so a label that still does not fit is still refused.
+  const unfittable = writeFixture('sequence', 'wide-brand-rail-sequence', 'openai', (_diagram, node) => {
+    node.label = 'Authorisation and session issuing service';
+    delete node.sublabel;
+    delete node.tag;
+  });
+  const refused = renderSync('sequence', unfittable, 'wide-brand-rail-sequence');
+  assert.equal(refused.result.status, 1, refused.result.stderr || refused.result.stdout);
+  assert.match(refused.result.stderr, /brand top rail/i);
 });
 
 test('branded lifecycle states move the semantic stamp left and keep the brand at upper right', () => {

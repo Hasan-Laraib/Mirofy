@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "API Gateway, Four Services, Queue-Backed Notifications"
+  },
+  "layout": {
+    "mode": "grid",
+    "cols": 4
+  },
+  "components": [
+    {
+      "id": "gateway",
+      "type": "security",
+      "label": "API Gateway",
+      "sublabel": "Single ingress for all client traffic",
+      "tag": "edge",
+      "provenance": "authored",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "Message Queue",
+      "sublabel": "Orders events",
+      "provenance": "authored",
+      "row": 0,
+      "col": 3
+    },
+    {
+      "id": "accounts",
+      "type": "backend",
+      "label": "Accounts",
+      "sublabel": "Service",
+      "provenance": "authored",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "catalogue",
+      "type": "backend",
+      "label": "Catalogue",
+      "sublabel": "Service",
+      "provenance": "authored",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "orders",
+      "type": "backend",
+      "label": "Orders",
+      "sublabel": "Service — publisher",
+      "provenance": "authored",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "notifications",
+      "type": "backend",
+      "label": "Notifications",
+      "sublabel": "Service — consumer",
+      "provenance": "authored",
+      "row": 1,
+      "col": 3
+    },
+    {
+      "id": "accounts_db",
+      "type": "database",
+      "label": "Accounts DB",
+      "sublabel": "Owned by accounts",
+      "provenance": "authored",
+      "row": 2,
+      "col": 0
+    },
+    {
+      "id": "catalogue_db",
+      "type": "database",
+      "label": "Catalogue DB",
+      "sublabel": "Owned by catalogue",
+      "provenance": "authored",
+      "row": 2,
+      "col": 1
+    },
+    {
+      "id": "orders_db",
+      "type": "database",
+      "label": "Orders DB",
+      "sublabel": "Owned by orders",
+      "provenance": "authored",
+      "row": 2,
+      "col": 2
+    },
+    {
+      "id": "notifications_db",
+      "type": "database",
+      "label": "Notifications DB",
+      "sublabel": "Owned by notifications",
+      "provenance": "authored",
+      "row": 2,
+      "col": 3
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "security-group",
+      "label": "Service tier",
+      "wraps": [
+        "accounts",
+        "catalogue",
+        "orders",
+        "notifications"
+      ],
+      "pad": 18
+    }
+  ],
+  "connections": [
+    {
+      "id": "gw_accounts",
+      "from": "gateway",
+      "to": "accounts",
+      "label": "HTTP",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "gw_catalogue",
+      "from": "gateway",
+      "to": "catalogue",
+      "label": "HTTP",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "gw_orders",
+      "from": "gateway",
+      "to": "orders",
+      "label": "HTTP",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "gw_notifications",
+      "from": "gateway",
+      "to": "notifications",
+      "label": "HTTP",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "orders_publish",
+      "from": "orders",
+      "to": "queue",
+      "label": "publishes",
+      "variant": "emphasis",
+      "fromSide": "top",
+      "toSide": "left",
+      "provenance": "authored"
+    },
+    {
+      "id": "notifications_consume",
+      "from": "queue",
+      "to": "notifications",
+      "label": "consumes",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "accounts_store",
+      "from": "accounts",
+      "to": "accounts_db",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "catalogue_store",
+      "from": "catalogue",
+      "to": "catalogue_db",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "orders_store",
+      "from": "orders",
+      "to": "orders_db",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    },
+    {
+      "id": "notifications_store",
+      "from": "notifications",
+      "to": "notifications_db",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "provenance": "authored"
+    }
+  ]
+}

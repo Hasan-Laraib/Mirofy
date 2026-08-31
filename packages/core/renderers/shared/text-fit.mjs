@@ -47,3 +47,15 @@ export function minimumNodeTextWidth(text, minimum) {
 export function availableNodeTextWidth(width) {
   return width - nodeTextFit.horizontalPadding;
 }
+
+// The narrowest box `text` still fits in once it has shrunk as far as it may.
+//
+// This is minimumNodeTextWidth read the other way round. The pair above answers
+// "is this box wide enough?", which is the question to ask when the box is
+// fixed. This answers "how wide would be enough?", which is the question to ask
+// when the box is the tool's to choose -- and it usually is. A renderer that
+// can widen the box should never ask an author to shorten the words instead:
+// the words are what the diagram means, and the box is only how it is drawn.
+export function requiredNodeWidth(text, minimum) {
+  return Math.ceil(minimumNodeTextWidth(text, minimum) + nodeTextFit.horizontalPadding);
+}

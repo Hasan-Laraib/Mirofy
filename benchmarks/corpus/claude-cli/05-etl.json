@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Event Analytics Pipeline — Raw Events to BI"
+  },
+  "stages": [
+    {
+      "label": "Sources"
+    },
+    {
+      "label": "Raw Landing"
+    },
+    {
+      "label": "Normalisation"
+    },
+    {
+      "label": "Curated Store"
+    },
+    {
+      "label": "Warehouse Load"
+    },
+    {
+      "label": "Warehouse"
+    },
+    {
+      "label": "Consumption"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "eventProducers",
+      "type": "external",
+      "label": "Event Producers",
+      "sublabel": "Apps & services emitting raw events",
+      "stage": 0,
+      "row": 0
+    },
+    {
+      "id": "s3Raw",
+      "type": "cloud",
+      "label": "S3 Raw Bucket",
+      "sublabel": "Immutable landing zone",
+      "tag": "JSON / gzip",
+      "brand": "aws",
+      "stage": 1,
+      "row": 0
+    },
+    {
+      "id": "normaliseJob",
+      "type": "backend",
+      "label": "Normalisation Job",
+      "sublabel": "Scheduled batch run",
+      "tag": "cron",
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "parquetStore",
+      "type": "cloud",
+      "label": "Parquet Store",
+      "sublabel": "Columnar, partitioned by date",
+      "tag": "Parquet",
+      "brand": "aws",
+      "stage": 3,
+      "row": 0
+    },
+    {
+      "id": "warehouseLoader",
+      "type": "backend",
+      "label": "Warehouse Loader",
+      "sublabel": "Stages and copies into Snowflake",
+      "stage": 4,
+      "row": 0
+    },
+    {
+      "id": "snowflake",
+      "type": "database",
+      "label": "Snowflake",
+      "sublabel": "Base fact tables",
+      "brand": "snowflake",
+      "stage": 5,
+      "row": 0
+    },
+    {
+      "id": "aggTables",
+      "type": "database",
+      "label": "Aggregate Tables",
+      "sublabel": "Materialised rollups",
+      "brand": "snowflake",
+      "stage": 5,
+      "row": 1
+    },
+    {
+      "id": "biTool",
+      "type": "frontend",
+      "label": "BI Tool",
+      "sublabel": "Dashboards & ad-hoc analysis",
+      "stage": 6,
+      "row": 1
+    }
+  ],
+  "flows": [
+    {
+      "id": "f1",
+      "from": "eventProducers",
+      "to": "s3Raw",
+      "label": "raw event batches",
+      "classification": "raw",
+      "provenance": "authored"
+    },
+    {
+      "id": "f2",
+      "from": "s3Raw",
+      "to": "normaliseJob",
+      "label": "read new partitions",
+      "classification": "raw",
+      "provenance": "authored"
+    },
+    {
+      "id": "f3",
+      "from": "normaliseJob",
+      "to": "parquetStore",
+      "label": "write normalised Parquet",
+      "classification": "normalised",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "f4",
+      "from": "parquetStore",
+      "to": "warehouseLoader",
+      "label": "read Parquet files",
+      "classification": "normalised",
+      "provenance": "authored"
+    },
+    {
+      "id": "f5",
+      "from": "warehouseLoader",
+      "to": "snowflake",
+      "label": "bulk load rows",
+      "classification": "modelled",
+      "variant": "emphasis",
+      "provenance": "authored"
+    },
+    {
+      "id": "f6",
+      "from": "snowflake",
+      "to": "aggTables",
+      "label": "aggregate & materialise",
+      "classification": "modelled",
+      "provenance": "authored"
+    },
+    {
+      "id": "f7",
+      "from": "aggTables",
+      "to": "biTool",
+      "label": "query aggregates",
+      "classification": "reporting",
+      "provenance": "authored"
+    }
+  ]
+}
