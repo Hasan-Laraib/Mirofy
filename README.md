@@ -50,8 +50,8 @@ external requests, and no runtime dependencies.
 
 ## What is proved
 
-The conformance matrix has **86 rows. 66 are proved without a browser**; 19
-more need headless Chrome (`MIROFY_CHROME`), bringing the total to 85.
+The conformance matrix has **87 rows. 67 are proved without a browser**; 19
+more need headless Chrome (`MIROFY_CHROME`), bringing the total to 86.
 
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this import's scope, so there is nothing here to prove parity against.
@@ -163,6 +163,15 @@ a generator with no positions to give says so, rather than inventing an
 arrangement and presenting it as authored intent.
 
 ## Attribution
+
+Every rendered artifact says what made it. The viewer carries a small footer
+the reader can dismiss — the diagram is theirs, and a banner they cannot close
+is an imposition on someone else's document. Share Cards carry a permanent
+one, because a card travels without its context and lands where nothing around
+it says where it came from.
+
+It names the tool and claims nothing about the diagram, and it carries no URL:
+a link baked into every shared artifact outlives the address it points at.
 
 MIT. `packages/core/LICENSE` retains, verbatim, the required third-party
 copyright notice for the imported rendering core; the root `LICENSE` covers
