@@ -88,6 +88,19 @@ process.stdin.on('end', async () => {
     process.stderr.write('openai author: no OPENAI_API_KEY in the environment or .benchmark.env\n');
     process.exit(2);
   }
+  // An unedited placeholder is a mistake, not a credential. Left to reach the
+  // API it becomes eight round-trips and eight 401s, reported as an author
+  // outage -- true, and useless. Refusing here names the actual problem.
+  if (key.startsWith('REPLACE')) {
+    process.stderr.write('openai author: .benchmark.env still holds the placeholder. '
+      + 'Replace REPLACE_ME with your key. Nothing was sent.' + String.fromCharCode(10));
+    process.exit(2);
+  }
+  if (!key.startsWith('sk-')) {
+    process.stderr.write('openai author: that does not look like an OpenAI key (expected it to '
+      + 'start with sk-). Nothing was sent.' + String.fromCharCode(10));
+    process.exit(2);
+  }
 
   let task;
   try {
