@@ -19,6 +19,12 @@
       var SHARE_CARD_HEIGHT = 630;
       var SHARE_CARD_PADDING = 36;
       var SHARE_CARD_HEADER = 112;
+      // A reserved band at the foot of every card. Attribution is drawn into
+      // it AFTER the diagram, so no diagram can grow over it: a card that
+      // travels to a README or a chat is the one artifact whose origin cannot
+      // be recovered from its surroundings, and it is not the reader's to
+      // remove. The viewer's own footer is dismissible; this is not.
+      var SHARE_CARD_FOOTER = 30;
 
       function exportError(key, values) {
         var error = new Error(viewerText(key, values));
@@ -762,7 +768,7 @@
               ctx.textAlign = 'left';
 
               var availableWidth = SHARE_CARD_WIDTH - SHARE_CARD_PADDING * 2;
-              var availableHeight = SHARE_CARD_HEIGHT - SHARE_CARD_HEADER - SHARE_CARD_PADDING;
+              var availableHeight = SHARE_CARD_HEIGHT - SHARE_CARD_HEADER - SHARE_CARD_PADDING - SHARE_CARD_FOOTER;
               var fit = Math.min(availableWidth / data.width, availableHeight / data.height);
               var drawWidth = data.width * fit;
               var drawHeight = data.height * fit;
@@ -773,6 +779,13 @@
               ctx.lineWidth = 1;
               ctx.strokeRect(drawX - 0.5, drawY - 0.5, drawWidth + 1, drawHeight + 1);
               ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+            // Drawn last, into the reserved band, so nothing can cover it.
+            ctx.font = "500 12px 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = muted;
+            ctx.fillText(viewerText('viewer.attribution.card'), SHARE_CARD_PADDING, SHARE_CARD_HEIGHT - 14);
               URL.revokeObjectURL(svgUrl);
 
               canvas.toBlob(function (blob) {

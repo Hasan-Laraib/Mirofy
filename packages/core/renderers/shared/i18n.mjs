@@ -172,6 +172,12 @@ const MESSAGE_PAIRS = {
   'viewer.export.downloadedReach': ['Downloaded Reach Share Card', '已下载可达范围分享卡片'],
   'viewer.export.downloadedWebm': ['Downloaded WebM', '已下载 WebM'],
   'viewer.export.recording': ['Recording 6 seconds of motion…', '正在录制 6 秒动效…'],
+  // Attribution. Deliberately a name and nothing else: no URL, because a
+  // link baked into every artifact someone shares outlives the address it
+  // points at, and no claim about the diagram, because attribution says what
+  // made a thing, never that the thing is correct.
+  'viewer.attribution.footer': ['Made with Mirofy', '由 Mirofy 生成'],
+  'viewer.attribution.card': ['Made with Mirofy', '由 Mirofy 生成'],
   'viewer.export.card.routeSummary.one': ['Route: {source} → {target} · {count} directed hop', '路径：{source} → {target} · {count} 个有向跳转'],
   'viewer.export.card.routeSummary.other': ['Route: {source} → {target} · {count} directed hops', '路径：{source} → {target} · {count} 个有向跳转'],
   'viewer.export.card.reachSummary': ['Authored {direction} from {origin} · {nodes} · {links} · max {hops}', '从{origin}开始的编写{direction} · {nodes} · {links} · 最深 {hops}'],

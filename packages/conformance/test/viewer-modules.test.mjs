@@ -13,8 +13,8 @@ import { emitPalette } from '../../viewer/src/tokens/emit.mjs';
 
 const jsParts = PARTS.filter((p) => p.kind === 'file' && p.path.startsWith('js/') && p.path !== 'js/boot.js');
 
-test('the viewer ships as 19 separate module files, not one blob (5.16)', () => {
-  assert.equal(jsParts.length, 19, 'expected 19 viewer JS modules in the part manifest');
+test('the viewer ships as 20 separate module files, not one blob (5.16)', () => {
+  assert.equal(jsParts.length, 20, 'expected 20 viewer JS modules in the part manifest');
   for (const part of jsParts) {
     assert.ok(fs.existsSync(path.join(SRC_ROOT, part.path)), `${part.path} is listed in PARTS but does not exist`);
   }

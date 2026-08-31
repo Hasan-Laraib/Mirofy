@@ -602,6 +602,45 @@ export const IMPORTED_ROWS = [
     testTitle: '[7.8] the benchmark workflow is not, and cannot become, a per-PR gate',
   },
   {
+    id: '6.12',
+    name: 'Attribution on artifacts',
+    // The baseline this project forked ships none, and that is its single
+    // largest unforced growth error: every diagram it rendered went into a
+    // README, a slide or a chat with nothing on it saying what made it.
+    //
+    // Two surfaces, deliberately different. The viewer footer is DISMISSIBLE
+    // -- the artifact belongs to whoever rendered it, and a banner they
+    // cannot close is an imposition on someone else's document. The Share
+    // Card is PERMANENT, because a card is the one artifact that travels
+    // without its context: it lands somewhere nothing around it says where it
+    // came from.
+    //
+    // Permanence is structural, not a promise. The card reserves a band and
+    // draws attribution into it AFTER the diagram, so a large diagram cannot
+    // paint over it. Observed failing on the reordering.
+    //
+    // Attribution says what made a diagram and never anything about the
+    // diagram: a test refuses the words verified, validated, correct and
+    // accurate in either string. It carries no URL either -- a link baked
+    // into every shared artifact outlives the address it points at, and a
+    // dead link is worse than a name.
+    //
+    // The footer's failure mode is the interesting one. localStorage throws
+    // in sandboxed iframes and with cookies blocked; the catch returns null,
+    // which reads as "not dismissed" and SHOWS attribution. Observed failing
+    // on a catch that returned the dismissed value instead, which would have
+    // turned a storage error into a silently unattributed artifact.
+    //
+    // The ordering assertion was itself vacuous at first: it matched
+    // `ctx.drawImage(img,`, which also matches the plain PNG export earlier
+    // in the same file, so it passed however the card was ordered. Anchored
+    // on the card's own call.
+    origin: 'N',
+    phase: 'P3',
+    proof: 'attribution.test.mjs',
+    testTitle: '[6.12] card attribution is drawn after the diagram, so nothing can cover it',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +
@@ -652,7 +691,7 @@ export const IMPORTED_ROWS = [
     origin: 'R',
     phase: 'P1',
     proof: 'viewer-modules.test.mjs',
-    testTitle: 'the viewer ships as 19 separate module files, not one blob (5.16)',
+    testTitle: 'the viewer ships as 20 separate module files, not one blob (5.16)',
   },
 
   // Phase 3 — Layout validation gates

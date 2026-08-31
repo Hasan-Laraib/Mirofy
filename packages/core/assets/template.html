@@ -4979,6 +4979,40 @@
       .source-evidence-beacon,
       svg [data-node-id], svg [data-edge-from], svg [data-detail], svg [data-detail-anchor], svg [data-legend-hit], svg { transition: none !important; }
     }
+
+/* Attribution ------------------------------------------------------------
+   Bottom-left, quiet, and clear of the navigation dock on the right. The
+   text takes no pointer events, so a click near it still reaches the stage. */
+.attribution {
+  position: fixed;
+  left: 16px;
+  bottom: 12px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 11px;
+  color: var(--muted);
+}
+.attribution[hidden] { display: none; }
+.attribution-text { pointer-events: none; }
+.attribution-dismiss {
+  all: unset;
+  cursor: pointer;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: var(--muted);
+}
+.attribution-dismiss:hover { color: var(--text); }
+.attribution-dismiss:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+@media print { .attribution { display: none; } }
+[data-embed='1'] .attribution { display: none; }
   </style>
 </head>
 <body>
@@ -5518,6 +5552,16 @@
     </div>
     <!-- MIROFY:CARDS_SLOT_END -->
 
+    <!-- Attribution. Present by default, dismissible by the reader: the
+         artifact is theirs, and a banner they cannot close is an imposition on
+         someone else's document. The Share Card carries a permanent one
+         precisely because it leaves this page. -->
+    <div class="attribution" id="attribution" data-attribution hidden>
+      <span class="attribution-text" id="attribution-text"></span>
+      <button type="button" class="attribution-dismiss" id="btn-attribution-dismiss"
+              aria-label="Dismiss attribution">&times;</button>
+    </div>
+
   </div>
 
   <script>
@@ -5777,6 +5821,12 @@
       var SHARE_CARD_HEIGHT = 630;
       var SHARE_CARD_PADDING = 36;
       var SHARE_CARD_HEADER = 112;
+      // A reserved band at the foot of every card. Attribution is drawn into
+      // it AFTER the diagram, so no diagram can grow over it: a card that
+      // travels to a README or a chat is the one artifact whose origin cannot
+      // be recovered from its surroundings, and it is not the reader's to
+      // remove. The viewer's own footer is dismissible; this is not.
+      var SHARE_CARD_FOOTER = 30;
 
       function exportError(key, values) {
         var error = new Error(viewerText(key, values));
@@ -6520,7 +6570,7 @@
               ctx.textAlign = 'left';
 
               var availableWidth = SHARE_CARD_WIDTH - SHARE_CARD_PADDING * 2;
-              var availableHeight = SHARE_CARD_HEIGHT - SHARE_CARD_HEADER - SHARE_CARD_PADDING;
+              var availableHeight = SHARE_CARD_HEIGHT - SHARE_CARD_HEADER - SHARE_CARD_PADDING - SHARE_CARD_FOOTER;
               var fit = Math.min(availableWidth / data.width, availableHeight / data.height);
               var drawWidth = data.width * fit;
               var drawHeight = data.height * fit;
@@ -6531,6 +6581,13 @@
               ctx.lineWidth = 1;
               ctx.strokeRect(drawX - 0.5, drawY - 0.5, drawWidth + 1, drawHeight + 1);
               ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+
+            // Drawn last, into the reserved band, so nothing can cover it.
+            ctx.font = "500 12px 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillStyle = muted;
+            ctx.fillText(viewerText('viewer.attribution.card'), SHARE_CARD_PADDING, SHARE_CARD_HEIGHT - 14);
               URL.revokeObjectURL(svgUrl);
 
               canvas.toBlob(function (blob) {
@@ -14957,6 +15014,57 @@
         }
       };
     })();
+      /* ============================================================
+         Attribution — present by default, dismissible by the reader
+         ============================================================ */
+
+      Mirofy.attribution = (function () {
+        var STORAGE_KEY = 'mirofy-attribution-dismissed';
+        var root = document.getElementById('attribution');
+        var text = document.getElementById('attribution-text');
+        var dismiss = document.getElementById('btn-attribution-dismiss');
+
+        // localStorage can throw (blocked cookies, sandboxed iframes, file://
+        // in some browsers); the whole script element dies on an uncaught
+        // error, so guard every access. A read that throws means "not
+        // dismissed", which shows attribution rather than hiding it -- the
+        // failure mode that keeps the artifact traceable.
+        function readStored() {
+          try { return localStorage.getItem(STORAGE_KEY); } catch (_) { return null; }
+        }
+        function writeStored(value) {
+          try { localStorage.setItem(STORAGE_KEY, value); } catch (_) {}
+        }
+
+        function show() {
+          if (!root) return;
+          root.hidden = false;
+          document.documentElement.setAttribute('data-attribution', 'shown');
+        }
+
+        function hide(persist) {
+          if (!root) return;
+          root.hidden = true;
+          document.documentElement.setAttribute('data-attribution', 'dismissed');
+          if (persist) writeStored('1');
+        }
+
+        function init() {
+          if (!root || !text) return;
+          text.textContent = viewerText('viewer.attribution.footer');
+          if (readStored() === '1') hide(false);
+          else show();
+          if (dismiss) {
+            dismiss.addEventListener('click', function () { hide(true); });
+          }
+        }
+
+        // Modules here self-initialise; the return value is for tests and the
+        // keyboard layer, not a caller that must remember to start it.
+        init();
+
+        return { init: init, show: show, hide: hide };
+      })();
 
     /* ============================================================
        Global keyboard shortcuts

@@ -33,6 +33,7 @@ export const PARTS = [
   { kind: 'file', path: 'js/16-route-probe.js' },
   { kind: 'file', path: 'js/17-semantic-lens.js' },
   { kind: 'file', path: 'js/18-guide.js' },
+  { kind: 'file', path: 'js/20-attribution.js' },
   { kind: 'file', path: 'js/19-bootstrap.js' },
   { kind: 'literal', text: '  </script>\n' },
   { kind: 'file', path: 'html/03-tail.html' },

@@ -48,7 +48,10 @@ test('all five renderers expose one explicit 1200x630 Share Card export', () => 
 test('Share Card uses contain-only canonical geometry with fixed safe areas', () => {
   const html = render('architecture');
   assert.match(html, /var availableWidth = SHARE_CARD_WIDTH - SHARE_CARD_PADDING \* 2;/);
-  assert.match(html, /var availableHeight = SHARE_CARD_HEIGHT - SHARE_CARD_HEADER - SHARE_CARD_PADDING;/);
+  // Row 6.12 reserved a footer band for attribution. That is another fixed
+  // safe area, which is what this test is about -- the diagram's height is
+  // subtracted, not overlapped, so the card stays contain-only.
+  assert.match(html, /var availableHeight = SHARE_CARD_HEIGHT - SHARE_CARD_HEADER - SHARE_CARD_PADDING - SHARE_CARD_FOOTER;/);
   assert.match(html, /var fit = Math\.min\(availableWidth \/ data\.width, availableHeight \/ data\.height\);/);
   assert.match(html, /ctx\.drawImage\(img, drawX, drawY, drawWidth, drawHeight\);/);
   assert.match(html, /function canvas2dOrThrow\(canvas, label\)/);
