@@ -1,14 +1,36 @@
-# Mirofy
+<h1 align="center">Mirofy</h1>
 
-**Diagrams of your system that cite their sources — and say what they could not see.**
+<p align="center">
+  <strong>Diagrams of your system that cite their sources — and say what they could not see.</strong>
+</p>
 
-Point Mirofy at a repository. It reads the code into an evidence graph, builds a
-model from that graph, and compiles the model into a self-contained HTML file
-you can open, search, share and check.
+<p align="center">
+  <img src="assets/self-model.svg" alt="Mirofy's own architecture, derived from its own source code" width="880">
+</p>
+
+<p align="center">
+  <em>That diagram is not a mock-up. It is this repository, scanned by itself —
+  every box citing the manifest it came from, every arrow citing the import
+  lines that produced it.</em>
+</p>
+
+---
+
+## What it is
+
+Point Mirofy at a repository. It reads the code into an **evidence graph**,
+builds a **model** from that graph, and compiles the model into **one HTML
+file** you can open, search, share and check.
 
 Every relationship it draws can answer one question: *what is the evidence for
 this?* Each carries the file, the line range and the commit it came from. Where
-nothing is known, the diagram says so instead of filling the gap.
+nothing is known, the diagram **says so** instead of filling the gap.
+
+<p align="center">
+  <img src="assets/pipeline.svg" alt="scan to model to compile to layout to render" width="880">
+</p>
+
+## Try it in five commands
 
 ```bash
 npm install
@@ -19,15 +41,38 @@ npm run layout                  # view        → positioned document
 node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html --repo-root .
 ```
 
-Run against **this repository**, that reads **230 files into 987 facts and 8
-gaps**, derives **19 components and 21 relationships** from them — every one
-citing the file and line it came from — and draws twelve of them, recording
-what it left out and why.
+Against **this repository** that reads **230 files into 987 facts and 8 gaps**,
+derives **19 components and 21 relationships** — every one citing the file and
+line it came from — and draws twelve, recording what it left out and why.
 
-Those five commands produce `preview/self-model.svg` — Mirofy's own
-architecture, derived from Mirofy's own code. It is not committed: generated
-artifacts are built, never stored (row 7.1), so the way to see it is to run
-the pipeline.
+Those commands reproduce the diagram at the top of this page. It is checked in
+under `assets/` as documentation; the interactive artifacts are built, never
+stored.
+
+## What you get
+
+<table>
+<tr>
+<td width="50%" valign="top">
+<img src="assets/meridian.png" alt="An architecture diagram in the meridian preset" width="100%">
+<p align="center"><em>Six presets, light and dark. <code>meridian</code> keeps
+arrows graphite so colour means <strong>what a node is</strong>.</em></p>
+</td>
+<td width="50%" valign="top">
+<img src="assets/sequence.png" alt="A sequence diagram with lifelines and messages" width="100%">
+<p align="center"><em>Five diagram types — architecture, workflow, sequence,
+dataflow, lifecycle.</em></p>
+</td>
+</tr>
+</table>
+
+<p align="center">
+  <img src="assets/self-model.png" alt="The interactive viewer with search, tracing and evidence panels" width="880">
+</p>
+
+<p align="center">
+  <em>One file. Opens offline, from disk, with no server and no network.</em>
+</p>
 
 No repository? Author a JSON document, or convert a Mermaid diagram:
 
@@ -121,9 +166,7 @@ recommendation. It runs on every pull request and can never fail one.
 
 ---
 
-## The artifact
-
-One HTML file. Opens offline, from disk, with no server and no network.
+## Inside the artifact
 
 - **Node Finder**, **Semantic Lens**, **Semantic Radar** — search, filter and
   overview a diagram too large to read at once
@@ -138,9 +181,6 @@ One HTML file. Opens offline, from disk, with no server and no network.
 
 A card shows what the reader actually did. None of them claim validation, and
 none are produced from a query that returned nothing.
-
-Five diagram types — `architecture`, `workflow`, `sequence`, `dataflow`,
-`lifecycle` — in six visual presets, light and dark.
 
 ```bash
 npm run gallery    # every type in every preset → preview/index.html

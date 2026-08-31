@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 190" width="900" height="190"
+     role="img" aria-label="Pipeline: a repository is read into an evidence graph, built into a system model, compiled to a bounded view, laid out, and rendered as one HTML file.">
+  <title>scan to model to compile to layout to render</title>
+
+  <style>
+    /* Hand-authored, not generated: this file is source, and it animates on
+       GitHub without an encoder. Colours are meridian's tokens, resolved --
+       an SVG loaded as an image has no document to inherit them from. */
+    .lbl   { font: 600 13px "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; fill: #1b1f24; }
+    .sub   { font: 400 10.5px "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; fill: #5c6672; }
+    .cap   { font: 400 11px "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; fill: #5c6672; }
+    .box   { fill: #ffffff; stroke: #cfd6dd; stroke-width: 1.5; }
+    .arrow { stroke: #5c6672; stroke-width: 1.6; fill: none; }
+
+    /* One pulse travels the pipeline: five stages, one after another, then a
+       pause. A stage lights as the pulse reaches it. */
+    .stage    { opacity: 0.55; animation: wake 7s ease-in-out infinite; }
+    .s1 { animation-delay: 0.0s; } .s2 { animation-delay: 0.7s; }
+    .s3 { animation-delay: 1.4s; } .s4 { animation-delay: 2.1s; } .s5 { animation-delay: 2.8s; }
+    @keyframes wake {
+      0%, 6%   { opacity: 0.55; }
+      10%, 44% { opacity: 1; }
+      52%,100% { opacity: 0.55; }
+    }
+    .accent { animation: glow 7s ease-in-out infinite; }
+    @keyframes glow {
+      0%, 6%   { stroke: #cfd6dd; }
+      10%, 44% { stroke: #0757ba; }
+      52%,100% { stroke: #cfd6dd; }
+    }
+
+    /* A reader who has asked not to see motion gets the finished state. */
+    @media (prefers-reduced-motion: reduce) {
+      .stage, .accent { animation: none; opacity: 1; }
+    }
+  </style>
+
+  <g class="stage s1">
+    <rect class="box accent s1" x="8" y="40" width="150" height="62" rx="4"/>
+    <text class="lbl" x="24" y="66">repository</text>
+    <text class="sub" x="24" y="84">230 files</text>
+  </g>
+  <path class="arrow" d="M164 71 L188 71"/>
+  <polygon points="188,71 181,67 181,75" fill="#5c6672"/>
+
+  <g class="stage s2">
+    <rect class="box accent s2" x="194" y="40" width="150" height="62" rx="4"/>
+    <text class="lbl" x="210" y="66">evidence graph</text>
+    <text class="sub" x="210" y="84">987 facts · 8 gaps</text>
+  </g>
+  <path class="arrow" d="M350 71 L374 71"/>
+  <polygon points="374,71 367,67 367,75" fill="#5c6672"/>
+
+  <g class="stage s3">
+    <rect class="box accent s3" x="380" y="40" width="150" height="62" rx="4"/>
+    <text class="lbl" x="396" y="66">system model</text>
+    <text class="sub" x="396" y="84">19 components</text>
+  </g>
+  <path class="arrow" d="M536 71 L560 71"/>
+  <polygon points="560,71 553,67 553,75" fill="#5c6672"/>
+
+  <g class="stage s4">
+    <rect class="box accent s4" x="566" y="40" width="150" height="62" rx="4"/>
+    <text class="lbl" x="582" y="66">bounded view</text>
+    <text class="sub" x="582" y="84">12 drawn · 7 named</text>
+  </g>
+  <path class="arrow" d="M722 71 L746 71"/>
+  <polygon points="746,71 739,67 739,75" fill="#5c6672"/>
+
+  <g class="stage s5">
+    <rect class="box accent s5" x="752" y="40" width="140" height="62" rx="4"/>
+    <text class="lbl" x="768" y="66">one .html</text>
+    <text class="sub" x="768" y="84">opens offline</text>
+  </g>
+
+  <text class="cap" x="8" y="132">scan</text>
+  <text class="cap" x="194" y="132">model</text>
+  <text class="cap" x="380" y="132">compile</text>
+  <text class="cap" x="566" y="132">layout</text>
+  <text class="cap" x="752" y="132">render</text>
+
+  <text class="cap" x="8" y="162">Every stage records what it could not determine. Nothing is inferred silently.</text>
+  <text class="cap" x="8" y="178">Numbers are this repository, scanned by itself.</text>
+</svg>
