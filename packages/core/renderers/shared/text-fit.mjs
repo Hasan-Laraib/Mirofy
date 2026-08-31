@@ -60,18 +60,25 @@ export function requiredNodeWidth(text, minimum) {
   return Math.ceil(minimumNodeTextWidth(text, minimum) + nodeTextFit.horizontalPadding);
 }
 
-// Every renderer checks a node's box against its label the same way -- 6.8px
-// per text unit, with 6px of slack -- and against its sublabel and tag through
-// minimumNodeTextWidth. A brand mark takes a further 48px off the top rail
-// before the label starts.
+// Every renderer checks a node's box against its label the same way -- so many
+// px of advance per text unit, with a few px of slack -- and against its
+// sublabel and tag through minimumNodeTextWidth. A brand mark takes a further
+// 48px off the top rail before the label starts.
 //
 // This is those checks read backwards, in one place, so that "is this box wide
 // enough?" and "how wide would be enough?" can never drift apart. When they
 // drift, a renderer widens a node to a size it then reports as too narrow --
 // and the author is told to shorten a label that would have fit.
+//
+// `labelFactor` and `labelSlack` are parameters rather than constants because
+// the renderers genuinely disagree: architecture measures at 6.6px with 8px of
+// slack, the rest at 6.8px with 6px. Passing the caller's own numbers back to
+// it is the whole point -- a shared default here would be a fifth opinion.
 export function requiredNodeBoxWidth(node, fit) {
+  const factor = fit.labelFactor ?? 6.8;
+  const slack = fit.labelSlack ?? 6;
   const units = textUnits(node.label ?? '');
-  let required = Math.ceil(units * 6.8 - 6);
+  let required = Math.ceil(units * factor - slack);
   if (node.sublabel) required = Math.max(required, requiredNodeWidth(node.sublabel, fit.sublabelMinimum));
   if (node.tag) required = Math.max(required, requiredNodeWidth(node.tag, fit.tagMinimum));
   if (node.brand) required = Math.max(required, Math.ceil(units * fit.labelMinimum * 0.6) + 48);

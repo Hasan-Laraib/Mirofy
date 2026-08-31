@@ -7,7 +7,7 @@ import { componentBox, boundaryBox, connectionPath } from '../shared/layout-repo
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
 import { applyLabelPlacements } from '../shared/label-placement.mjs';
 import { legendFootprint, relationshipLegendObstacles, resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
-import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
+import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth, requiredNodeBoxWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
 import { minimumReadableSourceTextPx } from '../shared/desktop-readability.mjs';
 import { translateMessage as i18nText } from '../shared/i18n.mjs';
@@ -49,6 +49,12 @@ const componentTextFit = {
   sublabelMinimum: 6,
   tagPreferred: 7,
   tagMinimum: 6,
+  // The metrics the label and brand-rail checks below measure with. Naming
+  // them here is what lets the fitting reuse those checks rather than
+  // re-deriving them and drifting.
+  labelFactor: 6.6,
+  labelSlack: 8,
+  labelMinimum: 8,
 };
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -62,6 +68,15 @@ const { diagram: arch, template, outPath, sourceEvidence } = await loadDiagramWi
 });
 
 const grid = gridLayout(arch);
+
+// The widest a component box may grow, matching the ceiling in the other
+// renderers so the tool has one answer to "how wide may a node be".
+const MAX_COMPONENT_W = 190;
+// The shortest a connection between two components may be. The grid step is
+// built from this, because the gap between adjacent columns IS the length of
+// the connection that crosses it -- and a layout that cannot satisfy its own
+// minimum is not a layout.
+const MIN_CONNECTION_PX = 24;
 
 const layout = {
   defaultW: 120,
@@ -92,10 +107,50 @@ const LEGEND_CATALOG = [
 ].map((kind) => ({ kind, label: i18nText(arch.meta.locale, `legend.architecture.${kind}`) }));
 
 // ---- Measure components from free coordinates --------------------------------
+/**
+ * Widen the default box until every component's text fits, in GRID MODE ONLY.
+ *
+ * The division is who owns the position. Under `layout.mode: "grid"` the
+ * renderer derives every coordinate from row/col, so the box size is its own
+ * choice and it can change it. Under free placement the author wrote `pos` for
+ * each component, and widening a box there would push it into a neighbour the
+ * author put at a specific point -- so that case belongs to `repair`, which
+ * moves components as well as resizing them, and asks before it does.
+ *
+ * ONE WIDTH FOR EVERY DEFAULT BOX, not one per component. Components in a grid
+ * are read as a table, and a row of boxes at eight different widths reads as
+ * eight different kinds of thing. A component whose author gave it an explicit
+ * `size` keeps it and takes no part in this.
+ */
+function fittedDefaultWidth() {
+  if (!grid) return layout.defaultW;
+  let required = layout.defaultW;
+  for (const c of asArray(arch.components)) {
+    if (Array.isArray(c.size)) continue;
+    required = Math.max(required, requiredNodeBoxWidth(c, componentTextFit));
+  }
+  return Math.min(MAX_COMPONENT_W, required);
+}
+
 function measureComponent(c) {
   const [x, y] = resolveComponentPos(c, grid);
-  const [w, h] = Array.isArray(c.size) ? c.size : [layout.defaultW, layout.defaultH];
+  const [w, h] = Array.isArray(c.size) ? c.size : [defaultW, layout.defaultH];
   return { ...c, x, y, width: w, height: h, cx: x + w / 2, cy: y + h / 2 };
+}
+
+const defaultW = fittedDefaultWidth();
+if (grid) {
+  // The step is set by the widest box that will actually be DRAWN, which is not
+  // the same question as how wide the default box should be. A component the
+  // author sized takes no part in choosing the default -- it already holds its
+  // own text -- but it still occupies its width in the grid, and a step that
+  // ignores it leaves the next column 10px away from a 24px minimum.
+  const widest = asArray(arch.components).reduce(
+    (accumulator, c) => Math.max(accumulator, Array.isArray(c.size) ? c.size[0] : defaultW),
+    defaultW,
+  );
+  // cellW carries the change because gapX is the author's if they set it.
+  grid.cellW = Math.max(grid.cellW, widest + MIN_CONNECTION_PX - grid.gapX);
 }
 
 const components = new Map(asArray(arch.components).map((c) => [c.id, measureComponent(c)]));
@@ -413,11 +468,11 @@ function validateArchitecture() {
     if (c.x < 0 || c.y < 0 || c.x + c.width > viewBox[0] || c.y + c.height > viewBox[1]) {
       problems.push(`Component "${c.id}" falls outside the viewBox ${viewBox[0]}x${viewBox[1]} — adjust pos/size or set a larger meta.viewBox.`);
     }
-    const estLabelW = textUnits(c.label) * 6.6;
-    if (estLabelW > c.width + 8) {
+    const estLabelW = textUnits(c.label) * componentTextFit.labelFactor;
+    if (estLabelW > c.width + componentTextFit.labelSlack) {
       problems.push(`Label "${c.label}" (~${Math.round(estLabelW)}px) is wider than component "${c.id}" (${c.width}px) — shorten the label or widen size.`);
     }
-    const brandRailProblem = brandTopRailProblem(c, c.width, 8, 'Component');
+    const brandRailProblem = brandTopRailProblem(c, c.width, componentTextFit.labelMinimum, 'Component');
     if (brandRailProblem) problems.push(brandRailProblem);
     // sublabel and tag render as single unwrapped <text> elements; shrink-to-fit
     // handles the ordinary case, this rejects what it cannot rescue.
@@ -577,7 +632,7 @@ function validateArchitecture() {
       const routed = pathFor(conn);
       const [start, end] = [routed.points[0], routed.points[routed.points.length - 1]];
       const distance = Math.hypot(end[0] - start[0], end[1] - start[1]);
-      if (distance < 24) problems.push(`Connection "${conn.label || `${conn.from}->${conn.to}`}" is too short (${Math.round(distance)}px; minimum 24px) — place its components farther apart.`);
+      if (distance < MIN_CONNECTION_PX) problems.push(`Connection "${conn.label || `${conn.from}->${conn.to}`}" is too short (${Math.round(distance)}px; minimum ${MIN_CONNECTION_PX}px) — place its components farther apart.`);
     }
   }
 
