@@ -117,3 +117,45 @@ export const BLOCKS = RAW_BLOCKS.map((block) => ({ ...block, props: propsFromBod
 export const SUFFIX = "\n\n";
 
 export const PROPERTY_NAMES = [...new Set(BLOCKS.flatMap((b) => b.props.map(([name]) => name)))];
+
+/**
+ * The custom properties in force for one preset and theme, resolved the way a
+ * browser's cascade would resolve them.
+ *
+ * A preset block is a PARTIAL override -- signal-flow's light block sets 27 of
+ * the 32 properties and inherits the rest -- so a caller cannot use it on its
+ * own. It has to lay the preset over the theme's base, which is what this does
+ * and what `[data-preset="x"][data-theme="y"]` means in the stylesheet.
+ *
+ * Written because `svg-static` did not do this. It collected every block whose
+ * selector did not mention data-preset, which dropped all ten preset blocks and
+ * left every static export in the classic palette however the document was
+ * authored -- six presets, one file, byte for byte. It also meant the theme was
+ * decided by which base block happened to come last in the list rather than by
+ * anybody choosing it.
+ *
+ * @param {string} preset a visual_preset value; "classic" has no block of its
+ *   own and correctly resolves to the base alone
+ * @param {'dark'|'light'} theme
+ * @returns {{tokens: Record<string, string>, matchedPreset: boolean}}
+ */
+export function resolveTokens(preset, theme) {
+  const themeSelector = `[data-theme="${theme}"]`;
+  /** @type {Record<string, string>} */
+  const tokens = {};
+  let matchedPreset = false;
+
+  for (const block of BLOCKS) {
+    if (!block.selector.includes(themeSelector)) continue;
+    if (block.selector.includes('data-preset')) continue;
+    for (const [name, value] of block.props) tokens[name] = value;
+  }
+  for (const block of BLOCKS) {
+    if (!block.selector.includes(themeSelector)) continue;
+    if (!block.selector.includes(`[data-preset="${preset}"]`)) continue;
+    matchedPreset = true;
+    for (const [name, value] of block.props) tokens[name] = value;
+  }
+
+  return { tokens, matchedPreset };
+}

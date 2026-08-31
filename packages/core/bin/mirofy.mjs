@@ -771,7 +771,7 @@ async function commandRender(args) {
  * static export would quietly stop matching the diagram it claims to be.
  */
 async function renderStaticSvg({ type, input, output, quality, repoRoot }) {
-  const [{ toStaticSvg }, { BLOCKS }] = await Promise.all([
+  const [{ toStaticSvg }, { resolveTokens }] = await Promise.all([
     import('../renderers/shared/svg-static.mjs'),
     import('../../viewer/src/tokens/tokens.mjs'),
   ]);
@@ -787,13 +787,27 @@ async function renderStaticSvg({ type, input, output, quality, repoRoot }) {
   });
   if (result.status !== 0) exitFrom(result);
 
-  const tokens = {};
-  for (const block of BLOCKS) {
-    if (/data-preset/.test(block.selector)) continue;
-    for (const [name, value] of block.props) tokens[name] = value;
+  const artifact = fs.readFileSync(intermediate, 'utf8');
+
+  // Taken from the artifact rather than from the source document, so the
+  // static export always agrees with the interactive one about which preset
+  // was applied -- including whatever the renderer does with an absent value.
+  const preset = /<html[^>]*\sdata-preset="([^"]*)"/.exec(artifact)?.[1] ?? 'classic';
+
+  // LIGHT, deliberately. A static SVG carries no background rectangle, so it is
+  // read on whatever ground it is pasted onto -- a README, a pull request, a
+  // Figma board -- and those are overwhelmingly light. Dark tokens would put
+  // near-white text on near-white paper. Until this line existed the theme was
+  // decided by which base block came last in the token list, which happened to
+  // be light; it is now chosen rather than inherited from an accident.
+  const { tokens, matchedPreset } = resolveTokens(preset, 'light');
+  if (preset !== 'classic' && !matchedPreset) {
+    // A preset the schema accepts but the palette has no block for would
+    // silently export in the classic colours, which is the bug this replaced.
+    fail(`svg-static: no palette for preset "${preset}". The schema accepts it, so `
+      + 'a block for it is missing from packages/viewer/src/tokens/tokens.mjs.');
   }
 
-  const artifact = fs.readFileSync(intermediate, 'utf8');
   const staticSvg = toStaticSvg(artifact, { tokens });
   if (staticSvg.unresolved.length > 0) {
     // An unresolved custom property is an element with no colour, and a

@@ -141,6 +141,86 @@ export function layeredPositions(view, { size = [180, 60], margin = 80, gapX = 1
 }
 
 /**
+ * Routes for edges whose endpoints sit in the same column.
+ *
+ * A layered layout puts every node of one depth in one vertical column, and a
+ * straight edge between two members of that column runs through every member
+ * between them. With three packages in a layer nobody noticed; with ten, an
+ * edge from the first to the fourth crosses two nodes and the Clean Flow gate
+ * rejects the diagram -- which is how this was found: the layout engine
+ * produced a document its own renderer refused.
+ *
+ * So those edges leave sideways instead, run down a channel beside the column,
+ * and come back in on the same side. Three orthogonal segments, both endpoints
+ * crossing their border perpendicularly, which is what the endpoint-side rule
+ * asks for.
+ *
+ * ADJACENT MEMBERS ARE LEFT ALONE. Nothing sits between them, their straight
+ * edge is correct and readable, and detouring it would trade a clean line for
+ * a detour around nothing. That also keeps every diagram that renders today
+ * rendering identically.
+ *
+ * Each edge gets its own channel so two detours in one gap do not merge into a
+ * single ambiguous corridor.
+ *
+ * @param {Array<{from: string, to: string}>} edges
+ * @param {Record<string, [number, number]>} positions
+ * @param {[number, number]} size
+ * @param {number} gapX horizontal space between columns
+ * @returns {Map<number, {fromSide: string, toSide: string, via: Array<[number, number]>}>}
+ *   keyed by index into `edges`
+ */
+export function sameColumnDetours(edges, positions, size, gapX) {
+  // Only the height is needed: the channel runs beside the column, so the
+  // endpoints attach at each node's vertical centre and the box width never
+  // enters the arithmetic.
+  const height = size[1];
+  const rowsByColumn = new Map();
+  for (const [id, [x, y]] of Object.entries(positions)) {
+    if (!rowsByColumn.has(x)) rowsByColumn.set(x, []);
+    rowsByColumn.get(x).push({ id, y });
+  }
+  /** @type {Map<string, number>} */
+  const rowOf = new Map();
+  for (const members of rowsByColumn.values()) {
+    members.sort((left, right) => left.y - right.y);
+    members.forEach((member, row) => rowOf.set(member.id, row));
+  }
+
+  const detours = new Map();
+  let channel = 0;
+  for (const [index, edge] of edges.entries()) {
+    const from = positions[edge.from];
+    const to = positions[edge.to];
+    if (!from || !to || from[0] !== to[0]) continue;
+    if (Math.abs(rowOf.get(edge.from) - rowOf.get(edge.to)) <= 1) continue;
+
+    // The channel sits in the gap to the LEFT of the column, stepping further
+    // out for each successive detour. Left rather than right because the
+    // layered layout reads left to right, so the outbound side is the one a
+    // reader is not already following.
+    const columnLeft = from[0];
+    const offset = 32 + (channel % 3) * 26;
+    const channelX = columnLeft - offset;
+    channel += 1;
+    // Nothing to route into: the channel would land off the canvas, or on top
+    // of the previous column. Left straight, and reported by the gate rather
+    // than moved somewhere equally wrong.
+    if (channelX <= 8 || offset >= gapX - 8) continue;
+
+    detours.set(index, {
+      fromSide: 'left',
+      toSide: 'left',
+      via: [
+        [channelX, from[1] + height / 2],
+        [channelX, to[1] + height / 2],
+      ],
+    });
+  }
+  return detours;
+}
+
+/**
  * Turn a compiled view into a renderable architecture document.
  *
  * @param {object} view the view IR from `compile`
@@ -206,13 +286,19 @@ export function viewToDocument(view, options = {}) {
     };
   });
 
-  const connections = asArray(view.edges)
-    .filter((edge) => edge && idOf.has(edge.from) && idOf.has(edge.to))
-    .map((edge) => ({
-      from: idOf.get(edge.from),
-      to: idOf.get(edge.to),
-      ...(edge.label ? { label: String(edge.label) } : {}),
-    }));
+  const drawnEdges = asArray(view.edges)
+    .filter((edge) => edge && idOf.has(edge.from) && idOf.has(edge.to));
+  // Only the layered placement stacks a whole depth into one column; the
+  // physical solver spreads nodes freely and has no columns to route around.
+  const detours = options.solver
+    ? new Map()
+    : sameColumnDetours(drawnEdges, solved.positions, size, 120);
+  const connections = drawnEdges.map((edge, index) => ({
+    from: idOf.get(edge.from),
+    to: idOf.get(edge.to),
+    ...(edge.label ? { label: String(edge.label) } : {}),
+    ...(detours.get(index) ?? {}),
+  }));
 
   // Citations need a pinned repository to verify against, and this module
   // cannot invent one. Given no repository, the sources are DROPPED and the

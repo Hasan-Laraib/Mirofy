@@ -28,6 +28,7 @@ import {
   toStaticSvg, parseRules, selectorTouchesSvg, classesUsed, resolveVars, minifyCss,
   selectorCanMatchStatic, flattenTarget, PRESENTATION_PROPERTIES,
 } from '../../core/renderers/shared/svg-static.mjs';
+import { resolveTokens } from '../../viewer/src/tokens/tokens.mjs';
 import { chromeAvailable, openArtifact } from './helpers/browser.mjs';
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-svg-static-'));
@@ -319,4 +320,99 @@ test('[4.15] rules that require a stripped attribute are dropped', () => {
   assert.equal(selectorCanMatchStatic('.c-backend, svg[data-x] .y'), true);
   // ...and with the attributes kept, nothing is dropped on this ground.
   assert.equal(selectorCanMatchStatic('svg[data-x] .y', { attributesStripped: false }), true);
+});
+
+// ---------------------------------------------------------------------------
+// The visual preset, which the static export used to throw away.
+//
+// `--format svg-static` collected every token block whose selector did not
+// mention data-preset, which is all ten preset blocks -- so six presets
+// produced one file, byte for byte, and a document authored in meridian
+// exported in classic's colours. Nothing here noticed, because nothing here
+// rendered the same diagram twice.
+// ---------------------------------------------------------------------------
+
+/** Render one fixture as svg-static under a named preset. */
+function staticSvgFor(preset) {
+  const source = JSON.parse(fs.readFileSync(
+    path.join(coreRoot, 'examples/web-app.architecture.json'), 'utf8'));
+  source.meta = { ...source.meta, visual_preset: preset };
+  delete source.meta.output;
+  const input = path.join(tmp, `preset-${preset}.json`);
+  const out = path.join(tmp, `preset-${preset}.svg`);
+  fs.writeFileSync(input, JSON.stringify(source));
+  execFileSync(process.execPath, [
+    path.join(coreRoot, 'bin/mirofy.mjs'), 'render', 'architecture', input, out,
+    '--format', 'svg-static',
+  ], { stdio: ['ignore', 'ignore', 'pipe'] });
+  return fs.readFileSync(out, 'utf8');
+}
+
+test('[6.13] every preset exports its own colours', () => {
+  const presets = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito', 'meridian'];
+  const byPreset = new Map(presets.map((preset) => [preset, staticSvgFor(preset)]));
+
+  const seen = new Map();
+  for (const [preset, svg] of byPreset) {
+    const previous = seen.get(svg);
+    assert.equal(previous, undefined,
+      `"${preset}" exported the same bytes as "${previous}" — the preset was dropped`);
+    seen.set(svg, preset);
+  }
+
+  // Distinct bytes are not enough: the colours have to be the preset's. The
+  // README says meridian keeps arrows graphite so that colour means what a
+  // node IS, and that is checkable.
+  assert.match(byPreset.get('meridian'), /stroke="#5c6672"/,
+    'meridian did not export its graphite arrow');
+  assert.doesNotMatch(byPreset.get('classic'), /stroke="#5c6672"/,
+    'classic exported meridian\'s arrow, so the fixture proves nothing');
+});
+
+test('[6.13] classic resolves to the base palette, with no preset block of its own', () => {
+  const { tokens, matchedPreset } = resolveTokens('classic', 'light');
+  assert.equal(matchedPreset, false, 'classic should match no preset block');
+  assert.equal(tokens['--arrow'], '#94a3b8');
+  assert.equal(Object.keys(tokens).length, 32, 'the base palette is 32 properties');
+});
+
+test('[6.13] a partial preset inherits the properties it does not override', () => {
+  // signal-flow's light block sets 27 of the 32. Laying it over the base is
+  // what makes the other five correct; using the block alone would leave a
+  // diagram with five colourless properties.
+  const base = resolveTokens('classic', 'light').tokens;
+  const { tokens } = resolveTokens('signal-flow', 'light');
+  assert.equal(Object.keys(tokens).length, 32);
+
+  const inherited = Object.keys(tokens).filter((name) => tokens[name] === base[name]);
+  const overridden = Object.keys(tokens).filter((name) => tokens[name] !== base[name]);
+  assert.ok(inherited.length > 0, 'signal-flow overrode everything, so this proves no layering');
+  assert.ok(overridden.length > 0, 'signal-flow overrode nothing, so the block was not applied');
+});
+
+test('[6.13] the theme is chosen, not inherited from block order', () => {
+  // A static SVG carries no background rectangle, so it is read on whatever
+  // ground it is pasted onto. Light is the deliberate choice; dark tokens
+  // would put near-white text on a near-white README.
+  const light = resolveTokens('classic', 'light').tokens;
+  const dark = resolveTokens('classic', 'dark').tokens;
+  assert.notEqual(light['--text'], dark['--text'], 'the two themes resolve identically');
+  assert.match(staticSvgFor('classic'), /fill="#0f172a"/,
+    'the export is not using the light palette it claims to');
+});
+
+test('[6.13] a preset with no palette is refused rather than exported as classic', () => {
+  // The failure this whole section replaces was silent. A preset the schema
+  // accepts but the palette has no block for must not quietly fall back.
+  const source = JSON.parse(fs.readFileSync(
+    path.join(coreRoot, 'examples/web-app.architecture.json'), 'utf8'));
+  source.meta = { ...source.meta, visual_preset: 'meridian' };
+  delete source.meta.output;
+  const input = path.join(tmp, 'preset-unknown.json');
+  fs.writeFileSync(input, JSON.stringify(source));
+
+  const { tokens, matchedPreset } = resolveTokens('no-such-preset', 'light');
+  assert.equal(matchedPreset, false);
+  assert.deepEqual(tokens, resolveTokens('classic', 'light').tokens,
+    'an unknown preset should resolve to the base, which is what the CLI then refuses');
 });

@@ -20,10 +20,13 @@
 //
 // The page previews are this tool's own `--format svg-static` output, for the
 // same reason the hero is a real scan: a page advertising an export nobody
-// uses is a page nobody should believe. They are ONE PER DIAGRAM TYPE rather
-// than one per preset, because svg-static currently flattens to the classic
-// palette and ignores meta.visual_preset -- six identical files would have
-// implied a difference that is not there.
+// uses is a page nobody should believe.
+//
+// They were one per diagram type because svg-static used to flatten every
+// document to the classic palette, so six files would have been identical and
+// implied a difference that was not there. That is fixed, and each type is now
+// previewed in a DIFFERENT preset -- five of the six visible at a glance, each
+// card highlighting the chip that names the one it shows.
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -36,6 +39,19 @@ const repoRoot = path.resolve(here, '..');
 const siteRoot = path.join(repoRoot, 'site');
 const cli = path.join(repoRoot, 'packages/core/bin/mirofy.mjs');
 const PRESETS = ['classic', 'signal-flow', 'blueprint', 'editorial', 'okabe-ito', 'meridian'];
+
+/**
+ * The preset each type is previewed in. Spread across the palette on purpose:
+ * a page that shows one set of colours five times has not shown you the
+ * presets.
+ */
+const PREVIEW_PRESET = {
+  architecture: 'meridian',
+  workflow: 'signal-flow',
+  sequence: 'blueprint',
+  dataflow: 'editorial',
+  lifecycle: 'okabe-ito',
+};
 
 /** What each diagram type is for, in the reader's terms rather than the schema's. */
 const ABOUT = {
@@ -135,6 +151,7 @@ for (const { mode, fixture } of MODES) {
   // One flat preview per type, from the unmodified fixture.
   const plain = path.join(scratch, `${mode}-preview.json`);
   const source2 = JSON.parse(fs.readFileSync(path.join(fixturesRoot, fixture), 'utf8'));
+  source2.meta = { ...source2.meta, visual_preset: PREVIEW_PRESET[mode] };
   delete source2.meta.output;
   fs.writeFileSync(plain, JSON.stringify(source2));
   run([cli, 'render', mode, plain, path.join(siteRoot, `previews/${mode}.svg`),
@@ -161,12 +178,13 @@ const commit = (() => {
 })();
 
 const typeCards = MODES.map(({ mode }) => {
+  const shown = PREVIEW_PRESET[mode];
   const chips = made.filter((entry) => entry.mode === mode).map((entry) => (
-    `          <a class="chip" href="gallery/${esc(entry.file)}">${esc(entry.preset)}</a>`
+    `          <a class="chip${entry.preset === shown ? ' shown' : ''}" href="gallery/${esc(entry.file)}">${esc(entry.preset)}</a>`
   )).join('\n');
   return `      <article class="type">
-        <a class="plate" href="gallery/${esc(mode)}--classic.html">
-          <img src="previews/${esc(mode)}.svg" alt="A ${esc(mode)} diagram" loading="lazy">
+        <a class="plate" href="gallery/${esc(mode)}--${esc(shown)}.html">
+          <img src="previews/${esc(mode)}.svg" alt="A ${esc(mode)} diagram in the ${esc(shown)} preset" loading="lazy">
         </a>
         <div class="type-body">
           <h3>${esc(mode)}</h3>
@@ -355,6 +373,8 @@ const index = `<!doctype html>
     border: 1px solid var(--line); color: var(--dim); background: var(--sunk);
   }
   .chip:hover { text-decoration: none; border-color: var(--accent); color: var(--accent); }
+  /* The preset the plate above is actually showing. */
+  .chip.shown { border-color: var(--accent); color: var(--accent); background: transparent; }
 
   /* ---- footer ---- */
   footer { border-top: 1px solid var(--line); padding: 32px 0 56px; color: var(--dim); font-size: 14px; }
@@ -447,9 +467,8 @@ ${typeCards}
     <p class="note" style="margin-top:26px">
       Each preview above is this tool's own <code>--format svg-static</code>
       output — 19&nbsp;KB, no scripts, no stylesheet needed. It is what you paste
-      into a README or a Figma board. It renders in the classic palette
-      regardless of preset, which is why there is one preview per type rather
-      than one per preset.
+      into a README or a Figma board, and it carries the document's preset:
+      each card is rendered in the one its highlighted chip names.
     </p>
   </div>
 </section>

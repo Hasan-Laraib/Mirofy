@@ -19,7 +19,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deriveFromGraph, packageIndex, ownerOf, classifyTarget } from '../../model/src/derive.mjs';
-import { viewToDocument, schemaTypeFor, safeId, layeredPositions } from '../../layout/src/document.mjs';
+import { viewToDocument, schemaTypeFor, safeId, layeredPositions, sameColumnDetours } from '../../layout/src/document.mjs';
 
 /** Two packages, one importing the other, plus a builtin and an external. */
 function graph() {
@@ -256,4 +256,94 @@ test('[1.20] the compiler’s omissions survive into the receipt', () => {
   // exists to prevent; the count has to reach whoever reads the diagram.
   const { receipt } = viewToDocument(view(), { title: 'x' });
   assert.equal(receipt.omissions, 1);
+});
+
+// ---------------------------------------------------------------------------
+// Same-column edges, which the layered placement used to run through whatever
+// was standing between their endpoints.
+//
+// Found when this repository's own self-model stopped rendering: the layout
+// engine produced a document its own renderer refused, because a tenth package
+// joined a layer and an edge from the first to the fourth crossed two nodes.
+// ---------------------------------------------------------------------------
+
+test('an edge between adjacent members of a column is left straight', () => {
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [380, 80], b: [380, 180] };
+  const detours = sameColumnDetours([{ from: 'a', to: 'b' }], positions, [180, 60], 120);
+  assert.equal(detours.size, 0,
+    'nothing stands between adjacent members, so a detour would go around nothing');
+});
+
+test('an edge that would cross an intervening node is routed around the column', () => {
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [380, 80], b: [380, 180], c: [380, 280], d: [380, 380] };
+  const detours = sameColumnDetours([{ from: 'a', to: 'd' }], positions, [180, 60], 120);
+  assert.equal(detours.size, 1);
+  const route = detours.get(0);
+  assert.equal(route.fromSide, 'left');
+  assert.equal(route.toSide, 'left');
+  // The channel has to sit clear of the column it is dodging, or the detour
+  // runs through the very nodes it was supposed to avoid.
+  for (const [x] of route.via) assert.ok(x < 380, `channel at ${x} is inside the column`);
+  // Both via points share one x, so the middle segment is vertical and the two
+  // end segments are horizontal -- perpendicular to the left border, which is
+  // what the endpoint-side rule asks of them.
+  assert.equal(route.via[0][0], route.via[1][0]);
+  assert.equal(route.via[0][1], 110, 'the detour should leave at the source row centre');
+  assert.equal(route.via[1][1], 410, 'and arrive at the target row centre');
+});
+
+test('edges in different columns are not touched', () => {
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [80, 80], b: [380, 380] };
+  const detours = sameColumnDetours([{ from: 'a', to: 'b' }], positions, [180, 60], 120);
+  assert.equal(detours.size, 0);
+});
+
+test('two detours in one gap take separate channels', () => {
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [380, 80], b: [380, 180], c: [380, 280], d: [380, 380] };
+  const detours = sameColumnDetours(
+    [{ from: 'a', to: 'd' }, { from: 'b', to: 'd' }], positions, [180, 60], 120,
+  );
+  assert.equal(detours.size, 2);
+  const [first, second] = [detours.get(0), detours.get(1)];
+  assert.notEqual(first.via[0][0], second.via[0][0],
+    'both detours share a channel, so they merge into one ambiguous corridor');
+});
+
+test('a detour with nowhere to go is left straight rather than sent off-canvas', () => {
+  // A column hard against the left edge has no gap to route through. Leaving
+  // the edge alone lets the gate report it; a channel at x -20 would be a
+  // different, undiagnosed problem.
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [8, 80], b: [8, 180], c: [8, 280], d: [8, 380] };
+  const detours = sameColumnDetours([{ from: 'a', to: 'd' }], positions, [180, 60], 120);
+  assert.equal(detours.size, 0);
+});
+
+test('the layered layout emits a document its own renderer accepts', () => {
+  // Two nodes share a column when the depth pass cannot settle them, which is
+  // what a CYCLE does -- and a package graph is full of cycles. Here `a` and
+  // `e` point at each other, so both fall to the same depth as b, c and d, and
+  // the a -> e edge has three nodes standing in its way.
+  const view = {
+    type: 'architecture',
+    nodes: ['root', 'a', 'b', 'c', 'd', 'e'].map((id) => ({ id, label: id, kind: 'package' })),
+    edges: [
+      { from: 'root', to: 'a' }, { from: 'root', to: 'b' }, { from: 'root', to: 'c' },
+      { from: 'root', to: 'd' }, { from: 'root', to: 'e' },
+      { from: 'a', to: 'e', label: 'imports' }, { from: 'e', to: 'a' },
+    ],
+  };
+  const { document } = viewToDocument(view, { title: 'Column crossing' });
+  const crossing = document.connections.find((connection) => connection.via);
+  assert.ok(crossing, 'the edge across the column was left straight');
+  const columnX = document.components.find((component) => component.id === 'a').pos[0];
+  assert.equal(document.components.find((component) => component.id === 'e').pos[0], columnX,
+    'the fixture no longer puts the two endpoints in one column, so it proves nothing');
+  for (const [x] of crossing.via) {
+    assert.ok(x < columnX, `the detour runs at x ${x}, inside the ${columnX} column`);
+  }
 });
