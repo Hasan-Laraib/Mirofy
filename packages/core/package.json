@@ -5,7 +5,7 @@
   "description": "Diagrams of your system that cite their sources - and say what they could not see. Five diagram types, validated, rendered to one self-contained HTML file.",
   "license": "MIT",
   "bin": {
-    "mirofy": "./bin/mirofy.mjs"
+    "mirofy": "bin/mirofy.mjs"
   },
   "engines": {
     "node": ">=18"

@@ -86,7 +86,9 @@ test('the bundle does not claim to be part of a workspace it was copied out of',
   assert.equal(manifest.devDependencies, undefined);
   assert.deepEqual(manifest.dependencies ?? {}, {},
     'the bundle declares a runtime dependency, so a copy would not run');
-  assert.equal(manifest.bin?.mirofy, './bin/mirofy.mjs');
+  // Without the leading ./ -- npm rewrites it on publish otherwise, and a
+  // manifest npm auto-corrects is a manifest that does not say what ships.
+  assert.equal(manifest.bin?.mirofy, 'bin/mirofy.mjs');
 });
 
 test('a new directory in packages/core has to be decided about', () => {
