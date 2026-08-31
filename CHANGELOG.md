@@ -117,6 +117,31 @@ when written. `scripts/check-readme-claims.mjs` derives them: it counts the
 matrix, reads the tool list the MCP server serves, renders an artifact to measure
 it, re-runs the scan, and re-runs the benchmark.
 
+### An installable skill bundle
+
+`npm run build:skill` assembles `dist/mirofy/` — 2.8 MB against `packages/core`'s
+3.7 MB, and named for the skill inside it. Copying `packages/core` instead
+installs a skill called **core** that declares in its own frontmatter that it is
+called **mirofy**; the manual instruction hid that because it names the
+destination, but nothing that walks a tree does.
+
+Before writing it, the build copies the result somewhere with no repository
+around it and renders a diagram. A bundle that only works inside its own
+checkout is not a bundle, it is a directory. It also refuses a directory in
+`packages/core` that it neither ships nor records a reason for skipping — the
+decision belongs to whoever adds it, not to a user who finds it missing.
+
+### First tag, and one removed
+
+`v2.16.0` — 197 commits with nothing to pin, until now. The number continues the
+one `packages/core` already declares; it is not a claim that 2.15 existed here.
+
+`provenance-anchor` is deleted. It was local-only, never pushed, and asserted
+that `packages/core` was byte-identical to an upstream commit — which stopped
+being true a long time ago, and named the upstream project in a message. It was
+the last reference to 50 superseded commits from before the history rewrite; the
+content of all of them is on `main` in rewritten form.
+
 ### Also
 
 - `repair` accepts all five diagram types. Only architecture permits node

@@ -1,0 +1,155 @@
+// @ts-check
+// Assembles the installable skill into dist/mirofy/.
+//
+//   npm run build:skill
+//   cp -r dist/mirofy ~/.claude/skills/
+//
+// Two things are wrong with telling somebody to copy packages/core instead.
+//
+// THE DIRECTORY IS CALLED core. A skill is identified by where it sits, so an
+// agent that indexes a skills directory finds one called "core" that claims in
+// its own frontmatter to be called "mirofy". The manual copy hides it, because
+// the instruction names the destination -- but nothing that walks a tree does.
+//
+// AND IT SHIPS 3.7 MB, of which 1 MB is tests nobody installing a skill asked
+// for. A skill directory is something a person keeps
+// in their home directory forever; it should carry what it needs to run and
+// nothing else.
+//
+// dist/ is git-ignored and built on demand (row 7.1: no generated artifacts in
+// git), so the bundle is always assembled from the code at the commit that
+// assembled it.
+
+import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const source = path.join(repoRoot, 'packages/core');
+const out = path.join(repoRoot, 'dist/mirofy');
+
+// What a skill needs to render, validate and explain a diagram. Anything not
+// named here does not ship, so adding a directory to packages/core does not
+// silently enlarge what every user installs.
+const INCLUDE = [
+  'SKILL.md',
+  'README.md',
+  'LICENSE',
+  'package.json',
+  'bin',
+  'renderers',
+  'schemas',
+  'assets',
+  'brand-marks',
+  'references',
+  'recipes',
+  'delta',
+  'examples',
+];
+
+// Present in packages/core and deliberately absent from the bundle.
+const EXCLUDE_REASON = {
+  test: 'the suite proves the code here; it does not run at a user site',
+  scripts: 'build tooling, not runtime',
+  node_modules: 'a workspace link; every package here has zero runtime dependencies',
+};
+
+/** @param {string} from @param {string} to */
+function copyTree(from, to) {
+  const stat = fs.statSync(from);
+  if (stat.isDirectory()) {
+    fs.mkdirSync(to, { recursive: true });
+    for (const entry of fs.readdirSync(from).sort()) {
+      copyTree(path.join(from, entry), path.join(to, entry));
+    }
+    return;
+  }
+  fs.copyFileSync(from, to);
+}
+
+/**
+ * Bytes under a directory, ignoring node_modules.
+ *
+ * Counting it would compare the bundle against a number that includes something
+ * which never ships, and report a saving larger than the one actually made.
+ *
+ * @param {string} dir
+ */
+function sizeOf(dir) {
+  let total = 0;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name === 'node_modules') continue;
+    const full = path.join(dir, entry.name);
+    total += entry.isDirectory() ? sizeOf(full) : fs.statSync(full).size;
+  }
+  return total;
+}
+
+fs.rmSync(out, { recursive: true, force: true });
+fs.mkdirSync(out, { recursive: true });
+
+const missing = INCLUDE.filter((name) => !fs.existsSync(path.join(source, name)));
+if (missing.length) {
+  console.error(`build-skill: packages/core has no ${missing.join(', ')}. `
+    + 'The bundle names what it ships, so a rename here has to be deliberate.');
+  process.exit(1);
+}
+for (const name of INCLUDE) copyTree(path.join(source, name), path.join(out, name));
+
+// Anything in packages/core that is neither shipped nor knowingly excluded is a
+// new directory nobody decided about. Failing here is the point: the decision
+// should be made when it is added, not discovered by a user who is missing it.
+const undecided = fs.readdirSync(source)
+  .filter((name) => !INCLUDE.includes(name) && !(name in EXCLUDE_REASON));
+if (undecided.length) {
+  console.error(`build-skill: packages/core has ${undecided.join(', ')}, which the bundle `
+    + 'neither ships nor records a reason for skipping. Add it to INCLUDE or to '
+    + 'EXCLUDE_REASON in this script.');
+  process.exit(1);
+}
+
+// The bundle is installed standalone, so its manifest must not claim to be part
+// of a workspace it was copied out of.
+const manifestPath = path.join(out, 'package.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+delete manifest.private;
+delete manifest.devDependencies;
+delete manifest.scripts;
+fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+// ---------------------------------------------------------------------------
+// Prove it runs where it will actually be installed
+// ---------------------------------------------------------------------------
+// Copied somewhere with no repository around it and asked to render. A bundle
+// that only works inside its own checkout is not a bundle; it is a directory.
+const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-skill-probe-'));
+try {
+  const installed = path.join(probe, 'mirofy');
+  copyTree(out, installed);
+  execFileSync(process.execPath, [
+    path.join(installed, 'bin/mirofy.mjs'), 'render', 'architecture',
+    path.join(installed, 'examples/web-app.architecture.json'),
+    path.join(probe, 'probe.html'),
+  ], { cwd: probe, stdio: ['ignore', 'ignore', 'pipe'] });
+  if (!fs.existsSync(path.join(probe, 'probe.html'))) {
+    throw new Error('the CLI reported success but wrote nothing');
+  }
+} catch (error) {
+  console.error('build-skill: the bundle does not work outside this repository.');
+  console.error(String(error.stderr || error.message).slice(0, 1500));
+  process.exit(1);
+} finally {
+  fs.rmSync(probe, { recursive: true, force: true });
+}
+
+const megabytes = (sizeOf(out) / 1024 / 1024).toFixed(1);
+const before = (sizeOf(source) / 1024 / 1024).toFixed(1);
+console.log(`build-skill: dist/mirofy — ${megabytes} MB (packages/core is ${before} MB)`);
+for (const [name, reason] of Object.entries(EXCLUDE_REASON)) {
+  console.log(`  omitted ${name}: ${reason}`);
+}
+console.log('\nInstall it with:');
+console.log('  cp -r dist/mirofy ~/.claude/skills/      # Claude Code');
+console.log('  cp -r dist/mirofy ~/.agents/skills/      # Codex CLI, opencode');

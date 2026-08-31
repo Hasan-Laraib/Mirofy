@@ -1,7 +1,11 @@
 export default [
   {
     files: ['**/*.mjs', '**/*.js'],
-    ignores: ['packages/core/**', 'node_modules/**'],
+    // `packages/core` is linted by its own config; the rest are build output.
+    // dist/ is a COPY of packages/core, so linting it reports every finding a
+    // second time under a path nobody edits -- 85 of them, the first time a
+    // bundle was built before a check ran.
+    ignores: ['packages/core/**', 'node_modules/**', 'dist/**', 'site/**', 'preview/**', 'scan/**'],
     languageOptions: {
       ecmaVersion: 2023,
       sourceType: 'module',

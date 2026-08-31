@@ -47,16 +47,24 @@ nothing is known, the diagram **says so** instead of filling the gap.
 
 ## Install
 
-**As an agent skill** — `packages/core/` is a skill directory with its own
-`SKILL.md`. Copy it where your agent looks:
+**As an agent skill** — build the bundle and copy it where your agent looks:
 
 ```bash
 git clone https://github.com/Hasan-Laraib/Mirofy.git
-cp -r Mirofy/packages/core ~/.claude/skills/mirofy      # Claude Code
-cp -r Mirofy/packages/core ~/.agents/skills/mirofy      # Codex CLI, opencode
+cd Mirofy && npm install && npm run build:skill
+
+cp -r dist/mirofy ~/.claude/skills/      # Claude Code
+cp -r dist/mirofy ~/.agents/skills/      # Codex CLI, opencode
 ```
 
 Then ask: `Use mirofy to map this repository's runtime architecture.`
+
+The bundle is 2.8 MB and named for the skill inside it — copying `packages/core`
+instead installs a skill called `core` that says in its own frontmatter it is
+called `mirofy`, and drags the test suite along with it. Before writing the
+bundle, `build:skill` copies it somewhere with no repository around it and
+renders a diagram: a bundle that only works inside its own checkout is not a
+bundle.
 
 **As a CLI** — no agent required:
 
