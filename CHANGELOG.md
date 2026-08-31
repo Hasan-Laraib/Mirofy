@@ -15,6 +15,18 @@ stops being one.
 
 ## 2026-09-01
 
+### The gate now checks the lockfile
+
+Renaming the workspace package from `@mirofy/core` to `mirofy` passed
+`npm run check` locally and failed **all twelve CI jobs**: `npm ci` refuses to
+install when the manifests and `package-lock.json` disagree, and nothing local
+noticed because `node_modules` was already sitting there.
+
+So the whole gate could pass on a machine where the project would not install at
+all — which is the worst shape a green check can have. `check:lockfile` compares
+every workspace's name and version against the lockfile, then asks npm itself
+with `npm ci --dry-run`.
+
 ### The publish guard learned how to call npm on Windows
 
 Both obvious ways are wrong there. `shell: true` concatenates arguments instead
