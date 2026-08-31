@@ -24,8 +24,10 @@ gaps**, derives **19 components and 21 relationships** from them — every one
 citing the file and line it came from — and draws twelve of them, recording
 what it left out and why.
 
-The result is checked in at [`preview/self-model.svg`](preview/self-model.svg):
-Mirofy's own architecture, derived from Mirofy's own code.
+Those five commands produce `preview/self-model.svg` — Mirofy's own
+architecture, derived from Mirofy's own code. It is not committed: generated
+artifacts are built, never stored (row 7.1), so the way to see it is to run
+the pipeline.
 
 No repository? Author a JSON document, or convert a Mermaid diagram:
 
