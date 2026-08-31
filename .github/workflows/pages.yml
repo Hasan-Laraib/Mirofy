@@ -1,0 +1,72 @@
+name: Pages
+
+# The public proof surface. The README claims every relationship can name the
+# file, line and commit it came from; until this exists a reader has to clone
+# the repository to check that, which is not checking, it is trusting.
+#
+# The site is BUILT HERE AND NEVER COMMITTED (row 7.1: no generated artifacts
+# in git). That is not only hygiene -- it means the published site is always
+# produced by the code at the commit it describes, and cannot quietly go on
+# describing an older one.
+#
+# ONE-TIME SETUP: Settings -> Pages -> Source: "GitHub Actions". Until that is
+# switched on, the deploy step fails with a 404 from the Pages API and the
+# build step still passes, so a broken setting is visible rather than silent.
+
+on:
+  push:
+    branches: [main]
+  # Buildable by hand, so the site can be republished without an empty commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never two deploys at once, and never cancel one half-way: an interrupted
+# deployment can leave the live site serving a partial upload. A superseded
+# BUILD is wasted work; a superseded DEPLOY is a broken page.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Full history: the renderer verifies every source citation against the
+      # pinned 40-character commit it names, in a real checkout. A shallow
+      # clone does not contain those revisions, and every citation on the
+      # self-model page would be discarded as unverifiable.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # The README's numbers are part of what this site shows, so they are
+      # checked before it is published rather than after somebody reads them.
+      - run: npm run check:readme
+
+      - run: npm run build:site
+
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

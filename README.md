@@ -76,9 +76,13 @@ npm run layout                  # view        → positioned document
 node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html --repo-root .
 ```
 
-Against **this repository** that reads **230 files into 987 facts and 8 gaps**,
-derives **19 components and 21 relationships** — every one citing the file and
-line it came from — and draws twelve, recording what it left out and why.
+Against **this repository** it records **1,052 facts** across **190 files**,
+with **8 gaps** it could not read; derives **19 components and 22
+relationships** — every one citing the file and line it came from — and draws
+**twelve**, recording what it left out and why.
+
+Those figures are checked, not remembered — see
+[the numbers on this page](#what-is-proved) below.
 
 Those commands reproduce the diagram at the top of this page. It is checked in
 under `assets/` as documentation; the interactive artifacts are built, never

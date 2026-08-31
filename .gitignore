@@ -12,6 +12,7 @@ packages/core/examples/*.html
 # Gallery output -- regenerate with `npm run gallery`. ~17 MB of rendered
 # artifacts; committing this is the exact debt P1a removed.
 preview/
+site/
 
 # SDD working artifacts: briefs, reports, review packages, ledger.
 .superpowers/

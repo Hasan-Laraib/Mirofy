@@ -139,6 +139,37 @@ try {
 }
 
 // ---------------------------------------------------------------------------
+// The scan of this repository, re-run
+// ---------------------------------------------------------------------------
+// The whole pipeline takes under three seconds, so there is no reason to quote
+// these from memory. The volatile ones -- facts and cited files, which move
+// every time a file is added -- are checked against what the README quotes with
+// a tolerance, so ordinary growth does not fail the build. The structural ones
+// are exact, because when THOSE change the README genuinely needs rewriting.
+run([path.join(repoRoot, 'packages/scanner/bin/scan.mjs')], 'scan');
+run([path.join(repoRoot, 'packages/model/bin/model.mjs'), '--from-graph',
+  '--graph', path.join(repoRoot, 'scan/evidence-graph.json')], 'model');
+run([path.join(repoRoot, 'packages/compile/bin/compile.mjs')], 'compile');
+
+const graph = readJson('scan/evidence-graph.json');
+const model = readJson('scan/model.json');
+const view = readJson('scan/view.json');
+const citedFiles = new Set();
+for (const fact of graph.facts ?? []) if (fact.location?.path) citedFiles.add(fact.location.path);
+for (const gap of graph.gaps ?? []) if (gap.path) citedFiles.add(gap.path);
+
+within('fact count', /\*\*([\d,]+) facts\*\*/, (graph.facts ?? []).length);
+within('cited file count', /across \*\*([\d,]+) files\*\*/, citedFiles.size);
+mustContain('recorded gaps', `**${(graph.gaps ?? []).length} gaps**`);
+mustContain(
+  'components and relationships derived',
+  `**${(model.components ?? []).length} components and ${(model.relationships ?? []).length}
+relationships**`,
+);
+mustContain('components drawn', `draws
+**${numberWord((view.components ?? view.nodes ?? []).length)}**`);
+
+// ---------------------------------------------------------------------------
 // The benchmark, re-measured
 // ---------------------------------------------------------------------------
 // Re-run rather than read a stored result. The rate is a claim about THIS
@@ -166,8 +197,8 @@ if (fs.existsSync(path.join(corpus, 'authored-by.json'))) {
 // ---------------------------------------------------------------------------
 /** Small counts read better as words, and that is how the README writes them. */
 function numberWord(n) {
-  return ['zero', 'one', 'two', 'three', 'four', 'five',
-    'six', 'seven', 'eight', 'nine', 'ten'][n] ?? String(n);
+  return ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven',
+    'eight', 'nine', 'ten', 'eleven', 'twelve'][n] ?? String(n);
 }
 
 /** Whether the README says "<n> <noun>", as a word or a numeral. */
@@ -184,14 +215,40 @@ function saysCount(n, noun) {
 
 /** Compare a size the README quotes against the size just measured. */
 function sizeWithin(claim, pattern, measuredKb) {
-  const quoted = Number(pattern.exec(readme)?.[1]);
+  within(claim, pattern, measuredKb, 0.08, 'KB');
+}
+
+/**
+ * Check a number the README quotes against one just measured, with slack.
+ *
+ * Quoting an exact count of anything that grows would fail the build on every
+ * commit that adds a file, which trains people to stop reading this.
+ */
+function within(claim, pattern, measured, tolerance = 0.1, unit = '') {
+  const quoted = Number((pattern.exec(readme)?.[1] ?? '').replace(/,/g, ''));
   if (!Number.isFinite(quoted)) {
-    assertThat(claim, false, `README quotes no size matching ${pattern} (measured ${measuredKb} KB)`);
+    assertThat(claim, false, `README quotes no number matching ${pattern} (measured ${measured}${unit})`);
     return;
   }
-  const drift = Math.abs(quoted - measuredKb) / measuredKb;
-  assertThat(claim, drift <= 0.08,
-    `README says ${quoted} KB, measured ${measuredKb} KB (${(drift * 100).toFixed(1)}% off)`);
+  const drift = Math.abs(quoted - measured) / (measured || 1);
+  assertThat(claim, drift <= tolerance,
+    `README says ${quoted}${unit}, measured ${measured}${unit} (${(drift * 100).toFixed(1)}% off)`);
+}
+
+/** @param {string} relative */
+function readJson(relative) {
+  return JSON.parse(fs.readFileSync(path.join(repoRoot, relative), 'utf8'));
+}
+
+/** Run a repository script, failing loudly rather than checking a stale file. */
+function run(argv, label) {
+  try {
+    return execFileSync(process.execPath, argv, { cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  } catch (error) {
+    console.error(`readme-claims: ${label} failed, so its numbers cannot be checked`);
+    console.error(String(error.stderr || error.stdout || error.message).slice(0, 1200));
+    process.exit(2);
+  }
 }
 
 const failed = results.filter((result) => !result.ok);
