@@ -50,8 +50,8 @@ external requests, and no runtime dependencies.
 
 ## What is proved
 
-The conformance matrix has **93 rows. 73 are proved without a browser**; 19
-more need headless Chrome (`MIROFY_CHROME`), bringing the total to 92.
+The conformance matrix has **94 rows. 74 are proved without a browser**; 19
+more need headless Chrome (`MIROFY_CHROME`), bringing the total to 93.
 
 One row (6.10, deterministic ZIP packaging) is UNPROVEN — its source was never
 part of this import's scope, so there is nothing here to prove parity against.

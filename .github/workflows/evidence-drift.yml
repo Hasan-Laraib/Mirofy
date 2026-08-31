@@ -1,0 +1,49 @@
+name: evidence-drift
+
+# What changed about the system, on every pull request (P5.1).
+#
+# This scans the base branch and the head, and reports the facts that differ.
+# It NEVER fails the build. Drift is information a reviewer cannot get from a
+# 40-file diff; it is not a verdict, and a check that went red because a fact
+# changed would go red on every pull request that does any work.
+#
+# It also never claims risk or merge safety. The report says what the evidence
+# says differently, and stops there.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          # Both sides of the comparison need to be reachable.
+          fetch-depth: 0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 22
+      - run: npm ci
+
+      - name: Scan head
+        run: |
+          npm run scan
+          cp scan/evidence-graph.json "$RUNNER_TEMP/head-graph.json"
+
+      - name: Scan base
+        run: |
+          git checkout --quiet "origin/${{ github.base_ref }}"
+          npm ci
+          npm run scan
+          cp scan/evidence-graph.json "$RUNNER_TEMP/base-graph.json"
+          git checkout --quiet -
+
+      - name: Report drift
+        run: |
+          npm run drift -- \
+            --base "$RUNNER_TEMP/base-graph.json" \
+            --head "$RUNNER_TEMP/head-graph.json" \
+            --markdown >> "$GITHUB_STEP_SUMMARY"

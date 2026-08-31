@@ -840,6 +840,45 @@ export const IMPORTED_ROWS = [
     testTitle: '[6.20] a component with no cited paths is UNKNOWN, not unchanged',
   },
   {
+    id: '6.17',
+    name: 'CI action (evidence drift on pull requests)',
+    // On a pull request the useful question is not "is this safe to merge" --
+    // no static tool can answer that -- but "what does this change say about
+    // the system that the last one did not". A fact appeared, vanished, or
+    // moved file. Those are checkable, and they are what a reviewer cannot see
+    // in a forty-file diff.
+    //
+    // The design is mostly about what it REFUSES to say: no score, no risk
+    // label, no merge recommendation. A reviewer reading "3 facts removed" can
+    // go and look; one reading "medium risk" has a number nobody can defend,
+    // and will either trust it or ignore it.
+    //
+    // Identity is the CLAIM -- subject, predicate, object -- and deliberately
+    // not the fact id, revision or file. Those change on every scan of an
+    // unchanged system, and folding them in would report the whole graph as
+    // churned on every run, which conveys nothing.
+    //
+    // A move is one event, not a removal plus an addition, or a single file
+    // rename would bury the real changes in noise.
+    //
+    // Gaps qualify a removal: "removed" and "no longer visible" call for
+    // different reactions, and the caveat appears only when there are gaps
+    // rather than as boilerplate nobody reads.
+    //
+    // The workflow has no failure path, asserted by absence. A drift check
+    // that could go red would go red on every pull request that does any work,
+    // and would be disabled by whoever it blocked first.
+    //
+    // The forbidden-word test needed correcting: it first failed on the
+    // report's own "not a risk score", which would have pushed the disclaimer
+    // out of the report to make the assertion pass. It now scans the findings
+    // with the disclaimers removed.
+    origin: 'N',
+    phase: 'P5',
+    proof: 'evidence-drift.test.mjs',
+    testTitle: '[6.17] the report claims nothing about risk or merge safety',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +
