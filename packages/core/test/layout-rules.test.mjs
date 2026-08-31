@@ -240,12 +240,17 @@ const CASES = [
       d.lanes = d.lanes.map((l) => (l.id === 'main' ? { ...l, id: 'primary' } : l));
       d.states = d.states.map((s) => (s.lane === 'main' ? { ...s, lane: 'primary' } : s));
     }, ['"main"', 'reserved']],
-  ['lifecycle: cross-lane state overlap', 'lifecycle',
+  // Two states in the SAME event lane. This used to put them in two different
+  // lanes, which no longer collides: each event lane now gets its own row in
+  // the band, so the renderer separates them itself. The gate is unchanged --
+  // what shrank is the population it applies to, and a same-lane collision is
+  // what is left of it, because stacking cannot separate two states that share
+  // a row.
+  ['lifecycle: same-lane state overlap', 'lifecycle',
     (d) => {
       const approval = d.states.find((s) => s.id === 'approval');
-      const failed = d.states.find((s) => s.id === 'failed');
-      delete failed.yOffset;
-      failed.col = approval.col;
+      const blocked = d.states.find((s) => s.id === 'blocked');
+      blocked.col = approval.col;
     }, ['less than 10px apart']],
   ['lifecycle: viewBox height below schema min', 'lifecycle',
     (d) => { d.meta.viewBox = [980, 565]; }, ['566']],
@@ -1510,4 +1515,96 @@ test('workflow: a right-to-left edge routes through the gap between its endpoint
   const high = Math.max(xs[0], xs.at(-1));
   assert.ok(corridor > low && corridor < high,
     `the corridor at ${corridor} is outside the span ${low}..${high} (${route[1]})`);
+});
+
+// ---------------------------------------------------------------------------
+// The lifecycle bands, which used to be narrower than the schema they serve.
+// ---------------------------------------------------------------------------
+
+/** The y of a state's box, read from the group the renderer tags with its id. */
+function stateY(html, id) {
+  const marker = `data-node-id="${id}"`;
+  const at = html.indexOf(marker);
+  if (at === -1) return null;
+  const rect = /<rect x="[\d.]+" y="([\d.]+)"/.exec(html.slice(at));
+  return rect ? Number(rect[1]) : null;
+}
+
+test('lifecycle: the event band offers every column the schema allows', () => {
+  // The schema lets a state declare col up to 4; the band stopped at 2. A
+  // document could pass schema validation and then be refused by the renderer,
+  // and measureState CLAMPED the out-of-range column to the last one, so the
+  // state was silently stacked on its neighbour and the overlap gate reported a
+  // collision nobody wrote.
+  const schema = JSON.parse(fs.readFileSync(path.join(skillRoot, 'schemas/lifecycle.schema.json'), 'utf8'));
+  const maximum = schema.properties.states.items.properties.col.maximum;
+
+  const d = load('lifecycle');
+  // The canvas has to be the renderer's to size. An authored viewBox is never
+  // overridden, so a document that pins 980 is correctly told its own contents
+  // do not fit -- that is a different rule, and not the one under test.
+  delete d.meta.viewBox;
+  const spare = d.states.find((state) => state.lane !== 'main' && state.lane !== 'terminal');
+  spare.col = maximum;
+  const { stderr } = render('lifecycle', d);
+  // Asserted on the specific complaint, not on overall success: dragging a
+  // state to the far right of the band changes what its transitions have to do,
+  // and a routing consequence of the fixture is not what this is about.
+  assert.doesNotMatch(stderr, /uses invalid column/,
+    `col ${maximum} is inside the schema and the band still refuses it`);
+  // And the canvas has to hold the column it just offered. Without the auto
+  // width the state sits at x 1018 on a 980px canvas and is reported as out of
+  // bounds -- a band with a slot nothing can occupy is not a band.
+  assert.doesNotMatch(stderr, /exceeds the horizontal bounds/,
+    'the new column exists but the canvas does not reach it');
+});
+
+/** A small lifecycle with two event lanes and room to see where they land. */
+function bandedLifecycle() {
+  return {
+    schema_version: 1,
+    diagram_type: 'lifecycle',
+    meta: { title: 'Rows' },
+    lanes: [
+      { id: 'main', label: 'Main' }, { id: 'waiting', label: 'Waiting' },
+      { id: 'exceptions', label: 'Exceptions' }, { id: 'terminal', label: 'Terminal' },
+    ],
+    states: [
+      { id: 'start', lane: 'main', col: 0, type: 'start', label: 'Start' },
+      { id: 'work', lane: 'main', col: 1, type: 'active', label: 'Work' },
+      { id: 'hold', lane: 'waiting', col: 0, type: 'waiting', label: 'Hold' },
+      { id: 'fail', lane: 'exceptions', col: 2, type: 'failure', label: 'Fail' },
+      { id: 'done', lane: 'terminal', col: 0, type: 'success', label: 'Done' },
+    ],
+    transitions: [
+      { id: 't1', from: 'start', to: 'work', label: 'go' },
+      { id: 't2', from: 'work', to: 'hold', label: 'wait' },
+      { id: 't3', from: 'work', to: 'fail', label: 'error' },
+      { id: 't4', from: 'work', to: 'done', label: 'finish' },
+    ],
+  };
+}
+
+test('lifecycle: two event lanes take separate rows without being asked', () => {
+  // Purpose-built rather than a mutated example: the bundled lifecycle packs
+  // its band tightly enough that almost any nudge collides with something, and
+  // a test that trips a different gate proves nothing about this one.
+  const { code, stderr, outPath } = render('lifecycle', bandedLifecycle());
+  assert.equal(code, 0, stderr);
+  const html = fs.readFileSync(outPath, 'utf8');
+  assert.equal(stateY(html, 'hold'), 278, 'the first event lane should sit at the band top');
+  assert.equal(stateY(html, 'fail'), 356, 'the second event lane should take the next row');
+});
+
+test('lifecycle: an authored yOffset is never replaced by the derived row', () => {
+  const d = bandedLifecycle();
+  // `hold` is in the FIRST event lane, so its derived row is 0. Writing 78 asks
+  // for the second row, and the author's number has to win.
+  d.states.find((state) => state.id === 'hold').yOffset = 78;
+
+  const { code, stderr, outPath } = render('lifecycle', d);
+  assert.equal(code, 0, stderr);
+  const html = fs.readFileSync(outPath, 'utf8');
+  assert.equal(stateY(html, 'hold'), 356,
+    'the derived row overrode a position the author wrote');
 });

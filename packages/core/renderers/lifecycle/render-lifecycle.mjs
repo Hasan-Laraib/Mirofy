@@ -48,10 +48,12 @@ const { diagram: lifecycle, template, outPath, sourceEvidence } = await loadDiag
   defaultExample: 'agent-run.lifecycle.json'
 });
 
-const viewBox = lifecycle.meta?.viewBox || [980, 660];
+const authoredViewBox = lifecycle.meta?.viewBox ?? null;
 const layout = {
   phaseY: 126,
   eventY: 278,
+  // One event row: the band's own height plus the gap the example used by hand.
+  eventRowStep: 78,
   outcomeY: 450,
   phaseW: 118,
   phaseH: 62,
@@ -60,8 +62,20 @@ const layout = {
   outcomeW: 118,
   outcomeH: 58,
   phaseXs: [94, 248, 402, 556, 710],
-  eventXs: [402, 556, 710],
-  outcomeXs: [402, 556, 710]
+  // Five slots each, because the schema lets a state declare `col` up to 4.
+  //
+  // The event and outcome bands used to stop at three, so a document could pass
+  // schema validation and then be refused by the renderer -- "the event band has
+  // integer columns 0..2" against a schema that says 0..4. Worse, measureState
+  // CLAMPED an out-of-range column to the last one instead of refusing it, so a
+  // state at col 3 was silently placed on top of the state at col 2, and the
+  // overlap gates then reported a collision the author never wrote.
+  //
+  // The two new slots are APPENDED at the same 154px pitch. Columns 0, 1 and 2
+  // keep the exact x they have always had, so every existing lifecycle diagram
+  // renders byte-identically.
+  eventXs: [402, 556, 710, 864, 1018],
+  outcomeXs: [402, 556, 710, 864, 1018]
 };
 
 const typeClass = {
@@ -99,11 +113,37 @@ function lifecycleAreaBottom() {
 
 // Lane semantics are fixed: lane id "main" maps to the top phase band, lane id
 // "terminal" maps to the bottom outcome band, and every other lane shares the
-// middle event band (separated visually via yOffset).
+// middle event band.
+//
+// Sharing the band used to mean sharing the exact y. Two lanes with a state in
+// the same column landed on the identical point, and the renderer answered with
+// "move one to another col or separate them with yOffset" -- asking an author to
+// hand-place a row this file could derive. The bundled example proves the
+// point: it carries a manual `yOffset: 78`, which is precisely one row.
+//
+// Each event lane now gets its own row. A state whose author wrote a yOffset
+// keeps exactly that; only states with none take the derived one.
 function bandFor(lane) {
   if (lane === 'main') return 'phase';
   if (lane === 'terminal') return 'outcome';
   return 'event';
+}
+
+/**
+ * Which row of the event band a lane occupies, in declaration order.
+ *
+ * Declaration order rather than anything cleverer: the author listed the lanes
+ * in the order they think about them, and a diagram that reordered them would
+ * tell a different story from the one that was written.
+ */
+const eventRowOf = new Map(asArray(lifecycle.lanes)
+  .map((lane) => lane.id)
+  .filter((id) => bandFor(id) === 'event')
+  .map((id, row) => [id, row]));
+
+/** How far below the band's top the last event row starts. */
+function eventBandBottomOffset() {
+  return Math.max(0, eventRowOf.size - 1) * layout.eventRowStep;
 }
 
 function measureState(state) {
@@ -113,11 +153,13 @@ function measureState(state) {
   const height = state.height || (isPhase ? layout.phaseH : isOutcome ? layout.outcomeH : layout.eventH);
   const xs = isPhase ? layout.phaseXs : isOutcome ? layout.outcomeXs : layout.eventXs;
   const cx = xs[state.col] ?? xs[xs.length - 1];
-  const y = (
-    isPhase ? layout.phaseY :
-      isOutcome ? layout.outcomeY :
-        layout.eventY
-  ) + (state.yOffset || 0);
+  const bandTop = isPhase ? layout.phaseY : isOutcome ? outcomeY : layout.eventY;
+  // An authored yOffset wins outright -- it is the author's geometry. Only a
+  // state that declares none takes its lane's row.
+  const derived = isPhase || isOutcome
+    ? 0
+    : (eventRowOf.get(state.lane) ?? 0) * layout.eventRowStep;
+  const y = bandTop + (state.yOffset ?? derived);
   return {
     ...state,
     width,
@@ -128,6 +170,41 @@ function measureState(state) {
     cy: y + height / 2
   };
 }
+
+// The canvas has to hold the columns the bands now offer. 980 was the width for
+// three event columns; five need more, and a document using only the first
+// three keeps exactly the width it had.
+//
+// An AUTHORED viewBox is never overridden -- it is the author's geometry, and
+// the bounds check below reports a canvas too small for its contents rather
+// than quietly resizing something somebody chose.
+// The outcome band does not move.
+//
+// A first version computed a floor for it, in case the event band grew into it.
+// That arithmetic could never differ from 450: the schema caps `lanes` at four,
+// and a diagram with an outcome band spends two of those on "main" and
+// "terminal", leaving two event lanes and two rows -- which fit exactly. Three
+// event rows are only reachable by giving up the terminal lane, and then
+// nothing is drawn in the outcome band at all.
+//
+// So the computation went, and this guard took its place. It is unreachable
+// today and says so; it becomes reachable the day the lane cap rises, which is
+// exactly when a silently overlapping band would be hardest to spot.
+const outcomeY = layout.outcomeY;
+
+const viewBox = authoredViewBox ?? [(() => {
+  let rightmost = 980 - 32;
+  for (const state of asArray(lifecycle.states)) {
+    const band = bandFor(state.lane);
+    const xs = band === 'phase' ? layout.phaseXs : band === 'outcome' ? layout.outcomeXs : layout.eventXs;
+    const cx = xs[state.col];
+    if (cx === undefined) continue;
+    const width = state.width
+      || (band === 'phase' ? layout.phaseW : band === 'outcome' ? layout.outcomeW : layout.eventW);
+    rightmost = Math.max(rightmost, cx + width / 2);
+  }
+  return Math.max(980, Math.ceil(rightmost + 32));
+})(), 660];
 
 const states = new Map(asArray(lifecycle.states).map((state) => [state.id, measureState(state)]));
 const laneLabels = new Map(asArray(lifecycle.lanes).map((lane) => [lane.id, lane.label]));
@@ -184,6 +261,12 @@ function validateLifecycle() {
 
   // The three bands are fixed at y=112/264/436. Preserve the original
   // outcome/legend reserve even though measured legend rows now sit lower.
+  const eventBandBottom = layout.eventY + eventBandBottomOffset() + layout.eventH;
+  if (eventBandBottom > layout.outcomeY - 8) {
+    problems.push(`The event band needs ${Math.ceil(eventBandBottom)}px for its `
+      + `${eventRowOf.size} lane(s), which reaches the outcome band at ${layout.outcomeY}. `
+      + 'Use fewer event lanes, or move a lane into "main" or "terminal".');
+  }
   if (lifecycleAreaBottom() + 4 < 448) {
     problems.push(`viewBox height ${viewBox[1]} is too short for the fixed band layout — set meta.viewBox[1] to at least 566.`);
   }
