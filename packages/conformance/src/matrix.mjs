@@ -728,6 +728,41 @@ export const IMPORTED_ROWS = [
     testTitle: '[6.19] an empty result from a gappy scan is "not found", never "does not exist"',
   },
   {
+    id: '3.15',
+    name: 'assert (architecture rules as CI checks)',
+    // A diagram says what the architecture looked like when it was drawn. A
+    // rule says what it is allowed to become -- "only the API talks to the
+    // database", "payments must not depend on analytics", "no cycles".
+    //
+    // Detecting a violation is the easy half. The half that matters is what to
+    // say when the scan could not read everything, and the answer is a THIRD
+    // outcome. A rule that found nothing over a scan with unread files has not
+    // been shown to hold; the violation could be in one of them. `unproven` is
+    // its own outcome, never counted among the passes even when tolerated, and
+    // it fails the run unless someone writes --allow-unproven. Observed
+    // failing on a planted "unproven is a pass".
+    //
+    // A selector matching nothing is an error rather than an empty pass. A
+    // rule about a component that does not exist passes forever, and the day
+    // someone renames the component is the day it silently stops protecting
+    // anything. Observed failing on a planted empty-set selector.
+    //
+    // Scope came from running this against the repository's own model. A
+    // sequence diagram records `api -> auth` and `auth -> api` because a
+    // request gets a reply; read as a dependency graph that is a cycle, and
+    // no-cycles reported six of them in a repository that has none. The rule
+    // was right and the scope was missing, so rules now narrow by diagram
+    // type.
+    //
+    // Cycles report the loop and not the path into it: a node that leads to a
+    // cycle without being in it sends the reader somewhere that is not the
+    // problem.
+    origin: 'N',
+    phase: 'P5',
+    proof: 'assert-rules.test.mjs',
+    testTitle: '[3.15] no violation over a scan with gaps is UNPROVEN, not passing',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

@@ -1,0 +1,20 @@
+{
+  "$comment": "Architecture rules for this repository, checked by `npm run assert`. A rule that finds no violation over a scan with unread files is UNPROVEN, not passing.",
+  "rules": [
+    {
+      "id": "no-cycles",
+      "kind": "no-cycles",
+      "$why": "A cycle between architecture components means no reader can tell which is the source of truth. Scoped to architecture documents: a sequence diagram records a reply as a second edge, which is a round trip, not a dependency cycle.",
+      "scope": {
+        "diagramType": "architecture"
+      }
+    },
+    {
+      "id": "external-systems-are-entry-points-only",
+      "kind": "max-fan-out",
+      "select": "kind:external",
+      "limit": 4,
+      "$why": "An external system with many outbound edges is usually a modelling mistake: the arrows belong to something inside the boundary."
+    }
+  ]
+}
