@@ -31,7 +31,7 @@ npm run model      # evidence    -> system model     (one inventory: components,
 npm run compile    # model       -> bounded view IR  (intent, no coordinates, every omission recorded)
 ```
 
-Against this repository, `scan` reads 190 files into 919 facts and 9 gaps, and
+Against this repository, `scan` reads 206 files into 916 facts and 8 gaps, and
 `compile` turns a 62-component model into a 12-node view while recording all
 110 omissions with reasons.
 
