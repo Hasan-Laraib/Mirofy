@@ -21,3 +21,6 @@ scan/
 
 # View compiler output from `npm run compile`.
 scan/view.json
+
+# Benchmark credentials. Never committed.
+.benchmark.env

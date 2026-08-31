@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-08-31T10:58:01.810Z",
+  "model": "claude-code-cli-2.1.251",
+  "status": "measured",
+  "firstPassUsableRate": 0,
+  "total": 8,
+  "usable": 0,
+  "byOutcome": {
+    "usable": 0,
+    "author-error": 0,
+    "invalid": 0,
+    "composition": 8
+  },
+  "results": [
+    {
+      "id": "01-web-app",
+      "outcome": "composition",
+      "detail": "layout/constraint: Label \"serves static assets\" overlaps component \"cdn\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [127, 90, 106, 14]\n  component \"cdn\" rect: [40, 80, 120, 60]\n  Suggested fix: labelAt [180, 154] or labelDy +54 (below); or labelAt [180, 76] or labelDy -24 (above); layout/constraint: Label \"serves static assets\" overlaps component \"spa\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [127, 90, 106, 14]\n  component \"spa\" rect: [200, 80, 120, 60]\n  Suggested fix: labelAt [180, 154] or labelDy +54 (below); or labelAt [180, 76] or labelDy -24 (above); layout/constraint: Label \"HTTPS / JSON\" overlaps component \"spa\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [226, 120, 68, 14]\n  component \"spa\" rect: [200, 80, 120, 60]\n  Suggested fix: labelAt [260, 154] or labelDy +24 (below); or labelAt [260, 76] or labelDy -54 (above)",
+      "errors": 3,
+      "warnings": 0
+    },
+    {
+      "id": "02-payment-flow",
+      "outcome": "composition",
+      "detail": "layout/constraint: Label \"Checkout Service\" (~109px) is wider than the 86px participant box — shorten it.; layout/constraint: Label \"Inventory Service\" (~116px) is wider than the 86px participant box — shorten it.; layout/constraint: Label \"Payment Gateway\" (~102px) is wider than the 86px participant box — shorten it.",
+      "errors": 3,
+      "warnings": 0
+    },
+    {
+      "id": "03-ci-pipeline",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[0] id \"e_push_lint\" \"push\" -> \"lint\" first segment 0 [134, 119] -> [134, 166] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[0] id \"e_push_lint\" \"push\" -> \"lint\" final segment 2 [174, 166] -> [174, 147] does not honor inferred toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[3] id \"e_lint_gate\" \"lint\" -> \"gate\" first segment 0 [266, 147] -> [260, 147] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[3] id \"e_lint_gate\" \"lint\" -> \"gate\" final segment 2 [260, 225] -> [254, 225] does not honor inferred toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[4] id \"e_unit_gate\" \"unitTests\" -> \"gate\" first segment 0 [266, 243] -> [254, 243] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.",
+      "errors": 28,
+      "warnings": 0
+    },
+    {
+      "id": "04-order-state",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[2] id \"t_shipped_delivered\" \"shipped\" -> \"delivered\" first segment 0 [773, 307] -> [647, 307] does not honor fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[2] id \"t_shipped_delivered\" \"shipped\" -> \"delivered\" final segment 0 [773, 307] -> [647, 307] does not honor toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[3] id \"t_pending_cancelled\" \"pending\" -> \"cancelled\" first segment 0 [402, 336] -> [402, 307] does not honor fromSide \"bottom\" — it must run vertical downward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[4] id \"t_paid_cancelled\" \"paid\" -> \"cancelled\" first segment 0 [556, 336] -> [556, 278] does not honor fromSide \"bottom\" — it must run vertical downward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[4] id \"t_paid_cancelled\" \"paid\" -> \"cancelled\" final segment 0 [556, 336] -> [556, 278] does not honor toSide \"top\" — it must run vertical downward from above; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.",
+      "errors": 36,
+      "warnings": 0
+    },
+    {
+      "id": "05-etl",
+      "outcome": "composition",
+      "detail": "brand/unknown: /nodes/1/brand \"aws\" is not a built-in brand; closest IDs: airtable, alibaba-cloud, angular, ansible, anthropic; brand/unknown: /nodes/3/brand \"aws\" is not a built-in brand; closest IDs: airtable, alibaba-cloud, angular, ansible, anthropic",
+      "errors": 2,
+      "warnings": 0
+    },
+    {
+      "id": "06-microservices",
+      "outcome": "composition",
+      "detail": "layout/constraint: Label \"HTTP\" overlaps component \"gateway\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [405, 120, 30, 14]\n  component \"gateway\" rect: [360, 80, 120, 60]\n  Suggested fix: labelAt [420, 154] or labelDy +24 (below); or labelAt [420, 76] or labelDy -54 (above); layout/constraint: Label \"publishes\" overlaps component \"orders\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [473, 194, 53, 14]\n  component \"orders\" rect: [360, 184, 120, 60]\n  Suggested fix: labelAt [500, 258] or labelDy +54 (below); or labelAt [500, 180] or labelDy -24 (above); layout/constraint: Label \"publishes\" overlaps component \"queue\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [473, 194, 53, 14]\n  component \"queue\" rect: [520, 184, 120, 60]\n  Suggested fix: labelAt [500, 258] or labelDy +54 (below); or labelAt [500, 180] or labelDy -24 (above); layout/constraint: Label \"consumes\" overlaps component \"queue\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [636, 194, 48, 14]\n  component \"queue\" rect: [520, 184, 120, 60]\n  Suggested fix: labelAt [660, 258] or labelDy +54 (below); or labelAt [660, 180] or labelDy -24 (above); layout/constraint: Label \"consumes\" overlaps component \"notifications\" — adjust labelDx/labelDy/labelSegment or set labelAt.\n  label rect: [636, 194, 48, 14]\n  component \"notifications\" rect: [680, 184, 120, 60]\n  Suggested fix: labelAt [660, 258] or labelDy +54 (below); or labelAt [660, 180] or labelDy -24 (above)",
+      "errors": 9,
+      "warnings": 0
+    },
+    {
+      "id": "07-auth",
+      "outcome": "composition",
+      "detail": "layout/constraint: Label \"Identity Provider\" (~116px) is wider than the 86px participant box — shorten it.; layout/constraint: Message \"Verify state matches the stored value\" spans 0px (minimum 60px) — give its participants more column distance.; layout/constraint: Message \"POST /token (code, code_verifier, client secret)\" sits outside the readable timeline — keep y between 160 and 677.; layout/constraint: Message \"200 OK: access_token, id_token, refresh_token\" sits outside the readable timeline — keep y between 160 and 677.; layout/constraint: Message \"Validate id_token signature, issuer, audience, nonce\" sits outside the readable timeline — keep y between 160 and 677.",
+      "errors": 12,
+      "warnings": 0
+    },
+    {
+      "id": "08-incident",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[3] id \"e_triage_mitigate\" \"triage\" -> \"mitigate\" first segment 0 [476, 243] -> [454, 243] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[3] id \"e_triage_mitigate\" \"triage\" -> \"mitigate\" final segment 0 [476, 243] -> [454, 243] does not honor inferred toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/edge-through-node: [clean-flow/edge-through-node] workflow edges[4] id \"e_triage_escalate\" \"triage\" -> \"escalate\" crosses node \"mitigate\" (unrelated to this relationship) on segment 0 [476, 243] -> [476, 290] (2px clearance) — adjust fromSide/toSide, set route/via or channel coordinates, or move the node to a clearer lane/column.; clean-flow/edge-through-node: [clean-flow/edge-through-node] workflow edges[6] id \"e_second_mitigate\" \"second\" -> \"mitigate\" crosses node \"triage\" (unrelated to this relationship) on segment 1 [426, 367] -> [426, 243] (2px clearance) — adjust fromSide/toSide, set route/via or channel coordinates, or move the node to a clearer lane/column.; clean-flow/edge-through-node: [clean-flow/edge-through-node] workflow edges[6] id \"e_second_mitigate\" \"second\" -> \"mitigate\" crosses node \"escalate\" (unrelated to this relationship) on segment 0 [579, 367] -> [426, 367] (2px clearance) — adjust fromSide/toSide, set route/via or channel coordinates, or move the node to a clearer lane/column.",
+      "errors": 29,
+      "warnings": 0
+    }
+  ]
+}
