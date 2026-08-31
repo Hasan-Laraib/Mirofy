@@ -12,25 +12,51 @@ const skillRoot = path.resolve(__dirname, '..');
 
 const TYPES = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
 
+/**
+ * How this program was actually invoked.
+ *
+ * Every usage line used to begin with a bare `mirofy`, which is a command that
+ * only exists once the package is installed. Somebody running it from a clone
+ * -- which the README tells them to do, because it works with no install -- was
+ * being handed instructions they could not paste.
+ *
+ * npm sets npm_command when it runs a bin, and process.argv[1] is the script
+ * otherwise. Neither is guesswork about the user's shell; both are what
+ * happened.
+ */
+function invokedAs() {
+  const script = process.argv[1] ?? '';
+  if (/[\\\/]node_modules[\\\/]/.test(script) || /[\\\/]\.bin[\\\/]/.test(script)) return 'mirofy';
+  if (script.endsWith('mirofy.mjs')) {
+    const relative = path.relative(process.cwd(), script).split(path.sep).join('/');
+    // A path that climbs out of the working directory is longer than it is
+    // useful; fall back to the name the installed command would have.
+    return relative && !relative.startsWith('..') ? `node ${relative}` : 'mirofy';
+  }
+  return 'mirofy';
+}
+
+const SELF = invokedAs();
+
 function usage() {
   return `Usage:
-  mirofy render <type> <input.json> [output.html] [--quality standard|showcase] [--repo-root path]
-  mirofy compare architecture <base.json> <head.json> [output.html] [--receipt path] [--json] [--quality standard|showcase] [--repo-root path]
-  mirofy deliver <type> <input.json> [output.html] [--json] [--open] [--quality standard|showcase] [--repo-root path]
-  mirofy preview <type> <input.json> [output.html] [--no-open] [--quality standard|showcase] [--repo-root path]
-  mirofy validate <type> <input.json> [--json] [--layout-json] [--quality standard|showcase] [--repo-root path]
-  mirofy inspect <type> <input.json>
-  mirofy check <output.html>
-  mirofy visual-check <output.html> [--json]
-  mirofy guide [scenario or question] [--json] [--lang en|zh]
-  mirofy brands [name, alias, domain, or category] [--json]
-  mirofy brands capture <url> [--json]
-  mirofy examples
-  mirofy doctor
-  mirofy demo [output-directory]
-  mirofy init [type] [output.json]
-  mirofy import mermaid <input.mmd> [output.json] [--json]
-  mirofy repair <type> <input.json> [output.json] --safe [--json]
+  ${SELF} render <type> <input.json> [output.html] [--quality standard|showcase] [--repo-root path]
+  ${SELF} compare architecture <base.json> <head.json> [output.html] [--receipt path] [--json] [--quality standard|showcase] [--repo-root path]
+  ${SELF} deliver <type> <input.json> [output.html] [--json] [--open] [--quality standard|showcase] [--repo-root path]
+  ${SELF} preview <type> <input.json> [output.html] [--no-open] [--quality standard|showcase] [--repo-root path]
+  ${SELF} validate <type> <input.json> [--json] [--layout-json] [--quality standard|showcase] [--repo-root path]
+  ${SELF} inspect <type> <input.json>
+  ${SELF} check <output.html>
+  ${SELF} visual-check <output.html> [--json]
+  ${SELF} guide [scenario or question] [--json] [--lang en|zh]
+  ${SELF} brands [name, alias, domain, or category] [--json]
+  ${SELF} brands capture <url> [--json]
+  ${SELF} examples
+  ${SELF} doctor
+  ${SELF} demo [output-directory]
+  ${SELF} init [type] [output.json]
+  ${SELF} import mermaid <input.mmd> [output.json] [--json]
+  ${SELF} repair <type> <input.json> [output.json] --safe [--json]
 
 Types:
   architecture, workflow, sequence, dataflow, lifecycle
@@ -1667,7 +1693,7 @@ function commandDemo(args) {
 
   console.log(`\nDemo ready: ${output}`);
   console.log('Next: open the HTML in your browser, then render your own diagram:');
-  console.log('  mirofy render architecture <input.json> <output.html>');
+  console.log(`  ${SELF} render architecture <input.json> <output.html>`);
 }
 
 async function commandValidate(args) {

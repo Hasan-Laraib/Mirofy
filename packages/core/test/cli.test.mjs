@@ -72,16 +72,36 @@ function copyInstalledSkill(target) {
 test('cli: help lists commands and diagram types', () => {
   const result = run(['--help']);
   assert.equal(result.status, 0, result.stderr);
-  assert.match(result.stdout, /mirofy render <type>/);
-  assert.match(result.stdout, /mirofy compare architecture <base\.json> <head\.json>/);
-  assert.match(result.stdout, /mirofy deliver <type>/);
-  assert.match(result.stdout, /mirofy preview <type>/);
-  assert.match(result.stdout, /mirofy visual-check <output\.html>/);
-  assert.match(result.stdout, /--open/);
-  assert.match(result.stdout, /mirofy guide \[scenario or question\]/);
-  assert.match(result.stdout, /mirofy doctor/);
-  assert.match(result.stdout, /mirofy demo \[output-directory\]/);
-  assert.match(result.stdout, /architecture, workflow, sequence, dataflow, lifecycle/);
+
+  // The usage lines lead with HOW THE TOOL WAS INVOKED, not a bare `mirofy`.
+  // Run from a clone -- which the README tells you to do, because it works
+  // with no install -- a bare `mirofy` is a command the reader does not have,
+  // and every usage line was handing them something unpasteable.
+  //
+  // Plain string checks rather than regexes: the interesting part is the verb
+  // and its arguments, and escaping brackets for a character class three
+  // layers deep is how a test ends up asserting something other than it says.
+  const lead = result.stdout.split(String.fromCharCode(10))
+    .map((line) => line.trim()).find((line) => line.includes('render <type>'));
+  assert.ok(lead, 'no render line in the usage output');
+  assert.ok(lead.startsWith('node ') && lead.includes('mirofy.mjs'),
+    `usage should lead with the real invocation, got: ${lead}`);
+
+  for (const line of [
+    'render <type>',
+    'compare architecture <base.json> <head.json>',
+    'deliver <type>',
+    'preview <type>',
+    'visual-check <output.html>',
+    'guide [scenario or question]',
+    'doctor',
+    'demo [output-directory]',
+    'init [type]',
+    '--open',
+    'architecture, workflow, sequence, dataflow, lifecycle',
+  ]) {
+    assert.ok(result.stdout.includes(line), `usage is missing: ${line}`);
+  }
 });
 
 test('cli: doctor reports a complete installation is ready', () => {
@@ -210,7 +230,11 @@ test('cli: demo creates a ready-to-open diagram in a chosen directory', () => {
   assert.match(fs.readFileSync(output, 'utf8'), /Sample Web App Diagram/);
   assert.match(result.stdout, new RegExp(`Demo ready: ${output.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
   assert.match(result.stdout, /Next: open the HTML in your browser/);
-  assert.match(result.stdout, /mirofy render architecture/);
+  // The next-step hint names the same invocation the usage does, so a reader
+  // running from a clone is not told to type a command they do not have.
+  assert.ok(result.stdout.includes('render architecture <input.json>'),
+    `the demo hint lost its next step:
+${result.stdout}`);
 });
 
 test('cli: demo defaults to the current directory', () => {

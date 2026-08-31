@@ -56,6 +56,16 @@ so it concluded "could not reach the registry" and reported ok. A check that
 cannot run is not a check that succeeded, and it now says so in its own name
 rather than quietly counting as a pass.
 
+### The CLI stopped telling you to run a command you may not have
+
+Every usage line began with a bare `mirofy`. Run from a clone — which the README
+recommends, because it works with no install — that is a command the reader does
+not have, so every line of help was unpasteable.
+
+It now leads with how it was actually invoked: `node packages/core/bin/mirofy.mjs
+render …` from a checkout, `mirofy render …` once installed. Neither is a guess
+about the reader's shell; both are what happened.
+
 ### The repository presents itself
 
 It was public with an **empty description**, no homepage link, and no topics —
