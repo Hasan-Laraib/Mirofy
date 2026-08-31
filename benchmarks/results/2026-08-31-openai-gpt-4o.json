@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "measuredAt": "2026-08-31T11:46:44.447Z",
+  "model": "openai-gpt-4o",
+  "status": "measured",
+  "firstPassUsableRate": 0.125,
+  "total": 8,
+  "usable": 1,
+  "byOutcome": {
+    "usable": 1,
+    "author-error": 0,
+    "invalid": 0,
+    "composition": 7
+  },
+  "results": [
+    {
+      "id": "01-web-app",
+      "outcome": "usable"
+    },
+    {
+      "id": "02-payment-flow",
+      "outcome": "composition",
+      "detail": "layout/constraint: Label \"Checkout Service\" (~109px) is wider than the 86px participant box — shorten it.; layout/constraint: Label \"Payment Gateway\" (~102px) is wider than the 86px participant box — shorten it.; layout/constraint: Label \"Order Event Bus\" (~102px) is wider than the 86px participant box — shorten it.; layout/constraint: Message \"Reserve Stock\" spans 0px (minimum 60px) — give its participants more column distance.",
+      "errors": 4,
+      "warnings": 0
+    },
+    {
+      "id": "03-ci-pipeline",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[0] id \"e1\" \"push\" -> \"lint\" first segment 0 [104, 119] -> [104, 166] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[0] id \"e1\" \"push\" -> \"lint\" final segment 2 [204, 166] -> [204, 243] does not honor inferred toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[1] id \"e2\" \"push\" -> \"unit_tests\" first segment 0 [104, 119] -> [104, 166] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[1] id \"e2\" \"push\" -> \"unit_tests\" final segment 2 [204, 166] -> [204, 243] does not honor inferred toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[2] id \"e3\" \"push\" -> \"build\" first segment 0 [104, 119] -> [104, 166] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.",
+      "errors": 26,
+      "warnings": 0
+    },
+    {
+      "id": "04-order-state",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[2] id \"shipped_to_delivered\" \"shipped\" -> \"delivered\" first segment 0 [710, 278] -> [710, 336] does not honor inferred fromSide \"top\" — it must run vertical upward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[2] id \"shipped_to_delivered\" \"shipped\" -> \"delivered\" final segment 0 [710, 278] -> [710, 336] does not honor inferred toSide \"bottom\" — it must run vertical upward from below; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[4] id \"paid_to_cancelled\" \"paid\" -> \"cancelled\" first segment 0 [556, 278] -> [556, 336] does not honor inferred fromSide \"top\" — it must run vertical upward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[4] id \"paid_to_cancelled\" \"paid\" -> \"cancelled\" final segment 0 [556, 278] -> [556, 336] does not honor inferred toSide \"bottom\" — it must run vertical upward from below; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] lifecycle transitions[5] id \"delivered_to_returned\" \"delivered\" -> \"returned\" first segment 0 [710, 278] -> [710, 336] does not honor inferred fromSide \"top\" — it must run vertical upward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross state borders perpendicularly.",
+      "errors": 23,
+      "warnings": 0
+    },
+    {
+      "id": "05-etl",
+      "outcome": "composition",
+      "detail": "brand/unknown: /nodes/0/brand \"AWS\" is not a built-in brand; closest IDs: airtable, alibaba-cloud, angular, ansible, anthropic; brand/unknown: /nodes/1/brand \"Custom\" is not a built-in brand; closest IDs: airtable, alibaba-cloud, angular, ansible, anthropic; brand/unknown: /nodes/2/brand \"AWS\" is not a built-in brand; closest IDs: airtable, alibaba-cloud, angular, ansible, anthropic; brand/unknown: /nodes/3/brand \"Custom\" is not a built-in brand; closest IDs: airtable, alibaba-cloud, angular, ansible, anthropic; brand/unknown: /nodes/5/brand \"Custom\" is not a built-in brand; closest IDs: airtable, alibaba-cloud, angular, ansible, anthropic",
+      "errors": 5,
+      "warnings": 0
+    },
+    {
+      "id": "06-microservices",
+      "outcome": "composition",
+      "detail": "clean-flow/edge-through-node: [clean-flow/edge-through-node] architecture connections[4] id \"orders_to_queue\" \"orders_service\" -> \"message_queue\" crosses component \"orders_db\" (unrelated to this relationship) on segment 0 [431, 244] -> [431, 318] (2px clearance) — adjust fromSide/toSide, set route/via, or move the component.; layout/constraint: Label \"Notifications Service\" (~139px) is wider than component \"notifications_service\" (120px) — shorten the label or widen size.; layout/constraint: Label \"Notifications Database\" (~145px) is wider than component \"notifications_db\" (120px) — shorten the label or widen size.",
+      "errors": 3,
+      "warnings": 0
+    },
+    {
+      "id": "07-auth",
+      "outcome": "composition",
+      "detail": "layout/constraint: Label \"Identity Provider\" (~116px) is wider than the 86px participant box — shorten it.; layout/constraint: Label \"Backend Server\" (~95px) is wider than the 86px participant box — shorten it.",
+      "errors": 2,
+      "warnings": 0
+    },
+    {
+      "id": "08-incident",
+      "outcome": "composition",
+      "detail": "clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[4] id \"e5\" \"triage\" -> \"escalate\" first segment 0 [430, 227] -> [430, 259] does not honor inferred fromSide \"top\" — it must run vertical upward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[4] id \"e5\" \"triage\" -> \"escalate\" final segment 0 [430, 227] -> [430, 259] does not honor inferred toSide \"bottom\" — it must run vertical upward from below; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[5] id \"e6\" \"escalate\" -> \"second_responder_mitigate\" first segment 0 [446, 243] -> [446, 290] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[5] id \"e6\" \"escalate\" -> \"second_responder_mitigate\" final segment 2 [484, 290] -> [484, 367] does not honor inferred toSide \"left\" — it must run horizontal rightward from the left; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.; clean-flow/endpoint-side-direction: [clean-flow/endpoint-side-direction] workflow edges[6] id \"e7\" \"mitigate\" -> \"write_postmortem\" first segment 0 [516, 243] -> [516, 352] does not honor inferred fromSide \"right\" — it must run horizontal rightward; keep automatic routing, or choose fromSide/toSide and via points whose first and final segments cross node borders perpendicularly.",
+      "errors": 30,
+      "warnings": 0
+    }
+  ]
+}

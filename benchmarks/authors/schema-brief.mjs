@@ -51,9 +51,17 @@ function describeItem(item, common, indent = '    ') {
   for (const [name, spec] of Object.entries(properties)) {
     const target = resolveRef(spec, common);
     const enumValues = target?.enum ?? target?.items?.enum;
+    // A `oneOf` has no `type` of its own, and rendering it as "any" told the
+    // model nothing -- gpt-4o read it as permission to write null, and all
+    // eight documents were rejected on `brand`. The union is what the schema
+    // actually says.
+    const union = (target?.oneOf ?? target?.anyOf ?? [])
+      .map((branch) => branch.type).filter(Boolean);
     const kind = enumValues
       ? enumValues.map((value) => JSON.stringify(value)).join(' | ')
-      : (Array.isArray(target?.type) ? target.type.join('|') : target?.type ?? 'any');
+      : union.length > 0
+        ? [...new Set(union)].join(' | ')
+        : (Array.isArray(target?.type) ? target.type.join('|') : target?.type ?? 'any');
     // Numeric bounds are part of what the schema requires, and leaving them
     // out produced rejections that measured the brief rather than the author:
     // sequence `y` has a minimum of 160 and workflow columns a maximum of 5,
@@ -62,6 +70,12 @@ function describeItem(item, common, indent = '    ') {
     if (typeof target?.minimum === 'number') bounds.push(`>= ${target.minimum}`);
     if (typeof target?.maximum === 'number') bounds.push(`<= ${target.maximum}`);
     if (typeof target?.pattern === 'string') bounds.push(`matching ${target.pattern}`);
+    // Array bounds were hidden, and an author told only "array" wrote `[]` for
+    // every optional collection -- rejected by minItems on all six documents
+    // that had one.
+    if (typeof target?.minItems === 'number') bounds.push(`at least ${target.minItems} item(s) IF PRESENT`);
+    if (typeof target?.maxItems === 'number') bounds.push(`at most ${target.maxItems}`);
+    if (typeof target?.minLength === 'number') bounds.push(`non-empty`);
     const suffix = bounds.length > 0 ? ` (${bounds.join(', ')})` : '';
     lines.push(`${indent}${required.has(name) ? '*' : ' '} ${name}: ${kind}${suffix}`);
   }
@@ -98,5 +112,8 @@ export function briefFor(diagramType) {
     ...sections,
     '',
     'A * marks a required key. Keys not listed are rejected.',
+    'OMIT any optional key you have no value for. Do not write null, do not write',
+    'an empty array, do not write an empty string -- an absent key is correct and',
+    'an empty one is rejected.',
   ].join('\n');
 }
