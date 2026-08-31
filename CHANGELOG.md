@@ -38,6 +38,30 @@ all — which is the worst shape a green check can have. `check:lockfile` compar
 every workspace's name and version against the lockfile, then asks npm itself
 with `npm ci --dry-run`.
 
+### The repository presents itself
+
+It was public with an **empty description**, no homepage link, and no topics —
+which reads as abandoned however good the code is. All three are set, and the
+homepage points at the live site that already existed.
+
+Secret scanning, **push protection**, Dependabot alerts and private
+vulnerability reporting are on. Push protection is the one that matters: it
+would refuse a future accidental key paste at the push, rather than after.
+
+A ruleset on `main` blocks force-push and deletion, and deliberately does *not*
+require pull requests — a guardrail that breaks a solo maintainer's workflow
+gets turned off, and then there is no guardrail.
+
+`SECURITY.md` said *"this repository has no remote yet"* on a hosted public
+repo, and `CONTRIBUTING.md` said CI "has not yet executed on a runner" after
+hundreds of runs. Both rewritten. Added: a code of conduct, three issue
+templates, a pull request template, and `CITATION.cff`.
+
+The third issue template is the one worth having — *"a diagram came out wrong"*.
+A validation error is easy, because the tool already knows. A diagram that
+passes every gate and still reads badly is a **missing** gate, and those are
+found by people looking at pictures.
+
 ### The publish guard learned how to call npm on Windows
 
 Both obvious ways are wrong there. `shell: true` concatenates arguments instead

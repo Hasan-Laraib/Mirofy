@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: Mirofy
+message: If you use this in published work, please cite it.
+type: software
+authors:
+  - alias: Hasan-Laraib
+repository-code: https://github.com/Hasan-Laraib/Mirofy
+url: https://hasan-laraib.github.io/Mirofy/
+abstract: >-
+  A tool that turns a repository, or a written description, into a validated
+  diagram rendered as one self-contained HTML file. Every relationship it
+  derives from source carries the file, line range and commit it came from, and
+  anything the scanner could not read is recorded as a gap rather than omitted
+  silently.
+keywords:
+  - software architecture
+  - diagram generation
+  - static analysis
+  - provenance
+  - documentation
+license: MIT
+version: 0.1.0
+date-released: "2026-09-01"

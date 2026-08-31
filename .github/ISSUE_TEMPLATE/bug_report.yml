@@ -1,0 +1,63 @@
+name: Bug report
+description: Something behaved differently from what it said it would
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before anything else, please run `npx mirofy doctor` and paste the
+        output below. It checks the things that turn out to be wrong most
+        often, and it takes a second.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran, and what came back. Paste the actual output rather than describing it — the exact wording is usually the clue.
+      placeholder: |
+        $ npx mirofy render architecture my.json out.html
+        Architecture layout validation failed:
+        - ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: document
+    attributes:
+      label: The document, or the smallest version of it that still fails
+      description: |
+        This is the single most useful thing you can include. If the document is private, cut it down — most layout bugs survive being reduced to three nodes and one edge.
+
+        If it does **not** survive being cut down, say so. That is itself a finding: it means the trigger depends on something the small version lost.
+      render: json
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: "`npx mirofy doctor` output"
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`npx mirofy --version`, or the commit you are on"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options: [Linux, macOS, Windows, Other]
+    validations:
+      required: true

@@ -1,0 +1,34 @@
+name: A diagram came out wrong
+description: It rendered without complaint, and the result is not right
+labels: ["layout"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most valuable kind of report this project gets.
+
+        A validation error is easy — the tool already knows. A diagram that
+        passes every gate and still reads badly is a gate that is missing, and
+        those are found by people looking at pictures, not by tests.
+
+  - type: textarea
+    id: document
+    attributes:
+      label: The document
+      render: json
+    validations:
+      required: true
+
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong with the result
+      description: "Labels overlapping, an edge through a box, something unreadable at normal zoom — whatever you saw. A screenshot with an arrow drawn on it beats a paragraph."
+    validations:
+      required: true
+
+  - type: input
+    id: preset
+    attributes:
+      label: Preset and theme
+      placeholder: "meridian, dark"

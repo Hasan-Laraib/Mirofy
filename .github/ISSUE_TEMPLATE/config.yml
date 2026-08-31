@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Hasan-Laraib/Mirofy/security/advisories/new
+    about: Report privately. Please do not open a public issue for a security problem.
+  - name: Which diagram type should I use?
+    url: https://hasan-laraib.github.io/Mirofy/
+    about: "Or ask the CLI: npx mirofy guide \"show an API request with a cache miss\""
