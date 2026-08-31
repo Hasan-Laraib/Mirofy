@@ -1,0 +1,8 @@
+{
+  "name": "@mirofy/explain",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Graph queries over the system model, with an incompleteness report on every answer.",
+  "exports": { "./query": "./src/query.mjs" }
+}

@@ -690,6 +690,44 @@ export const IMPORTED_ROWS = [
     testTitle: '[4.15] every style that applied in the artifact still applies',
   },
   {
+    id: '6.19',
+    name: 'explain (CLI graph queries)',
+    // The questions anyone asks about a system they did not write: what calls
+    // this, what is downstream, what touches the payment data, is anything
+    // unreachable. A search tool answers by matching text and hoping; this
+    // answers from the model built out of the evidence graph.
+    //
+    // Which makes the EMPTY answer the dangerous one. "Nothing calls
+    // PaymentService" is useful if the scanner read every file and reckless if
+    // six failed to parse, and the difference is invisible unless the answer
+    // carries it. So every result -- every verb, without exception -- returns
+    // an `incompleteness` block naming the unread files that could change it,
+    // and says "not found, never does not exist" in those words. Observed
+    // failing on a planted "always complete".
+    //
+    // A clean scan says so rather than staying silent, because "complete" is
+    // information and an absent field reads as an oversight.
+    //
+    // `impact` is stated as REACHABILITY and refuses to be more. It reports
+    // what is connected downstream; whether a change breaks any of it is a
+    // judgement about a running system that this has no evidence for, so the
+    // answer carries that boundary in writing and a test forbids the word
+    // risk anywhere in the payload.
+    //
+    // An unknown component id is refused with a suggestion rather than
+    // answered with zero -- "0 callers" for a typo is true, useless, and reads
+    // as a fact about the system instead of about the spelling. Observed
+    // failing on a planted lookup that answered anyway.
+    //
+    // Direction is the whole answer: callers and dependencies are the same
+    // traversal read opposite ways, and swapping them yields a plausible list
+    // that is a different fact. Observed failing on the swap.
+    origin: 'N',
+    phase: 'P5',
+    proof: 'explain.test.mjs',
+    testTitle: '[6.19] an empty result from a gappy scan is "not found", never "does not exist"',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +
