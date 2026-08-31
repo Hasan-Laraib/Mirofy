@@ -13,6 +13,26 @@ stops being one.
 
 ---
 
+## 2026-09-01
+
+### The publish guard learned how to call npm on Windows
+
+Both obvious ways are wrong there. `shell: true` concatenates arguments instead
+of escaping them, and Node prints a security warning about it on every run — the
+last thing anyone should be reading immediately before a publish is a warning
+they have decided to ignore. Naming `npm.cmd` directly fails with `EINVAL`,
+because Node refuses to spawn a `.cmd` without a shell; that is the mitigation
+for CVE-2024-27980, not a bug.
+
+It runs npm's own `npm-cli.js` on the Node already present. npm sets
+`npm_execpath` to exactly that when it runs a script, which is the only context
+this guard really executes in.
+
+Found by running the guard rather than reading it — twice, because the first
+attempt swapped one broken invocation for another.
+
+---
+
 ## 2026-08-31
 
 ### The layout engine started passing its own gates
