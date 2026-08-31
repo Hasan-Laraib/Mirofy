@@ -5,7 +5,7 @@ import { animateAttr, focusEdgeAttrs, focusNodeAttrs, focusNodeTitle, loadDiagra
 import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { componentBox, boundaryBox, connectionPath } from '../shared/layout-report.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
-import { solveLabelPlacements, hasAuthoredLabelPosition } from '../shared/label-placement.mjs';
+import { applyLabelPlacements } from '../shared/label-placement.mjs';
 import { legendFootprint, relationshipLegendObstacles, resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
 import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
@@ -359,27 +359,20 @@ function buildLabelRects() {
  *
  * A label the author positioned is left exactly where they put it.
  */
+/** Every routed relationship, keyed the way the label solver keys labels. */
+function routesFor(relations, endpoints) {
+  return asArray(relations)
+    .map((relation, index) => (
+      endpoints.has(relation?.from) && endpoints.has(relation?.to)
+        ? { key: String(index), points: pathFor(relation)?.points ?? [] }
+        : null
+    ))
+    .filter(Boolean);
+}
+
 function solveConnectionLabels() {
-  const rects = buildLabelRects();
-  if (rects.length === 0) return;
-  const { placements } = solveLabelPlacements({
-    labels: rects.map((rect) => ({
-      key: String(rect.relationIndex),
-      x: rect.x,
-      y: rect.y,
-      width: rect.width,
-      height: rect.height,
-      pinned: hasAuthoredLabelPosition(rect.relation),
-    })),
-    obstacles: [...components.values()],
-    bounds: { width: viewBox[0], height: viewBox[1] },
-  });
-  for (const rect of rects) {
-    const move = placements.get(String(rect.relationIndex));
-    if (!move || (move.dx === 0 && move.dy === 0)) continue;
-    rect.relation.labelDx = (rect.relation.labelDx || 0) + move.dx;
-    rect.relation.labelDy = (rect.relation.labelDy || 0) + move.dy;
-  }
+  applyLabelPlacements(buildLabelRects(), components.values(),
+    { width: viewBox[0], height: viewBox[1] }, routesFor(arch.connections, components));
 }
 
 function validateArchitecture() {

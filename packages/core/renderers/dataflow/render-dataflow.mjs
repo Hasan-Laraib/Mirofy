@@ -4,6 +4,7 @@ import { esc, renderDefinitions, renderSemanticSigil, textUnits } from '../share
 import { animateAttr, focusEdgeAttrs, focusNodeAttrs, focusNodeTitle, loadDiagramWithBrandMarks, writeDiagram, svgAccessibleText, svgRootAttrs } from '../shared/cli.mjs';
 import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
+import { applyLabelPlacements } from '../shared/label-placement.mjs';
 import { resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
 import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
@@ -114,6 +115,35 @@ for (const [index, flow] of asArray(dataflow.flows).entries()) {
 }
 for (const [index, node] of asArray(dataflow.nodes).entries()) {
   if (!nodeSteps.has(node.id)) nodeSteps.set(node.id, index);
+}
+
+/** The rect each flow label occupies, in flow order. */
+function buildFlowLabelRects() {
+  const rects = [];
+  for (const [flowIndex, flow] of asArray(dataflow.flows).entries()) {
+    if (!flow.label || !nodes.has(flow.from) || !nodes.has(flow.to)) continue;
+    const [lx, ly] = labelPoint(flow, pathFor(flow).points);
+    const { width, height } = flowLabelSize(flow);
+    rects.push({ relation: flow, relationIndex: flowIndex, label: flow.label, x: lx - width / 2, y: ly - 11, width, height, lx, ly });
+  }
+  return rects;
+}
+
+/** Move automatically-placed flow labels clear of the nodes. */
+/** Every routed relationship, keyed the way the label solver keys labels. */
+function routesFor(relations, endpoints) {
+  return asArray(relations)
+    .map((relation, index) => (
+      endpoints.has(relation?.from) && endpoints.has(relation?.to)
+        ? { key: String(index), points: pathFor(relation)?.points ?? [] }
+        : null
+    ))
+    .filter(Boolean);
+}
+
+function solveFlowLabels() {
+  applyLabelPlacements(buildFlowLabelRects(), nodes.values(),
+    { width: viewBox[0], height: viewBox[1] }, routesFor(dataflow.flows, nodes));
 }
 
 function validateDataflow() {
@@ -263,13 +293,7 @@ function validateDataflow() {
     routeHint: 'adjust route/via or channelX/channelY so each turn uses a clear inter-stage corridor'
   }));
 
-  const labelRects = [];
-  for (const [flowIndex, flow] of asArray(dataflow.flows).entries()) {
-    if (!flow.label || !nodes.has(flow.from) || !nodes.has(flow.to)) continue;
-    const [lx, ly] = labelPoint(flow, pathFor(flow).points);
-    const { width, height } = flowLabelSize(flow);
-    labelRects.push({ relation: flow, relationIndex: flowIndex, label: flow.label, x: lx - width / 2, y: ly - 11, width, height, lx, ly });
-  }
+  const labelRects = buildFlowLabelRects();
   for (const rect of labelRects) {
     for (const node of nodes.values()) {
       if (rectsOverlap(rect, node, -2)) {
@@ -472,6 +496,7 @@ ${renderLegend()}
       </svg>`;
 }
 
+solveFlowLabels();
 validateDataflow();
 writeDiagram({
   outPath,

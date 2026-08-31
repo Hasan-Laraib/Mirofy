@@ -988,14 +988,29 @@ test('architecture: Clean Flow Gate rejects a connection through a component', (
   assert.match(stderr, /segment 0 .*2px clearance/);
 });
 
-test('dataflow: showcase rejects a relationship label that hides another route', () => {
-  const d = JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples', 'event-stream.dataflow.json'), 'utf8'));
-  const approvedReplay = d.flows.find((flow) => flow.label === 'approved replay');
+test('dataflow: an unplaced label is moved clear of another route, not reported at the author', () => {
+  // This test used to DELETE the authored position and then assert the gate
+  // fired. That was a fair test of the old behaviour and is the wrong test for
+  // this one: a label with no authored position is the renderer's to place,
+  // and placing it on top of another route was never the author's mistake to
+  // answer for.
+  const load = () => JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples', 'event-stream.dataflow.json'), 'utf8'));
+  const unplaced = load();
+  const approvedReplay = unplaced.flows.find((flow) => flow.label === 'approved replay');
   delete approvedReplay.labelAt;
   delete approvedReplay.labelDx;
   delete approvedReplay.labelDy;
   delete approvedReplay.labelSegment;
-  const { code, stderr } = render('dataflow', d);
+  const placed = render('dataflow', unplaced);
+  assert.equal(placed.code, 0, `the renderer should have placed it clear; stderr:\n${placed.stderr}`);
+
+  // The gate is unchanged and still live. What shrank is the population it
+  // applies to: an automatic label no longer lands here, so what remains is a
+  // label a person put here -- [853, 603] being exactly where the unplaced
+  // label used to fall, 0px from the "failure sample" route.
+  const pinned = load();
+  pinned.flows.find((flow) => flow.label === 'approved replay').labelAt = [853, 603];
+  const { code, stderr } = render('dataflow', pinned);
   assert.notEqual(code, 0, `expected non-zero exit; stderr:\n${stderr}`);
   assert.match(stderr, /\[composition\/label-route-clearance\] showcase dataflow/);
   assert.match(stderr, /approved replay.*failure sample/);

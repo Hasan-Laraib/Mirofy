@@ -6,7 +6,7 @@ import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
 import { resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
 import { componentFill, arrowClassMap, rectsOverlap, cleanFlowProblems, cleanCrossingProblems, cleanAmbiguousCorridorProblems, cleanBorderRunProblems, cleanRouteRhythmProblems, cleanLabelRouteClearanceProblems, routePointsValue, asArray, isFinitePoint } from '../shared/geometry.mjs';
-import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth, requiredNodeWidth } from '../shared/text-fit.mjs';
+import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth, requiredNodeBoxWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
 import { translateMessage as i18nText } from '../shared/i18n.mjs';
 
@@ -69,15 +69,11 @@ const COLUMN_GUTTER = 22;
 function requiredParticipantWidth() {
   let required = 0;
   for (const participant of asArray(sequence.participants)) {
-    required = Math.max(required, Math.ceil(textUnits(participant.label) * 6.8 - 6));
-    if (participant.sublabel) {
-      required = Math.max(required,
-        requiredNodeWidth(participant.sublabel, participantTextFit.sublabelMinimum));
-    }
-    // A brand mark takes 48px off the top rail before the label starts.
-    if (participant.brand) {
-      required = Math.max(required, Math.ceil(textUnits(participant.label) * 8 * 0.6) + 48);
-    }
+    required = Math.max(required, requiredNodeBoxWidth(participant, {
+      ...participantTextFit,
+      // The width brandTopRailProblem is called with below.
+      labelMinimum: 8,
+    }));
   }
   return required;
 }

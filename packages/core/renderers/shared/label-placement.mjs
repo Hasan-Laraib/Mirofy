@@ -28,7 +28,7 @@
 // collision is reported. Moving it somewhere else that is also wrong would
 // trade a diagnosed problem for an undiagnosed one.
 
-import { rectsOverlap } from './geometry.mjs';
+import { rectsOverlap, segmentRectClearance } from './geometry.mjs';
 
 // How far a label may be nudged, in the order the nudges are tried.
 //
@@ -62,6 +62,20 @@ const CANDIDATES = Object.freeze(
     }),
 );
 
+/** Whether a label rect sits too close to a route that is not its own. */
+function crowdsAnotherRoute(rect, key, routes, minimum) {
+  for (const route of routes) {
+    if (route.key === key) continue;
+    const points = route.points;
+    if (!Array.isArray(points) || points.length < 2) continue;
+    for (let i = 0; i < points.length - 1; i += 1) {
+      const segment = { start: points[i], end: points[i + 1] };
+      if (segmentRectClearance(segment, rect) < minimum) return true;
+    }
+  }
+  return false;
+}
+
 /** The rect a label would occupy at a given offset from its natural point. */
 function rectAt(label, dx, dy) {
   return {
@@ -76,15 +90,29 @@ function rectAt(label, dx, dy) {
  * Place automatically-positioned edge labels so they clear nodes and each
  * other.
  *
+ * `routes` lets a label also keep clear of the LINES, not just the boxes. A
+ * label parked 1px off an unrelated edge is as unreadable as one parked on a
+ * node, and it is the same kind of failure: the tool put it there. A label is
+ * never asked to clear its own route -- it is supposed to sit on it.
+ *
  * @param {{labels: Array<{key: string, x: number, y: number, width: number,
  *          height: number, pinned?: boolean}>,
  *          obstacles: Array<{x: number, y: number, width: number, height: number}>,
+ *          routes?: Array<{key: string, points: Array<Array<number>>}>,
  *          clearance?: number,
+ *          routeClearance?: number,
  *          bounds?: {width: number, height: number}|null}} options
  * @returns {{placements: Map<string, {dx: number, dy: number}>, moved: number,
  *            unplaceable: Array<string>}}
  */
-export function solveLabelPlacements({ labels, obstacles, clearance = -2, bounds = null }) {
+export function solveLabelPlacements({
+  labels,
+  obstacles,
+  routes = [],
+  clearance = -2,
+  routeClearance = 6,
+  bounds = null,
+}) {
   const placements = new Map();
   const unplaceable = [];
   let moved = 0;
@@ -107,6 +135,7 @@ export function solveLabelPlacements({ labels, obstacles, clearance = -2, bounds
         return false;
       }
       if (obstacles.some((obstacle) => rectsOverlap(rect, obstacle, clearance))) return false;
+      if (crowdsAnotherRoute(rect, label.key, routes, routeClearance)) return false;
       // Labels are checked against each other with no tolerance: two labels
       // that merely touch are still two labels a reader can separate.
       return !taken.some((other) => rectsOverlap(rect, other, 0));
@@ -141,4 +170,46 @@ export function hasAuthoredLabelPosition(relation) {
   return Boolean(relation?.labelAt)
     || Number.isFinite(relation?.labelDx)
     || Number.isFinite(relation?.labelDy);
+}
+
+/**
+ * Solve a renderer's edge labels and write the result back onto the relations.
+ *
+ * The choice is stored as labelDx/labelDy on the relation itself, so every
+ * later reader -- the collision check, the renderer -- sees one position
+ * through the ordinary labelPoint path. There is no second code path to keep
+ * in step, and the tool's choice ends up spelled out in the document rather
+ * than hidden in a renderer.
+ *
+ * Takes the rects the renderer already built for its own collision check,
+ * rather than rebuilding them: the four renderers size their label boxes
+ * slightly differently, and a solver working from its own idea of the geometry
+ * would clear a rect nobody else believes in.
+ *
+ * @param {Array<{relation: object, relationIndex: number, x: number, y: number,
+ *                width: number, height: number}>} rects
+ * @param {Iterable<{x: number, y: number, width: number, height: number}>} obstacles
+ * @param {{width: number, height: number}|null} [bounds]
+ */
+export function applyLabelPlacements(rects, obstacles, bounds = null, routes = []) {
+  if (rects.length === 0) return;
+  const { placements } = solveLabelPlacements({
+    labels: rects.map((rect) => ({
+      key: String(rect.relationIndex),
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+      pinned: hasAuthoredLabelPosition(rect.relation),
+    })),
+    obstacles: [...obstacles],
+    routes,
+    bounds,
+  });
+  for (const rect of rects) {
+    const move = placements.get(String(rect.relationIndex));
+    if (!move || (move.dx === 0 && move.dy === 0)) continue;
+    rect.relation.labelDx = (rect.relation.labelDx || 0) + move.dx;
+    rect.relation.labelDy = (rect.relation.labelDy || 0) + move.dy;
+  }
 }

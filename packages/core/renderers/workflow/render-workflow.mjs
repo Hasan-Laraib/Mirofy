@@ -4,8 +4,9 @@ import { esc, renderDefinitions, renderSemanticSigil, textUnits } from '../share
 import { animateAttr, focusEdgeAttrs, focusNodeAttrs, focusNodeTitle, loadDiagramWithBrandMarks, writeDiagram, svgAccessibleText, svgRootAttrs } from '../shared/cli.mjs';
 import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
+import { applyLabelPlacements } from '../shared/label-placement.mjs';
 import { resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
-import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
+import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth, requiredNodeBoxWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
 import { translateMessage as i18nText } from '../shared/i18n.mjs';
 import {
@@ -45,6 +46,16 @@ const { diagram: workflow, template, outPath, sourceEvidence } = await loadDiagr
   defaultExample: 'agent-tool-call.workflow.json'
 });
 
+// Font sizes for this renderer's node text; the fitting geometry is shared.
+const nodeTextFit = {
+  labelPreferred: 11,
+  labelMinimum: 9,
+  sublabelPreferred: 8,
+  sublabelMinimum: 6,
+  tagPreferred: 7,
+  tagMinimum: 6,
+};
+
 const layout = {
   laneX: 40,
   laneY: 52,
@@ -57,12 +68,174 @@ const layout = {
   nodeH: 52
 };
 
+// ---------------------------------------------------------------------------
+// Fitting the lanes to what is in them.
+//
+// The numbers above are this renderer's defaults, and they are good ones for
+// the diagram they were tuned against. They are not facts about anybody else's
+// diagram, and until now they behaved as though they were: a label wider than
+// 92px was answered with "shorten the label or increase node.width", and three
+// nodes stacked in one column with yOffset were answered with "move one to
+// another col". Both ask an author to change what the diagram SAYS to fit a
+// number this file picked.
+//
+// So the defaults grow to hold the content. What the author wrote -- an
+// explicit node.width, a yOffset, a col -- is never touched; only the
+// renderer's own numbers move.
+//
+// Nothing grows for a diagram the defaults already fit, so every document that
+// renders correctly today renders byte-identically.
+// ---------------------------------------------------------------------------
+
+// The widest a node may grow before widening stops being a fix. Matches the
+// participant ceiling in the sequence renderer: one answer to "how wide may a
+// node be" across the tool, rather than one per renderer.
+const MAX_NODE_W = 190;
+// The shortest a straight edge between two nodes may be before it reads as a
+// join rather than a connection. The gate below enforces it; the column
+// spacing has to be built from the same number, or the layout produces edges
+// its own validation then rejects -- which is exactly what a first attempt at
+// this did, at 24px against a 28px minimum.
+const MIN_EDGE_PX = 28;
+// Clear space between two node boxes in adjacent columns, and between the
+// outermost nodes and the lane edge. The gutter IS the length of a straight
+// edge between adjacent columns, so it cannot be smaller than the minimum.
+const MIN_COL_GUTTER = MIN_EDGE_PX + 8;
+const LANE_PAD = 16;
+
+// Set false when a fitted layout turns out not to be viable, so the renderer
+// falls back to exactly the geometry it produced before rather than to
+// something halfway between the two.
+let fitWidths = true;
+
+/** A node's box width: the author's if they set one, otherwise one that fits. */
+function fittedNodeWidth(node) {
+  if (node.width) return node.width;
+  if (!fitWidths) return layout.nodeW;
+  return Math.min(MAX_NODE_W, Math.max(layout.nodeW, requiredNodeBoxWidth(node, nodeTextFit)));
+}
+
+/** A node's box height, which no fitting changes. */
+function fittedNodeHeight(node) {
+  return node.height || (node.tag ? 68 : layout.nodeH);
+}
+
+/**
+ * Lane height tall enough for the deepest yOffset in any lane.
+ *
+ * A node sits centred in the lane's content band and is then displaced by its
+ * yOffset, so a band of height H holds a node of height h at offset o only
+ * while |o| <= (H - h) / 2. Turned around, the band must be at least
+ * h + 2|o| tall. One height serves every lane: lanes are drawn as a stack of
+ * equal bands, and a ragged stack reads as a mistake rather than as meaning.
+ */
+function fittedLaneHeight(measurable) {
+  let contentH = layout.laneH - layout.laneTitleH;
+  for (const node of measurable) {
+    contentH = Math.max(contentH, fittedNodeHeight(node) + 2 * Math.abs(node.yOffset || 0));
+  }
+  return layout.laneTitleH + contentH;
+}
+
+/**
+ * Column centres wide enough that no two node boxes touch.
+ *
+ * The default colXs is a hand-tuned array whose gaps are as narrow as 70px --
+ * which two 92px nodes cannot both sit in. That is not a bug in any document;
+ * it is this array being treated as though it were universal.
+ *
+ * An unused column consumes no width, so a three-column diagram is not padded
+ * out to six.
+ */
+function solveColumns(widthByCol) {
+  const xs = [];
+  let cursor = layout.laneX + LANE_PAD;
+  for (let col = 0; col < layout.colXs.length; col += 1) {
+    const width = widthByCol.get(col);
+    if (width === undefined) {
+      // No node here: it occupies no space, but still needs a defined centre.
+      xs.push(cursor);
+      continue;
+    }
+    xs.push(cursor + width / 2);
+    cursor += width + MIN_COL_GUTTER;
+  }
+  return { xs, laneW: cursor - MIN_COL_GUTTER + LANE_PAD - layout.laneX };
+}
+
+/**
+ * Whether these column centres hold these nodes.
+ *
+ * Two nodes may share horizontal space freely when they are in DIFFERENT
+ * lanes -- lanes are stacked bands, and the whole point of a column is that
+ * the same step lines up across them. A first version of this check compared
+ * adjacent columns without regard to lane, decided the bundled example's own
+ * layout did not fit, and re-solved a diagram that was already correct.
+ */
+function columnsFit(xs, placeable) {
+  const laneRight = layout.laneX + layout.laneW;
+  const byLane = new Map();
+  for (const node of placeable) {
+    const width = fittedNodeWidth(node);
+    const x = xs[node.col] - width / 2;
+    if (x < layout.laneX || x + width > laneRight) return false;
+    byLane.set(node.lane, [...(byLane.get(node.lane) || []), { x, width }]);
+  }
+  for (const laneNodes of byLane.values()) {
+    for (let i = 0; i < laneNodes.length; i += 1) {
+      for (let j = i + 1; j < laneNodes.length; j += 1) {
+        const gap = Math.max(laneNodes[i].x, laneNodes[j].x)
+          - Math.min(laneNodes[i].x + laneNodes[i].width, laneNodes[j].x + laneNodes[j].width);
+        if (gap < 8) return false;
+      }
+    }
+  }
+  return true;
+}
+
+{
+  const placeable = asArray(workflow.nodes)
+    .filter((node) => Number.isInteger(node.col) && node.col >= 0 && node.col < layout.colXs.length);
+  const widthByCol = new Map();
+  for (const node of placeable) {
+    widthByCol.set(node.col, Math.max(widthByCol.get(node.col) ?? 0, fittedNodeWidth(node)));
+  }
+
+  // An authored viewBox is the author's geometry and is never overridden, so a
+  // solved layout that would not fit inside it is not adopted at all. Falling
+  // back leaves the diagram exactly as it rendered before, with the same
+  // diagnostics -- worse than fitting it, but never worse than not trying.
+  const authoredWidth = workflow.meta?.viewBox?.[0] ?? null;
+  const laneWCeiling = authoredWidth === null
+    ? Infinity
+    : authoredWidth - layout.laneX - 16;
+
+  if (placeable.length > 0 && !columnsFit(layout.colXs, placeable)) {
+    const solved = solveColumns(widthByCol);
+    if (solved.laneW <= laneWCeiling) {
+      layout.colXs = solved.xs;
+      layout.laneW = Math.max(layout.laneW, solved.laneW);
+    } else {
+      fitWidths = false;
+    }
+  }
+
+  const grownLaneH = fittedLaneHeight(asArray(workflow.nodes));
+  const authoredHeight = workflow.meta?.viewBox?.[1] ?? null;
+  const heightNeeded = layout.laneY
+    + (workflow.lanes?.length || 1) * grownLaneH
+    + ((workflow.lanes?.length || 1) - 1) * layout.laneGap
+    + 124;
+  if (authoredHeight === null || heightNeeded <= authoredHeight) layout.laneH = grownLaneH;
+}
+
 // Content is 680px wide (laneX + laneW); auto height fits the lanes plus legend.
 const autoHeight = layout.laneY
   + (workflow.lanes?.length || 1) * layout.laneH
   + ((workflow.lanes?.length || 1) - 1) * layout.laneGap
   + 124;
-const viewBox = workflow.meta?.viewBox || [720, autoHeight];
+const autoWidth = Math.max(720, layout.laneX + layout.laneW + 40);
+const viewBox = workflow.meta?.viewBox || [autoWidth, autoHeight];
 
 const laneIndex = new Map(asArray(workflow.lanes).map((lane, index) => [lane.id, index]));
 const laneLabels = new Map(asArray(workflow.lanes).map((lane) => [lane.id, lane.label]));
@@ -91,7 +264,7 @@ function legendY() {
 }
 
 function measureNode(node) {
-  const width = node.width || layout.nodeW;
+  const width = fittedNodeWidth(node);
   const height = node.height || (node.tag ? 68 : layout.nodeH);
   const cx = layout.colXs[node.col];
   const contentH = layout.laneH - layout.laneTitleH;
@@ -107,15 +280,6 @@ function measureNode(node) {
   };
 }
 
-// Font sizes for this renderer's node text; the fitting geometry is shared.
-const nodeTextFit = {
-  labelPreferred: 11,
-  labelMinimum: 9,
-  sublabelPreferred: 8,
-  sublabelMinimum: 6,
-  tagPreferred: 7,
-  tagMinimum: 6,
-};
 
 const nodes = new Map(asArray(workflow.nodes).map((node) => [node.id, measureNode(node)]));
 
@@ -154,6 +318,35 @@ const edgeSteps = new Map(asArray(workflow.edges).map((edge, index) => {
 
 function nodeStep(node) {
   return mainPathSteps.get(node.id) ?? asArray(workflow.mainPath).length + asArray(workflow.nodes).findIndex((item) => item.id === node.id);
+}
+
+/** The rect each edge label occupies, in edge order. */
+function buildEdgeLabelRects() {
+  const rects = [];
+  for (const [edgeIndex, edge] of asArray(workflow.edges).entries()) {
+    if (!edge.label || !nodes.has(edge.from) || !nodes.has(edge.to)) continue;
+    const [lx, ly] = workflowEdgeLabelPoint(edge, pathFor(edge).points);
+    const width = Math.max(30, textUnits(edge.label) * 4.8 + 10);
+    rects.push({ relation: edge, relationIndex: edgeIndex, label: edge.label, x: lx - width / 2, y: ly - 10, width, height: 14, lx, ly });
+  }
+  return rects;
+}
+
+/** Move automatically-placed edge labels clear of the nodes and each other. */
+/** Every routed relationship, keyed the way the label solver keys labels. */
+function routesFor(relations, endpoints) {
+  return asArray(relations)
+    .map((relation, index) => (
+      endpoints.has(relation?.from) && endpoints.has(relation?.to)
+        ? { key: String(index), points: pathFor(relation)?.points ?? [] }
+        : null
+    ))
+    .filter(Boolean);
+}
+
+function solveEdgeLabels() {
+  applyLabelPlacements(buildEdgeLabelRects(), nodes.values(),
+    { width: viewBox[0], height: viewBox[1] }, routesFor(workflow.edges, nodes));
 }
 
 function validateWorkflow() {
@@ -319,8 +512,8 @@ function validateWorkflow() {
       if (routed.points.length === 2) {
         const [start, end] = routed.points;
         const segmentLength = Math.hypot(end[0] - start[0], end[1] - start[1]);
-        if (segmentLength < 28) {
-          problems.push(`Edge "${edge.from}" -> "${edge.to}" is too short (${Math.round(segmentLength)}px; minimum 28px) — drop its label or route it through a channel.`);
+        if (segmentLength < MIN_EDGE_PX) {
+          problems.push(`Edge "${edge.from}" -> "${edge.to}" is too short (${Math.round(segmentLength)}px; minimum ${MIN_EDGE_PX}px) — drop its label or route it through a channel.`);
         }
       }
     }
@@ -407,13 +600,7 @@ function validateWorkflow() {
     }
   }
 
-  const labelRects = [];
-  for (const [edgeIndex, edge] of workflow.edges.entries()) {
-    if (!edge.label || !nodes.has(edge.from) || !nodes.has(edge.to)) continue;
-    const [lx, ly] = workflowEdgeLabelPoint(edge, pathFor(edge).points);
-    const width = Math.max(30, textUnits(edge.label) * 4.8 + 10);
-    labelRects.push({ relation: edge, relationIndex: edgeIndex, label: edge.label, x: lx - width / 2, y: ly - 10, width, height: 14, lx, ly });
-  }
+  const labelRects = buildEdgeLabelRects();
   for (const rect of labelRects) {
     for (const node of nodes.values()) {
       if (rectsOverlap(rect, node, -2)) {
@@ -739,6 +926,7 @@ ${renderLegend()}
       </svg>`;
 }
 
+solveEdgeLabels();
 validateWorkflow();
 writeDiagram({
   outPath,

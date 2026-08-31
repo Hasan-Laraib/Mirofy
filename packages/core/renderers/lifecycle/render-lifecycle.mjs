@@ -4,6 +4,7 @@ import { esc, renderDefinitions, renderSemanticSigil, textUnits } from '../share
 import { animateAttr, focusEdgeAttrs, focusNodeAttrs, focusNodeTitle, loadDiagramWithBrandMarks, writeDiagram, svgAccessibleText, svgRootAttrs } from '../shared/cli.mjs';
 import { resolveProvenance } from '../shared/evidence-provenance.mjs';
 import { throwDiagnosticProblems } from '../shared/diagnostics.mjs';
+import { applyLabelPlacements } from '../shared/label-placement.mjs';
 import { resolveLegend, renderLegend as renderResolvedLegend } from '../shared/legend.mjs';
 import { availableNodeTextWidth, fittedNodeFontSize, minimumNodeTextWidth } from '../shared/text-fit.mjs';
 import { brandLabelFitWidth, brandMarkFor, brandMetadataFor, brandTopRailProblem, renderBrandMark } from '../shared/brand-marks.mjs';
@@ -137,6 +138,37 @@ for (const [index, transition] of asArray(lifecycle.transitions).entries()) {
 }
 for (const [index, state] of asArray(lifecycle.states).entries()) {
   if (!stateSteps.has(state.id)) stateSteps.set(state.id, index);
+}
+
+/** The rect each transition label occupies, in transition order. */
+function buildTransitionLabelRects() {
+  const rects = [];
+  for (const [transitionIndex, transition] of asArray(lifecycle.transitions).entries()) {
+    if (!transition.label || !states.has(transition.from) || !states.has(transition.to)) continue;
+    const [lx, ly] = labelPoint(transition, pathFor(transition).points);
+    const longestLine = Math.max(textUnits(transition.label), textUnits(transition.note || ''));
+    const width = Math.max(32, longestLine * 4.9 + 12);
+    const height = transition.note ? 27 : 16;
+    rects.push({ relation: transition, relationIndex: transitionIndex, label: transition.label, x: lx - width / 2, y: ly - 11, width, height, lx, ly });
+  }
+  return rects;
+}
+
+/** Move automatically-placed transition labels clear of the states. */
+/** Every routed relationship, keyed the way the label solver keys labels. */
+function routesFor(relations, endpoints) {
+  return asArray(relations)
+    .map((relation, index) => (
+      endpoints.has(relation?.from) && endpoints.has(relation?.to)
+        ? { key: String(index), points: pathFor(relation)?.points ?? [] }
+        : null
+    ))
+    .filter(Boolean);
+}
+
+function solveTransitionLabels() {
+  applyLabelPlacements(buildTransitionLabelRects(), states.values(),
+    { width: viewBox[0], height: viewBox[1] }, routesFor(lifecycle.transitions, states));
 }
 
 function validateLifecycle() {
@@ -296,15 +328,7 @@ function validateLifecycle() {
     routeHint: 'move route/via or channel coordinates so each lifecycle turn has a readable run-up'
   }));
 
-  const labelRects = [];
-  for (const [transitionIndex, transition] of asArray(lifecycle.transitions).entries()) {
-    if (!transition.label || !states.has(transition.from) || !states.has(transition.to)) continue;
-    const [lx, ly] = labelPoint(transition, pathFor(transition).points);
-    const longestLine = Math.max(textUnits(transition.label), textUnits(transition.note || ''));
-    const width = Math.max(32, longestLine * 4.9 + 12);
-    const height = transition.note ? 27 : 16;
-    labelRects.push({ relation: transition, relationIndex: transitionIndex, label: transition.label, x: lx - width / 2, y: ly - 11, width, height, lx, ly });
-  }
+  const labelRects = buildTransitionLabelRects();
   for (const rect of labelRects) {
     for (const state of states.values()) {
       if (rectsOverlap(rect, state, -2)) {
@@ -561,6 +585,7 @@ ${renderLegend()}
       </svg>`;
 }
 
+solveTransitionLabels();
 validateLifecycle();
 writeDiagram({
   outPath,

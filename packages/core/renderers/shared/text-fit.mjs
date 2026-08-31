@@ -59,3 +59,21 @@ export function availableNodeTextWidth(width) {
 export function requiredNodeWidth(text, minimum) {
   return Math.ceil(minimumNodeTextWidth(text, minimum) + nodeTextFit.horizontalPadding);
 }
+
+// Every renderer checks a node's box against its label the same way -- 6.8px
+// per text unit, with 6px of slack -- and against its sublabel and tag through
+// minimumNodeTextWidth. A brand mark takes a further 48px off the top rail
+// before the label starts.
+//
+// This is those checks read backwards, in one place, so that "is this box wide
+// enough?" and "how wide would be enough?" can never drift apart. When they
+// drift, a renderer widens a node to a size it then reports as too narrow --
+// and the author is told to shorten a label that would have fit.
+export function requiredNodeBoxWidth(node, fit) {
+  const units = textUnits(node.label ?? '');
+  let required = Math.ceil(units * 6.8 - 6);
+  if (node.sublabel) required = Math.max(required, requiredNodeWidth(node.sublabel, fit.sublabelMinimum));
+  if (node.tag) required = Math.max(required, requiredNodeWidth(node.tag, fit.tagMinimum));
+  if (node.brand) required = Math.max(required, Math.ceil(units * fit.labelMinimum * 0.6) + 48);
+  return required;
+}

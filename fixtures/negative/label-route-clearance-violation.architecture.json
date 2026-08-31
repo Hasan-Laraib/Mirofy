@@ -1,15 +1,90 @@
 {
   "schema_version": 1,
   "diagram_type": "architecture",
-  "meta": { "title": "Label route clearance violation" },
+  "meta": {
+    "title": "Label route clearance violation"
+  },
   "components": [
-    { "id": "p1", "type": "backend", "label": "P1", "pos": [20, 100], "size": [80, 40] },
-    { "id": "p2", "type": "backend", "label": "P2", "pos": [300, 100], "size": [80, 40] },
-    { "id": "p3", "type": "backend", "label": "P3", "pos": [150, 40], "size": [40, 30] },
-    { "id": "p4", "type": "backend", "label": "P4", "pos": [220, 40], "size": [40, 30] }
+    {
+      "id": "p1",
+      "type": "backend",
+      "label": "P1",
+      "pos": [
+        20,
+        100
+      ],
+      "size": [
+        80,
+        40
+      ]
+    },
+    {
+      "id": "p2",
+      "type": "backend",
+      "label": "P2",
+      "pos": [
+        300,
+        100
+      ],
+      "size": [
+        80,
+        40
+      ]
+    },
+    {
+      "id": "p3",
+      "type": "backend",
+      "label": "P3",
+      "pos": [
+        150,
+        40
+      ],
+      "size": [
+        40,
+        30
+      ]
+    },
+    {
+      "id": "p4",
+      "type": "backend",
+      "label": "P4",
+      "pos": [
+        220,
+        40
+      ],
+      "size": [
+        40,
+        30
+      ]
+    }
   ],
   "connections": [
-    { "id": "p1-p2", "from": "p1", "to": "p2", "label": "data" },
-    { "id": "p3-p4", "from": "p3", "to": "p4", "fromSide": "bottom", "toSide": "bottom", "via": [[170, 115], [240, 115]] }
+    {
+      "id": "p1-p2",
+      "from": "p1",
+      "to": "p2",
+      "label": "data",
+      "labelAt": [
+        200,
+        110
+      ]
+    },
+    {
+      "id": "p3-p4",
+      "from": "p3",
+      "to": "p4",
+      "fromSide": "bottom",
+      "toSide": "bottom",
+      "via": [
+        [
+          170,
+          115
+        ],
+        [
+          240,
+          115
+        ]
+      ]
+    }
   ]
 }
