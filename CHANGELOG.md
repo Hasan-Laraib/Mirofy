@@ -15,6 +15,28 @@ stops being one.
 
 ## 2026-09-01
 
+### The pipeline graphic has colour you can actually see, and a pop
+
+Its lit fills were 2-4% tints -- `#f4f8ff` and friends, white with a rumour of
+blue -- so the hue survived only on 1.5px of border and vanished at README
+scale. They are now around 11%: visible, still quiet enough to sit under body
+text. The SCAN / MODEL / COMPILE / LAYOUT / RENDER captions take their stage's
+colour too, so there is something along the bottom edge and not just a row of
+boxes.
+
+And each stage now emits a ring as it wakes -- a rounded rect behind the box
+that grows and fades, so the cascade reads as five small pops travelling left to
+right. Pure transform and opacity, no filter, which keeps the promise written
+into that file's own header.
+
+The first attempt was invisible and the reason is worth keeping: the ring is
+painted UNDER the box, so only the part outside it is ever seen, and the
+keyframes peaked at scale 1.015 -- brightest at the exact moment it was still
+hidden behind the border, then large only once it had faded to nothing. It now
+appears already clear of the edge and fades while still travelling. Caught by
+screenshotting the burst instant rather than trusting the markup, the same way
+the original cascade bug was.
+
 ### The dark hero turned the other four captures dark, silently
 
 Adding the dark hero broke the four capability captures in the same run. The
