@@ -25,3 +25,4 @@ scan/view.json
 
 # Benchmark credentials. Never committed.
 .benchmark.env
+launch/
