@@ -111,6 +111,9 @@ export function ownerOf(filePath, packages) {
 export function classifyTarget(object) {
   const text = String(object ?? '');
   if (text.startsWith('package:node:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
+  // Python's standard library, for the same reason as node's: every file
+  // imports os and typing, and drawing those buries the architecture.
+  if (text.startsWith('package:python:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
   if (text.startsWith('package:')) return { kind: 'external-package', name: text.slice('package:'.length) };
   return { kind: 'path', name: text };
 }

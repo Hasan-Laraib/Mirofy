@@ -114,7 +114,14 @@ for (const name of INCLUDE) copyTree(path.join(source, name), path.join(out, nam
 // new directory nobody decided about. Failing here is the point: the decision
 // should be made when it is added, not discovered by a user who is missing it.
 const undecided = fs.readdirSync(source)
-  .filter((name) => !INCLUDE.includes(name) && !(name in EXCLUDE_REASON));
+  .filter((name) => !INCLUDE.includes(name) && !(name in EXCLUDE_REASON))
+  // generate-validators.test.mjs deliberately mkdtemps a `.validator-check-*`
+  // directory inside packages/core while it runs, and two other test files
+  // already know to skip it. This one did not, so whenever the suite happened
+  // to run that test while the bundle was being built, the gate failed on a
+  // directory that would be gone a second later. A flake that reddens CI at
+  // random is worse than the check it comes from is good.
+  .filter((name) => !name.startsWith('.validator-check-'));
 if (undecided.length) {
   console.error(`build-skill: packages/core has ${undecided.join(', ')}, which the bundle `
     + 'neither ships nor records a reason for skipping. Add it to INCLUDE or to '

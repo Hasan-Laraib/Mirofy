@@ -15,6 +15,48 @@ stops being one.
 
 ## 2026-09-01
 
+### A gate that reddened at random
+
+generate-validators.test.mjs deliberately creates a temp directory inside
+packages/core while it runs, and two test files already knew to skip it.
+build-skill did not, so whenever the suite happened to run that test while the
+bundle was being built, the gate failed on a directory that would be gone a
+second later. A check that fails at random is worse than the thing it checks is
+good.
+
+### Python
+
+An import adapter for Python, on the same contract as the JavaScript one and
+the same rule: never guess.
+
+It resolves relative imports against the importing file's own directory,
+absolute imports against the repository root and any directory that actually
+holds a package -- which is what a project puts on sys.path, `src/` being the
+common case. Resolution is by FILE EXISTENCE: a path is accepted because the
+file is there, never because it looked plausible. `from .llm import client`
+resolves to the client module rather than the package `__init__.py` beside it,
+because that is the edge the code has.
+
+Where it stops, it says so. A computed `importlib.import_module(name)` is a gap
+naming its line. A relative import that climbs above the repository root is a
+gap. And a specifier that matches two source roots is a gap listing both --
+which one wins depends on sys.path, which is configuration and not in the
+source, so picking one would be a guess dressed as evidence.
+
+The standard library is named rather than drawn, exactly as node builtins are.
+Every Python file imports `os` and `typing`; edges to those would bury the
+architecture in the noise the node-builtin rule exists to keep out.
+
+Docstrings are blanked before parsing, with newlines preserved so every later
+line number survives. A Python docstring routinely contains example imports,
+and reading them would put edges in the diagram that the code does not have,
+cited to a line that is prose. Planting "do not strip docstrings" fails.
+
+So does planting "take the first hit when ambiguous", and "treat a computed
+import as an ordinary line". A fourth plant -- "draw the stdlib" -- passed,
+because the tests only covered the plain `import os` branch and not
+`from typing import List`. That branch is covered now.
+
 ### The coverage report counted only what it could already read
 
 Someone pointed Mirofy at a Python repository. It produced two boxes from 266
