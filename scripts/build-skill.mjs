@@ -27,6 +27,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// packages/core/pipeline is generated and git-ignored, so a fresh checkout does
+// not have it. The INCLUDE list below names it, and the comment there claimed
+// this build ran it first -- which it did not. It passed on the machine that had
+// already generated the directory and failed every CI leg, which is the exact
+// local-green/CI-red shape this repository has now hit four times.
+execFileSync(process.execPath, [path.join(repoRoot, 'scripts/build-pipeline.mjs')],
+  { stdio: ['ignore', 'ignore', 'inherit'] });
+
 const source = path.join(repoRoot, 'packages/core');
 const out = path.join(repoRoot, 'dist/mirofy');
 
