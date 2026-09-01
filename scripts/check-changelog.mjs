@@ -95,9 +95,33 @@ const named = [...new Set(
     .map((match) => match[1])
     .filter((token) => token.includes('/')),
 )];
-const missing = named.filter((relative) => !fs.existsSync(path.join(repoRoot, relative)));
-check('every path it names exists', missing.length === 0,
-  missing.length ? `not found: ${missing.join(', ')}` : `${named.length} path(s) checked`);
+// A path that exists on this machine but is gitignored is NOT a path a reader
+// can follow: it is generated output that a fresh clone does not have. Checking
+// only fs.existsSync passed locally and failed all twelve CI legs at once,
+// because the entry named `scan/diagram.json` -- real here, absent there. Asking
+// git as well makes local and CI agree, which is the whole point of a gate.
+const ignored = (relative) => {
+  try {
+    execFileSync('git', ['check-ignore', '-q', '--', relative], { cwd: repoRoot, stdio: 'ignore' });
+    return true;
+  } catch {
+    return false; // exit 1 means "not ignored"; no git at all also lands here
+  }
+};
+const absent = named.filter((relative) => !fs.existsSync(path.join(repoRoot, relative)));
+const generated = named.filter((relative) => !absent.includes(relative) && ignored(relative));
+const unfollowable = [...absent, ...generated];
+// Two different problems deserve two different sentences. "not found:
+// scan/diagram.json" is confusing to read on a machine where that file is
+// plainly sitting there -- the reason it fails is that a reader cloning this
+// repository would not have it.
+check('every path it names exists', unfollowable.length === 0,
+  unfollowable.length
+    ? [
+      absent.length ? `not found: ${absent.join(', ')}` : '',
+      generated.length ? `gitignored, so a fresh clone has no such file: ${generated.join(', ')}` : '',
+    ].filter(Boolean).join('; ')
+    : `${named.length} path(s) checked`);
 
 // ---------------------------------------------------------------------------
 const failed = results.filter((result) => !result.ok);

@@ -15,6 +15,18 @@ stops being one.
 
 ## 2026-09-01
 
+### check:changelog now agrees with CI about what a path is
+
+The entry below named the scan's generated diagram. That file is real on the machine that
+wrote the entry and gitignored, so `check:changelog` passed locally and then
+failed on all twelve CI legs at once -- the worst shape a gate can have, because
+the only way to find out is to push.
+
+It now asks git as well as the filesystem: a path that exists but is ignored is
+not a path a reader can follow. Both cases were planted, and they report
+different sentences, because a bare "not found" is a baffling thing
+to read on a machine where the file is plainly sitting there.
+
 ### The README shows the viewer being used, not just pictures it made
 
 `scripts/build-screenshots.mjs` renders a real artifact, drives the shipped
@@ -46,7 +58,7 @@ break the promise the picture exists to make. The colour here is on the edges an
 only while they move -- motion, not encoding.
 
 Because the hero is generated output that a script then decorates, it can rot
-with no error at all: re-running the CLI over `scan/diagram.json` writes a
+with no error at all: re-running the CLI over the scan output writes a
 perfectly valid hero with the animation silently gone. Three checks now stand on
 it -- the decoration marker, every edge animated, and every drawn component
 present -- and a plain re-render was planted to prove the first two fire.
