@@ -78,9 +78,12 @@ reason would have quietly replaced OIDC with exactly the kind of long-lived
 credential trusted publishing exists to avoid, and provenance would have stopped
 appearing with no error to notice. It is gone.
 
-Package publishing access is *2FA or automation tokens* — a second factor when a
-person publishes, and CI still able to run. Requiring 2FA for **every** publish
-would demand an interactive prompt from a runner, which nothing can answer.
+Package publishing access is npm's strictest — *require 2FA and disallow bypass
+2FA tokens* — and it is the right setting **because** nothing here publishes
+with a token. The looser option exists to grandfather in granular tokens that
+bypass 2FA, the mechanism npm is deprecating; a trusted-publishing credential is
+not one of those. It is minted per workflow run, expires in minutes, and is
+bound to this repository and this file.
 
 `0.1.0` carries no provenance attestation and never will: it was published from
 a laptop, and only a runner can prove its identity to npm. The next release will.

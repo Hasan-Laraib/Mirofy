@@ -22,10 +22,15 @@ name: Publish
 #        Environment:           (blank -- this job declares none, and a value
 #                                here would make every OIDC claim fail to match)
 #
-#      Package publishing access is set to "2FA or automation tokens", which
-#      requires a second factor when a person publishes and still lets this
-#      workflow run. Requiring 2FA for EVERY publish would demand an interactive
-#      prompt from a runner, which nothing can answer.
+#      Package publishing access is "Require two-factor authentication and
+#      disallow bypass 2FA tokens" -- npm's strictest, and the right one HERE
+#      precisely because nothing in this repository publishes with a token.
+#
+#      The looser option exists to grandfather in granular tokens that bypass
+#      2FA, which is the mechanism npm is deprecating. A trusted-publishing
+#      credential is not one of those: it is minted per workflow run, expires in
+#      minutes, and is bound to this repository and this file. Choosing the
+#      looser setting would keep a door open that nothing here walks through.
 #
 # After that there is no npm token anywhere: the job proves who it is with a
 # short-lived OIDC token GitHub mints for this workflow, and nothing long-lived
