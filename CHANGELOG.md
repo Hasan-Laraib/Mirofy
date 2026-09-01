@@ -15,6 +15,51 @@ stops being one.
 
 ## 2026-09-01
 
+### The test suite leaked 35 GB of temporary directories
+
+Test files create scratch repositories with `fs.mkdtempSync`, and most never
+removed one. Yesterday that had left **20,460 abandoned directories totalling
+35.4 GB** in the system temp folder and filled the disk to 0.08 GB free -- at
+which point the gate began failing with ENOSPC in a different place each run,
+which reads as a flaky test suite rather than a full disk. It cost an hour of
+chasing the wrong thing.
+
+Adding an `rmSync` to each of a hundred files fixes today and not tomorrow: the
+next test written is the one nobody reminds. So cleanup moved to the runner.
+`scripts/scratch-cleanup.mjs` is loaded with `--import` by both test runners,
+records every directory created directly inside the system temp root, and
+removes them on exit. It reaches the per-file child processes the test runner
+spawns -- verified, because if it did not this approach would be worthless --
+and `NODE_OPTIONS` carries it to grandchildren, which is what finally caught
+visual-check's Chrome profile.
+
+Its scope is deliberately narrow: only directories whose parent IS the temp
+root. Deleting inside a working tree because a helper decided it was scratch
+would be a far worse bug than the one being fixed.
+
+Two things it could not fix by itself, both now fixed at the source. The
+benchmark leaked its corpus on every scheduled run and is not a test, so the
+guard never saw it; it cleans up on exit now. And two tests reached fs through
+a NAMESPACE import (`const fs = await import('node:fs')`), which holds the
+original binding and walks straight past a patch on the default export -- they
+were the last leak standing, and the guard's own header claimed a check for
+that which did not exist.
+
+`check:scratch` is that check, and it is in the gate. It also refuses a test
+that writes scratch inside a package other tests read: the one that did made
+build-skill fail on an undecided directory and made degraded.test.mjs, which
+copies packages/core wholesale, fail at random on test ordering. That scratch
+now lives in one declared `packages/core/.scratch/` -- it has to stay inside
+that package, because the generator it copies imports `ajv` and only
+packages/core/node_modules has the version with dist/2020.js. Moving it to the
+system temp directory, and then to a repo-level directory, broke exactly that.
+
+Three full gate runs now leak zero directories, from hundreds each. Two plants
+fail it: a namespace import, and scratch written into a package. The first plant
+of each passed, and both misses were the same shape -- a per-FILE test where one
+correct usage masked an incorrect one, and a path check whose character class
+had collapsed so it matched nothing on Windows and passed on an empty set.
+
 ### A detour that dodged one node by crossing another
 
 Both routers picked their channel by arithmetic and checked only that it stayed

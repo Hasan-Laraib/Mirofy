@@ -177,9 +177,9 @@ const EOL = String.fromCharCode(10);
 
 test('[2.17] the coverage denominator is the repository, not what the adapters could read', async () => {
   const { repositoryFiles } = await import('../../scanner/src/files.mjs');
-  const fs = await import('node:fs');
-  const os = await import('node:os');
-  const path = await import('node:path');
+  const { default: fs } = await import('node:fs');
+  const { default: os } = await import('node:os');
+  const { default: path } = await import('node:path');
   const { execFileSync } = await import('node:child_process');
 
   // A repository in a language no adapter handles. The scan built its
@@ -204,9 +204,9 @@ test('[2.17] the coverage denominator is the repository, not what the adapters c
 
 test('[2.17] a file git ignores is not counted against coverage', async () => {
   const { repositoryFiles } = await import('../../scanner/src/files.mjs');
-  const fs = await import('node:fs');
-  const os = await import('node:os');
-  const path = await import('node:path');
+  const { default: fs } = await import('node:fs');
+  const { default: os } = await import('node:os');
+  const { default: path } = await import('node:path');
   const { execFileSync } = await import('node:child_process');
 
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'product-denominator-'));

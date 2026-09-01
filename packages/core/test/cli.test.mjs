@@ -64,7 +64,7 @@ function copyInstalledSkill(target) {
         // Another test creates this short-lived directory under skillRoot so
         // Ajv resolves from the checkout. Never copy a concurrently removed
         // test fixture into an installed-skill simulation.
-        && !rel.startsWith('.validator-check-');
+        && !rel.startsWith('.');   // dot entries are scratch; none of them ship
     },
   });
 }

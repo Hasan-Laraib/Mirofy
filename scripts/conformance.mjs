@@ -24,6 +24,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { IMPORTED_ROWS } from '../packages/conformance/src/matrix.mjs';
 
+// --import scripts/scratch-cleanup.mjs: test files create scratch
+// repositories and most never removed one. It reaches the per-file child
+// processes the runner spawns, which is the only reason this works from
+// here rather than needing an edit in every test.
+const SCRATCH_GUARD = ['--import', new URL('./scratch-cleanup.mjs', import.meta.url).href];
+
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
 const includeBrowser = process.env.MIROFY_CHROME ? true : false;
@@ -71,7 +77,7 @@ for (const suite of suites) {
 
   if (!titledSuiteNames.has(suite)) {
     try {
-      execFileSync(process.execPath, ['--test', file], { stdio: 'inherit' });
+      execFileSync(process.execPath, [...SCRATCH_GUARD, '--test', file], { stdio: 'inherit' });
     } catch {
       failures += 1;
     }
@@ -84,7 +90,8 @@ for (const suite of suites) {
   let tapOutput = '';
   let suiteFailed = false;
   try {
-    tapOutput = execFileSync(process.execPath, ['--test', '--test-reporter=tap', file], { encoding: 'utf8' });
+    tapOutput = execFileSync(process.execPath,
+        [...SCRATCH_GUARD, '--test', '--test-reporter=tap', file], { encoding: 'utf8' });
   } catch (error) {
     suiteFailed = true;
     tapOutput = String(error.stdout || '');

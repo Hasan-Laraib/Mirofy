@@ -88,6 +88,16 @@ const tasks = fs.readdirSync(tasksDir)
   .map((name) => JSON.parse(fs.readFileSync(path.join(tasksDir, name), 'utf8')));
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-benchmark-'));
+// Removed on the way out, however the run ends. This is not a test, so the
+// runner's cleanup guard never sees it, and a benchmark that leaves a corpus
+// behind on every scheduled run is the same slow leak by another route.
+process.on('exit', () => {
+  try {
+    fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 8, retryDelay: 60 });
+  } catch {
+    // Nothing useful to do from an exit handler; the gate will name it.
+  }
+});
 
 /**
  * Ask the author for one document. Anything unreadable is the author's failure.

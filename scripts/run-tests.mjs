@@ -77,7 +77,12 @@ if (files.length === 0) {
 }
 
 console.log(`running ${files.length} test file(s)${quarantined ? ' (quarantined)' : ''}`);
-const result = spawnSync(process.execPath, ['--test', ...files], {
+// --import scripts/scratch-cleanup.mjs: test files create scratch
+// repositories and most never removed one. It reaches the per-file child
+// processes the runner spawns, which is the only reason this works from
+// here rather than needing an edit in every test.
+const scratchGuard = new URL('./scratch-cleanup.mjs', import.meta.url).href;
+const result = spawnSync(process.execPath, ['--import', scratchGuard, '--test', ...files], {
   cwd: repoRoot,
   stdio: 'inherit',
 });

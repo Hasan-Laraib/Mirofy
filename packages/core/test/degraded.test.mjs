@@ -39,7 +39,7 @@ fs.cpSync(skillRoot, installedRoot, {
       // The validator freshness test creates and removes this fixture inside
       // skillRoot while the test runner executes files concurrently. Exclude
       // it from the installed-skill copy to avoid a copy/remove race.
-      && !rel.startsWith('.validator-check-');
+      && !rel.startsWith('.');   // dot entries are scratch; none of them ship
   },
 });
 

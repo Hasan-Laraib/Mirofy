@@ -66,6 +66,7 @@ const EXCLUDE_REASON = {
   test: 'the suite proves the code here; it does not run at a user site',
   scripts: 'build tooling, not runtime',
   node_modules: 'a workspace link; every package here has zero runtime dependencies',
+  '.scratch': 'test scratch; it lives here because ajv resolves through this package',
 };
 
 /** @param {string} from @param {string} to */
@@ -115,13 +116,12 @@ for (const name of INCLUDE) copyTree(path.join(source, name), path.join(out, nam
 // should be made when it is added, not discovered by a user who is missing it.
 const undecided = fs.readdirSync(source)
   .filter((name) => !INCLUDE.includes(name) && !(name in EXCLUDE_REASON))
-  // generate-validators.test.mjs deliberately mkdtemps a `.validator-check-*`
-  // directory inside packages/core while it runs, and two other test files
-  // already know to skip it. This one did not, so whenever the suite happened
-  // to run that test while the bundle was being built, the gate failed on a
-  // directory that would be gone a second later. A flake that reddens CI at
-  // random is worse than the check it comes from is good.
-  .filter((name) => !name.startsWith('.validator-check-'));
+  // No exemption for scratch any more: generate-validators.test.mjs used to
+  // create a directory inside packages/core while it ran, and this gate failed
+  // on it at random depending on test ordering. That scratch moved to the
+  // system temp directory, so the cause is gone and the check can be strict
+  // again -- which is the point of it.
+  ;
 if (undecided.length) {
   console.error(`build-skill: packages/core has ${undecided.join(', ')}, which the bundle `
     + 'neither ships nor records a reason for skipping. Add it to INCLUDE or to '

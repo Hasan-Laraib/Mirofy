@@ -9,7 +9,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
 
 test('validator freshness check accepts CRLF checkouts', () => {
-  const scratch = fs.mkdtempSync(path.join(skillRoot, '.validator-check-'));
+  // Inside packages/core, because the generator it copies imports `ajv` and
+  // only packages/core/node_modules has the version with dist/2020.js -- moving
+  // this to os.tmpdir(), and then to a repo-level directory, broke exactly that.
+  //
+  // But under ONE named dot-directory rather than a fresh `.validator-check-*`
+  // at the top level each time. Everything that reads packages/core skips dot
+  // entries, which are never shipped; scattered scratch at the top level made
+  // build-skill fail on an undecided directory and degraded.test.mjs -- which
+  // copies packages/core wholesale -- fail at random on test ordering.
+  const scratchRoot = path.join(skillRoot, '.scratch');
+  fs.mkdirSync(scratchRoot, { recursive: true });
+  const scratch = fs.mkdtempSync(path.join(scratchRoot, 'validator-check-'));
   try {
     fs.mkdirSync(path.join(scratch, 'scripts'));
     fs.mkdirSync(path.join(scratch, 'renderers', 'shared'), { recursive: true });
