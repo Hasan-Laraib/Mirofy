@@ -161,7 +161,11 @@ for (const { mode, fixture } of MODES) {
 fs.rmSync(scratch, { recursive: true, force: true });
 console.log(`build-site: ${made.length} gallery artifacts, ${MODES.length + 1} previews`);
 
-for (const asset of ['logo.png', 'logo-dark.png']) {
+for (const asset of ['logo.png', 'logo-dark.png',
+  // The hero is the product, not the wordmark. Both themes, because the
+  // page follows the reader's and a light slab on a dark page is worse
+  // than no picture at all.
+  'viewer-hero.png', 'viewer-hero-dark.png']) {
   fs.copyFileSync(path.join(repoRoot, 'assets', asset), path.join(siteRoot, 'assets', asset));
 }
 
@@ -261,6 +265,37 @@ const index = `<!doctype html>
     pointer-events: none;
   }
   .hero .wrap { position: relative; padding-top: 76px; padding-bottom: 60px; text-align: center; }
+  /* The product, framed. A visitor used to meet a wordmark and two paragraphs
+     before seeing anything the tool makes; the strongest asset on the whole
+     site sat below three screens of scrolling. */
+  .shot {
+    margin: 46px auto 0; max-width: 1000px; border: 1px solid var(--line);
+    border-radius: 14px; overflow: hidden; background: var(--surface);
+    box-shadow: 0 1px 2px rgba(16, 20, 32, .05), 0 18px 50px -18px rgba(16, 20, 32, .28);
+  }
+  .shot .chrome {
+    display: flex; gap: 7px; align-items: center; padding: 11px 14px;
+    border-bottom: 1px solid var(--line); background: var(--sunk);
+  }
+  .shot .chrome span { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .shot img { display: block; width: 100%; height: auto; }
+
+  /* The one-command band, directly under the hero: map is the whole pitch and
+     the site never mentioned it. No backticks in here -- this CSS lives inside
+     a template literal, and one closes the string. */
+  .band { background: var(--sunk); border-bottom: 1px solid var(--line); }
+  .band .wrap { padding-top: 44px; padding-bottom: 46px; }
+  .cmd {
+    margin: 14px 0 30px; padding: 18px 20px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--surface);
+    box-shadow: 0 1px 2px rgba(16, 20, 32, .04);
+  }
+  .cmd code { font-size: 17px; letter-spacing: -.01em; }
+  .cmd .dim { color: var(--dim); margin-right: 10px; }
+  .three { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 22px; }
+  .three div { display: flex; flex-direction: column; gap: 6px; }
+  .three strong { font-size: 14.5px; }
+  .three span { color: var(--dim); font-size: 13.5px; line-height: 1.55; }
   .logo { width: 320px; max-width: 78%; height: auto; }
   .tagline {
     margin: 22px auto 0; max-width: 30ch;
@@ -404,8 +439,33 @@ const index = `<!doctype html>
       <a class="btn primary" href="self-model.html">Open Mirofy's own map →</a>
       <a class="btn ghost" href="https://github.com/Hasan-Laraib/Mirofy">View source</a>
     </div>
+
+    <figure class="shot">
+      <div class="chrome"><span></span><span></span><span></span></div>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="assets/viewer-hero-dark.png">
+        <img src="assets/viewer-hero.png" width="1280" height="549"
+             alt="A rendered Mirofy artifact: ten services coloured by role inside an AWS region and a security group, with a legend naming each role">
+      </picture>
+    </figure>
   </div>
 </header>
+
+<section class="band">
+  <div class="wrap">
+    <h2>One command</h2>
+    <p class="lead">Point it at a repository. It writes one HTML file you can
+      open, search, share and check.</p>
+    <div class="cmd">
+      <code><span class="dim">$</span> npx mirofy-cli map .</code>
+    </div>
+    <div class="three">
+      <div><strong>It reads your code</strong><span>Imports, manifests and routes become an evidence graph. What it cannot parse is recorded as a gap, never dropped.</span></div>
+      <div><strong>It models what it found</strong><span>Packages if you have them, source directories if you do not. Nothing is invented to fill a hole.</span></div>
+      <div><strong>It writes one file</strong><span><code>architecture.html</code>, next to your code. Every edge carries the file, line and commit it came from.</span></div>
+    </div>
+  </div>
+</section>
 
 <section>
   <div class="wrap">

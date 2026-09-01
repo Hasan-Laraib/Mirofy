@@ -15,6 +15,21 @@ stops being one.
 
 ## 2026-09-01
 
+### The site leads with the product now, not the wordmark
+
+A visitor met a logo, two paragraphs and two buttons. The most attractive thing
+the tool makes -- a colourful artifact -- was three screens down, small and grey,
+and `mirofy map` was not mentioned anywhere at all.
+
+The hero now carries a real rendered artifact, framed as a window, in whichever
+theme the reader's browser asked for. Directly beneath it is the command, with
+three lines on what it does: reads your code, models what it found, writes one
+file. Both use the site's existing type scale and palette rather than a new one.
+
+The build crashed once on a backtick inside a CSS comment -- that stylesheet
+lives inside a JS template literal, and a backtick ends the string. Second time
+this file has done that.
+
 ### `mirofy map .` -- the README's first sentence, finally true
 
 Pointing Mirofy at somebody else's repository did not work, and failed in the
