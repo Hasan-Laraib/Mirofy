@@ -39,11 +39,11 @@
              animation-iteration-count: infinite; }
     .s1 { animation-name: lit1; } .s2 { animation-name: lit2; } .s3 { animation-name: lit3; }
     .s4 { animation-name: lit4; } .s5 { animation-name: lit5; }
-    @keyframes lit1 { 0%,3%{opacity:.45}  6%,84%{opacity:1} 90%,100%{opacity:.45} }
-    @keyframes lit2 { 0%,15%{opacity:.45} 18%,84%{opacity:1} 90%,100%{opacity:.45} }
-    @keyframes lit3 { 0%,27%{opacity:.45} 30%,84%{opacity:1} 90%,100%{opacity:.45} }
-    @keyframes lit4 { 0%,39%{opacity:.45} 42%,84%{opacity:1} 90%,100%{opacity:.45} }
-    @keyframes lit5 { 0%,51%{opacity:.45} 54%,84%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit1 { 0%,2%{opacity:.45} 5%,88%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit2 { 0%,10%{opacity:.45} 13%,88%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit3 { 0%,18%{opacity:.45} 21%,88%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit4 { 0%,26%{opacity:.45} 29%,88%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit5 { 0%,34%{opacity:.45} 37%,88%{opacity:1} 90%,100%{opacity:.45} }
 
     /* Border and a barely-there tint take the stage's own colour as it wakes.
        Two plain properties and no filter -- this project's renderers are not
@@ -52,11 +52,11 @@
             animation-iteration-count: infinite; }
     .e1 { animation-name: edge1; } .e2 { animation-name: edge2; } .e3 { animation-name: edge3; }
     .e4 { animation-name: edge4; } .e5 { animation-name: edge5; }
-    @keyframes edge1 { 0%,3%{stroke:#dfe3ea;fill:#fff}  6%,84%{stroke:#2563eb;fill:#f4f8ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
-    @keyframes edge2 { 0%,15%{stroke:#dfe3ea;fill:#fff} 18%,84%{stroke:#4f46e5;fill:#f6f6ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
-    @keyframes edge3 { 0%,27%{stroke:#dfe3ea;fill:#fff} 30%,84%{stroke:#6d28d9;fill:#f9f6ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
-    @keyframes edge4 { 0%,39%{stroke:#dfe3ea;fill:#fff} 42%,84%{stroke:#7c3aed;fill:#faf7ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
-    @keyframes edge5 { 0%,51%{stroke:#dfe3ea;fill:#fff} 54%,84%{stroke:#059669;fill:#f1fbf6} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge1 { 0%,2%{stroke:#dfe3ea;fill:#fff} 5%,88%{stroke:#2563eb;fill:#f4f8ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge2 { 0%,10%{stroke:#dfe3ea;fill:#fff} 13%,88%{stroke:#4f46e5;fill:#f6f6ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge3 { 0%,18%{stroke:#dfe3ea;fill:#fff} 21%,88%{stroke:#6d28d9;fill:#f9f6ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge4 { 0%,26%{stroke:#dfe3ea;fill:#fff} 29%,88%{stroke:#7c3aed;fill:#faf7ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge5 { 0%,34%{stroke:#dfe3ea;fill:#fff} 37%,88%{stroke:#059669;fill:#f1fbf6} 90%,100%{stroke:#dfe3ea;fill:#fff} }
 
     /* The connector draws across the gap rather than sending a dot over it.
        At 24px a travelling dot reads as a speck; a line arriving reads as the
@@ -66,19 +66,19 @@
             animation-iteration-count: infinite; }
     .l1 { animation-name: draw1; } .l2 { animation-name: draw2; }
     .l3 { animation-name: draw3; } .l4 { animation-name: draw4; }
-    @keyframes draw1 { 0%,9%{stroke-dashoffset:26;stroke:#c9d2dd}  15%,84%{stroke-dashoffset:0;stroke:#4f46e5} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
-    @keyframes draw2 { 0%,21%{stroke-dashoffset:26;stroke:#c9d2dd} 27%,84%{stroke-dashoffset:0;stroke:#6d28d9} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
-    @keyframes draw3 { 0%,33%{stroke-dashoffset:26;stroke:#c9d2dd} 39%,84%{stroke-dashoffset:0;stroke:#7c3aed} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
-    @keyframes draw4 { 0%,45%{stroke-dashoffset:26;stroke:#c9d2dd} 51%,84%{stroke-dashoffset:0;stroke:#059669} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+    @keyframes draw1 { 0%,6%{stroke-dashoffset:26;stroke:#c9d2dd} 10%,88%{stroke-dashoffset:0;stroke:#4f46e5} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+    @keyframes draw2 { 0%,14%{stroke-dashoffset:26;stroke:#c9d2dd} 18%,88%{stroke-dashoffset:0;stroke:#6d28d9} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+    @keyframes draw3 { 0%,22%{stroke-dashoffset:26;stroke:#c9d2dd} 26%,88%{stroke-dashoffset:0;stroke:#7c3aed} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+    @keyframes draw4 { 0%,30%{stroke-dashoffset:26;stroke:#c9d2dd} 34%,88%{stroke-dashoffset:0;stroke:#059669} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
 
     .tip { opacity: 0; animation-duration: 10s; animation-timing-function: ease-in-out;
            animation-iteration-count: infinite; }
     .p1 { animation-name: tip1; } .p2 { animation-name: tip2; }
     .p3 { animation-name: tip3; } .p4 { animation-name: tip4; }
-    @keyframes tip1 { 0%,12%{opacity:0} 15%,84%{opacity:1} 90%,100%{opacity:0} }
-    @keyframes tip2 { 0%,24%{opacity:0} 27%,84%{opacity:1} 90%,100%{opacity:0} }
-    @keyframes tip3 { 0%,36%{opacity:0} 39%,84%{opacity:1} 90%,100%{opacity:0} }
-    @keyframes tip4 { 0%,48%{opacity:0} 51%,84%{opacity:1} 90%,100%{opacity:0} }
+    @keyframes tip1 { 0%,8%{opacity:0} 10%,88%{opacity:1} 90%,100%{opacity:0} }
+    @keyframes tip2 { 0%,16%{opacity:0} 18%,88%{opacity:1} 90%,100%{opacity:0} }
+    @keyframes tip3 { 0%,24%{opacity:0} 26%,88%{opacity:1} 90%,100%{opacity:0} }
+    @keyframes tip4 { 0%,32%{opacity:0} 34%,88%{opacity:1} 90%,100%{opacity:0} }
 
     /* Asked not to see motion: you get the finished frame, which is the one
        that carries the meaning anyway -- every stage lit, every handover made. */

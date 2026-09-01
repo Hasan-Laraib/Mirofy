@@ -15,6 +15,21 @@ stops being one.
 
 ## 2026-09-01
 
+### The two animated graphics spent most of their loop half-built
+
+Rendering the README the way GitHub renders it showed the problem plainly:
+`evidence.svg` reached its finished state at 68% of an 11-second loop and started
+fading at 88%, so the assembled record -- the passport, the citation, the gap,
+the entire point of the picture -- was on screen for about two seconds in eleven.
+A reader arriving mid-cycle met a mostly empty box. `pipeline.svg` had a milder
+version of the same shape.
+
+The reveal is a preamble, not the message. Both are retimed so the finished
+frame holds for most of the loop: evidence now assembles by 39% and holds to
+90% (5.6s of 11s, up from 2.2s), the pipeline by 37% holding to 88% (5.1s of
+10s, up from 3.0s). Nothing about what they say changed, only how long they
+spend saying it.
+
 ### The hero follows the reader's theme
 
 It is captured twice now -- once in each of the viewer's themes, through the
