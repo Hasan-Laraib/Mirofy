@@ -15,6 +15,21 @@ stops being one.
 
 ## 2026-09-01
 
+### 0.2.0 crashed on the commonest three-module repository there is
+
+`A imports B`, `A imports C`, `B imports C`. Layered, that is three boxes in one
+row, and the A-to-C edge runs straight through B -- so Clean Flow rejected the
+diagram and `mirofy map` failed outright. Found by running the PUBLISHED package
+against a fresh repository, which is the only place it shows: this repository is
+a thirteen-package workspace and never produces that shape.
+
+`skipLevelDetours` is the missing other axis of `sameColumnDetours`. Where an
+edge skips a column AND something actually sits in the way, it routes through a
+channel below the rows. Where the skipped column is empty the edge stays
+straight, because bending an edge that crosses nothing is decoration, and
+decoration in a layout engine is a lie about what was in the way. Both halves
+are planted.
+
 ### The site leads with the product now, not the wordmark
 
 A visitor met a logo, two paragraphs and two buttons. The most attractive thing

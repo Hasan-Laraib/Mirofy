@@ -221,6 +221,69 @@ export function sameColumnDetours(edges, positions, size, gapX) {
 }
 
 /**
+ * Routes for edges that skip a column.
+ *
+ * Same problem as `sameColumnDetours`, other axis. A layered layout puts every
+ * node of one depth in one column, so an edge from column 0 to column 2 runs
+ * straight through whatever sits in column 1 on the same row -- and Clean Flow
+ * rejects it, correctly.
+ *
+ * It is not a rare shape. `A imports B`, `A imports C`, `B imports C` is the
+ * commonest three-module arrangement there is, and it put A, B and C in one row
+ * with the A-to-C edge crossing B. `mirofy map` therefore failed outright on an
+ * ordinary small repository -- found by running the published package against
+ * one, which is the only place it shows.
+ *
+ * The channel runs BELOW the rows: a layered diagram reads left to right, so
+ * the space under it is the one a reader is not tracking.
+ *
+ * @param {Array<{from: string, to: string}>} edges
+ * @param {Record<string, [number, number]>} positions
+ * @param {[number, number]} size
+ * @returns {Map<number, {fromSide: string, toSide: string, via: Array<[number, number]>}>}
+ */
+export function skipLevelDetours(edges, positions, size) {
+  const [width, height] = size;
+  const entries = Object.entries(positions);
+  if (!entries.length) return new Map();
+  const columns = [...new Set(entries.map(([, [x]]) => x))].sort((left, right) => left - right);
+  const columnOf = new Map(entries.map(([id, [x]]) => [id, columns.indexOf(x)]));
+  const lowest = Math.max(...entries.map(([, [, y]]) => y)) + height;
+
+  const detours = new Map();
+  let channel = 0;
+  for (const [index, edge] of edges.entries()) {
+    const from = positions[edge.from];
+    const to = positions[edge.to];
+    if (!from || !to || from[0] === to[0]) continue;
+    if (Math.abs(columnOf.get(edge.to) - columnOf.get(edge.from)) <= 1) continue;
+
+    // Only detour when something is ACTUALLY in the way. A skip-level edge over
+    // an empty column is a straight line, and bending it would be decoration.
+    const left = Math.min(from[0], to[0]);
+    const right = Math.max(from[0], to[0]);
+    const top = Math.min(from[1], to[1]);
+    const bottom = Math.max(from[1], to[1]) + height;
+    const blocked = entries.some(([id, [x, y]]) => id !== edge.from && id !== edge.to
+      && x > left && x < right && y < bottom && y + height > top);
+    if (!blocked) continue;
+
+    const offset = 34 + (channel % 3) * 24;
+    channel += 1;
+    const channelY = lowest + offset;
+    detours.set(index, {
+      fromSide: 'bottom',
+      toSide: 'bottom',
+      via: [
+        [from[0] + width / 2, channelY],
+        [to[0] + width / 2, channelY],
+      ],
+    });
+  }
+  return detours;
+}
+
+/**
  * Turn a compiled view into a renderable architecture document.
  *
  * @param {object} view the view IR from `compile`
@@ -290,9 +353,15 @@ export function viewToDocument(view, options = {}) {
     .filter((edge) => edge && idOf.has(edge.from) && idOf.has(edge.to));
   // Only the layered placement stacks a whole depth into one column; the
   // physical solver spreads nodes freely and has no columns to route around.
+  // Two axes, one map. A column-mate detour and a skip-level detour can never
+  // apply to the same edge -- one requires equal x, the other requires
+  // different x -- so merging cannot silently drop a route.
   const detours = options.solver
     ? new Map()
-    : sameColumnDetours(drawnEdges, solved.positions, size, 120);
+    : new Map([
+      ...sameColumnDetours(drawnEdges, solved.positions, size, 120),
+      ...skipLevelDetours(drawnEdges, solved.positions, size),
+    ]);
   const connections = drawnEdges.map((edge, index) => ({
     from: idOf.get(edge.from),
     to: idOf.get(edge.to),

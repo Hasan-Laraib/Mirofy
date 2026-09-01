@@ -1,6 +1,6 @@
 {
   "name": "mirofy-cli",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Diagrams of your system that cite their sources - and say what they could not see. Five diagram types, validated, rendered to one self-contained HTML file. Installs the `mirofy` command.",
   "license": "MIT",

@@ -19,7 +19,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { deriveFromGraph, packageIndex, moduleIndex, ownerOf, classifyTarget } from '../../model/src/derive.mjs';
-import { viewToDocument, schemaTypeFor, safeId, layeredPositions, sameColumnDetours } from '../../layout/src/document.mjs';
+import { viewToDocument, schemaTypeFor, safeId, layeredPositions, sameColumnDetours, skipLevelDetours } from '../../layout/src/document.mjs';
 
 /** Two packages, one importing the other, plus a builtin and an external. */
 function graph() {
@@ -424,4 +424,40 @@ test('the layered layout emits a document its own renderer accepts', () => {
   for (const [x] of crossing.via) {
     assert.ok(x < columnX, `the detour runs at x ${x}, inside the ${columnX} column`);
   }
+});
+
+test('[1.20] an edge that skips a column routes around what sits in it', () => {
+  // A imports B, A imports C, B imports C -- the commonest three-module shape
+  // there is. Layered, that is three boxes in one row, and the A-to-C edge runs
+  // straight through B. Clean Flow rejects it, correctly, so `mirofy map`
+  // failed outright on an ordinary small repository.
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [80, 100], b: [380, 100], c: [680, 100] };
+  const size = /** @type {[number, number]} */ ([180, 60]);
+  const detours = skipLevelDetours([{ from: 'a', to: 'c' }], positions, size);
+  const route = detours.get(0);
+  assert.ok(route, 'the skip-level edge was left to run through the node between its ends');
+  assert.equal(route.fromSide, 'bottom');
+  assert.equal(route.toSide, 'bottom');
+  // The channel clears the bottom of every box, so it cannot re-enter a row.
+  const lowest = 100 + size[1];
+  for (const [, y] of route.via) assert.ok(y > lowest, `waypoint at ${y} is not below ${lowest}`);
+});
+
+test('[1.20] a skip-level edge over an empty column is left straight', () => {
+  // Bending an edge that crosses nothing is decoration, and decoration in a
+  // layout engine is a lie about what was in the way.
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [80, 100], c: [680, 100], b: [380, 400] };
+  const detours = skipLevelDetours([{ from: 'a', to: 'c' }], positions,
+    /** @type {[number, number]} */ ([180, 60]));
+  assert.equal(detours.size, 0, 'nothing sits between a and c on their row, so nothing to route around');
+});
+
+test('[1.20] adjacent columns are never detoured', () => {
+  /** @type {Record<string, [number, number]>} */
+  const positions = { a: [80, 100], b: [380, 100] };
+  const detours = skipLevelDetours([{ from: 'a', to: 'b' }], positions,
+    /** @type {[number, number]} */ ([180, 60]));
+  assert.equal(detours.size, 0);
 });
