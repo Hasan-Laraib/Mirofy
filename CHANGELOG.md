@@ -15,6 +15,25 @@ stops being one.
 
 ## 2026-09-01
 
+### The hero follows the reader's theme
+
+It is captured twice now -- once in each of the viewer's themes, through the
+viewer's own theme button rather than by forcing an attribute, so a screenshot
+of a theme nobody can actually reach would fail instead of shipping. The README
+serves them with `<picture>` and `prefers-color-scheme`, which is what the logo
+at the top has always done, so a reader in dark mode stops having a white slab
+dropped into their page and a reader in light mode stops having a dark one.
+
+Only the hero. The four capability captures stay light, and not to save bytes:
+they sit at about half width inside a table, and small dark thumbnails lose the
+fine text -- the passport's file path and the trace's hop count -- that is the
+entire reason those frames are there.
+
+`check:readme` now reads `srcset` as well as `src`. A `<picture>` source
+pointing at a missing file fails silently for exactly the readers it was added
+for, and unlike a broken `<img>` it leaves no alt text behind either. A renamed
+file and a one-letter `srcset` typo were both planted.
+
 ### check:size was blind to the change most likely to break it
 
 The five screenshots took the tree to 6.1 MB against a 6 MB budget. The gate

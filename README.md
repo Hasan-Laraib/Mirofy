@@ -17,7 +17,12 @@
 </p>
 
 <p align="center">
-  <a href="https://hasan-laraib.github.io/Mirofy/gallery/architecture--classic.html"><img src="assets/viewer-hero.png" alt="A rendered Mirofy artifact open in a browser: ten services coloured by role, grouped inside an AWS region and a security group, with a legend naming each role" width="880"></a>
+  <a href="https://hasan-laraib.github.io/Mirofy/gallery/architecture--classic.html">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/viewer-hero-dark.png">
+      <img src="assets/viewer-hero.png" alt="A rendered Mirofy artifact open in a browser: ten services coloured by role, grouped inside an AWS region and a security group, with a legend naming each role" width="880">
+    </picture>
+  </a>
 </p>
 
 <p align="center">

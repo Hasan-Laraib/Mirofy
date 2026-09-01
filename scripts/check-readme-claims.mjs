@@ -254,7 +254,13 @@ svgFigure('pipeline.svg: named', /· ([\d,]+) named</, components - drawn);
 // Every picture the README points at has to be there. A renamed or regenerated
 // asset leaves a broken image on the project's front page, which is both the
 // most visible possible defect and the one nothing was watching for.
-const referenced = [...new Set([...readme.matchAll(/src="(assets\/[^"]+)"/g)].map((m) => m[1]))];
+// srcset as well as src: a <picture> source that points at a missing file
+// fails silently for exactly the readers it was added for, and unlike a broken
+// <img> it does not even leave alt text behind.
+const referenced = [...new Set([
+  ...[...readme.matchAll(/src="(assets\/[^"]+)"/g)].map((m) => m[1]),
+  ...[...readme.matchAll(/srcset="(assets\/[^"]+)"/g)].map((m) => m[1]),
+])];
 const brokenImages = referenced.filter((rel) => !fs.existsSync(path.join(repoRoot, rel)));
 assertThat(
   'every image the README points at exists',
@@ -264,7 +270,7 @@ assertThat(
 );
 // The captures are a set: build-screenshots.mjs writes all five in one run, so
 // a missing one means somebody committed a partial run.
-const captures = ['hero', 'search', 'passport', 'trace', 'lens']
+const captures = ['hero', 'hero-dark', 'search', 'passport', 'trace', 'lens']
   .map((name) => `assets/viewer-${name}.png`);
 const missingCaptures = captures.filter((rel) => !fs.existsSync(path.join(repoRoot, rel)));
 assertThat(
