@@ -66,6 +66,25 @@ It now leads with how it was actually invoked: `node packages/core/bin/mirofy.mj
 render …` from a checkout, `mirofy render …` once installed. Neither is a guess
 about the reader's shell; both are what happened.
 
+### Trusted publishing, and a token that would have silently undone it
+
+Releases now authenticate with the OIDC token GitHub mints for the publish
+workflow. No long-lived credential exists to leak or rotate.
+
+The publish step still passed `NODE_AUTH_TOKEN` from a secret, left from before.
+It was harmless only because the secret was never created — and it was a trap:
+**npm prefers a token when one is present.** Adding an `NPM_TOKEN` for any
+reason would have quietly replaced OIDC with exactly the kind of long-lived
+credential trusted publishing exists to avoid, and provenance would have stopped
+appearing with no error to notice. It is gone.
+
+Package publishing access is *2FA or automation tokens* — a second factor when a
+person publishes, and CI still able to run. Requiring 2FA for **every** publish
+would demand an interactive prompt from a runner, which nothing can answer.
+
+`0.1.0` carries no provenance attestation and never will: it was published from
+a laptop, and only a runner can prove its identity to npm. The next release will.
+
 ### Published — `mirofy-cli@0.1.0`
 
 ```

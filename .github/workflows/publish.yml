@@ -15,10 +15,17 @@ name: Publish
 #      way to configure a trusted publisher for a package that does not exist
 #      yet, so the first release always goes up manually.
 #
-#   2. On npmjs.com → the package → Settings → Trusted Publisher, add:
+#   2. DONE -- trusted publishing configured on npmjs.com:
 #        Organization or user:  Hasan-Laraib
 #        Repository:            Mirofy
 #        Workflow filename:     publish.yml
+#        Environment:           (blank -- this job declares none, and a value
+#                                here would make every OIDC claim fail to match)
+#
+#      Package publishing access is set to "2FA or automation tokens", which
+#      requires a second factor when a person publishes and still lets this
+#      workflow run. Requiring 2FA for EVERY publish would demand an interactive
+#      prompt from a runner, which nothing can answer.
 #
 # After that there is no npm token anywhere: the job proves who it is with a
 # short-lived OIDC token GitHub mints for this workflow, and nothing long-lived
@@ -93,9 +100,17 @@ jobs:
       # it into a clean directory to check it actually renders. It is slow on
       # purpose: npm allows an unpublish for 72 hours and then the version
       # number is spent forever.
+      # NO TOKEN, deliberately. This step used to pass NODE_AUTH_TOKEN from a
+      # secret, left over from before trusted publishing existed here. It was
+      # harmless only because the secret was never created -- and it was a trap:
+      # npm prefers a token when one is present, so adding an NPM_TOKEN secret
+      # for any reason would have silently replaced OIDC with the exact kind of
+      # long-lived credential trusted publishing was set up to avoid, and
+      # provenance would have stopped appearing with no error to notice.
+      #
+      # Authentication comes from the OIDC token GitHub mints for this workflow.
+      # If that is misconfigured this step fails loudly, which is the point.
       - name: Publish
         if: steps.already.outputs.published == 'false'
         run: npm publish --provenance --access public
         working-directory: packages/core
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
