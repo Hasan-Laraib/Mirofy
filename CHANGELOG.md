@@ -15,6 +15,22 @@ stops being one.
 
 ## 2026-09-01
 
+### A detour that dodged one node by crossing another
+
+Both routers picked their channel by arithmetic and checked only that it stayed
+on the canvas. So a detour could avoid its column-mates by running straight
+through a node sitting in the gap -- trading one Clean Flow violation for a less
+predictable one. A seven-module Python repository hit it on the first try.
+
+They now step outward until the channel is CLEAR, and leave the edge straight
+when nothing clear exists, so the gate reports it rather than the router moving
+it somewhere equally wrong. The skip-level router checks its two drops into the
+channel as well, not just the horizontal run between them.
+
+The test for it took three attempts, and each failure was the fixture rather
+than the code: two column-mates in adjacent rows need no detour at all, and a
+blocker as wide as the gap correctly produces none.
+
 ### A gate that reddened at random
 
 generate-validators.test.mjs deliberately creates a temp directory inside

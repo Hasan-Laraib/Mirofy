@@ -461,3 +461,28 @@ test('[1.20] adjacent columns are never detoured', () => {
     /** @type {[number, number]} */ ([180, 60]));
   assert.equal(detours.size, 0);
 });
+
+test('[1.20] a detour never routes through another node', () => {
+  // The routers picked a channel by arithmetic and checked only that it stayed
+  // on the canvas, so a detour could dodge its column-mates by running straight
+  // through a node sitting in the gap -- trading one Clean Flow violation for a
+  // less predictable one. Found by mapping a seven-module Python repository.
+  const size = /** @type {[number, number]} */ ([80, 40]);
+  /** @type {Record<string, [number, number]>} */
+  const positions = {
+    a: [300, 100],
+    // A column-mate between them: two ADJACENT rows run straight and need no
+    // detour at all, which is what the first version of this fixture measured.
+    middle: [300, 200],
+    b: [300, 300],
+    // Sits across the first two candidate channels (32px and 58px out) and
+    // clear of the third, so a correct router has somewhere to go and an
+    // arithmetic-only one lands inside it.
+    blocker: [240, 180],
+  };
+  const route = sameColumnDetours([{ from: 'a', to: 'b' }], positions, size, 200).get(0);
+  assert.ok(route, 'a same-column edge spanning two rows still needs a route around its column');
+  const channelX = route.via[0][0];
+  const clear = channelX + 6 < 240 || channelX - 6 > 240 + size[0];
+  assert.ok(clear, `channel at x=${channelX} runs through the node spanning 240..${240 + size[0]}`);
+});

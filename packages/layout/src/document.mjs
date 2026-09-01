@@ -141,6 +141,36 @@ export function layeredPositions(view, { size = [180, 60], margin = 80, gapX = 1
 }
 
 /**
+ * Does a straight segment pass through any node box, other than its own ends?
+ *
+ * A detour that dodges one node by crossing another has not solved anything --
+ * it has moved the Clean Flow violation somewhere the author is less likely to
+ * predict. Both routers picked a channel by arithmetic alone and checked only
+ * that it stayed on the canvas.
+ *
+ * @param {[number, number]} from
+ * @param {[number, number]} to
+ * @param {Array<[string, [number, number]]>} boxes
+ * @param {[number, number]} size
+ * @param {string[]} ignore ids the segment is allowed to touch: its own ends
+ */
+function segmentIsClear(from, to, boxes, size, ignore) {
+  const [width, height] = size;
+  const left = Math.min(from[0], to[0]);
+  const right = Math.max(from[0], to[0]);
+  const top = Math.min(from[1], to[1]);
+  const bottom = Math.max(from[1], to[1]);
+  const CLEARANCE = 6;
+  for (const [id, [x, y]] of boxes) {
+    if (ignore.includes(id)) continue;
+    if (x + width + CLEARANCE < left || x - CLEARANCE > right) continue;
+    if (y + height + CLEARANCE < top || y - CLEARANCE > bottom) continue;
+    return false;
+  }
+  return true;
+}
+
+/**
  * Routes for edges whose endpoints sit in the same column.
  *
  * A layered layout puts every node of one depth in one vertical column, and a
@@ -200,22 +230,27 @@ export function sameColumnDetours(edges, positions, size, gapX) {
     // layered layout reads left to right, so the outbound side is the one a
     // reader is not already following.
     const columnLeft = from[0];
-    const offset = 32 + (channel % 3) * 26;
-    const channelX = columnLeft - offset;
+    const boxes = Object.entries(positions);
+    // Step outward until the channel is CLEAR, not merely on the canvas. The
+    // old arithmetic picked an offset and checked the canvas only, so a
+    // detour could dodge its column-mates by running straight through a node
+    // in the gap -- trading one Clean Flow violation for a less predictable
+    // one.
+    let placed = null;
+    for (let step = 0; step < 6; step += 1) {
+      const offset = 32 + ((channel + step) % 6) * 26;
+      const channelX = columnLeft - offset;
+      if (channelX <= 8 || offset >= gapX - 8) break;
+      const a = /** @type {[number, number]} */ ([channelX, from[1] + height / 2]);
+      const b = /** @type {[number, number]} */ ([channelX, to[1] + height / 2]);
+      if (segmentIsClear(a, b, boxes, size, [edge.from, edge.to])) { placed = [a, b]; break; }
+    }
     channel += 1;
-    // Nothing to route into: the channel would land off the canvas, or on top
-    // of the previous column. Left straight, and reported by the gate rather
-    // than moved somewhere equally wrong.
-    if (channelX <= 8 || offset >= gapX - 8) continue;
+    // Nothing clear to route into. Left straight, and reported by the gate
+    // rather than moved somewhere equally wrong.
+    if (!placed) continue;
 
-    detours.set(index, {
-      fromSide: 'left',
-      toSide: 'left',
-      via: [
-        [channelX, from[1] + height / 2],
-        [channelX, to[1] + height / 2],
-      ],
-    });
+    detours.set(index, { fromSide: 'left', toSide: 'left', via: placed });
   }
   return detours;
 }
@@ -268,17 +303,21 @@ export function skipLevelDetours(edges, positions, size) {
       && x > left && x < right && y < bottom && y + height > top);
     if (!blocked) continue;
 
-    const offset = 34 + (channel % 3) * 24;
+    // The horizontal run is below every box by construction, but the two drops
+    // into it are not: a node directly beneath either end would be crossed.
+    let placed = null;
+    for (let step = 0; step < 4; step += 1) {
+      const channelY = lowest + 34 + ((channel + step) % 4) * 24;
+      const a = /** @type {[number, number]} */ ([from[0] + width / 2, channelY]);
+      const b = /** @type {[number, number]} */ ([to[0] + width / 2, channelY]);
+      const clear = segmentIsClear([from[0] + width / 2, from[1] + height], a, entries, size, [edge.from, edge.to])
+        && segmentIsClear([to[0] + width / 2, to[1] + height], b, entries, size, [edge.from, edge.to])
+        && segmentIsClear(a, b, entries, size, [edge.from, edge.to]);
+      if (clear) { placed = [a, b]; break; }
+    }
     channel += 1;
-    const channelY = lowest + offset;
-    detours.set(index, {
-      fromSide: 'bottom',
-      toSide: 'bottom',
-      via: [
-        [from[0] + width / 2, channelY],
-        [to[0] + width / 2, channelY],
-      ],
-    });
+    if (!placed) continue;
+    detours.set(index, { fromSide: 'bottom', toSide: 'bottom', via: placed });
   }
   return detours;
 }
