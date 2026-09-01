@@ -7,11 +7,18 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { compileView } from '../src/compile.mjs';
 import { DEFAULT_BUDGET } from '../src/request.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+// The repository being worked on is the CURRENT DIRECTORY, not wherever this
+// script happens to live. Deriving it from import.meta.url meant that pointing
+// Mirofy at somebody else's repository half-worked and was worse than failing:
+// scan.mjs already honoured cwd, so it wrote an evidence graph into their repo,
+// and then this step read and wrote inside the MIROFY CHECKOUT -- silently
+// overwriting Mirofy's own scan output and leaving the target repo with no
+// diagram at all. `--root` overrides it for anyone who needs to.
+const rootFlag = process.argv.indexOf('--root');
+const repoRoot = path.resolve(rootFlag === -1 ? process.cwd() : process.argv[rootFlag + 1]);
 
 const args = { model: path.join(repoRoot, 'scan', 'model.json'), type: 'architecture', scope: 'system', budget: DEFAULT_BUDGET, out: null };
 const argv = process.argv.slice(2);

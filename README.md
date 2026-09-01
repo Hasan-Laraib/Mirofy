@@ -75,11 +75,16 @@ by hand:
 **Nothing to install** — one command, and a diagram opens:
 
 ```bash
+npx mirofy-cli map .    # YOUR repository, mapped, in one command
 npx mirofy-cli demo     # a finished artifact, to see what this produces
 npx mirofy-cli init     # a starter document of your own to edit
-npx mirofy-cli validate architecture architecture.json
 npx mirofy-cli render architecture architecture.json
 ```
+
+`map` runs the whole pipeline in the directory you point it at — scan, model,
+compile, layout, render — and writes `architecture.html` next to your code. It
+works on a repository that declares no workspaces: where there are no packages
+to draw, it models the **source directories** and the imports between them.
 
 `npx mirofy-cli guide "show an API request with a cache miss"` picks the
 diagram type for you if you are not sure which one you want.
@@ -121,7 +126,10 @@ Nothing is downloaded at runtime and nothing phones home — there is no update
 check, because a tool that reaches the network to tell you about itself is a
 tool that reaches the network.
 
-## Try it in five commands
+## The pipeline, one step at a time
+
+`mirofy map` is these five steps in order. Run them yourself when you want to
+keep an intermediate, or point a step somewhere else:
 
 ```bash
 npm run scan                    # repository  → evidence graph

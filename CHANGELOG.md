@@ -15,6 +15,60 @@ stops being one.
 
 ## 2026-09-01
 
+### `mirofy map .` -- the README's first sentence, finally true
+
+Pointing Mirofy at somebody else's repository did not work, and failed in the
+worst possible way. `scan.mjs` honoured the current directory; `model`,
+`compile` and `layout` derived their root from `import.meta.url` -- where the
+script file lives. So a scan wrote an evidence graph into the target repository
+and every step after it read and wrote inside the MIROFY CHECKOUT, silently
+overwriting Mirofy's own scan output and leaving the target with no diagram at
+all. All three now resolve the repository from the current directory, with
+`--root` to override.
+
+That exposed a second, larger problem. Components came only from
+`contains-package` facts, which exist only where a root manifest declares
+workspaces. A repository with no workspaces -- which is most of them -- derived
+zero components: every import landed as "outside any package" and the diagram
+came out empty. The tool working exactly as built, and useless.
+
+`moduleIndex` closes it. Where a repository declares no packages, or exactly
+one, components are the source directories, read off dependency facts already
+in the graph. Nothing new is scanned and nothing is guessed -- and a module is
+labelled `statically-derived`, never `config-derived`, because a directory
+inferred from import statements is not configuration. Two or more declared
+packages keep package granularity, which is what protects this repository's own
+model and all thirty golden digests from the fallback.
+
+And `mirofy map [dir]` runs the five steps in order, because telling a newcomer
+to run five commands with a `--from-graph` flag in the middle is telling them
+not to bother. An empty result is reported as an empty result, with a pointer
+to the coverage report, rather than rendered as a blank page and called a
+success.
+
+### The pipeline ships now, and the scanner reads .gitignore
+
+`mirofy-cli` publishes packages/core and nothing else, so everything that maps a
+repository lived in packages the registry never saw. `scripts/build-pipeline.mjs`
+copies scanner, model, compile, layout and evidence into
+`packages/core/pipeline/` -- git-ignored, one source of truth, still zero runtime
+dependencies -- and proves the copy by running it against a throwaway repository
+before it is allowed to ship. Separate packages would have meant core depending
+on them, and zero dependencies is conformance row 6.9, not a preference.
+
+Doing that immediately broke the numbers: the generated copy was scanned as if
+somebody had written it, which added a component and an edge that exist nowhere
+in the repository -- and only on a machine that had run the build. CI, without
+that directory, derived different numbers from the same commit.
+
+So the scanner asks git. A hard-coded skip list cannot answer this: it skips
+`dist` and `build` by NAME, which both over-reaches -- a repository with real
+source in `build/` loses it silently, the exact omission this scanner exists to
+refuse -- and under-reaches, because generated directories with any other name
+are read as source. If git cannot answer, nothing is ignored: "I could not
+check" must never quietly become "there was nothing there". Both halves are
+planted.
+
 ### The pipeline graphic has colour you can actually see, and a pop
 
 Its lit fills were 2-4% tints -- `#f4f8ff` and friends, white with a rumour of

@@ -27,6 +27,7 @@
     "check:template": "node scripts/check-template.mjs",
     "gallery": "node scripts/gallery.mjs",
     "build:site": "node scripts/build-site.mjs",
+    "build:pipeline": "node scripts/build-pipeline.mjs",
     "build:hero": "node scripts/build-hero.mjs",
     "build:screenshots": "node scripts/build-screenshots.mjs",
     "build:skill": "node scripts/build-skill.mjs",

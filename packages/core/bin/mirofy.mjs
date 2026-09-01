@@ -40,6 +40,7 @@ const SELF = invokedAs();
 
 function usage() {
   return `Usage:
+  ${SELF} map [directory] [output.html]        map a repository end to end
   ${SELF} render <type> <input.json> [output.html] [--quality standard|showcase] [--repo-root path]
   ${SELF} compare architecture <base.json> <head.json> [output.html] [--receipt path] [--json] [--quality standard|showcase] [--repo-root path]
   ${SELF} deliver <type> <input.json> [output.html] [--json] [--open] [--quality standard|showcase] [--repo-root path]
@@ -1976,12 +1977,84 @@ async function validateDocumentQuietly(type, filePath) {
   }
 }
 
+// `mirofy map [dir]` -- the README's first sentence, as one command.
+//
+// scan -> model -> compile -> layout -> render, in the directory you point it
+// at. Each step already runs standalone; this exists because asking a newcomer
+// to run five commands with a --from-graph flag in the middle is asking them
+// to not bother.
+//
+// The pipeline lives in two places for one reason: packages/core/pipeline is
+// the copy that ships (see scripts/build-pipeline.mjs), and packages/<name> is
+// the source of truth used from a checkout. Whichever is present wins; if
+// neither is, that is said plainly rather than surfaced as a missing file.
+function pipelineStep(name) {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    path.join(here, '..', 'pipeline', name),       // published tarball
+    path.join(here, '..', '..', name),             // workspace checkout
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+function commandMap(argv) {
+  const flags = new Set(argv.filter((value) => value.startsWith('--')));
+  const positional = argv.filter((value) => !value.startsWith('--'));
+  const target = path.resolve(positional[0] ?? '.');
+  if (!fs.existsSync(target)) fail(`No such directory: ${target}`);
+
+  const steps = [
+    ['scanner/bin/scan.mjs', []],
+    ['model/bin/model.mjs', ['--from-graph', '--graph', path.join(target, 'scan', 'evidence-graph.json')]],
+    ['compile/bin/compile.mjs', []],
+    ['layout/bin/layout.mjs', []],
+  ];
+  for (const [rel, extra] of steps) {
+    const script = pipelineStep(rel);
+    if (!script) {
+      fail(`This build has no ${rel.split('/')[0]} step.
+
+`
+        + `Run it from a checkout, or reinstall mirofy-cli -- the published package `
+        + `carries the pipeline under core/pipeline/.`);
+    }
+    const step = spawnSync(process.execPath, [script, ...extra, '--root', target],
+      { cwd: target, stdio: flags.has('--quiet') ? 'ignore' : 'inherit' });
+    if (step.status !== 0) {
+      fail(`mirofy map failed at ${rel.split('/')[0]}. The step above printed why.`);
+    }
+  }
+
+  const diagram = path.join(target, 'scan', 'diagram.json');
+  if (!fs.existsSync(diagram)) fail(`The pipeline produced no diagram at ${diagram}.`);
+  const view = JSON.parse(fs.readFileSync(path.join(target, 'scan', 'view.json'), 'utf8'));
+  const drawn = (view.components ?? view.nodes ?? []).length;
+  if (!drawn) {
+    // An empty diagram is a real answer about a repository, and saying so is
+    // better than rendering a blank page and calling it a success.
+    fail(['Nothing to draw: no dependencies between source directories were found.',
+      `Look at ${path.join(target, 'scan', 'coverage.md')} for what was read and what was not.`,
+    ].join(String.fromCharCode(10)));
+  }
+
+  const output = path.resolve(positional[1] ?? path.join(target, 'architecture.html'));
+  commandRender(['architecture', diagram, output, '--repo-root', target]);
+  console.log(`
+mirofy map: ${drawn} component(s) -> ${output}`);
+}
+
 switch (command) {
   case undefined:
   case '-h':
   case '--help':
   case 'help':
     console.log(usage());
+    break;
+  case 'map':
+    commandMap(args);
     break;
   case 'render':
     commandRender(args);

@@ -16,7 +16,7 @@
     "check:brand-marks": "node scripts/generate-brand-marks.mjs --check",
     "generate:validators": "node scripts/generate-validators.mjs",
     "check:validators": "node scripts/generate-validators.mjs --check",
-    "prepublishOnly": "node ../../scripts/prepublish-guard.mjs"
+    "prepublishOnly": "node ../../scripts/build-pipeline.mjs && node ../../scripts/prepublish-guard.mjs"
   },
   "devDependencies": {
     "ajv": "^8.17.1",
@@ -63,6 +63,7 @@
     "README.md",
     "LICENSE",
     "bin",
+    "pipeline",
     "renderers",
     "schemas",
     "assets",

@@ -56,6 +56,38 @@ export function packageIndex(facts) {
   return packages;
 }
 
+/**
+ * Where each source MODULE lives, longest directory first.
+ *
+ * A repository that declares no workspaces has no `contains-package` facts at
+ * all, so every import edge lands as "outside any package" and the model
+ * derives nothing. That is most repositories, and it made "point Mirofy at a
+ * repository" produce an empty diagram for them -- the tool working exactly as
+ * built and being useless.
+ *
+ * At that granularity the useful unit is the source directory, which is already
+ * in the evidence: every dependency fact cites the file it came from. Nothing
+ * new is scanned and nothing is guessed -- the directories are read off facts
+ * the graph already holds.
+ */
+export function moduleIndex(facts) {
+  const dirs = new Map();
+  for (const fact of facts) {
+    if (fact.predicate !== 'depends-on') continue;
+    const from = fact.location?.path;
+    if (!from) continue;
+    const cut = from.lastIndexOf('/');
+    // A file sitting at the repository root belongs to no directory, and
+    // inventing one for it would be drawing something nobody wrote.
+    if (cut === -1) continue;
+    const dir = from.slice(0, cut);
+    if (!dirs.has(dir)) dirs.set(dir, from);
+  }
+  return [...dirs.entries()]
+    .map(([dir, file]) => ({ name: dir, dir: `${dir}/`, manifest: file }))
+    .sort((a, b) => b.dir.length - a.dir.length);
+}
+
 /** The package that owns a path, or null when nothing does. */
 export function ownerOf(filePath, packages) {
   const text = String(filePath ?? '');
@@ -82,7 +114,13 @@ export function classifyTarget(object) {
  */
 export function deriveFromGraph(graph, { includeExternal = true } = {}) {
   const facts = factsOf(graph);
-  const packages = packageIndex(facts);
+  const declared = packageIndex(facts);
+  // One package is the same problem as none: the whole repository collapses to a
+  // single node with every edge suppressed as internal. Both fall back to
+  // modules. A workspace with two or more packages keeps package granularity,
+  // so this repository's own model -- and every golden digest -- is untouched.
+  const byModule = declared.length <= 1;
+  const packages = byModule ? moduleIndex(facts) : declared;
 
   /** @type {Map<string, object>} */
   const components = new Map();
@@ -90,13 +128,19 @@ export function deriveFromGraph(graph, { includeExternal = true } = {}) {
     components.set(entry.name, {
       id: entry.name,
       authoredId: false,
-      kind: 'package',
-      labels: [entry.name.replace(/^@[^/]+\//, '')],
-      // The manifest IS the evidence. A component here can always be checked.
+      kind: byModule ? 'module' : 'package',
+      labels: [byModule
+        ? entry.name.slice(entry.name.lastIndexOf('/') + 1)
+        : entry.name.replace(/^@[^/]+\//, '')],
+      // The evidence is the manifest for a package, and a real file inside it
+      // for a module. Either way a component here can be checked, never taken
+      // on trust.
       sources: [{ path: entry.manifest }],
       evidenceRefs: [{ path: entry.manifest }],
-      provenance: 'config-derived',
-      metadata: { packageName: entry.name },
+      // A manifest is configuration; a directory read off import statements is
+      // not. Labelling a module config-derived would overstate what is known.
+      provenance: byModule ? 'statically-derived' : 'config-derived',
+      metadata: byModule ? { modulePath: entry.name } : { packageName: entry.name },
     });
   }
 

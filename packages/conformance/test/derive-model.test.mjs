@@ -18,7 +18,7 @@
 // imports of node:fs -- the answer is recorded rather than guessed.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveFromGraph, packageIndex, ownerOf, classifyTarget } from '../../model/src/derive.mjs';
+import { deriveFromGraph, packageIndex, moduleIndex, ownerOf, classifyTarget } from '../../model/src/derive.mjs';
 import { viewToDocument, schemaTypeFor, safeId, layeredPositions, sameColumnDetours } from '../../layout/src/document.mjs';
 
 /** Two packages, one importing the other, plus a builtin and an external. */
@@ -58,6 +58,64 @@ function graph() {
     gaps: [],
   };
 }
+
+/** A repository that declares no workspaces at all: no manifest facts, just
+ *  imports between files in two source directories. This is the shape of most
+ *  repositories, and the shape that used to model to nothing. */
+function flatGraph() {
+  return {
+    schemaVersion: 1,
+    facts: [
+      {
+        subject: 'src/api/server.mjs', predicate: 'depends-on', object: 'src/db/pool.mjs',
+        provenance: 'statically-derived', location: { path: 'src/api/server.mjs', lines: [2, 2] },
+      },
+      {
+        subject: 'src/api/server.mjs', predicate: 'depends-on', object: 'src/api/cache.mjs',
+        provenance: 'statically-derived', location: { path: 'src/api/server.mjs', lines: [3, 3] },
+      },
+      {
+        subject: 'src/db/pool.mjs', predicate: 'depends-on', object: 'package:node:process',
+        provenance: 'statically-derived', location: { path: 'src/db/pool.mjs', lines: [1, 1] },
+      },
+    ],
+    gaps: [],
+  };
+}
+
+test('[1.19] a repository with no workspaces models its source directories, not nothing', () => {
+  const { components, relationships, notModelled } = deriveFromGraph(flatGraph());
+  const ids = components.filter((c) => c.kind === 'module').map((c) => c.id).sort();
+  assert.deepEqual(ids, ['src/api', 'src/db'],
+    'a repo that declares no packages derived no components at all, which is most repositories');
+  const edge = relationships.find((r) => r.from === 'src/api' && r.to === 'src/db');
+  assert.ok(edge, 'the import from src/api into src/db is an edge between two modules');
+  assert.equal(edge.evidenceRefs[0].path, 'src/api/server.mjs',
+    'the edge cites the file it was read from');
+  // The import inside src/api is the inside of one module, not an edge.
+  assert.ok(!relationships.some((r) => r.from === 'src/api' && r.to === 'src/api'));
+  assert.ok(!notModelled.some((n) => /outside any package/.test(n.reason ?? '')),
+    'every edge found an owner, so nothing should be reported as unattributable');
+});
+
+test('[1.19] a module is statically-derived, never labelled config-derived like a package', () => {
+  const { components } = deriveFromGraph(flatGraph());
+  const api = components.find((c) => c.id === 'src/api');
+  assert.equal(api.kind, 'module');
+  assert.equal(api.provenance, 'statically-derived',
+    'a directory read off import statements is not configuration and must not claim to be');
+  assert.equal(api.labels[0], 'api', 'the label is the directory name, not the whole path');
+});
+
+test('[1.19] a real workspace keeps package granularity and never falls back to directories', () => {
+  const { components } = deriveFromGraph(graph());
+  assert.ok(components.some((c) => c.id === '@acme/api' && c.kind === 'package'));
+  assert.ok(!components.some((c) => c.kind === 'module'),
+    'two or more declared packages must keep package granularity -- this is what protects '
+    + 'the model of this repository, and every golden digest, from the fallback');
+  assert.equal(moduleIndex(graph().facts).length > 0, true,
+    'moduleIndex still computes; it is simply not the one used here');
+});
 
 test('[1.19] components come out of the scan, each citing its manifest', () => {
   const derived = deriveFromGraph(graph());

@@ -8,18 +8,28 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { EvidenceGraph } from '../../evidence/src/graph.mjs';
 import { buildModel } from '../src/model.mjs';
 import { deriveFromGraph } from '../src/derive.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+// The repository being worked on is the CURRENT DIRECTORY, not wherever this
+// script happens to live. Deriving it from import.meta.url meant that pointing
+// Mirofy at somebody else's repository half-worked and was worse than failing:
+// scan.mjs already honoured cwd, so it wrote an evidence graph into their repo,
+// and then this step read and wrote inside the MIROFY CHECKOUT -- silently
+// overwriting Mirofy's own scan output and leaving the target repo with no
+// diagram at all. `--root` overrides it for anyone who needs to.
+const rootFlag = process.argv.indexOf('--root');
+const repoRoot = path.resolve(rootFlag === -1 ? process.cwd() : process.argv[rootFlag + 1]);
 
 function parseArgs(argv) {
   const args = { documents: [], graph: null, overrides: null, fromGraph: false, out: path.join(repoRoot, 'scan', 'model.json') };
   for (let i = 0; i < argv.length; i += 1) {
     const flag = argv[i];
     if (flag === '--from-graph') { args.fromGraph = true; continue; }
+    // --root is read before parsing, but its VALUE is a bare path and would
+    // otherwise be collected as a document to model.
+    if (flag === '--root') { i += 1; continue; }
     if (flag === '--graph' || flag === '--overrides' || flag === '--out') {
       const key = flag.slice(2);
       args[key] = argv[i + 1];

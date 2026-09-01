@@ -17,6 +17,7 @@
 // or TypeScript type-only re-export edge cases beyond `export ... from`.
 // Files this extractor cannot read at all become Gaps.
 
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { posixPath } from '../adapter.mjs';
@@ -24,17 +25,59 @@ import { posixPath } from '../adapter.mjs';
 export const SOURCE_EXTENSIONS = Object.freeze(['.js', '.mjs', '.cjs', '.jsx', '.ts', '.mts', '.cts', '.tsx']);
 const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', 'preview', 'scan']);
 
-function* walk(root, rel = '') {
+/**
+ * Which of these paths git is ignoring.
+ *
+ * A hard-coded SKIP_DIRS cannot answer this. It skips `dist` and `build` by
+ * NAME, which both over-reaches -- a repository with real source in `build/`
+ * loses it silently, the exact omission this scanner exists to refuse -- and
+ * under-reaches: generated directories with any other name are read as source.
+ *
+ * That under-reach was not hypothetical here. A generated copy of this
+ * project's own pipeline under packages/core/pipeline/ was scanned as if
+ * somebody had written it, which added a component and an edge that exist
+ * nowhere in the repository, and only on the machine that had run the build --
+ * CI, with no such directory, derived different numbers from the same commit.
+ *
+ * Asking git is the honest question: a path git ignores is not source anyone
+ * wrote. One batched call, and if git cannot answer -- no repository, no git on
+ * PATH -- nothing is ignored, because "I could not check" must never quietly
+ * become "there was nothing there".
+ */
+function gitIgnored(root, relatives) {
+  if (!relatives.length) return new Set();
+  try {
+    const result = spawnSync('git', ['check-ignore', '--stdin'], {
+      cwd: root, input: relatives.join(String.fromCharCode(10)), encoding: 'utf8',
+    });
+    // 0 = some ignored, 1 = none ignored. Anything else is git failing, and a
+    // failure is not evidence that the tree is clean.
+    if (result.status !== 0 && result.status !== 1) return new Set();
+    if (result.error) return new Set();
+    return new Set(String(result.stdout || '').split(String.fromCharCode(10))
+      .map((line) => posixPath(line.trim())).filter(Boolean));
+  } catch {
+    return new Set();
+  }
+}
+
+function* walkAll(root, rel = '') {
   const entries = fs.readdirSync(path.join(root, rel), { withFileTypes: true });
   for (const entry of entries) {
     if (entry.name.startsWith('.') && entry.name !== '.') continue;
     if (entry.isDirectory()) {
       if (SKIP_DIRS.has(entry.name)) continue;
-      yield* walk(root, posixPath(path.join(rel, entry.name)));
+      yield* walkAll(root, posixPath(path.join(rel, entry.name)));
     } else if (SOURCE_EXTENSIONS.includes(path.extname(entry.name))) {
       yield posixPath(path.join(rel, entry.name));
     }
   }
+}
+
+function* walk(root, rel = '') {
+  const found = [...walkAll(root, rel)];
+  const ignored = gitIgnored(root, found);
+  for (const file of found) if (!ignored.has(file)) yield file;
 }
 
 // Blank out comments and string bodies, preserving newlines so line numbers

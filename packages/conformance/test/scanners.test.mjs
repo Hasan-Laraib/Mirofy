@@ -12,6 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 const REVISION = 'b'.repeat(40);
+const NEWLINE = String.fromCharCode(10);
 
 function makeRepo(files) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'product-scan-'));
@@ -103,6 +104,50 @@ test('[2.8] import scanner reports static, re-export, require and literal dynami
   // Exact lines: the import of ./b.js is on line 1, the dynamic import on 4.
   assert.deepEqual(edges.find((f) => f.object === 'src/b.js').location.lines, [1, 1]);
   assert.deepEqual(edges.find((f) => f.object === 'src/e.js').location.lines, [4, 4]);
+});
+
+test('[2.8] a file git ignores is generated output, not source somebody wrote', async () => {
+  const { importsAdapter } = await import('../../scanner/src/adapters/imports.mjs');
+  const { runAdapter } = await import('../../scanner/src/adapter.mjs');
+  const { execFileSync } = await import('node:child_process');
+  const repoRoot = makeRepo({
+    '.gitignore': 'generated/' + NEWLINE,
+    'src/a.js': "import { b } from '../generated/b.js';" + NEWLINE,
+    'generated/b.js': "import { c } from './c.js';" + NEWLINE + 'export const b = c;' + NEWLINE,
+    'generated/c.js': 'export const c = 1;' + NEWLINE,
+  });
+  execFileSync('git', ['init', '-q'], { cwd: repoRoot, stdio: 'ignore' });
+
+  const { facts } = await runAdapter(importsAdapter, { repoRoot, revision: REVISION });
+  const subjects = [...new Set(facts.map((fact) => fact.subject))].sort();
+
+  // The generated tree is not read: a build artefact is not architecture, and
+  // scanning it made this repository derive a component and an edge that
+  // existed only on machines that had run the build.
+  assert.ok(!subjects.some((subject) => subject.startsWith('generated/')),
+    `generated/ was scanned as source: ${subjects.join(', ')}`);
+  // But the hand-written file that POINTS at it is still read in full. Ignoring
+  // a target must not silently drop the edge that names it.
+  assert.deepEqual(subjects, ['src/a.js']);
+  assert.ok(facts.some((fact) => fact.object === 'generated/b.js'),
+    'the import into generated/ is still a recorded fact, citing where it came from');
+});
+
+test('[2.8] with no git repository at all, nothing is treated as ignored', async () => {
+  const { importsAdapter } = await import('../../scanner/src/adapters/imports.mjs');
+  const { runAdapter } = await import('../../scanner/src/adapter.mjs');
+  // No git init here, deliberately. "I could not check" must never quietly
+  // become "there was nothing there" -- that is the omission this scanner
+  // exists to refuse, arriving through the back door.
+  const repoRoot = makeRepo({
+    '.gitignore': 'generated/' + NEWLINE,
+    'src/a.js': "import { b } from '../generated/b.js';" + NEWLINE,
+    'generated/b.js': "import { c } from './c.js';" + NEWLINE + 'export const b = c;' + NEWLINE,
+    'generated/c.js': 'export const c = 1;' + NEWLINE,
+  });
+  const { facts } = await runAdapter(importsAdapter, { repoRoot, revision: REVISION });
+  assert.ok(facts.some((fact) => fact.subject === 'generated/b.js'),
+    'without git to ask, every file must still be scanned rather than assumed absent');
 });
 
 test('[2.8] a computed specifier is a Gap with the line, never a guessed fact', async () => {
