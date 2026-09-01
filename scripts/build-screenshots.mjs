@@ -121,10 +121,16 @@ function crop(file, keep) {
 function downscale(file) {
   // One line on purpose: a multi-line -c program needs newline escaping, and
   // this file has already been bitten once by an escape that collapsed.
+  // Resize, then reduce to a 256-colour palette. These are screenshots of flat
+  // UI -- solid fills, hairlines and mono text -- which is the exact content
+  // palette PNG was made for: it cuts them by about 60% with no visible change
+  // at any zoom worth looking at. Without it the five captures pushed the
+  // tracked tree to 6.1 MB against a 6 MB budget, and the honest fix for that
+  // is smaller pictures, not a bigger budget.
   const program = 'import sys;from PIL import Image;'
-    + 'im=Image.open(sys.argv[1]);w=1280;'
-    + 'im.resize((w,round(im.height*w/im.width)),Image.LANCZOS)'
-    + '.save(sys.argv[1],optimize=True)';
+    + 'im=Image.open(sys.argv[1]).convert("RGB");w=1280;'
+    + 'im=im.resize((w,round(im.height*w/im.width)),Image.LANCZOS);'
+    + 'im.quantize(colors=256,method=0).save(sys.argv[1],optimize=True)';
   try {
     execFileSync('python', ['-c', program, file], { stdio: 'ignore' });
   } catch {

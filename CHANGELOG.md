@@ -15,6 +15,21 @@ stops being one.
 
 ## 2026-09-01
 
+### check:size was blind to the change most likely to break it
+
+The five screenshots took the tree to 6.1 MB against a 6 MB budget. The gate
+passed locally and failed on every CI leg, because it counted `git ls-files` --
+what is *already* tracked -- and the new files were still untracked when it ran.
+The only way to find out was to push. That is the second gate this week with the
+same shape as the changelog one, and the same fix: ask git the question CI will
+ask. It now counts untracked, un-ignored files too, and a 700 KB plant proves it.
+
+The budget itself is unchanged. The screenshots are now reduced to a 256-colour
+palette, which is what PNG was built for on flat UI -- solid fills, hairlines,
+mono text -- and takes the five captures from 871 KB to 359 KB with no visible
+difference at any zoom worth looking at. The honest response to a budget being
+hit is smaller files, not a bigger budget.
+
 ### The hero is the artifact now, and it is in colour
 
 The top of the README was the self-model: a tall, sparse, entirely grey diagram
