@@ -72,16 +72,26 @@ export function packageIndex(facts) {
  */
 export function moduleIndex(facts) {
   const dirs = new Map();
+  // Both ENDS of every edge. Taking only the importing file missed any module
+  // that is imported and imports nothing itself -- a leaf: constants, types, a
+  // pure helper. It never became a component, so the edge pointing at it found
+  // no owner and was dropped as "outside any package": a silent omission, which
+  // is the one thing this pipeline is built to refuse. The prepublish guard
+  // caught it on a two-module repository.
+  const consider = (file) => {
+    if (!file) return;
+    const cut = String(file).lastIndexOf('/');
+    // A file at the repository root belongs to no directory, and inventing one
+    // for it would be drawing something nobody wrote.
+    if (cut === -1) return;
+    const dir = String(file).slice(0, cut);
+    if (!dirs.has(dir)) dirs.set(dir, file);
+  };
   for (const fact of facts) {
     if (fact.predicate !== 'depends-on') continue;
-    const from = fact.location?.path;
-    if (!from) continue;
-    const cut = from.lastIndexOf('/');
-    // A file sitting at the repository root belongs to no directory, and
-    // inventing one for it would be drawing something nobody wrote.
-    if (cut === -1) continue;
-    const dir = from.slice(0, cut);
-    if (!dirs.has(dir)) dirs.set(dir, from);
+    consider(fact.location?.path);
+    // `package:...` targets are the registry, not a directory in this tree.
+    if (!String(fact.object ?? '').startsWith('package:')) consider(fact.object);
   }
   return [...dirs.entries()]
     .map(([dir, file]) => ({ name: dir, dir: `${dir}/`, manifest: file }))

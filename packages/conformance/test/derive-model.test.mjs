@@ -98,6 +98,26 @@ test('[1.19] a repository with no workspaces models its source directories, not 
     'every edge found an owner, so nothing should be reported as unattributable');
 });
 
+test('[1.19] a module that imports nothing is still a component, not a dropped edge', () => {
+  // A leaf: imported by others, importing nothing itself. Constants, types, a
+  // pure helper. Taking module directories only from the IMPORTING side made it
+  // invisible, and the edge pointing at it was then discarded as unattributable
+  // -- a silent omission dressed up as a clean model.
+  const { components, relationships, notModelled } = deriveFromGraph({
+    schemaVersion: 1,
+    facts: [{
+      subject: 'src/api/routes.mjs', predicate: 'depends-on', object: 'src/store/repo.mjs',
+      provenance: 'statically-derived', location: { path: 'src/api/routes.mjs', lines: [1, 1] },
+    }],
+    gaps: [],
+  });
+  const ids = components.map((c) => c.id).sort();
+  assert.deepEqual(ids, ['src/api', 'src/store'],
+    'the imported-but-never-importing module must still be a component');
+  assert.equal(relationships.length, 1, 'and the edge into it must survive');
+  assert.ok(!notModelled.some((n) => /outside any package/.test(n.reason ?? '')));
+});
+
 test('[1.19] a module is statically-derived, never labelled config-derived like a package', () => {
   const { components } = deriveFromGraph(flatGraph());
   const api = components.find((c) => c.id === 'src/api');
