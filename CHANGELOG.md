@@ -15,6 +15,71 @@ stops being one.
 
 ## 2026-09-01
 
+### The README graphic was stating four numbers, three of them wrong
+
+`assets/pipeline.svg` said 230 files, 987 facts and 8 gaps. The repository was
+at 196, 1,089 and 10. Nobody had lied -- the figures were true when they were
+drawn -- but an SVG is not somewhere anyone thinks to look for stale numbers,
+which is exactly what makes it the good hiding place.
+
+This is the same defect `check-readme-claims.mjs` was written to kill in the
+prose, so the graphics now answer to it too: every figure in `pipeline.svg` is
+re-derived from a live scan, and `assets/evidence.svg` -- which quotes one whole
+fact as its proof that every drawn edge carries a source -- is checked against
+the evidence graph, down to the file, the line, the provenance class and the
+recorded gap it quotes. A graphic arguing "nothing is inferred silently" and
+illustrated with an invented citation would have been a small demonstration of
+the opposite.
+
+The README's own scan figures were two commits stale and inside the checker's
+tolerance, so nothing had complained. They are level again.
+
+### The artifact fetches a webfont, and the README said "no network"
+
+Writing an offline check made it fail on the first run. The viewer pulls
+JetBrains Mono from `fonts.googleapis.com`, so opening a delivered artifact also
+tells Google somebody opened it.
+
+The artifact does render completely without it -- the link is `media="print"`
+with an `onload`, so it never blocks paint, and the stack falls back to system
+monospace. But "it degrades nicely" is not "no network". Rather than write the
+check around the thing that broke it, the check now proves the stronger claim
+that is actually true: **nothing the artifact needs comes from the network.**
+Every external reference must be a font, and every font reference must be in a
+form that cannot block first paint or change what the diagram says -- a CDN
+script, a remote image, a CSS `url()`, or that same font link with its async
+attributes removed all fail it. Both were planted and both failed before this
+was believed.
+
+A second check keeps the prose and the artifact in step in *both* directions: it
+fails if the README overstates what is fetched, and fails just as loudly if the
+fetch is ever removed and the caveat is left behind.
+
+Whether to drop the webfont entirely is a visual decision, not a correctness
+one, and is left open.
+
+### Colour, motion, and a cascade that is not built from delays
+
+`pipeline.svg` now walks the logo's blue-to-violet gradient across its four
+working stages and lands on emerald for the artifact, with each connector
+drawing across its gap as the handover happens. `evidence.svg` is new: an edge
+lights, its Semantic Passport opens, four rows of the record resolve, a verified
+badge stamps, and the gap the scanner refused to guess appears underneath.
+
+Both encode the cascade in keyframe percentages rather than `animation-delay`.
+The obvious way -- one keyframe set, five delays -- is wrong: a stage still lit
+when the shared loop restarts reappears underneath the stage that should be
+alone on screen, and a mid-cycle frame showed stages 1 and 5 lit with 2, 3 and 4
+dark. Caught by screenshotting four pinned frames rather than trusting the
+markup.
+
+### The screenshots are captioned as claims now
+
+The gallery block read as a lookbook and had the same shape as the upstream
+project's. Same images, but each one now states a claim and names what proves it
+-- conformance row 4.16, conformance row 1.1, and the network check above.
+
+
 ### `bin` entries are executable, and one of them could not have run
 
 `npm ci` sets the executable bit on every declared `bin`, and git tracks that —

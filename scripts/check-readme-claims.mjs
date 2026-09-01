@@ -134,6 +134,60 @@ try {
   // time a stylesheet gained a rule, which trains people to stop reading it.
   sizeWithin('interactive artifact size', /~(\d+) KB and earns it/, htmlKb);
   sizeWithin('static SVG size', /(\d+) KB standalone SVG/, svgKb);
+
+  // The README says the artifact opens "with no server and no network". The
+  // first version of this check tested that literally and FAILED on the very
+  // first run: the viewer pulls JetBrains Mono from fonts.googleapis.com.
+  //
+  // The artifact does render completely without it -- the link is loaded with
+  // media="print" onload, so it never blocks paint, and the body stack falls
+  // back to system monospace. But "it degrades nicely" is not "no network", and
+  // a page that opens your architecture also tells Google you opened it.
+  //
+  // So this checks the guarantee that is actually true and is worth more than
+  // the flat one: NOTHING THE ARTIFACT NEEDS COMES FROM THE NETWORK. Every
+  // external reference must be a font, and every font reference must be in a
+  // form that cannot block or change what the diagram says. A CDN script, a
+  // remote image, an analytics beacon, a CSS url(), or that same font link with
+  // its async attributes dropped all fail here -- which is the difference
+  // between a real check and one written around the thing that broke it.
+  const artifact = fs.readFileSync(html, 'utf8');
+  const external = [...artifact.matchAll(/<(link|script|img|iframe)\b[^>]*>/gi)]
+    .map((match) => match[0])
+    .filter((tag) => /(?:href|src)=["'](?:https?:)?\/\//i.test(tag))
+    .concat([...artifact.matchAll(/url\(\s*["']?(?:https?:)?\/\/[^)]*\)/gi)].map((m) => m[0]))
+    .concat([...artifact.matchAll(/@import\s+(?:url\()?["']?https?:[^;]*/gi)].map((m) => m[0]));
+
+  const FONT_HOST = /fonts\.(?:googleapis|gstatic)\.com/i;
+  // A reference is harmless only if it is a font AND cannot affect first paint:
+  // a connection hint, an async stylesheet, or one behind <noscript> (and this
+  // viewer does not run without script at all).
+  const harmless = (tag) => FONT_HOST.test(tag) && (
+    /rel=["'](?:preconnect|dns-prefetch)["']/i.test(tag)
+    || (/media=["']print["']/i.test(tag) && /onload=/i.test(tag))
+    || artifact.includes(`<noscript>
+    ${tag}`)
+  );
+  const blocking = external.filter((tag) => !harmless(tag));
+  assertThat(
+    'nothing the artifact needs comes from the network',
+    blocking.length === 0,
+    blocking.length === 0
+      ? `${htmlKb} KB; ${external.length} external ref(s), all optional webfont`
+      : `${blocking.length} blocking: ${blocking.map((t) => t.slice(0, 64)).join(' | ')}`,
+  );
+
+  // And the README has to SAY there is a webfont, rather than claim a purity
+  // the artifact does not have. If the fetch is ever removed for real, this
+  // flips and demands the sentence be strengthened -- the check refuses to let
+  // the prose drift in either direction.
+  const fetchesAFont = external.some((tag) => FONT_HOST.test(tag) && !/preconnect|dns-prefetch/i.test(tag));
+  assertThat(
+    'the README describes what the artifact fetches',
+    fetchesAFont === /it does not wait for and does not need/.test(readme),
+    fetchesAFont ? 'the artifact requests a webfont, and the README says so'
+      : 'the artifact requests nothing; the README should drop the webfont caveat',
+  );
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }
@@ -168,6 +222,85 @@ relationships**`,
 );
 mustContain('components drawn', `draws
 **${numberWord((view.components ?? view.nodes ?? []).length)}**`);
+
+// ---------------------------------------------------------------------------
+// The two graphics at the top of the README
+// ---------------------------------------------------------------------------
+// assets/pipeline.svg was carrying "230 files", "987 facts", "8 gaps" while the
+// repository had moved to 196 / 1,089 / 10. Nobody had lied; the numbers were
+// right when they were drawn, and an SVG is not somewhere anyone thinks to look
+// for stale figures. That is the same defect this file was written to kill in
+// the README prose, so the graphics now answer to it too.
+const pipelineSvg = fs.readFileSync(path.join(repoRoot, 'assets/pipeline.svg'), 'utf8');
+const svgFigure = (claim, re, actual, tolerance = 0) => {
+  const found = pipelineSvg.match(re);
+  if (!found) return assertThat(claim, false, `pipeline.svg no longer contains ${re}`);
+  const quoted = Number(found[1].replace(/,/g, ''));
+  const ok = tolerance ? Math.abs(quoted - actual) <= actual * tolerance : quoted === actual;
+  return assertThat(claim, ok, `pipeline.svg says ${found[1]}, the scan says ${actual}`);
+};
+const drawn = (view.components ?? view.nodes ?? []).length;
+const components = (model.components ?? []).length;
+svgFigure('pipeline.svg: files', /([\d,]+) files</, citedFiles.size, 0.15);
+svgFigure('pipeline.svg: facts', /([\d,]+) facts/, (graph.facts ?? []).length, 0.15);
+svgFigure('pipeline.svg: gaps', /· ([\d,]+) gaps</, (graph.gaps ?? []).length);
+svgFigure('pipeline.svg: components', /([\d,]+) components</, components);
+svgFigure('pipeline.svg: drawn', /([\d,]+) drawn/, drawn);
+// The graphic says "12 drawn · 7 named": the seven a bounded view leaves out are
+// named in the artifact rather than dropped. If that arithmetic stops holding,
+// the sentence the graphic is making has stopped being true.
+svgFigure('pipeline.svg: named', /· ([\d,]+) named</, components - drawn);
+
+// assets/evidence.svg quotes ONE fact, in full, as the proof that every drawn
+// edge carries its source. It has to be a fact this repository actually holds:
+// a graphic arguing "nothing is inferred silently", illustrated with an invented
+// citation, would be a small demonstration of the opposite.
+const evidenceSvg = fs.readFileSync(path.join(repoRoot, 'assets/evidence.svg'), 'utf8');
+const citation = evidenceSvg.match(/>([\w./-]+\.mjs):(\d+)</);
+if (!citation) {
+  assertThat('evidence.svg: cites a source line', false, 'no file:line found in the graphic');
+} else {
+  const [, citedPath, citedLine] = citation;
+  // The lookup is bound to the relation the graphic DRAWS, not just to the file
+  // and line. Moving the citation from line 3 to line 4 used to pass this check,
+  // because line 4 is also an import -- so a fact existed there, just a
+  // different one, pointing somewhere else entirely. Only the object check
+  // downstream noticed. A check named "the cited fact is in the evidence graph"
+  // has to fail when the citation stops naming the drawn edge.
+  const arrow = evidenceSvg.match(/>[^<>]*→\s*([\w./-]+)</);
+  const target = arrow ? arrow[1] : null;
+  const backing = (graph.facts ?? []).find((fact) => fact.location?.path === citedPath
+    && (fact.location?.lines ?? [])[0] === Number(citedLine)
+    && Boolean(target) && String(fact.object).endsWith(target));
+  assertThat(
+    'evidence.svg: the cited fact is in the evidence graph',
+    Boolean(backing),
+    backing ? `${citedPath}:${citedLine} is ${backing.id} (${backing.predicate})`
+      : `${citedPath}:${citedLine} is not a fact this repository records`,
+  );
+  if (backing) {
+    assertThat(
+      'evidence.svg: the quoted provenance matches the fact',
+      evidenceSvg.includes(`>${backing.provenance}<`),
+      `the graph calls ${backing.id} ${backing.provenance}`,
+    );
+    assertThat(
+      'evidence.svg: the quoted object matches the fact',
+      evidenceSvg.includes(path.posix.basename(backing.object)),
+      `${backing.id} points at ${backing.object}`,
+    );
+  }
+}
+
+// The gap is the other half of the argument, and it is quoted verbatim, so it
+// has to still be a gap. A scanner that learns to resolve this import should
+// break this graphic rather than leave it advertising a limit that is gone.
+const quotedGap = evidenceSvg.match(/>(computed import specifier at line \d+[^<]*)</);
+assertThat(
+  'evidence.svg: the quoted gap is still recorded',
+  Boolean(quotedGap) && (graph.gaps ?? []).some((gap) => gap.reason === quotedGap[1]),
+  quotedGap ? `"${quotedGap[1].slice(0, 52)}..."` : 'no gap reason quoted in the graphic',
+);
 
 // ---------------------------------------------------------------------------
 // Install instructions that actually work

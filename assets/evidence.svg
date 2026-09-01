@@ -1,0 +1,143 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 252" width="900" height="252"
+     role="img" aria-label="One drawn edge, opened: the passport shows the relation depends-on, provenance statically-derived, the source line packages/core/renderers/workflow/render-workflow.mjs line 3, and the revision 4976866. Below, a gap the scanner recorded instead of guessing: a computed import in delivery.test.mjs line 69 whose target cannot be known statically.">
+  <title>Every edge carries its source. Every gap is recorded.</title>
+
+  <style>
+    /* Hand-authored source, like pipeline.svg, and for the same reason: it has
+       to animate inside a GitHub README, which means an img tag, which means no
+       script and no inherited custom properties.
+
+       Class names here are deliberately short, and that is safe ONLY because
+       this file is consumed through an img tag, which gives it its own
+       document. Inlining this SVG and pipeline.svg into one page would put
+       both stylesheets in the same scope, where .box, .edge and @keyframes
+       edge collide -- a preview harness that did exactly that painted this
+       file's dasharray onto the other file's boxes. Namespace them first.
+
+       EVERYTHING QUOTED HERE IS TRUE AND CHECKED. The fact is f415 from this
+       repository's own evidence graph; render-workflow.mjs line 3 really is the
+       import of shared/utils.mjs, and 4976866 is a real ancestor of main. The
+       gap is real too -- delivery.test.mjs line 69 is a computed import whose
+       target genuinely cannot be resolved without running the code. A graphic
+       arguing "every claim carries its source", illustrated with an invented
+       example, would be making the opposite argument. check-readme-claims.mjs
+       re-derives all of it, so it cannot quietly go stale.
+
+       The cascade lives in the keyframe percentages, never in animation-delay:
+       a staggered delay lets a late element still be visible after the shared
+       loop restarts, so it reappears under the beat that should be alone. */
+
+    .mono  { font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .sans  { font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; }
+    .key   { font-size: 10px; fill: #8a94a6; letter-spacing: .06em; }
+    .val   { font-size: 10.5px; fill: #1b1f24; }
+    /* A CSS rule outranks a presentation attribute, so fill="..." on a .val
+       text node is silently discarded. The two coloured values need classes. */
+    .prov  { fill: #2563eb; }
+    .dim   { fill: #8a7350; }
+    .eyeb  { font-size: 9.5px; fill: #8a94a6; letter-spacing: .12em; font-weight: 600; }
+    .ttl   { font-size: 12.5px; fill: #1b1f24; font-weight: 600; }
+    .node  { font-size: 10.5px; fill: #1b1f24; }
+    .cap   { font-size: 10px; fill: #8a94a6; letter-spacing: .06em; font-weight: 600; }
+    .gaptx { font-size: 10.5px; fill: #7c4a06; }
+    .gapk  { font-size: 9.5px; fill: #b45309; letter-spacing: .12em; font-weight: 600; }
+
+    .anim { animation-duration: 11s; animation-iteration-count: infinite;
+            animation-timing-function: ease-out; }
+
+    /* Beat 1 -- the edge is the only thing on screen, then it lights. */
+    .edge  { stroke: #dfe3ea; stroke-width: 2; fill: none;
+             stroke-dasharray: 40; stroke-dashoffset: 40; animation-name: edge; }
+    @keyframes edge { 0%,4%{stroke-dashoffset:40;stroke:#c9d2dd} 10%,88%{stroke-dashoffset:0;stroke:#2563eb} 94%,100%{stroke-dashoffset:40;stroke:#c9d2dd} }
+    .head  { opacity: 0; animation-name: head; }
+    @keyframes head { 0%,8%{opacity:0} 12%,88%{opacity:1} 94%,100%{opacity:0} }
+    .box   { fill: #fff; stroke: #dfe3ea; stroke-width: 1.5; animation-name: boxwake; }
+    @keyframes boxwake { 0%,4%{stroke:#dfe3ea;fill:#fff} 10%,88%{stroke:#2563eb;fill:#f4f8ff} 94%,100%{stroke:#dfe3ea;fill:#fff} }
+
+    /* Beat 2 -- the passport opens. It slides a little, because a panel that
+       only fades reads as decoration, while a panel that arrives reads as the
+       answer to the click that opened it. */
+    .panel { opacity: 0; transform: translateX(12px); animation-name: panel; }
+    @keyframes panel { 0%,14%{opacity:0;transform:translateX(12px)} 22%,88%{opacity:1;transform:translateX(0)} 94%,100%{opacity:0;transform:translateX(12px)} }
+
+    /* Beat 3 -- the rows resolve one at a time, so a reader follows the record
+       being assembled rather than meeting it whole. */
+    .r1 { opacity: 0; animation-name: row1; } .r2 { opacity: 0; animation-name: row2; }
+    .r3 { opacity: 0; animation-name: row3; } .r4 { opacity: 0; animation-name: row4; }
+    @keyframes row1 { 0%,24%{opacity:0} 29%,88%{opacity:1} 94%,100%{opacity:0} }
+    @keyframes row2 { 0%,30%{opacity:0} 35%,88%{opacity:1} 94%,100%{opacity:0} }
+    @keyframes row3 { 0%,36%{opacity:0} 41%,88%{opacity:1} 94%,100%{opacity:0} }
+    @keyframes row4 { 0%,42%{opacity:0} 47%,88%{opacity:1} 94%,100%{opacity:0} }
+
+    /* Beat 4 -- the badge stamps. fill-box origin, or the scale pivots on the
+       SVG origin and the badge flies in from the corner. */
+    .stamp { opacity: 0; transform-box: fill-box; transform-origin: center;
+             transform: scale(.82); animation-name: stamp; }
+    @keyframes stamp { 0%,50%{opacity:0;transform:scale(.82)} 55%{opacity:1;transform:scale(1.04)} 58%,88%{opacity:1;transform:scale(1)} 94%,100%{opacity:0;transform:scale(.82)} }
+
+    /* Beat 5 -- and the thing the tool could NOT determine, which is the half
+       of this that other diagram tools leave out. */
+    .gap { opacity: 0; animation-name: gap; }
+    @keyframes gap { 0%,62%{opacity:0} 68%,88%{opacity:1} 94%,100%{opacity:0} }
+
+    /* Reduced motion gets the assembled record: the frame that carries the
+       argument, with nothing left mid-transition. */
+    @media (prefers-reduced-motion: reduce) {
+      .anim { animation: none; }
+      .edge { stroke-dashoffset: 0; stroke: #2563eb; }
+      .box  { stroke: #2563eb; fill: #f4f8ff; }
+      .head, .panel, .r1, .r2, .r3, .r4, .stamp, .gap { opacity: 1; transform: none; }
+    }
+  </style>
+
+  <!-- the drawn edge: two files and the import between them -->
+  <rect class="box anim" x="8" y="70" width="168" height="46" rx="5"/>
+  <text class="mono node" x="24" y="98">render-workflow.mjs</text>
+  <path class="edge anim" d="M176 93 L214 93"/>
+  <polygon class="head anim" points="214,93 206,88 206,98" fill="#2563eb"/>
+  <rect class="box anim" x="214" y="70" width="134" height="46" rx="5"/>
+  <text class="mono node" x="230" y="98">utils.mjs</text>
+  <text class="mono cap" x="8" y="140">ONE DRAWN EDGE</text>
+
+  <!-- the passport: why that edge is on the page at all -->
+  <g class="panel anim">
+    <rect x="372" y="16" width="520" height="160" rx="6" fill="#fbfcfe" stroke="#dfe3ea" stroke-width="1.5"/>
+    <text class="sans eyeb" x="388" y="40">SEMANTIC PASSPORT</text>
+    <text class="sans ttl" x="388" y="62">render-workflow.mjs → shared/utils.mjs</text>
+    <path d="M388 74 L876 74" stroke="#e8ecf2" stroke-width="1"/>
+
+    <g class="r1 anim">
+      <text class="sans key" x="388" y="96">PREDICATE</text>
+      <text class="mono val" x="500" y="96">depends-on</text>
+    </g>
+    <g class="r2 anim">
+      <text class="sans key" x="388" y="115">PROVENANCE</text>
+      <text class="mono val prov" x="500" y="115">statically-derived</text>
+    </g>
+    <g class="r3 anim">
+      <text class="sans key" x="388" y="134">SOURCE</text>
+      <text class="mono val" x="500" y="134">packages/core/renderers/workflow/render-workflow.mjs:3</text>
+    </g>
+    <g class="r4 anim">
+      <text class="sans key" x="388" y="153">REVISION</text>
+      <text class="mono val" x="500" y="153">4976866</text>
+    </g>
+
+    <g class="stamp anim">
+      <rect x="742" y="26" width="134" height="22" rx="11" fill="#ecfdf5" stroke="#059669" stroke-width="1.2"/>
+      <path d="M755 37 l4 4 l7 -8" stroke="#059669" stroke-width="1.8" fill="none"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <text class="sans" x="772" y="41" font-size="9.5" font-weight="600"
+            letter-spacing=".08em" fill="#047857">VERIFIED SOURCE</text>
+    </g>
+  </g>
+
+  <!-- and the half nobody else shows: what it could not determine -->
+  <g class="gap anim">
+    <rect x="8" y="192" width="884" height="52" rx="6" fill="#fffbf3" stroke="#f3d9a8"
+          stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text class="sans gapk" x="26" y="215">NOT MODELLED</text>
+    <text class="mono gaptx" x="130" y="215">packages/conformance/test/delivery.test.mjs</text>
+    <text class="mono gaptx dim" x="130" y="232">computed import specifier at line 69; the target cannot be known statically</text>
+  </g>
+</svg>

@@ -1,84 +1,142 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 190" width="900" height="190"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 200" width="900" height="200"
      role="img" aria-label="Pipeline: a repository is read into an evidence graph, built into a system model, compiled to a bounded view, laid out, and rendered as one HTML file.">
   <title>scan to model to compile to layout to render</title>
 
   <style>
     /* Hand-authored, not generated: this file is source, and it animates on
-       GitHub without an encoder. Colours are meridian's tokens, resolved --
-       an SVG loaded as an image has no document to inherit them from. */
-    .lbl   { font: 600 13px "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; fill: #1b1f24; }
-    .sub   { font: 400 10.5px "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; fill: #5c6672; }
-    .cap   { font: 400 11px "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; fill: #5c6672; }
-    .box   { fill: #ffffff; stroke: #cfd6dd; stroke-width: 1.5; }
-    .arrow { stroke: #5c6672; stroke-width: 1.6; fill: none; }
+       GitHub without an encoder. Colours are written out rather than held in
+       custom properties, because an SVG loaded through an img tag has no
+       document to inherit them from.
 
-    /* One pulse travels the pipeline: five stages, one after another, then a
-       pause. A stage lights as the pulse reaches it. */
-    .stage    { opacity: 0.55; animation: wake 7s ease-in-out infinite; }
-    .s1 { animation-delay: 0.0s; } .s2 { animation-delay: 0.7s; }
-    .s3 { animation-delay: 1.4s; } .s4 { animation-delay: 2.1s; } .s5 { animation-delay: 2.8s; }
-    @keyframes wake {
-      0%, 6%   { opacity: 0.55; }
-      10%, 44% { opacity: 1; }
-      52%,100% { opacity: 0.55; }
-    }
-    .accent { animation: glow 7s ease-in-out infinite; }
-    @keyframes glow {
-      0%, 6%   { stroke: #cfd6dd; }
-      10%, 44% { stroke: #0757ba; }
-      52%,100% { stroke: #cfd6dd; }
-    }
+       Class names here are deliberately short, and that is safe ONLY because
+       this file is consumed through an img tag, which gives it its own
+       document. Inlining this SVG and pipeline.svg into one page would put
+       both stylesheets in the same scope, where .box, .edge and @keyframes
+       edge collide -- a preview harness that did exactly that painted this
+       file's dasharray onto the other file's boxes. Namespace them first.
 
-    /* A reader who has asked not to see motion gets the finished state. */
+       The four working stages walk the logo's own gradient, blue to violet.
+       The fifth is emerald because it is not another step -- it is the thing
+       you are left holding, and a reader should be able to see where the
+       pipeline stops without first reading the captions.
+
+       THE CASCADE IS IN THE PERCENTAGES, NOT IN animation-delay. The obvious
+       way to stagger five stages is one keyframe set and five delays, and it
+       is wrong here: a stage that stays lit until 72% of its own cycle, started
+       5.6s late, is still lit after the 8s loop has restarted -- so it reappears
+       underneath stage one and a mid-cycle frame shows stages 1 and 5 lit with
+       2, 3 and 4 dark, which is the opposite of what this is meant to say.
+       Every stage shares one 10s window and lights at its own percentage. */
+
+    .lbl  { font: 600 13px "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; fill: #1b1f24; }
+    .sub  { font: 400 10.5px "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; fill: #5c6672; }
+    .cap  { font: 600 10.5px "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; fill: #8a94a6;
+            letter-spacing: .08em; }
+    .note { font: 400 11px "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif; fill: #5c6672; }
+    .box  { fill: #ffffff; stroke: #dfe3ea; stroke-width: 1.5; }
+
+    .stage { opacity: .45; animation-duration: 10s; animation-timing-function: ease-in-out;
+             animation-iteration-count: infinite; }
+    .s1 { animation-name: lit1; } .s2 { animation-name: lit2; } .s3 { animation-name: lit3; }
+    .s4 { animation-name: lit4; } .s5 { animation-name: lit5; }
+    @keyframes lit1 { 0%,3%{opacity:.45}  6%,84%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit2 { 0%,15%{opacity:.45} 18%,84%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit3 { 0%,27%{opacity:.45} 30%,84%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit4 { 0%,39%{opacity:.45} 42%,84%{opacity:1} 90%,100%{opacity:.45} }
+    @keyframes lit5 { 0%,51%{opacity:.45} 54%,84%{opacity:1} 90%,100%{opacity:.45} }
+
+    /* Border and a barely-there tint take the stage's own colour as it wakes.
+       Two plain properties and no filter -- this project's renderers are not
+       allowed to emit filters, and the README's own graphic should not either. */
+    .edge { animation-duration: 10s; animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite; }
+    .e1 { animation-name: edge1; } .e2 { animation-name: edge2; } .e3 { animation-name: edge3; }
+    .e4 { animation-name: edge4; } .e5 { animation-name: edge5; }
+    @keyframes edge1 { 0%,3%{stroke:#dfe3ea;fill:#fff}  6%,84%{stroke:#2563eb;fill:#f4f8ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge2 { 0%,15%{stroke:#dfe3ea;fill:#fff} 18%,84%{stroke:#4f46e5;fill:#f6f6ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge3 { 0%,27%{stroke:#dfe3ea;fill:#fff} 30%,84%{stroke:#6d28d9;fill:#f9f6ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge4 { 0%,39%{stroke:#dfe3ea;fill:#fff} 42%,84%{stroke:#7c3aed;fill:#faf7ff} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+    @keyframes edge5 { 0%,51%{stroke:#dfe3ea;fill:#fff} 54%,84%{stroke:#059669;fill:#f1fbf6} 90%,100%{stroke:#dfe3ea;fill:#fff} }
+
+    /* The connector draws across the gap rather than sending a dot over it.
+       At 24px a travelling dot reads as a speck; a line arriving reads as the
+       handover it stands for. Each one lands just before its stage wakes. */
+    .link { stroke-width: 1.8; fill: none; stroke-dasharray: 26; stroke-dashoffset: 26;
+            animation-duration: 10s; animation-timing-function: ease-out;
+            animation-iteration-count: infinite; }
+    .l1 { animation-name: draw1; } .l2 { animation-name: draw2; }
+    .l3 { animation-name: draw3; } .l4 { animation-name: draw4; }
+    @keyframes draw1 { 0%,9%{stroke-dashoffset:26;stroke:#c9d2dd}  15%,84%{stroke-dashoffset:0;stroke:#4f46e5} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+    @keyframes draw2 { 0%,21%{stroke-dashoffset:26;stroke:#c9d2dd} 27%,84%{stroke-dashoffset:0;stroke:#6d28d9} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+    @keyframes draw3 { 0%,33%{stroke-dashoffset:26;stroke:#c9d2dd} 39%,84%{stroke-dashoffset:0;stroke:#7c3aed} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+    @keyframes draw4 { 0%,45%{stroke-dashoffset:26;stroke:#c9d2dd} 51%,84%{stroke-dashoffset:0;stroke:#059669} 90%,100%{stroke-dashoffset:26;stroke:#c9d2dd} }
+
+    .tip { opacity: 0; animation-duration: 10s; animation-timing-function: ease-in-out;
+           animation-iteration-count: infinite; }
+    .p1 { animation-name: tip1; } .p2 { animation-name: tip2; }
+    .p3 { animation-name: tip3; } .p4 { animation-name: tip4; }
+    @keyframes tip1 { 0%,12%{opacity:0} 15%,84%{opacity:1} 90%,100%{opacity:0} }
+    @keyframes tip2 { 0%,24%{opacity:0} 27%,84%{opacity:1} 90%,100%{opacity:0} }
+    @keyframes tip3 { 0%,36%{opacity:0} 39%,84%{opacity:1} 90%,100%{opacity:0} }
+    @keyframes tip4 { 0%,48%{opacity:0} 51%,84%{opacity:1} 90%,100%{opacity:0} }
+
+    /* Asked not to see motion: you get the finished frame, which is the one
+       that carries the meaning anyway -- every stage lit, every handover made. */
     @media (prefers-reduced-motion: reduce) {
-      .stage, .accent { animation: none; opacity: 1; }
+      .stage, .edge, .link, .tip { animation: none; opacity: 1; }
+      .link { stroke-dashoffset: 0; }
+      .l1 { stroke: #4f46e5; } .l2 { stroke: #6d28d9; }
+      .l3 { stroke: #7c3aed; } .l4 { stroke: #059669; }
+      .e1 { stroke: #2563eb; fill: #f4f8ff; } .e2 { stroke: #4f46e5; fill: #f6f6ff; }
+      .e3 { stroke: #6d28d9; fill: #f9f6ff; } .e4 { stroke: #7c3aed; fill: #faf7ff; }
+      .e5 { stroke: #059669; fill: #f1fbf6; }
     }
   </style>
 
   <g class="stage s1">
-    <rect class="box accent s1" x="8" y="40" width="150" height="62" rx="4"/>
-    <text class="lbl" x="24" y="66">repository</text>
-    <text class="sub" x="24" y="84">230 files</text>
+    <rect class="box edge e1" x="8" y="42" width="150" height="62" rx="5"/>
+    <text class="lbl" x="24" y="68">repository</text>
+    <text class="sub" x="24" y="86">196 files</text>
   </g>
-  <path class="arrow" d="M164 71 L188 71"/>
-  <polygon points="188,71 181,67 181,75" fill="#5c6672"/>
+  <path class="link l1" d="M164 73 L188 73"/>
+  <polygon class="tip p1" points="188,73 181,69 181,77" fill="#4f46e5"/>
 
   <g class="stage s2">
-    <rect class="box accent s2" x="194" y="40" width="150" height="62" rx="4"/>
-    <text class="lbl" x="210" y="66">evidence graph</text>
-    <text class="sub" x="210" y="84">987 facts · 8 gaps</text>
+    <rect class="box edge e2" x="194" y="42" width="150" height="62" rx="5"/>
+    <text class="lbl" x="210" y="68">evidence graph</text>
+    <text class="sub" x="210" y="86">1,089 facts · 10 gaps</text>
   </g>
-  <path class="arrow" d="M350 71 L374 71"/>
-  <polygon points="374,71 367,67 367,75" fill="#5c6672"/>
+  <path class="link l2" d="M350 73 L374 73"/>
+  <polygon class="tip p2" points="374,73 367,69 367,77" fill="#6d28d9"/>
 
   <g class="stage s3">
-    <rect class="box accent s3" x="380" y="40" width="150" height="62" rx="4"/>
-    <text class="lbl" x="396" y="66">system model</text>
-    <text class="sub" x="396" y="84">19 components</text>
+    <rect class="box edge e3" x="380" y="42" width="150" height="62" rx="5"/>
+    <text class="lbl" x="396" y="68">system model</text>
+    <text class="sub" x="396" y="86">19 components</text>
   </g>
-  <path class="arrow" d="M536 71 L560 71"/>
-  <polygon points="560,71 553,67 553,75" fill="#5c6672"/>
+  <path class="link l3" d="M536 73 L560 73"/>
+  <polygon class="tip p3" points="560,73 553,69 553,77" fill="#7c3aed"/>
 
   <g class="stage s4">
-    <rect class="box accent s4" x="566" y="40" width="150" height="62" rx="4"/>
-    <text class="lbl" x="582" y="66">bounded view</text>
-    <text class="sub" x="582" y="84">12 drawn · 7 named</text>
+    <rect class="box edge e4" x="566" y="42" width="150" height="62" rx="5"/>
+    <text class="lbl" x="582" y="68">bounded view</text>
+    <text class="sub" x="582" y="86">12 drawn · 7 named</text>
   </g>
-  <path class="arrow" d="M722 71 L746 71"/>
-  <polygon points="746,71 739,67 739,75" fill="#5c6672"/>
+  <path class="link l4" d="M722 73 L746 73"/>
+  <polygon class="tip p4" points="746,73 739,69 739,77" fill="#059669"/>
 
   <g class="stage s5">
-    <rect class="box accent s5" x="752" y="40" width="140" height="62" rx="4"/>
-    <text class="lbl" x="768" y="66">one .html</text>
-    <text class="sub" x="768" y="84">opens offline</text>
+    <rect class="box edge e5" x="752" y="42" width="140" height="62" rx="5"/>
+    <text class="lbl" x="768" y="68">one .html</text>
+    <text class="sub" x="768" y="86">opens offline</text>
   </g>
 
-  <text class="cap" x="8" y="132">scan</text>
-  <text class="cap" x="194" y="132">model</text>
-  <text class="cap" x="380" y="132">compile</text>
-  <text class="cap" x="566" y="132">layout</text>
-  <text class="cap" x="752" y="132">render</text>
+  <text class="cap" x="8" y="132">SCAN</text>
+  <text class="cap" x="194" y="132">MODEL</text>
+  <text class="cap" x="380" y="132">COMPILE</text>
+  <text class="cap" x="566" y="132">LAYOUT</text>
+  <text class="cap" x="752" y="132">RENDER</text>
 
-  <text class="cap" x="8" y="162">Every stage records what it could not determine. Nothing is inferred silently.</text>
-  <text class="cap" x="8" y="178">Numbers are this repository, scanned by itself.</text>
+  <text class="note" x="8" y="164">Every stage records what it could not determine. Nothing is inferred silently.</text>
+  <text class="note" x="8" y="182">The numbers are this repository, scanned by itself.</text>
 </svg>

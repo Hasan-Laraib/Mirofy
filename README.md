@@ -106,7 +106,7 @@ npm run layout                  # view        → positioned document
 node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html --repo-root .
 ```
 
-Against **this repository** it records **1,052 facts** across **190 files**,
+Against **this repository** it records **1,089 facts** across **196 files**,
 with **10 gaps** it could not read; derives **19 components and 24
 relationships** — every one citing the file and line it came from — and draws
 **twelve**, recording what it left out and why.
@@ -128,19 +128,39 @@ node packages/core/bin/mirofy.mjs validate architecture design.json --json
 
 ## What you get
 
+<p align="center">
+  <img src="assets/evidence.svg" alt="One drawn edge, opened: the passport shows the relation depends-on, provenance statically-derived, the source line render-workflow.mjs line 3, and the revision it was verified against. Below it, a gap the scanner recorded instead of guessing." width="880">
+</p>
+
+<p align="center">
+  <em>Open any edge and it tells you why it is on the page: the relation, its
+  provenance class, the file and line it came from, and the commit it was
+  checked against. Underneath is the half most tools leave out — what the
+  scanner could <strong>not</strong> determine, written down instead of guessed.
+  <br>
+  That record is real, and taken from this repository. So is the gap.</em>
+</p>
+
+Three claims about the pictures below, each with the thing that keeps it honest.
+
 <table>
 <tr>
 <td width="50%" valign="top">
 <img src="assets/meridian.png" alt="An architecture diagram in the meridian preset" width="100%">
-<p align="center"><em>Six presets, light and dark. <code>meridian</code> keeps
-arrows graphite so colour means <strong>what a node is</strong>.
-<a href="https://hasan-laraib.github.io/Mirofy/gallery/architecture--meridian.html">Open ↗</a></em></p>
+<p><strong>Colour tells you what a node is, never where an arrow goes.</strong>
+Six presets, light and dark. <code>meridian</code> holds every arrow at graphite
+so hue is never doing two jobs at once.
+<br>
+<sub>Proved by conformance row 4.16 · <a href="https://hasan-laraib.github.io/Mirofy/gallery/architecture--meridian.html">open this exact artifact ↗</a></sub></p>
 </td>
 <td width="50%" valign="top">
 <img src="assets/sequence.png" alt="A sequence diagram with lifelines and messages" width="100%">
-<p align="center"><em>Five diagram types — architecture, workflow, sequence,
-dataflow, lifecycle.
-<a href="https://hasan-laraib.github.io/Mirofy/gallery/sequence--meridian.html">Open ↗</a></em></p>
+<p><strong>Five diagram types, one schema, one validator.</strong>
+architecture · workflow · sequence · dataflow · lifecycle — the same typed IR
+behind all of them.
+<br>
+<sub>Proved by conformance row 1.1, which renders all five from their baseline
+fixtures in one pass · <a href="https://hasan-laraib.github.io/Mirofy/gallery/sequence--meridian.html">open this exact artifact ↗</a></sub></p>
 </td>
 </tr>
 </table>
@@ -150,8 +170,20 @@ dataflow, lifecycle.
 </p>
 
 <p align="center">
-  <em>One file. Opens offline, from disk, with no server and no network.</em>
+  <strong>One file. No server — and nothing it needs from the network.</strong>
   <br>
+  <em>The diagram, the evidence, the search and every interaction are in the
+  file. The one thing it ever asks the internet for is a webfont
+  <strong>it does not wait for and does not need</strong>, and it falls back to
+  your system monospace without it.</em>
+  <br>
+  <sub>Checked on every run by <code>scripts/check-readme-claims.mjs</code>,
+  which fails the build the moment a reference appears that could block first
+  paint or change what the diagram says — and which fails just as loudly if this
+  sentence ever overstates what the artifact actually fetches.</sub>
+</p>
+
+<p align="center">
   <strong><a href="https://hasan-laraib.github.io/Mirofy/">All thirty are live ↗</a></strong> — five types × six
   presets, rebuilt from every commit.
 </p>
