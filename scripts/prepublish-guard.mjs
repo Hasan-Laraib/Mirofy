@@ -111,6 +111,16 @@ say('  passed');
 // check that cannot be fooled by the source tree still being on disk.
 say('packing and installing the tarball into a clean directory');
 const NEWLINE = String.fromCharCode(10);
+// Rebuild the bundled pipeline before packing, ALWAYS. prepublishOnly runs
+// build-pipeline first, so npm publish was fine -- but running this guard
+// directly tested whatever copy happened to be on disk. It sat one fix behind
+// and reported a defect that had already been repaired, which is the friendlier
+// half of the failure mode; the other half is a guard passing on a stale bundle
+// and blessing a tarball nobody built.
+say('rebuilding the bundled pipeline so the tarball under test is the current one');
+execFileSync(process.execPath, [path.join(repoRoot, 'scripts/build-pipeline.mjs')],
+  { stdio: ['ignore', 'ignore', 'inherit'] });
+
 const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-prepublish-'));
 try {
   const packed = runNpm( ['pack', '--pack-destination', probe], {
