@@ -180,8 +180,8 @@ mustContain('components drawn', `draws
 // So the registry decides which of the two this file is allowed to be. When
 // npm cannot be reached the question is not asked -- being offline is not
 // evidence about anything.
-const readmeTellsYouToNpx = /^\s*npx mirofy /m.test(readme);
-const readmeSaysNotLive = /`npx mirofy` is not live yet/.test(readme);
+const readmeTellsYouToNpx = /^\s*npx mirofy-cli /m.test(readme);
+const readmeSaysNotLive = /`npx mirofy-cli` is not live yet/.test(readme);
 let published = null;
 let unreachable = 'npm was not run';
 const npmCli = (() => {
@@ -198,7 +198,7 @@ const npmCli = (() => {
 })();
 if (npmCli) {
   try {
-    execFileSync(process.execPath, [npmCli, 'view', 'mirofy', 'version'], {
+    execFileSync(process.execPath, [npmCli, 'view', 'mirofy-cli', 'version'], {
       encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 30000,
     });
     published = true;
@@ -221,16 +221,16 @@ if (published === null) {
 } else if (published) {
   assertThat('install instructions match the registry', readmeTellsYouToNpx && !readmeSaysNotLive,
     readmeTellsYouToNpx && !readmeSaysNotLive
-      ? 'mirofy is published and the README says npx'
-      : 'mirofy IS published now — lead with `npx mirofy` and delete the "not live yet" note');
+      ? 'mirofy-cli is published and the README says npx'
+      : 'mirofy-cli IS published now — lead with `npx mirofy-cli` and delete the "not live yet" note');
 } else {
   const why = readmeTellsYouToNpx
-    ? 'the README tells a reader to run `npx mirofy`, which 404s: mirofy is not on npm yet'
-    : 'mirofy is not published, and the README no longer says so — a reader has no way '
+    ? 'the README tells a reader to run `npx mirofy-cli`, which 404s: mirofy-cli is not on npm yet'
+    : 'mirofy-cli is not published, and the README no longer says so — a reader has no way '
       + 'to know why there is no npx command';
   assertThat('install instructions match the registry', !readmeTellsYouToNpx && readmeSaysNotLive,
     !readmeTellsYouToNpx && readmeSaysNotLive
-      ? 'mirofy is unpublished and the README says so instead of telling you to npx it'
+      ? 'mirofy-cli is unpublished and the README says so instead of telling you to npx it'
       : why);
 }
 

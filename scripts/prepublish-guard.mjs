@@ -123,7 +123,12 @@ try {
     cwd: probe, encoding: 'utf8', stdio: ['ignore', 'ignore', 'pipe'],
   });
 
-  const installed = path.join(probe, 'node_modules/mirofy');
+  // Read from the manifest rather than written down: the package was renamed
+  // once already, when npm refused the bare name, and a hardcoded directory
+  // here would have failed the probe for a reason that has nothing to do with
+  // whether the tarball works.
+  const packageName = JSON.parse(fs.readFileSync(path.join(corePath, 'package.json'), 'utf8')).name;
+  const installed = path.join(probe, 'node_modules', packageName);
   execFileSync(process.execPath, [
     path.join(installed, 'bin/mirofy.mjs'), 'render', 'architecture',
     path.join(installed, 'examples/web-app.architecture.json'),

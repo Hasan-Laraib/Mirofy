@@ -63,11 +63,12 @@ node packages/core/bin/mirofy.mjs render architecture architecture.json
 `… guide "show an API request with a cache miss"` picks the diagram type for
 you if you are not sure which one you want.
 
-> **`npx mirofy` is not live yet.** `mirofy` is reserved on npm and `0.1.0` is
-> packed and verified, but nothing is published, so this README does not tell
-> you to run a command that would 404. `scripts/check-readme-claims.mjs` checks
-> the registry and will fail this file the day that stops being true — the
-> shorter instructions go in then, not before.
+> **`npx mirofy-cli` is not live yet.** The package is `mirofy-cli` and the
+> command it installs is `mirofy`; the bare name was refused by npm as too
+> close to the existing `minify`. `0.1.0` is packed and verified but not yet
+> published, so this README does not tell you to run a command that would 404.
+> `scripts/check-readme-claims.mjs` checks the registry and will fail this file
+> the day that stops being true.
 
 **As an agent skill** — build the bundle and copy it where your agent looks:
 

@@ -66,6 +66,23 @@ It now leads with how it was actually invoked: `node packages/core/bin/mirofy.mj
 render …` from a checkout, `mirofy render …` once installed. Neither is a guess
 about the reader's shell; both are what happened.
 
+### The package is `mirofy-cli`, because npm refused `mirofy`
+
+> 403 Forbidden — Package name too similar to existing package `minify`
+
+npm runs a typosquatting check at publish time, `minify` is a real package with
+15.3.1 published, and `mirofy` falls inside its similarity threshold. There is
+no retrying that.
+
+`mirofy-cli` it is — and **the command it installs is still `mirofy`**, which is
+what anyone actually types. The manifest declares both bins pointing at one
+file, so `npx mirofy-cli` resolves without npx having to guess which binary a
+differently-named package meant.
+
+The publish guard read `node_modules/mirofy` from a hardcoded string, which
+would have failed the install probe for a reason that had nothing to do with
+whether the tarball worked. It reads the name from the manifest now.
+
 ### The repository presents itself
 
 It was public with an **empty description**, no homepage link, and no topics —

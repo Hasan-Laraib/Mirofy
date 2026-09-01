@@ -1,11 +1,12 @@
 {
-  "name": "mirofy",
+  "name": "mirofy-cli",
   "version": "0.1.0",
   "type": "module",
-  "description": "Diagrams of your system that cite their sources - and say what they could not see. Five diagram types, validated, rendered to one self-contained HTML file.",
+  "description": "Diagrams of your system that cite their sources - and say what they could not see. Five diagram types, validated, rendered to one self-contained HTML file. Installs the `mirofy` command.",
   "license": "MIT",
   "bin": {
-    "mirofy": "bin/mirofy.mjs"
+    "mirofy": "bin/mirofy.mjs",
+    "mirofy-cli": "bin/mirofy.mjs"
   },
   "engines": {
     "node": ">=18"
