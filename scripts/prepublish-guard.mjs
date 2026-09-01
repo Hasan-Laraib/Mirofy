@@ -110,6 +110,7 @@ say('  passed');
 // that silently loses an entry. Packing it and running the result is the only
 // check that cannot be fooled by the source tree still being on disk.
 say('packing and installing the tarball into a clean directory');
+const NEWLINE = String.fromCharCode(10);
 const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-prepublish-'));
 try {
   const packed = runNpm( ['pack', '--pack-destination', probe], {
@@ -137,8 +138,40 @@ try {
   if (!fs.existsSync(path.join(probe, 'out.html'))) {
     refuse('the installed package reported success but rendered nothing');
   }
+  // Rendering a document that ships with the package proves the renderer. It
+  // does NOT prove the thing the README opens with -- point it at a repository.
+  // That path runs entirely different code, it is the reason packages/core now
+  // carries a pipeline/ directory, and the first tarball built with it could
+  // not lay anything out: layout imported webcola statically, webcola is a dev
+  // dependency, and nothing in a render-only probe touches layout. It shipped
+  // clean and would have died in the first stranger's terminal.
+  //
+  // So: build a throwaway repository and map it with the INSTALLED cli.
+  const repo = path.join(probe, 'subject');
+  fs.mkdirSync(path.join(repo, 'src/api'), { recursive: true });
+  fs.mkdirSync(path.join(repo, 'src/store'), { recursive: true });
+  fs.writeFileSync(path.join(repo, 'package.json'), '{"name":"subject","version":"0.0.0"}');
+  fs.writeFileSync(path.join(repo, 'src/api/routes.mjs'),
+    ["import { save } from '../store/repo.mjs';", 'export const app = () => save();', ''].join(NEWLINE));
+  fs.writeFileSync(path.join(repo, 'src/store/repo.mjs'), 'export const save = () => 1;' + NEWLINE);
+  for (const args of [['init', '-q'], ['add', '-A'],
+    ['-c', 'user.email=probe@local', '-c', 'user.name=probe', 'commit', '-qm', 'probe']]) {
+    execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
+  }
+  execFileSync(process.execPath, [path.join(installed, 'bin/mirofy.mjs'), 'map', '.'],
+    { cwd: repo, stdio: ['ignore', 'ignore', 'pipe'] });
+  const mapped = path.join(repo, 'architecture.html');
+  if (!fs.existsSync(mapped)) {
+    refuse('the installed package could not map a repository -- `mirofy map` produced no artifact');
+  }
+  const model = JSON.parse(fs.readFileSync(path.join(repo, 'scan/model.json'), 'utf8'));
+  const drawn = (model.components ?? []).map((component) => component.id).sort();
+  if (!drawn.includes('src/api') || !drawn.includes('src/store')) {
+    refuse(`the installed package mapped ${JSON.stringify(drawn)}; expected both source modules`);
+  }
+
   const bytes = fs.statSync(tarball).size;
-  say(`  ${(bytes / 1024).toFixed(0)} KB, installs and renders`);
+  say(`  ${(bytes / 1024).toFixed(0)} KB, installs, renders, and maps a repository`);
 } catch (error) {
   refuse(`the packed tarball does not work when installed:\n${String(error.stderr || error.message).slice(0, 1500)}`);
 } finally {

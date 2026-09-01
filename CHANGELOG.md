@@ -46,6 +46,34 @@ not to bother. An empty result is reported as an empty result, with a pointer
 to the coverage report, rather than rendered as a blank page and called a
 success.
 
+### The first tarball built with the pipeline could not lay anything out
+
+Installing it and mapping a repository -- rather than only rendering a document
+that ships with it -- found that `layout` imports `webcola` statically. webcola
+is a devDependency, deliberately, so that row 6.9's zero-runtime-dependency
+promise survives; the published package carries no dev dependencies, so merely
+loading the layout step threw ERR_MODULE_NOT_FOUND. Nothing in a render-only
+probe touches layout. It packed clean and would have died in the first
+stranger's terminal.
+
+webcola is now resolved when the solver runs, not when the module loads. The
+default layout is layered and needs nothing, so the common path never reaches
+it; asking for `--solver` without the dependency says so in one sentence
+instead of throwing a module resolution error at somebody who never chose that
+library. The prepublish guard now builds a throwaway repository and maps it with
+the INSTALLED cli, so the difference between "renders" and "works" is checked
+where it actually shows.
+
+Making the import lazy also removed webcola as a statically-derived component of
+this repository: 19 components and 24 relationships became 18 and 23. The
+figures in the README and in pipeline.svg followed, as their checks required.
+
+And the typechecker caught a real bug in the change, not a typing nit:
+`new cola.Layout()` had become `new cola().Layout()`, which constructs the
+loader and then calls a method on it. Latent, because the default path never
+calls the solver -- the seven solver tests found it the moment the parentheses
+were right.
+
 ### The pipeline ships now, and the scanner reads .gitignore
 
 `mirofy-cli` publishes packages/core and nothing else, so everything that maps a

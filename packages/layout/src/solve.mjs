@@ -22,7 +22,35 @@
 // between runs makes every render produce a new golden digest for an
 // unchanged document.
 
-import * as cola from 'webcola';
+import { createRequire } from 'node:module';
+
+// Resolved WHEN THE SOLVER RUNS, not when this module loads. A static import
+// here made the whole layout step unloadable without webcola, and webcola is a
+// devDependency -- so the published package, which carries this pipeline but
+// no dev dependencies, could not lay anything out at all. It was caught by
+// installing the tarball and mapping a repository with it, which is the only
+// place the difference shows.
+//
+// The default path never reaches here: `layeredPositions` handles dependency
+// DAGs and needs nothing. Only `--solver` does, and asking for it without the
+// dependency present should say so in one sentence rather than throw a module
+// resolution error at somebody who did not choose this library.
+let colaModule = null;
+// `any`, because a require() at runtime carries no types the checker can see.
+// The narrow use below -- one constructor, four chained setters -- is asserted
+// by the layout tests rather than by the type system.
+/** @returns {any} */
+function cola() {
+  if (colaModule) return colaModule;
+  try {
+    colaModule = createRequire(import.meta.url)('webcola');
+  } catch {
+    throw new Error('The --solver layout needs webcola, a dev dependency of @mirofy/layout. '
+      + 'Install it, or drop --solver to use the layered layout, which is the default '
+      + 'and needs nothing.');
+  }
+  return colaModule;
+}
 
 /** @type {[number, number]} */
 const DEFAULT_SIZE = [180, 60];
@@ -103,7 +131,7 @@ export function solve(view, options = {}) {
     .filter((edge) => indexOf.has(edge.from) && indexOf.has(edge.to))
     .map((edge) => ({ source: indexOf.get(edge.from), target: indexOf.get(edge.to) }));
 
-  new cola.Layout()
+  new (cola().Layout)()
     .size(canvas)
     .nodes(nodes)
     .links(links)
