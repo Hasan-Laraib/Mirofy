@@ -145,5 +145,8 @@ try {
   fs.rmSync(probe, { recursive: true, force: true });
 }
 
-const version = JSON.parse(fs.readFileSync(path.join(corePath, 'package.json'), 'utf8')).version;
-console.log(`\nprepublish: mirofy@${version} is ready to publish.`);
+// Both from the manifest. The name was written down here and said "mirofy" for
+// a whole CI run after the package had been renamed -- the last line anybody
+// reads before publishing, quietly naming the wrong package.
+const manifest = JSON.parse(fs.readFileSync(path.join(corePath, 'package.json'), 'utf8'));
+console.log(`\nprepublish: ${manifest.name}@${manifest.version} is ready to publish.`);

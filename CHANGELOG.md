@@ -82,6 +82,17 @@ holding the shorter instructions back precisely until this was true — the
 gate failed on the next run after publishing, unprompted, with the exact
 change to make.
 
+### Two names that were written down instead of read
+
+The publish guard's last line — the one somebody reads immediately before
+uploading — said `mirofy@0.1.0` for a full CI run *after* the package had been
+renamed. So did the workflow's tag check. Both read the manifest now.
+
+And a re-pushed tag is no longer an error. The first release went up by hand,
+because npm cannot configure a trusted publisher for a package that does not
+exist, so this workflow will meet a version already on the registry. *Already
+published* is a true statement about a successful release, not a failure.
+
 ### The package is `mirofy-cli`, because npm refused `mirofy`
 
 > 403 Forbidden — Package name too similar to existing package `minify`

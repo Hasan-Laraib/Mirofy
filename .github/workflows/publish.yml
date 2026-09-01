@@ -1,6 +1,6 @@
 name: Publish
 
-# Publishes `mirofy` to npm when a version tag is pushed.
+# Publishes `mirofy-cli` to npm when a version tag is pushed.
 #
 # WITH PROVENANCE, which is the reason this workflow exists rather than a
 # `npm publish` from somebody's laptop. npm records, and shows on the package
@@ -11,10 +11,9 @@ name: Publish
 #
 # BEFORE THIS CAN RUN, TWO ONE-TIME STEPS:
 #
-#   1. Publish 0.1.0 by hand once, to create the package:
-#        cd packages/core && npm publish --access public
-#      npm has no way to configure a trusted publisher for a package that does
-#      not exist yet.
+#   1. DONE -- mirofy-cli@0.1.0 was published by hand on 2026-09-01. npm has no
+#      way to configure a trusted publisher for a package that does not exist
+#      yet, so the first release always goes up manually.
 #
 #   2. On npmjs.com → the package → Settings → Trusted Publisher, add:
 #        Organization or user:  Hasan-Laraib
@@ -68,16 +67,34 @@ jobs:
           tag="${GITHUB_REF_NAME#v}"
           manifest="$(node -p "require('./packages/core/package.json').version")"
           if [ "$tag" != "$manifest" ]; then
-            echo "tag ${GITHUB_REF_NAME} does not match mirofy@${manifest}" >&2
+            echo "tag ${GITHUB_REF_NAME} does not match ${manifest}" >&2
             exit 1
           fi
-          echo "publishing mirofy@${manifest}"
+          echo "publishing $(node -p "require('./packages/core/package.json').name")@${manifest}"
+
+      # A re-pushed tag should not be an error. The first release was published
+      # by hand -- npm cannot configure a trusted publisher for a package that
+      # does not exist yet -- so this workflow will meet a version that is
+      # already on the registry, and "already published" is a true statement
+      # about a successful release, not a failure.
+      - name: Skip if this version is already on the registry
+        id: already
+        run: |
+          name="$(node -p "require('./packages/core/package.json').name")"
+          version="$(node -p "require('./packages/core/package.json').version")"
+          if npm view "${name}@${version}" version >/dev/null 2>&1; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "${name}@${version} is already on the registry; nothing to do."
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # prepublishOnly runs the full gate, then packs the tarball and installs
       # it into a clean directory to check it actually renders. It is slow on
       # purpose: npm allows an unpublish for 72 hours and then the version
       # number is spent forever.
       - name: Publish
+        if: steps.already.outputs.published == 'false'
         run: npm publish --provenance --access public
         working-directory: packages/core
         env:
