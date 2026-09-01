@@ -13,7 +13,7 @@ stops being one.
 
 ---
 
-## 2026-09-01
+## 2026-09-02
 
 ### The test suite leaked 35 GB of temporary directories
 
@@ -59,6 +59,8 @@ fail it: a namespace import, and scratch written into a package. The first plant
 of each passed, and both misses were the same shape -- a per-FILE test where one
 correct usage masked an incorrect one, and a path check whose character class
 had collapsed so it matched nothing on Windows and passed on an empty set.
+
+## 2026-09-01
 
 ### A detour that dodged one node by crossing another
 
