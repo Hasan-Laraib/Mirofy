@@ -47,28 +47,31 @@ nothing is known, the diagram **says so** instead of filling the gap.
 
 ## Install
 
-**Nothing to install** — clone it and run. There is no build step and no
-`npm install`, because every package here has zero runtime dependencies:
+**Nothing to install** — one command, and a diagram opens:
+
+```bash
+npx mirofy-cli demo     # a finished artifact, to see what this produces
+npx mirofy-cli init     # a starter document of your own to edit
+npx mirofy-cli validate architecture architecture.json
+npx mirofy-cli render architecture architecture.json
+```
+
+`npx mirofy-cli guide "show an API request with a cache miss"` picks the
+diagram type for you if you are not sure which one you want.
+
+**As a CLI you keep** — `npm install -g mirofy-cli`. The command it installs is
+**`mirofy`**; the package carries the `-cli` suffix because npm refused the bare
+name as too close to the existing `minify`.
+
+**From source** — no install at all, because there is nothing to install:
 
 ```bash
 git clone https://github.com/Hasan-Laraib/Mirofy.git
-cd Mirofy
-
-node packages/core/bin/mirofy.mjs demo    # a finished artifact, to see what this produces
-node packages/core/bin/mirofy.mjs init    # a starter document of your own to edit
-node packages/core/bin/mirofy.mjs validate architecture architecture.json
-node packages/core/bin/mirofy.mjs render architecture architecture.json
+node Mirofy/packages/core/bin/mirofy.mjs demo
 ```
 
-`… guide "show an API request with a cache miss"` picks the diagram type for
-you if you are not sure which one you want.
-
-> **`npx mirofy-cli` is not live yet.** The package is `mirofy-cli` and the
-> command it installs is `mirofy`; the bare name was refused by npm as too
-> close to the existing `minify`. `0.1.0` is packed and verified but not yet
-> published, so this README does not tell you to run a command that would 404.
-> `scripts/check-readme-claims.mjs` checks the registry and will fail this file
-> the day that stops being true.
+That works on a bare checkout with no `npm install`, because every package here
+has zero runtime dependencies.
 
 **As an agent skill** — build the bundle and copy it where your agent looks:
 
@@ -89,17 +92,9 @@ bundle, `build:skill` copies it somewhere with no repository around it and
 renders a diagram: a bundle that only works inside its own checkout is not a
 bundle.
 
-**From source** — no install at all, because there is nothing to install:
-
-```bash
-git clone https://github.com/Hasan-Laraib/Mirofy.git
-node Mirofy/packages/core/bin/mirofy.mjs demo
-```
-
-That works on a bare checkout with no `npm install`, because every package here
-has zero runtime dependencies. Nothing is downloaded at runtime and nothing
-phones home — there is no update check, because a tool that reaches the network
-to tell you about itself is a tool that reaches the network.
+Nothing is downloaded at runtime and nothing phones home — there is no update
+check, because a tool that reaches the network to tell you about itself is a
+tool that reaches the network.
 
 ## Try it in five commands
 

@@ -66,6 +66,22 @@ It now leads with how it was actually invoked: `node packages/core/bin/mirofy.mj
 render …` from a checkout, `mirofy render …` once installed. Neither is a guess
 about the reader's shell; both are what happened.
 
+### Published — `mirofy-cli@0.1.0`
+
+```
+npx mirofy-cli demo
+```
+
+Live on npm, MIT, no dependencies, 596 kB packed / 71 files. Verified by
+installing from the registry into an empty directory and rendering: 799 ms to
+install, a 718 kB diagram out.
+
+The README now leads with `npx`. It was told to by
+`scripts/check-readme-claims.mjs`, which watches the registry and had been
+holding the shorter instructions back precisely until this was true — the
+gate failed on the next run after publishing, unprompted, with the exact
+change to make.
+
 ### The package is `mirofy-cli`, because npm refused `mirofy`
 
 > 403 Forbidden — Package name too similar to existing package `minify`
