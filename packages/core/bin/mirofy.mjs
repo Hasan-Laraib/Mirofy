@@ -2000,6 +2000,37 @@ function pipelineStep(name) {
   return null;
 }
 
+const NEWLINE = String.fromCharCode(10);
+
+// What the scan could not read, as a sentence, or null when that is not the
+// story. The coverage report has always been written and nobody running `map`
+// opens it: someone pointed this at a Python repository, got two boxes out of
+// 266 files, and had to read the scanner's source to find out why. A diagram of
+// 0.8% of a system presented without comment is the overstatement this project
+// exists to refuse -- and it is worse inside a 700 KB interactive viewer, which
+// looks like a considered answer.
+function coverageNote(target) {
+  const coveragePath = path.join(target, 'scan', 'coverage.md');
+  if (!fs.existsSync(coveragePath)) return null;
+  const coverage = fs.readFileSync(coveragePath, 'utf8');
+  const summary = coverage.match(/Of (\d+) files: (\d+) analysed, \d+ with gaps, (\d+) not analysed/);
+  if (!summary) return null;
+  const [, total, analysed, unread] = summary.map(Number);
+  // Only when the unread part dominates. On a repository this tool does
+  // understand, the unread files are READMEs and images, and saying so every
+  // run would train people to skip the line that matters.
+  if (!total || unread <= analysed) return null;
+  const kinds = [...coverage.matchAll(/^\| `([^`]+)` \| (\d+) \|$/gm)]
+    .map((row) => `${row[2]} ${row[1]}`).slice(0, 3);
+  return [
+    `${unread} of ${total} files were not read by any adapter.`,
+    kinds.length ? `  Mostly: ${kinds.join(', ')}.` : '',
+    '  Mirofy currently reads JavaScript and TypeScript imports, package.json',
+    '  workspaces, Express and Next routes, and docker-compose. Nothing else.',
+    `  Every unread file is named in ${coveragePath}.`,
+  ].filter(Boolean).join(NEWLINE);
+}
+
 function commandMap(argv) {
   const flags = new Set(argv.filter((value) => value.startsWith('--')));
   const positional = argv.filter((value) => !value.startsWith('--'));
@@ -2035,15 +2066,21 @@ function commandMap(argv) {
   if (!drawn) {
     // An empty diagram is a real answer about a repository, and saying so is
     // better than rendering a blank page and calling it a success.
-    fail(['Nothing to draw: no dependencies between source directories were found.',
-      `Look at ${path.join(target, 'scan', 'coverage.md')} for what was read and what was not.`,
-    ].join(String.fromCharCode(10)));
+    // The most important place to explain it: nothing was drawn, and the
+    // reason is almost always that nothing could be read.
+    const why = coverageNote(target);
+    fail([
+      'Nothing to draw: no dependencies between source directories were found.',
+      why ? `${NEWLINE}${why}` : `Look at ${path.join(target, 'scan', 'coverage.md')} for what was read and what was not.`,
+    ].join(NEWLINE));
   }
 
   const output = path.resolve(positional[1] ?? path.join(target, 'architecture.html'));
   commandRender(['architecture', diagram, output, '--repo-root', target]);
-  console.log(`
-mirofy map: ${drawn} component(s) -> ${output}`);
+  console.log(`${NEWLINE}mirofy map: ${drawn} component(s) -> ${output}`);
+
+  const note = coverageNote(target);
+  if (note) console.log(`${NEWLINE}WARNING: ${note}`);
 }
 
 switch (command) {

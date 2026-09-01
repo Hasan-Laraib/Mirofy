@@ -15,6 +15,7 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { EvidenceGraph } from '../../evidence/src/graph.mjs';
 import { coverageReport, renderCoverage } from '../../evidence/src/coverage.mjs';
+import { repositoryFiles } from '../src/files.mjs';
 import { runAdapter } from '../src/adapter.mjs';
 import { workspaceAdapter } from '../src/adapters/workspace.mjs';
 import { importsAdapter } from '../src/adapters/imports.mjs';
@@ -62,6 +63,12 @@ for (const adapter of ADAPTERS) {
   console.log(`scan: ${adapter.id.padEnd(10)} ${String(facts.length).padStart(5)} facts  ${String(gaps.length).padStart(3)} gaps  ${String(inventory.length).padStart(4)} files  ${Date.now() - started} ms`);
 }
 
+// THE DENOMINATOR IS THE REPOSITORY, not the union of what the adapters
+// managed to look at. Built from the union, a repository written in a language
+// no adapter handles reported "Of 0 files: 0 analysed, 0 not analysed" --
+// every unread file invisible rather than listed. The files an adapter reached
+// are still folded in, so a path examined outside the walk cannot fall out.
+for (const file of repositoryFiles(repoRoot)) allFiles.add(file);
 const report = coverageReport(graph, { inventories, allFiles: [...allFiles] });
 
 fs.mkdirSync(out, { recursive: true });

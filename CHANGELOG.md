@@ -15,6 +15,47 @@ stops being one.
 
 ## 2026-09-01
 
+### The coverage report counted only what it could already read
+
+Someone pointed Mirofy at a Python repository. It produced two boxes from 266
+files -- the two JavaScript files in an `examples/` directory -- and reported:
+
+    Of 2 files: 2 analysed, 0 with gaps, 0 not analysed.
+
+Every number true. The impression false, and badly: a reader of coverage.md
+alone would conclude the repository was two files and had been fully understood.
+On a repository with no JavaScript at all it said `Of 0 files`, printed directly
+above its own sentence about how a percentage "silently claims its denominator
+is the whole system".
+
+The cause was one line in scan.mjs: the denominator was the union of the
+adapters' inventories -- the files an adapter had looked at. `coverageReport`
+already partitions correctly and already has a "not analysed -- no adapter
+examined these at all" bucket. That bucket could never fill, because a file no
+adapter handles was never a candidate. The tool was not failing to read those
+files; it was declining to admit they existed.
+
+The denominator is now the repository: every file git is not ignoring, of any
+type. The walk and the ignore rules moved to packages/scanner/src/files.mjs so
+the scan and the adapters cannot disagree about what "the files" means again.
+Mirofy's own report now reads 271 analysed, 8 with gaps, 110 not analysed of 389
+-- boring, as it should be, and the .json and .md in that 110 are visibly not a
+missing language.
+
+The not-analysed list is grouped by extension before it is named in full. Two
+hundred and sixty-four `.py` files listed one per line between the READMEs and
+the PNGs is technically complete and practically a way of not saying it.
+
+And `mirofy map` says it out loud, because nobody running a command opens the
+report it wrote. When the unread files outnumber the read ones it now names the
+proportion, the top extensions, and what Mirofy actually reads. Both exits do
+it -- the empty-diagram one most of all, since "nothing to draw" is almost
+always "nothing could be read".
+
+This does not add a Python adapter. It stops the tool from quietly overstating
+itself on every repository it cannot read, which is a different and more
+important thing.
+
 ### 0.2.0 crashed on the commonest three-module repository there is
 
 `A imports B`, `A imports C`, `B imports C`. Layered, that is three boxes in one

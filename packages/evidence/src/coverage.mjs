@@ -105,8 +105,30 @@ export function renderCoverage(report) {
   lines.push('');
   lines.push('No adapter examined these at all.');
   lines.push('');
-  for (const path of report.notAnalysed) lines.push(`- \`${path}\``);
-  lines.push('');
+  if (report.notAnalysed.length) {
+    // Grouped by extension FIRST, because this list is now the whole
+    // repository minus what was read, and the one fact a reader needs is
+    // usually "an entire language is missing here". Two hundred and sixty-four
+    // `.py` files named one per line, between the READMEs and the PNGs, is
+    // technically complete and practically a way of not saying it.
+    const byKind = new Map();
+    for (const file of report.notAnalysed) {
+      const dot = file.lastIndexOf('.');
+      const slash = file.lastIndexOf('/');
+      const kind = dot > slash + 1 ? file.slice(dot) : '(no extension)';
+      byKind.set(kind, (byKind.get(kind) ?? 0) + 1);
+    }
+    const ranked = [...byKind.entries()].sort((left, right) =>
+      right[1] - left[1] || left[0].localeCompare(right[0]));
+    lines.push('| type | files |');
+    lines.push('| --- | ---: |');
+    for (const [kind, count] of ranked) lines.push(`| \`${kind}\` | ${count} |`);
+    lines.push('');
+    // And still named, every one. A summary is where omissions hide; the table
+    // above is a finding aid for the list below, never a replacement for it.
+    for (const path of report.notAnalysed) lines.push(`- \`${path}\``);
+    lines.push('');
+  }
 
   return lines.join('\n');
 }

@@ -173,6 +173,54 @@ test('coverage buckets every file exactly once, and the buckets sum to the whole
     'a file no adapter examined must appear as not analysed, never silently dropped');
 });
 
+const EOL = String.fromCharCode(10);
+
+test('[2.17] the coverage denominator is the repository, not what the adapters could read', async () => {
+  const { repositoryFiles } = await import('../../scanner/src/files.mjs');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { execFileSync } = await import('node:child_process');
+
+  // A repository in a language no adapter handles. The scan built its
+  // denominator from the union of adapter inventories, so this reported
+  // "Of 0 files: 0 analysed, 0 not analysed" -- printed directly above its own
+  // sentence about denominators claiming to be the whole system. Every unread
+  // file was invisible rather than listed, and a reader of coverage.md alone
+  // would conclude the repository had been fully understood.
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'product-denominator-'));
+  fs.mkdirSync(path.join(root, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'src/cli.py'), ['def main():', '    return 1', ''].join(EOL));
+  fs.writeFileSync(path.join(root, 'src/graph.py'), ['def build():', '    return 2', ''].join(EOL));
+  fs.writeFileSync(path.join(root, 'README.md'), '# a repository' + EOL);
+  execFileSync('git', ['init', '-q'], { cwd: root, stdio: 'ignore' });
+
+  const files = repositoryFiles(root);
+  assert.ok(files.includes('src/cli.py'),
+    'a file no adapter can read must still be a candidate; that is what makes it a visible absence');
+  assert.ok(files.includes('README.md'), 'the denominator is every file, not every source file');
+  assert.equal(files.length, 3);
+});
+
+test('[2.17] a file git ignores is not counted against coverage', async () => {
+  const { repositoryFiles } = await import('../../scanner/src/files.mjs');
+  const fs = await import('node:fs');
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { execFileSync } = await import('node:child_process');
+
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'product-denominator-'));
+  fs.mkdirSync(path.join(root, 'generated'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.gitignore'), 'generated/' + EOL);
+  fs.writeFileSync(path.join(root, 'app.py'), 'x = 1' + EOL);
+  fs.writeFileSync(path.join(root, 'generated/out.py'), 'y = 2' + EOL);
+  execFileSync('git', ['init', '-q'], { cwd: root, stdio: 'ignore' });
+
+  const files = repositoryFiles(root);
+  assert.deepEqual(files, ['app.py'],
+    'build output is not unread source, and counting it would invent a coverage problem');
+});
+
 test('the rendered coverage report never fabricates a percentage (2.17)', async () => {
   const { renderCoverage } = await import('../../evidence/src/coverage.mjs');
   const report = await builtReport();
