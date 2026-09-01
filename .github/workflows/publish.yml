@@ -69,6 +69,14 @@ jobs:
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
+      # Trusted publishing is an npm CLI feature, and the npm bundled with Node 22
+      # predates it. Without it `npm publish` never performs the OIDC exchange,
+      # sends no credential, and the registry answers PUT with a bare 404 --
+      # "not found" for a package that plainly exists, which reads like a
+      # misconfigured trusted publisher and is not one. Pin a version that can
+      # do it.
+      - run: npm install -g npm@latest
+      - run: npm --version
       - run: npm ci
 
       # The tag is the release. A tag that does not match the version being
