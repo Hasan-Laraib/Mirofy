@@ -17,16 +17,17 @@
 </p>
 
 <p align="center">
-  <a href="https://hasan-laraib.github.io/Mirofy/self-model.html"><img src="assets/self-model.svg" alt="Mirofy's own architecture, derived from its own source code" width="880"></a>
+  <a href="https://hasan-laraib.github.io/Mirofy/gallery/architecture--classic.html"><img src="assets/viewer-hero.png" alt="A rendered Mirofy artifact open in a browser: ten services coloured by role, grouped inside an AWS region and a security group, with a legend naming each role" width="880"></a>
 </p>
 
 <p align="center">
-  <em>That diagram is not a mock-up. It is this repository, scanned by itself —
-  every box citing the manifest it came from, every arrow citing the import
-  lines that produced it.</em>
+  <em>This is the whole product: one HTML file, open in a browser. Every colour
+  in it is the system&rsquo;s own vocabulary &mdash; backend, database, cloud,
+  security, message bus, external &mdash; and nothing else. Colour never marks
+  where an arrow goes, only what a thing <strong>is</strong>.</em>
   <br>
-  <strong><a href="https://hasan-laraib.github.io/Mirofy/self-model.html">Open the live one ↗</a></strong> — click any
-  node for the file, line range and commit behind it.
+  <strong><a href="https://hasan-laraib.github.io/Mirofy/gallery/architecture--classic.html">Open this exact file ↗</a></strong> &mdash;
+  click any node for its evidence, trace what reaches it, search it, present it.
 </p>
 
 ---
@@ -43,6 +44,25 @@ nothing is known, the diagram **says so** instead of filling the gap.
 
 <p align="center">
   <img src="assets/pipeline.svg" alt="scan to model to compile to layout to render" width="880">
+</p>
+
+Run it against this repository and you get this — not a mock-up, and not drawn
+by hand:
+
+<p align="center">
+  <a href="https://hasan-laraib.github.io/Mirofy/self-model.html"><img src="assets/self-model.svg" alt="Mirofy's own architecture, derived from its own source code: twelve packages and the imports between them" width="820"></a>
+</p>
+
+<p align="center">
+  <em>Every box is the same colour here, and that is the point. All twelve of
+  these are the same thing — a package, derived from a manifest — so there is
+  nothing for colour to say, and it says nothing. The picture at the top is
+  colourful because that system genuinely has six kinds in it. A tool that
+  tinted these boxes to look livelier would be inventing a distinction it had
+  not found.</em>
+  <br>
+  <strong><a href="https://hasan-laraib.github.io/Mirofy/self-model.html">Open the live one ↗</a></strong> — click any
+  node for the file, line range and commit behind it.
 </p>
 
 ## Install

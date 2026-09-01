@@ -15,6 +15,43 @@ stops being one.
 
 ## 2026-09-01
 
+### The hero is the artifact now, and it is in colour
+
+The top of the README was the self-model: a tall, sparse, entirely grey diagram
+of twelve identical boxes. A reader met a screen and a half of it before reaching
+a sentence about what the tool does.
+
+It is now a real rendered artifact, captured from the shipped viewer -- ten
+services coloured by role inside an AWS region and a security group, with the
+legend naming each role. `scripts/build-screenshots.mjs` produces it and refuses
+to save it unless at least four kinds actually carry colour in that diagram; a
+colourful hero of a system whose colour meant nothing would argue against the
+rule the README states two sections later.
+
+The first attempt opened the Semantic Lens for extra colour and its card sat over
+the right half of the diagram, hiding five of the ten nodes. A hero of a system
+you cannot see is not a hero.
+
+### The self-model stays grey, on purpose, and now says why
+
+It moved down to sit beside the pipeline it illustrates, and its caption owns the
+thing that looked like a flaw. All twelve drawn components are `config-derived`
+`package` -- identical on every dimension the model records. There is no honest
+axis for colour there: kind is uniform because `package` is not an architecture
+schema type (row 1.20) and provenance is uniform because every one of them came
+from a manifest.
+
+Tinting them would have been the easy way to make the page livelier and would
+have meant inventing a distinction the tool had not found, on the front page of a
+project whose entire argument is that it does not do that.
+
+### Two checks on the pictures themselves
+
+Every image the README points at must exist, and the five viewer captures must be
+present as a set. A renamed asset leaves a broken image on the project's front
+page -- the most visible defect available, and nothing was watching for it. Both
+were planted.
+
 ### check:changelog now agrees with CI about what a path is
 
 The entry below named the scan's generated diagram. That file is real on the machine that

@@ -75,7 +75,11 @@ await browser.cdp.send('Emulation.setDeviceMetricsOverride', {
 }, sessionId);
 
 /** Run a step, fail loudly if its own assertion about the viewer is false. */
-async function shot(name, caption, script, page = artifact) {
+async function shot(name, caption, script, page = artifact, keep = null, viewport = null) {
+  if (viewport) {
+    await browser.cdp.send('Emulation.setDeviceMetricsOverride',
+      { ...viewport, deviceScaleFactor: 2, mobile: false }, sessionId);
+  }
   await navigate(pathToFileURL(page).href);
   const state = await evaluate(script);
   if (!state || state.error) {
@@ -87,8 +91,14 @@ async function shot(name, caption, script, page = artifact) {
   const { data } = await browser.cdp.send('Page.captureScreenshot', {
     format: 'png', captureBeyondViewport: false,
   }, sessionId);
+  if (viewport) {
+    // Put the shared viewport back, or every later shot inherits this one's.
+    await browser.cdp.send('Emulation.setDeviceMetricsOverride',
+      { width: 1440, height: 860, deviceScaleFactor: 2, mobile: false }, sessionId);
+  }
   const out = path.join(assets, `viewer-${name}.png`);
   fs.writeFileSync(out, Buffer.from(data, 'base64'));
+  if (keep) crop(out, keep);
   downscale(out);
   console.log(`  ${name.padEnd(9)} ${caption}`);
   return { name, caption, state };
@@ -97,6 +107,17 @@ async function shot(name, caption, script, page = artifact) {
 // Captured at 2x for sharpness, shipped at 1x-and-a-half. The comment above
 // promised this and the first version did not do it: four 2880px frames were
 // 1.4 MB of git history for images a README displays at about 900px.
+// The hero is a banner, so it is cropped to the toolbar-and-diagram band: the
+// artifact's closing note cards are good content but they make the frame tall,
+// and a hero that pushes the first sentence below the fold is working against
+// the page.
+function crop(file, keep) {
+  const program = 'import sys;from PIL import Image;'
+    + 'im=Image.open(sys.argv[1]);k=float(sys.argv[2]);'
+    + 'im.crop((0,0,im.width,int(im.height*k))).save(sys.argv[1],optimize=True)';
+  execFileSync('python', ['-c', program, file, String(keep)], { stdio: 'ignore' });
+}
+
 function downscale(file) {
   // One line on purpose: a multi-line -c program needs newline escaping, and
   // this file has already been bitten once by an escape that collapsed.
@@ -113,6 +134,39 @@ function downscale(file) {
 
 const steps = [];
 try {
+  // THE HERO. The self-model was the hero and it is grey for an honest reason:
+  // all twelve of its components are `config-derived` `package`, identical on
+  // every dimension the model records, so there is nothing for colour to mean.
+  // This artifact has six real kinds, so its colour carries the rule the README
+  // states -- and the Lens is open showing exactly that mapping, which is the
+  // one panel that makes the colour legible rather than decorative.
+  steps.push(await shot('hero', 'The hero: a real artifact, full colour', `(function () {
+    // No panel open. The first version opened the Semantic Lens and its card
+    // sat over the right half of the diagram, hiding five of the ten nodes --
+    // a hero of a system you cannot see. Interactivity is shown by the four
+    // captures further down; this frame's job is the diagram itself.
+    // The renderer paints kind onto the node classes (c-cloud, c-backend,
+    // c-database, ...). Counting those is the honest measure of "the colour
+    // means something"; there is no element with a legend class to count --
+    // the legend is drawn inside the SVG.
+    var STRUCTURAL = { 'c-grid': 1, 'c-mask': 1, 'c-region': 1 };
+    var kinds = {};
+    [].slice.call(document.querySelectorAll('svg [class]')).forEach(function (el) {
+      var raw = el.getAttribute('class') || '';
+      raw.split(' ').forEach(function (token) {
+        if (/^c-[a-z-]+$/.test(token) && !STRUCTURAL[token]) kinds[token] = 1;
+      });
+    });
+    var names = Object.keys(kinds);
+    // A hero whose colour means nothing would argue against the rule the README
+    // states two sections later. This is exactly why the self-model is not the
+    // hero any more: every one of its nodes is the same kind.
+    if (names.length < 4) {
+      return { error: 'only ' + names.length + ' kinds carry colour here (' + names.join(', ') + ')' };
+    }
+    return { kinds: names.length, roles: names.sort() };
+  })()`, artifact, 0.80, { width: 1680, height: 900 }));
+
   // Search. Typing a real query and reporting how many nodes matched, so the
   // shot cannot be of an empty finder that merely happens to be open.
   steps.push(await shot('search', 'Node Finder, filtered by a typed query', `(function () {
