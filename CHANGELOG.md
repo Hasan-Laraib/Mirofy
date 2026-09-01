@@ -15,6 +15,29 @@ stops being one.
 
 ## 2026-09-01
 
+### The dark hero turned the other four captures dark, silently
+
+Adding the dark hero broke the four capability captures in the same run. The
+viewer remembers a theme choice, so pressing its theme button for `hero-dark`
+persisted, and every capture after it inherited dark -- while the README text
+and the commit message both said those four were deliberately light. The
+screenshots and the words describing them disagreed, and nothing noticed.
+
+Found by rendering the README through GitHub's own markdown renderer and looking
+at it, which is the only reason it was caught before anyone else saw it.
+
+Two changes. Every shot now pins its theme, with `light` as the default rather
+than null, so a capture added later without thinking about it is still pinned.
+And the theme is verified from the CAPTURED IMAGE, not from CSS: reading a
+computed background was tried first and is useless here, because the artifact
+paints an inner container and both `html` and `body` stay light in the dark
+theme -- it failed a correct capture twice before that was clear. The pixels are
+what a reader sees, so the pixels are what is checked.
+
+Planted the case that matters: a step that flips the theme after the attribute
+assertion has already passed, where only the image can tell. It reports
+`search is dark (luma 7)`.
+
 ### The two animated graphics spent most of their loop half-built
 
 Rendering the README the way GitHub renders it showed the problem plainly:

@@ -75,12 +75,19 @@ await browser.cdp.send('Emulation.setDeviceMetricsOverride', {
 }, sessionId);
 
 /** Run a step, fail loudly if its own assertion about the viewer is false. */
-async function shot(name, caption, script, page = artifact, keep = null, viewport = null, theme = null) {
+async function shot(name, caption, script, page = artifact, keep = null, viewport = null, theme = 'light') {
   if (viewport) {
     await browser.cdp.send('Emulation.setDeviceMetricsOverride',
       { ...viewport, deviceScaleFactor: 2, mobile: false }, sessionId);
   }
   await navigate(pathToFileURL(page).href);
+  // EVERY shot pins its theme, and 'light' is the DEFAULT rather than null so a
+  // shot added later without thinking about it is still pinned and still
+  // verified. Leaving it unset let the viewer's remembered
+  // preference carry over: the hero-dark step pressed the theme button, the
+  // artifact persisted that, and all four capability captures after it came out
+  // dark while the README text and the commit message said they were light.
+  // State that survives a navigation is state a capture must not inherit.
   if (theme) {
     // Through the viewer's own control, not by forcing an attribute: the button
     // is what a reader would press, and if it ever stops working this fails
@@ -116,6 +123,19 @@ async function shot(name, caption, script, page = artifact, keep = null, viewpor
   fs.writeFileSync(out, Buffer.from(data, 'base64'));
   if (keep) crop(out, keep);
   downscale(out);
+  // Ground truth: the image itself. Reading a computed background was tried and
+  // is useless here -- this artifact paints an inner container, so html and body
+  // stay light in the dark theme and a correct capture was reported as broken.
+  // The pixels are what the reader sees, so the pixels are what gets checked.
+  if (theme) {
+    const probe = 'import sys;from PIL import Image;'
+      + 'im=Image.open(sys.argv[1]).convert("RGB").crop((0,0,40,40));'
+      + 'p=list(im.getdata());'
+      + 'print(round(sum(r*299+g*587+b*114 for r,g,b in p)/len(p)/1000))';
+    const luma = Number(execFileSync('python', ['-c', probe, out], { encoding: 'utf8' }).trim());
+    if (theme === 'dark' && luma > 110) throw new Error(`build-screenshots: ${name} is light (luma ${luma})`);
+    if (theme === 'light' && luma < 150) throw new Error(`build-screenshots: ${name} is dark (luma ${luma})`);
+  }
   console.log(`  ${name.padEnd(9)} ${caption}`);
   return { name, caption, state };
 }
@@ -187,7 +207,7 @@ try {
       return { error: 'only ' + names.length + ' kinds carry colour here (' + names.join(', ') + ')' };
     }
     return { kinds: names.length, roles: names.sort() };
-  })()`, artifact, 0.80, { width: 1680, height: 900 }));
+  })()`, artifact, 0.80, { width: 1680, height: 900 }, 'light'));
 
   // The same frame in the dark theme, so the README can hand each reader the
   // one matching the page they are already on -- the <picture> trick the logo
@@ -245,7 +265,7 @@ try {
     if (shown === 0) return { error: 'the query "api" matched nothing' };
     if (shown >= all) return { error: 'the query "api" narrowed nothing: ' + status.textContent };
     return { showing: status.textContent.trim(), from: all };
-  })()`));
+  })()`, artifact, null, null, 'light'));
 
   // Focus + Semantic Passport: the differentiator. The step asserts the
   // passport actually carries provenance, not just that a panel appeared.
@@ -276,7 +296,7 @@ try {
       repository: repository && !repository.hidden ? repository.textContent.trim() : null,
       citations: best.links,
     };
-  })()`, selfArtifact));
+  })()`, selfArtifact, null, null, 'light'));
 
   // Authored reachability: click a node, then trace upstream. The path lights
   // and everything off it dims -- the most visually distinctive thing here.
@@ -318,7 +338,7 @@ try {
       return { node: named, upstream: reach, status: said };
     }
     return { error: 'no node in this artifact reported any upstream reach' };
-  })()`));
+  })()`, artifact, null, null, 'light'));
 
   // Semantic Lens: the surface that makes provenance visible across the whole
   // diagram at once rather than one node at a time.
@@ -329,7 +349,7 @@ try {
     var panel = document.getElementById('semantic-lens');
     if (!panel || panel.hidden) return { error: 'the lens did not open' };
     return { controls: panel.querySelectorAll('button, input, select').length };
-  })()`));
+  })()`, artifact, null, null, 'light'));
 } finally {
   await browser.close();
   fs.rmSync(tmp, { recursive: true, force: true });
