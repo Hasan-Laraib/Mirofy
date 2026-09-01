@@ -15,6 +15,52 @@ stops being one.
 
 ## 2026-09-01
 
+### The README shows the viewer being used, not just pictures it made
+
+`scripts/build-screenshots.mjs` renders a real artifact, drives the shipped
+viewer through real clicks in real Chrome, and saves four frames: search
+narrowing a list, a Semantic Passport carrying a real citation, an upstream
+trace lighting a path, and the Semantic Lens across the whole diagram.
+
+It refuses to photograph a feature that did nothing, which it had to learn three
+times. The search shot was of an unfiltered list, so it now asserts the list
+shrank. The trace shot picked the first node in document order -- a source with
+no upstream -- and was indistinguishable from the passport shot; it now picks the
+node with the deepest reach, and the survey loop clears focus before selecting,
+because re-clicking the last-surveyed node toggled the selection off and saved an
+empty passport. The passport shot came from the authored example, which has no
+source citations, so it showed the evidence panel with the evidence missing --
+illustrating the one claim it exists to prove by not showing it. That frame now
+comes from this repository, where the citation is real.
+
+### The hero draws itself
+
+`assets/self-model.svg` is still the real thing -- this repository, scanned by
+itself, through the real pipeline -- but its dependency edges now arrive one at a
+time in colour and settle to grey, instead of appearing as a finished wall.
+
+It deliberately does not tint the boxes. All twelve components are the same kind,
+`package`, and the README states the rule two sections later: colour tells you
+what a node is, never where an arrow goes. Colouring them to look livelier would
+break the promise the picture exists to make. The colour here is on the edges and
+only while they move -- motion, not encoding.
+
+Because the hero is generated output that a script then decorates, it can rot
+with no error at all: re-running the CLI over `scan/diagram.json` writes a
+perfectly valid hero with the animation silently gone. Three checks now stand on
+it -- the decoration marker, every edge animated, and every drawn component
+present -- and a plain re-render was planted to prove the first two fire.
+
+### Adding a script changed the numbers, and the checks noticed
+
+`build-screenshots.mjs` loads the shared browser helper through a computed
+specifier, so the scanner recorded a new gap: 10 became 11. Nothing was wrong --
+that gap is real and correctly refused. But `check:readme` failed on the spot,
+in the README and in `pipeline.svg` at once, which is precisely what those checks
+were added for a few hours earlier. Facts and cited files moved too, and are now
+1,098 across 198.
+
+
 ### The README graphic was stating four numbers, three of them wrong
 
 `assets/pipeline.svg` said 230 files, 987 facts and 8 gaps. The repository was

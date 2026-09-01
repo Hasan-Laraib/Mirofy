@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1008" lang="en" display="block"><style>svg{width:100%;min-width:min(900px,100%);display:block;transform-origin:0 0;transition:transform 0.18s ease}.c-grid{stroke:#e2e8f0;fill:none}.c-mask{fill:#ffffff;stroke:none}.c-external{fill:rgba(148, 163, 184, 0.18);stroke:#64748b}.t-primary{fill:#0f172a}.t-muted{fill:#64748b}.t-external{fill:#64748b}svg .semantic-sigil{fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:0.76;pointer-events:none}svg .semantic-sigil>*{vector-effect:non-scaling-stroke}svg .semantic-sigil .sigil-fill{fill:currentColor;stroke:none}svg .s-external{color:#64748b}.a-default{stroke:#94a3b8;fill:none}.m-default{fill:#94a3b8}.m-emphasis{fill:#059669}.m-security{fill:#e11d48}.m-dashed{fill:#7c3aed}</style>
-        <title id="mirofy-diagram-title">Mirofy packages</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1108" lang="en" display="block"><style>svg{width:100%;min-width:min(900px,100%);display:block;transform-origin:0 0;transition:transform 0.18s ease}.c-grid{stroke:#e2e8f0;fill:none}.c-mask{fill:#ffffff;stroke:none}.c-external{fill:rgba(148, 163, 184, 0.18);stroke:#64748b}.t-primary{fill:#0f172a}.t-muted{fill:#64748b}.t-external{fill:#64748b}svg .semantic-sigil{fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:0.76;pointer-events:none}svg .semantic-sigil>*{vector-effect:non-scaling-stroke}svg .semantic-sigil .sigil-fill{fill:currentColor;stroke:none}svg .s-external{color:#64748b}.a-default{stroke:#94a3b8;fill:none}.m-default{fill:#94a3b8}.m-emphasis{fill:#059669}.m-security{fill:#e11d48}.m-dashed{fill:#7c3aed}/* build-hero */.a-default{stroke-dasharray:1;stroke-dashoffset:1;opacity:0;animation-duration:11s;animation-iteration-count:infinite;animation-timing-function:ease-in-out}.h-e0{animation-name:h-draw0}.h-e1{animation-name:h-draw1}.h-e2{animation-name:h-draw2}.h-e3{animation-name:h-draw3}.h-e4{animation-name:h-draw4}.h-e5{animation-name:h-draw5}.h-e6{animation-name:h-draw6}.h-e7{animation-name:h-draw7}.h-e8{animation-name:h-draw8}.h-e9{animation-name:h-draw9}.h-e10{animation-name:h-draw10}.h-e11{animation-name:h-draw11}.h-e12{animation-name:h-draw12}.h-e13{animation-name:h-draw13}.h-e14{animation-name:h-draw14}.h-e15{animation-name:h-draw15}.h-e16{animation-name:h-draw16}@keyframes h-draw0{0%,4.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}4.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}9.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}21.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw1{0%,7.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}8.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}12.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}24.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw2{0%,11.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}11.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}16.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}28.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw3{0%,14.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}15.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}19.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}31.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw4{0%,18.4%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}19.0%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}23.4%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}35.4%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw5{0%,22.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}22.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}27.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}39.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw6{0%,25.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}26.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}30.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}42.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw7{0%,29.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}29.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}34.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}46.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw8{0%,32.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}33.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}37.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}49.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw9{0%,36.4%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}37.0%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}41.4%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}53.4%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw10{0%,40.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}40.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}45.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}57.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw11{0%,43.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}44.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}48.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}60.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw12{0%,47.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}47.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}52.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}64.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw13{0%,50.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}51.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}55.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}67.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw14{0%,54.4%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}55.0%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}59.4%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}71.4%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw15{0%,58.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}58.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}63.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}75.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw16{0%,61.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}62.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}66.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}78.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@media (prefers-reduced-motion:reduce){.a-default{animation:none;opacity:1;stroke-dashoffset:0;stroke:#94a3b8}}</style>
+        <title id="mirofy-diagram-title">System model</title>
         <desc id="mirofy-diagram-description">An architecture diagram generated by Mirofy.</desc>
         <!-- Definitions -->
         <defs>
@@ -28,222 +28,237 @@
 
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path d="M 260 498.8 L 312 498.8 Q 320 498.8 320 490.8 L 320 218 Q 320 210 328 210 L 380 210" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 515.6 L 312 515.6 Q 320 515.6 320 523.6 L 320 602 Q 320 610 328 610 L 380 610" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 512.8 L 276 512.8 Q 284 512.8 284 520.8 L 284 559 Q 284 567 292 567 L 680 567" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 507.2 L 276 507.2 Q 284 507.2 284 499.2 L 284 468 Q 284 460 292 460 L 680 460" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 496 L 312 496 Q 320 496 320 488 L 320 118 Q 320 110 328 110 L 380 110" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 521.2 L 312 521.2 Q 320 521.2 320 529.2 L 320 802 Q 320 810 328 810 L 380 810" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 501.6 L 312 501.6 Q 320 501.6 320 493.6 L 320 318 Q 320 310 328 310 L 380 310" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 524 L 312 524 Q 320 524 320 532 L 320 902 Q 320 910 328 910 L 380 910" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 510 L 380 510" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 504.4 L 312 504.4 Q 320 504.4 320 496.4 L 320 418 Q 320 410 328 410 L 380 410" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 518.4 L 312 518.4 Q 320 518.4 320 526.4 L 320 702 Q 320 710 328 710 L 380 710" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 560 110 L 612 110 Q 620 110 620 118 L 620 538 Q 620 546 628 546 L 680 546" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 560 410 L 612 410 Q 620 410 620 418 L 620 438 Q 620 446 628 446 L 680 446" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 560 510 L 612 510 Q 620 510 620 502 L 620 482 Q 620 474 628 474 L 680 474" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 551.6 L 312 551.6 Q 320 551.6 320 543.6 L 320 318 Q 320 310 328 310 L 380 310" pathLength="1" class="a-default h-e0" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 568.4 L 312 568.4 Q 320 568.4 320 576.4 L 320 802 Q 320 810 328 810 L 380 810" pathLength="1" class="a-default h-e1" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 562.8 L 312 562.8 Q 320 562.8 320 570.8 L 320 602 Q 320 610 328 610 L 380 610" pathLength="1" class="a-default h-e2" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 565.6 L 312 565.6 Q 320 565.6 320 573.6 L 320 702 Q 320 710 328 710 L 380 710" pathLength="1" class="a-default h-e3" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 557.2 L 312 557.2 Q 320 557.2 320 549.2 L 320 518 Q 320 510 328 510 L 380 510" pathLength="1" class="a-default h-e4" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 548.8 L 312 548.8 Q 320 548.8 320 540.8 L 320 218 Q 320 210 328 210 L 380 210" pathLength="1" class="a-default h-e5" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 560 L 680 560" pathLength="1" class="a-default h-e6" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 546 L 312 546 Q 320 546 320 538 L 320 118 Q 320 110 328 110 L 380 110" pathLength="1" class="a-default h-e7" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 574 L 312 574 Q 320 574 320 582 L 320 1002 Q 320 1010 328 1010 L 380 1010" pathLength="1" class="a-default h-e8" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 554.4 L 312 554.4 Q 320 554.4 320 546.4 L 320 418 Q 320 410 328 410 L 380 410" pathLength="1" class="a-default h-e9" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 571.2 L 312 571.2 Q 320 571.2 320 579.2 L 320 902 Q 320 910 328 910 L 380 910" pathLength="1" class="a-default h-e10" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 380 110 L 356 110 Q 348 110 348 118 L 348 702 Q 348 710 356 710 L 380 710" pathLength="1" class="a-default h-e11" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 380 110 L 330 110 Q 322 110 322 118 L 322 402 Q 322 410 330 410 L 380 410" pathLength="1" class="a-default h-e12" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 463 140 L 463 180" pathLength="1" class="a-default h-e13" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 477 180 L 477 140" pathLength="1" class="a-default h-e14" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 560 510 L 612 510 Q 620 510 620 518 L 620 538 Q 620 546 628 546 L 680 546" pathLength="1" class="a-default h-e15" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 560 610 L 612 610 Q 620 610 620 602 L 620 582 Q 620 574 628 574 L 680 574" pathLength="1" class="a-default h-e16" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
 
         <!-- Components -->
         <g id="node-mirofy-conformance">
           <title>conformance · Architecture component · package</title>
-          <rect x="80" y="480" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="80" y="480" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(86 486) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="80" y="530" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="80" y="530" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(86 536) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="170" y="514" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">conformance</text>
-        <text x="170" y="532" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="170" y="564" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">conformance</text>
+        <text x="170" y="582" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
-        <g id="node-mirofy-core">
-          <title>core · Architecture component · package</title>
+        <g id="node-mirofy-cli">
+          <title>mirofy-cli · Architecture component · package</title>
           <rect x="380" y="80" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
           <rect x="380" y="80" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
           <g class="semantic-sigil s-external" transform="translate(386 86) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="470" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">core</text>
+          <text x="470" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">mirofy-cli</text>
         <text x="470" y="132" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
-        <g id="node-mirofy-evidence">
-          <title>evidence · Architecture component · package</title>
-          <rect x="680" y="430" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="680" y="430" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(686 436) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text x="770" y="464" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">evidence</text>
-        <text x="770" y="482" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
-        </g>
-
-        <g id="node-mirofy-explain">
-          <title>explain · Architecture component · package</title>
+        <g id="node-mirofy-layout">
+          <title>layout · Architecture component · package</title>
           <rect x="380" y="180" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
           <rect x="380" y="180" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
           <g class="semantic-sigil s-external" transform="translate(386 186) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="470" y="214" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">explain</text>
+          <text x="470" y="214" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">layout</text>
         <text x="470" y="232" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
-        <g id="node-mirofy-layout">
-          <title>layout · Architecture component · package</title>
-          <rect x="380" y="280" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="280" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 286) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text x="470" y="314" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">layout</text>
-        <text x="470" y="332" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
-        </g>
-
-        <g id="node-mirofy-model">
-          <title>model · Architecture component · package</title>
-          <rect x="380" y="380" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="380" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 386) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text x="470" y="414" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">model</text>
-        <text x="470" y="432" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
-        </g>
-
-        <g id="node-mirofy-scanner">
-          <title>scanner · Architecture component · package</title>
-          <rect x="380" y="480" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="480" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 486) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
-            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
-            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
-          </g>
-          <text x="470" y="514" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">scanner</text>
-        <text x="470" y="532" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
-        </g>
-
-        <g id="node-mirofy-viewer">
-          <title>viewer · Architecture component · package</title>
+        <g id="node-mirofy-evidence">
+          <title>evidence · Architecture component · package</title>
           <rect x="680" y="530" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
           <rect x="680" y="530" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
           <g class="semantic-sigil s-external" transform="translate(686 536) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="770" y="564" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">viewer</text>
+          <text x="770" y="564" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">evidence</text>
         <text x="770" y="582" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
-        <g id="node-mirofy-benchmark">
-          <title>benchmark · Architecture component · package</title>
+        <g id="node-mirofy-explain">
+          <title>explain · Architecture component · package</title>
+          <rect x="380" y="280" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="380" y="280" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(386 286) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text x="470" y="314" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">explain</text>
+        <text x="470" y="332" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+        </g>
+
+        <g id="node-mirofy-import">
+          <title>import · Architecture component · package</title>
+          <rect x="380" y="380" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="380" y="380" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(386 386) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text x="470" y="414" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">import</text>
+        <text x="470" y="432" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+        </g>
+
+        <g id="node-mirofy-model">
+          <title>model · Architecture component · package</title>
+          <rect x="380" y="480" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="380" y="480" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(386 486) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text x="470" y="514" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">model</text>
+        <text x="470" y="532" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+        </g>
+
+        <g id="node-mirofy-scanner">
+          <title>scanner · Architecture component · package</title>
           <rect x="380" y="580" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
           <rect x="380" y="580" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
           <g class="semantic-sigil s-external" transform="translate(386 586) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="470" y="614" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">benchmark</text>
+          <text x="470" y="614" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">scanner</text>
         <text x="470" y="632" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
-        <g id="node-mirofy-compile">
-          <title>compile · Architecture component · package</title>
+        <g id="node-mirofy-viewer">
+          <title>viewer · Architecture component · package</title>
           <rect x="380" y="680" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
           <rect x="380" y="680" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
           <g class="semantic-sigil s-external" transform="translate(386 686) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="470" y="714" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">compile</text>
+          <text x="470" y="714" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">viewer</text>
         <text x="470" y="732" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
-        <g id="node-mirofy-export">
-          <title>export · Architecture component · package</title>
+        <g id="node-mirofy-benchmark">
+          <title>benchmark · Architecture component · package</title>
           <rect x="380" y="780" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
           <rect x="380" y="780" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
           <g class="semantic-sigil s-external" transform="translate(386 786) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="470" y="814" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">export</text>
+          <text x="470" y="814" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">benchmark</text>
         <text x="470" y="832" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
-        <g id="node-mirofy-import">
-          <title>import · Architecture component · package</title>
+        <g id="node-mirofy-compile">
+          <title>compile · Architecture component · package</title>
           <rect x="380" y="880" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
           <rect x="380" y="880" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
           <g class="semantic-sigil s-external" transform="translate(386 886) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="470" y="914" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">import</text>
+          <text x="470" y="914" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">compile</text>
         <text x="470" y="932" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+        </g>
+
+        <g id="node-mirofy-export">
+          <title>export · Architecture component · package</title>
+          <rect x="380" y="980" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="380" y="980" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(386 986) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text x="470" y="1014" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">export</text>
+        <text x="470" y="1032" class="t-external" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <!-- Connection labels -->
         <g>
-          <rect x="298.2" y="334.4" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="344.4" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="410.8" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="420.8" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="542.8" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="552.8" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="669.2" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="679.2" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="262.2" y="519.9" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="284" y="529.9" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="584.4" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="594.4" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="262.2" y="463.6" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="284" y="473.6" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="617.8" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="627.8" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="283" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="293" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="513.6" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="523.6" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="645.6" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="655.6" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="359.4" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="369.4" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="385.8" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="395.8" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="448.2" y="540" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="470" y="550" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="697" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="707" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="308" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="318" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="490" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="500" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="772" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="782" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="437.2" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="447.2" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="462.2" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="472.2" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="298.2" y="594.2" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="320" y="604.2" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="270.2" y="720.6" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="292" y="730.6" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="598.2" y="308" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="620" y="318" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="326.2" y="424" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="348" y="434" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="598.2" y="408" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="620" y="418" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="244.2" y="240" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="266" y="250" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
         <g>
-          <rect x="598.2" y="472" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
-          <text x="620" y="482" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+          <rect x="413.2" y="138" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="435" y="148" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+        </g>
+        <g>
+          <rect x="483.2" y="160" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="505" y="170" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+        </g>
+        <g>
+          <rect x="598.2" y="508" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="620" y="518" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
+        </g>
+        <g>
+          <rect x="598.2" y="572" width="43.6" height="14" rx="3" class="c-mask" fill="#ffffff" stroke="none"/>
+          <text x="620" y="582" class="t-muted" font-size="8" text-anchor="middle" fill="#64748b">imports</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
@@ -251,10 +266,10 @@
 
         <!-- Legend -->
         <g>
-          <text x="40" y="972" class="t-primary" font-size="12" font-weight="650" fill="#0f172a">Legend</text>
+          <text x="40" y="1072" class="t-primary" font-size="12" font-weight="650" fill="#0f172a">Legend</text>
           <g>
-            <rect x="40" y="983" width="16" height="10" rx="2.5" class="c-external" stroke-width="1" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-            <text x="62" y="992" class="t-muted" font-size="10" font-weight="500" fill="#64748b">External</text>
+            <rect x="40" y="1083" width="16" height="10" rx="2.5" class="c-external" stroke-width="1" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+            <text x="62" y="1092" class="t-muted" font-size="10" font-weight="500" fill="#64748b">External</text>
           </g>
         </g>
       </svg>

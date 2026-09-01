@@ -251,6 +251,37 @@ svgFigure('pipeline.svg: drawn', /([\d,]+) drawn/, drawn);
 // the sentence the graphic is making has stopped being true.
 svgFigure('pipeline.svg: named', /· ([\d,]+) named</, components - drawn);
 
+// assets/self-model.svg is generated output that a script then decorates, which
+// is a shape that rots quietly: anyone re-running the CLI over scan/diagram.json
+// writes a perfectly valid hero with the animation silently gone, and no error
+// anywhere. So the committed copy has to prove it came from scripts/build-hero.mjs
+// and still describes the model this repository has now.
+const hero = fs.readFileSync(path.join(repoRoot, 'assets/self-model.svg'), 'utf8');
+assertThat(
+  'self-model.svg came from build-hero.mjs',
+  hero.includes('/* build-hero */'),
+  hero.includes('/* build-hero */') ? 'the decoration marker is present'
+    : 'the hero looks like a plain render -- run: node scripts/build-hero.mjs',
+);
+const heroEdges = (hero.match(/a-default h-e\d+/g) ?? []).length;
+const heroPaths = (hero.match(/class="a-default/g) ?? []).length;
+assertThat(
+  'every edge in the hero is animated',
+  heroEdges > 0 && heroEdges === heroPaths,
+  `${heroEdges} of ${heroPaths} dependency edges carry a reveal`,
+);
+// Structural staleness is the one that matters: a hero drawn before a package
+// existed is a picture of a system this repository no longer is.
+const undrawnInHero = (view.components ?? view.nodes ?? [])
+  .map((node) => node.label ?? node.id)
+  .filter((label) => label && !hero.includes(String(label).split('/').pop()));
+assertThat(
+  'the hero shows the components the model draws',
+  undrawnInHero.length === 0,
+  undrawnInHero.length === 0 ? `all ${(view.components ?? view.nodes ?? []).length} present`
+    : `missing from the hero: ${undrawnInHero.join(', ')}`,
+);
+
 // assets/evidence.svg quotes ONE fact, in full, as the proof that every drawn
 // edge carries its source. It has to be a fact this repository actually holds:
 // a graphic arguing "nothing is inferred silently", illustrated with an invented

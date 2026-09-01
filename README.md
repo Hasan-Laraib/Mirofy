@@ -106,8 +106,8 @@ npm run layout                  # view        → positioned document
 node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html --repo-root .
 ```
 
-Against **this repository** it records **1,089 facts** across **196 files**,
-with **10 gaps** it could not read; derives **19 components and 24
+Against **this repository** it records **1,098 facts** across **198 files**,
+with **11 gaps** it could not read; derives **19 components and 24
 relationships** — every one citing the file and line it came from — and draws
 **twelve**, recording what it left out and why.
 
@@ -187,6 +187,47 @@ fixtures in one pass · <a href="https://hasan-laraib.github.io/Mirofy/gallery/s
   <strong><a href="https://hasan-laraib.github.io/Mirofy/">All thirty are live ↗</a></strong> — five types × six
   presets, rebuilt from every commit.
 </p>
+
+### The viewer, actually being used
+
+Not mock-ups. Every frame below is a capture of the shipped viewer, driven
+through real clicks by `scripts/build-screenshots.mjs` — which fails rather than
+reuse an old picture if a control is renamed or a panel stops opening, and
+refuses to save a shot of a feature that did nothing.
+
+<table>
+<tr>
+<td width="50%" valign="top">
+<img src="assets/viewer-search.png" alt="The Node Finder open, a query typed, the list narrowed to two of ten nodes" width="100%">
+<p><strong>Find anything.</strong> Typing <code>api</code> narrows ten nodes to
+two. The capture asserts the list actually shrank — a screenshot of an unfiltered
+list is not a screenshot of search.</p>
+</td>
+<td width="50%" valign="top">
+<img src="assets/viewer-passport.png" alt="A Semantic Passport showing a verified source-backed citation with its repository and commit" width="100%">
+<p><strong>Ask a node where it came from.</strong> <code>conformance</code>,
+<code>source-backed</code>, cited to <code>packages/conformance/package.json</code>
+at a pinned commit. This one is captured from <em>this repository</em>, because
+the authored example has no citations and a passport with the evidence missing
+would illustrate the claim by not showing it.</p>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<img src="assets/viewer-trace.png" alt="Authored reachability traced upstream from Worker: six nodes, six links, five hops, everything off the path dimmed" width="100%">
+<p><strong>Follow what reaches what.</strong> Upstream of <code>Worker</code>:
+six nodes, six links, five hops — lit, with everything off the path dimmed. The
+capture picks the node with the <em>deepest</em> reach, so the picture is of a
+path and not of one arrow.</p>
+</td>
+<td width="50%" valign="top">
+<img src="assets/viewer-lens.png" alt="The Semantic Lens comparing system roles across the whole diagram" width="100%">
+<p><strong>Compare roles across the whole system.</strong> The Semantic Lens
+answers provenance and kind for every node at once, rather than one node at a
+time.</p>
+</td>
+</tr>
+</table>
 
 ---
 
