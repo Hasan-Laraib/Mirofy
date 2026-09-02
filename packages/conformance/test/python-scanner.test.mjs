@@ -18,6 +18,7 @@ import { runAdapter } from '../../scanner/src/adapter.mjs';
 const REVISION = 'c'.repeat(40);
 const NL = String.fromCharCode(10);
 const TRIPLE = '"'.repeat(3);
+const CRLF = String.fromCharCode(13) + String.fromCharCode(10);
 
 /** A throwaway git repository. git, because the walk asks it what to ignore. */
 function makeRepo(files) {
@@ -104,6 +105,24 @@ test('[2.8] stdlib is named rather than drawn, on BOTH import forms', async () =
     'package:python:os',          // stdlib via plain import
     'package:python:typing',      // stdlib via from-import
   ]);
+});
+
+test('[2.8] a CRLF checkout is read, not silently skipped', async () => {
+  // JavaScript's `.` does not match a carriage return -- it counts as a line
+  // terminator -- so `(.+)$` fails on every line of a CRLF file. This adapter
+  // read 8 of 264 files on a Windows clone of a real repository and reported
+  // ZERO gaps while doing it: no error, no warning, just a nearly empty
+  // diagram. Every Windows checkout of every Python project would have hit it.
+  const repoRoot = makeRepo({
+    'src/a.py': ['import os', 'from .other import thing', ''].join(CRLF),
+    'src/other.py': 'thing = 1' + CRLF,
+  });
+  const { facts, gaps } = await runAdapter(pythonAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, []);
+  assert.deepEqual(facts.map((fact) => fact.object).sort(), ['package:python:os', 'src/other.py'],
+    'a CRLF file must yield the same facts an LF one does');
+  // And the line numbers survive the split.
+  assert.deepEqual(facts.find((f) => f.object === 'src/other.py').location.lines, [2, 2]);
 });
 
 test('[2.8] a computed python import is a Gap with its line, never a guessed fact', async () => {

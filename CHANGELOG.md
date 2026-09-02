@@ -15,6 +15,33 @@ stops being one.
 
 ## 2026-09-02
 
+### The Python adapter read almost nothing on a CRLF checkout
+
+JavaScript's `.` does not match a carriage return -- it counts as a line
+terminator -- so `(.+)$` fails on every line of a CRLF file. Both import
+patterns in the Python adapter end that way. On a Windows clone of a real
+264-file Python repository it read **8 files** and reported **zero gaps** doing
+it: no error, no warning, just a nearly empty diagram that looked like a correct
+answer. Every Windows checkout of every Python project would have hit it.
+
+Splitting on `/?
+/` instead of `'
+'` fixes it. On that same repository:
+
+    python facts     29  ->  1,281
+    components       16  ->  74
+    relationships    12  ->  85
+    gaps              0  ->  1   (a real one, now visible)
+
+Two things worth keeping. The JavaScript adapter was never affected, which is
+why nothing in this repository -- LF throughout, and the only place the scanner
+had been exercised -- could have caught it. And the failure reported ZERO GAPS
+while reading three percent of the files, because "I found nothing here" and
+"there is nothing here" are indistinguishable from outside. That is the exact
+confusion this project exists to refuse, arriving through a regex.
+
+Released as 0.3.4.
+
 ### The READMEs say what it reads, and the npm page stops being an internal note
 
 Python support shipped without the README saying so beyond one sentence bolted

@@ -209,7 +209,11 @@ export const pythonAdapter = {
         continue;
       }
       const code = stripNonCode(source);
-      const lines = code.split('\n');
+      // Split on CRLF as well as LF. JavaScript's `.` does not match a carriage
+      // return -- it counts as a line terminator -- so `(.+)$` fails on every line
+      // of a CRLF checkout. This adapter read 8 of 264 files on a Windows clone
+      // and reported no gaps at all: silent, and total.
+      const lines = code.split(/\r?\n/);
 
       lines.forEach((line, index) => {
         const lineNumber = index + 1;
