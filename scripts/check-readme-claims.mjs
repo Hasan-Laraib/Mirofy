@@ -405,6 +405,30 @@ assertThat(
 // So the registry decides which of the two this file is allowed to be. When
 // npm cannot be reached the question is not asked -- being offline is not
 // evidence about anything.
+const i18nSource = fs.readFileSync(
+  path.join(repoRoot, 'packages/core/renderers/shared/i18n.mjs'), 'utf8');
+// The passport line the README quotes has to be the line the viewer renders.
+// A README arguing that a capped list must announce its cap, illustrated with
+// a phrase the artifact does not use, is the same defect one level up.
+// Read with indexOf rather than a regular expression. Every regex written
+// into this repository through a generated patch has had its backslashes
+// collapse at least once, and a pattern that quietly matches nothing turns a
+// check into a decoration.
+const KEY = "'viewer.passport.source.partial': ['";
+const keyAt = i18nSource.indexOf(KEY);
+const partial = keyAt < 0 ? null
+  : i18nSource.slice(keyAt + KEY.length, i18nSource.indexOf("'", keyAt + KEY.length));
+const quotedPassport = partial
+  && partial.split('{shown}').join('3').split('{total}').join('43');
+assertThat(
+  'the passport line the README quotes is the one the viewer renders',
+  Boolean(quotedPassport) && readme.includes(quotedPassport),
+  quotedPassport
+    ? (readme.includes(quotedPassport) ? `README quotes "${quotedPassport}"`
+      : `README does not contain: "${quotedPassport}"`)
+    : 'viewer.passport.source.partial is not in the i18n table',
+);
+
 const readmeTellsYouToNpx = /^\s*npx mirofy-cli /m.test(readme);
 const readmeSaysNotLive = /`npx mirofy-cli` is not live yet/.test(readme);
 let published = null;

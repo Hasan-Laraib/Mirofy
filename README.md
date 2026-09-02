@@ -10,6 +10,7 @@
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/mirofy-cli"><img src="https://img.shields.io/npm/v/mirofy-cli?style=flat-square&color=3b82f6&label=mirofy-cli" alt="mirofy-cli on npm"></a>
   <img src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square" alt="MIT licensed">
   <img src="https://img.shields.io/badge/runtime%20dependencies-0-7c3aed?style=flat-square" alt="Zero runtime dependencies">
   <img src="https://img.shields.io/badge/conformance-81%20rows%20proved-3b82f6?style=flat-square" alt="81 conformance rows proved without a browser">
@@ -300,7 +301,13 @@ exists, not whether something is a "backend". 784 imports of Node builtins are
 blanked before parsing — a docstring full of example imports would otherwise
 become edges the code does not have, cited to prose. A citation with no
 pinned commit to verify against is discarded rather than shown, because a
-citation nobody can check is worse than none.
+citation nobody can check is worse than none — `map` reads the commit from
+your `origin` remote, or takes `--repo-url` and `--revision` when there is no
+remote to read.
+
+A passport lists at most three sources, because forty-three links is not a
+passport. It says **“Showing 3 of 43 cited sources”** when it does, so a bound on the
+drawing is never mistaken for a claim about the evidence.
 
 ### It answers questions about your system
 
@@ -417,6 +424,10 @@ model — not a worse one, a different one. Ours is the second kind.
 - **Route Probe** — resolve a directed path and see it traced, hop by hop
 - **Semantic Passport** — click a node for its type, tags and cited evidence,
   with a **Verified Source Beacon** on anything backed by a pinned commit
+- **Your code, drawn apart from everyone else’s** — a module you wrote is
+  solid, a third-party package is dashed. Not a colour: the colour-blind-safe
+  preset already spends all seven of its hues on the seven semantic roles, so
+  an eighth would be a distinction only some readers could see
 - **Guided views**, presentation mode, motion governor, and `?embed=1`
 - Three exports, copied straight to the clipboard:
   - **Export → Share Card** — a 1200×630 PNG in the current theme and preset
