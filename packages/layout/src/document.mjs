@@ -341,24 +341,68 @@ export function skipLevelDetours(edges, positions, size) {
     // layers began wrapping, a source in the top row with three nodes beneath it
     // had no clear way down at all, so the edge stayed straight and ran through
     // whatever sat between the columns.
+    // Midway between one column's right edge and the next column's left.
+    // Outside the outermost columns there is no neighbour, so fall back to a
+    // fixed margin -- the canvas edge is not an obstacle.
+    const gutterRight = (x) => {
+      const next = columns[columns.indexOf(x) + 1];
+      return next === undefined ? x + width + 40 : (x + width + next) / 2;
+    };
+    const gutterLeft = (x) => {
+      const previous = columns[columns.indexOf(x) - 1];
+      return previous === undefined ? x - 40 : (previous + width + x) / 2;
+    };
+    const goingRight = from[0] < to[0];
+    const exitX = goingRight ? gutterRight(from[0]) : gutterLeft(from[0]);
+    const entryX = goingRight ? gutterLeft(to[0]) : gutterRight(to[0]);
+
     let placed = null;
-    let side = 'bottom';
     for (let step = 0; step < 8 && !placed; step += 1) {
       const below = step % 2 === 0;
       const nudge = 34 + (((channel + step) >> 1) % 4) * 24;
       const channelY = below ? lowest + nudge : highest - nudge;
       if (channelY <= 8) continue;
-      const edgeY = below ? height : 0;
-      const a = /** @type {[number, number]} */ ([from[0] + width / 2, channelY]);
-      const b = /** @type {[number, number]} */ ([to[0] + width / 2, channelY]);
-      const clear = segmentIsClear([from[0] + width / 2, from[1] + edgeY], a, entries, size, [edge.from, edge.to])
-        && segmentIsClear([to[0] + width / 2, to[1] + edgeY], b, entries, size, [edge.from, edge.to])
-        && segmentIsClear(a, b, entries, size, [edge.from, edge.to]);
-      if (clear) { placed = [a, b]; side = below ? 'bottom' : 'top'; }
+      // Into the GUTTER, not straight down. Dropping from the node's own
+      // centre means dropping through its own column, and a full column has
+      // no way out: layout -> cli could go neither below (model, scanner) nor
+      // above (explain), so the edge stayed straight and ran through compile.
+      // Three edges of this repository's own twelve did exactly that.
+      //
+      // The vertical space BETWEEN two columns is empty by construction --
+      // that is what makes it a gutter -- so the riser goes there.
+      //
+      // Every corner is named. `via` points are joined by STRAIGHT segments,
+      // not routed orthogonally, so two of them describe a diagonal and the
+      // endpoint-side gate refuses it: out the right face at [260, 210] to a
+      // channel point at [320, 46] is not a rightward departure. Four points
+      // spell the L-shapes out -- out, down, across, up, in.
+      const fromY = from[1] + height / 2;
+      const toY = to[1] + height / 2;
+      const fromAnchor = /** @type {[number, number]} */ (
+        [goingRight ? from[0] + width : from[0], fromY]);
+      const toAnchor = /** @type {[number, number]} */ (
+        [goingRight ? to[0] : to[0] + width, toY]);
+      const corners = /** @type {[number, number][]} */ ([
+        [exitX, fromY], [exitX, channelY], [entryX, channelY], [entryX, toY],
+      ]);
+      const path = [fromAnchor, ...corners, toAnchor];
+      let clear = true;
+      for (let leg = 0; leg < path.length - 1 && clear; leg += 1) {
+        clear = segmentIsClear(path[leg], path[leg + 1], entries, size, [edge.from, edge.to]);
+      }
+      if (clear) placed = corners;
     }
     channel += 1;
     if (!placed) continue;
-    detours.set(index, { fromSide: side, toSide: side, via: placed });
+    // The sides follow the gutter, not the channel: the edge leaves through
+    // the face nearest its riser and arrives through the far one. Saying
+    // 'bottom' here while routing out the side is what produced sixteen
+    // crossings where three had been.
+    detours.set(index, {
+      fromSide: goingRight ? 'right' : 'left',
+      toSide: goingRight ? 'left' : 'right',
+      via: placed,
+    });
   }
   return detours;
 }

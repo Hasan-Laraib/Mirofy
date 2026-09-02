@@ -145,7 +145,7 @@
   <g class="stage s2">
     <rect class="box edge e2" x="194" y="42" width="150" height="62" rx="5"/>
     <text class="lbl" x="210" y="68">evidence graph</text>
-    <text class="sub" x="210" y="86">1,100 facts · 11 gaps</text>
+    <text class="sub" x="210" y="86">1,100 facts · 14 gaps</text>
   </g>
   <path class="link l2" d="M350 73 L374 73"/>
   <polygon class="tip p2" points="374,73 367,69 367,77" fill="#6d28d9"/>

@@ -160,7 +160,7 @@ node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html
 ```
 
 Against **this repository** it records **1,100 facts** across **198 files**,
-with **11 gaps** it could not read; derives **18 components and 23
+with **14 gaps** it could not read; derives **18 components and 20
 relationships** — every one citing the file and line it came from — and draws
 **twelve**, recording what it left out and why.
 

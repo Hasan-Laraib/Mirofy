@@ -37,6 +37,13 @@ run([path.join(repoRoot, 'packages/scanner/bin/scan.mjs')], 'scan');
 run([path.join(repoRoot, 'packages/model/bin/model.mjs'), '--from-graph',
   '--graph', path.join(repoRoot, 'scan/evidence-graph.json')], 'model');
 run([path.join(repoRoot, 'packages/compile/bin/compile.mjs')], 'compile');
+// The step this was missing. scan, model and compile were re-run and then a
+// diagram.json from some EARLIER run was rendered, so the hero could show a
+// graph the current view no longer had -- caught when view.json listed `mcp`
+// and the freshly built hero did not.
+run([path.join(repoRoot, 'packages/layout/bin/layout.mjs'),
+  '--view', path.join(repoRoot, 'scan/view.json'),
+  '--out', path.join(repoRoot, 'scan/diagram.json')], 'layout');
 // standard, not showcase: this repository's own package graph does not pass the
 // showcase Proper Crossing Gate (row 3.1). `conformance` fans out to nine
 // packages and those runs cross the cli-to-viewer edge. That is the gate being

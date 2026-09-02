@@ -437,11 +437,79 @@ test('[1.20] an edge that skips a column routes around what sits in it', () => {
   const detours = skipLevelDetours([{ from: 'a', to: 'c' }], positions, size);
   const route = detours.get(0);
   assert.ok(route, 'the skip-level edge was left to run through the node between its ends');
-  assert.equal(route.fromSide, 'bottom');
-  assert.equal(route.toSide, 'bottom');
-  // The channel clears the bottom of every box, so it cannot re-enter a row.
-  const lowest = 100 + size[1];
-  for (const [, y] of route.via) assert.ok(y > lowest, `waypoint at ${y} is not below ${lowest}`);
+
+  // Asserted as the INVARIANT -- no part of the route touches the box in the
+  // middle -- rather than as one particular shape. The first version of this
+  // test named the shape ('bottom' on both ends, every waypoint below every
+  // box) and so failed the day the route improved, while a route that dived
+  // below and came back up THROUGH b would have satisfied every line of it.
+  assert.equal(route.fromSide, 'right', 'a left-to-right edge leaves by the right face');
+  assert.equal(route.toSide, 'left');
+
+  const [width, height] = size;
+  const anchors = [
+    [positions.a[0] + width, positions.a[1] + height / 2],
+    ...route.via,
+    [positions.c[0], positions.c[1] + height / 2],
+  ];
+  const [bx, by] = positions.b;
+  /** Does the axis-aligned segment p->q enter b's box? */
+  const hitsB = (p, q) => {
+    const [minX, maxX] = [Math.min(p[0], q[0]), Math.max(p[0], q[0])];
+    const [minY, maxY] = [Math.min(p[1], q[1]), Math.max(p[1], q[1])];
+    return maxX > bx && minX < bx + width && maxY > by && minY < by + height;
+  };
+  for (let leg = 0; leg < anchors.length - 1; leg += 1) {
+    assert.ok(!hitsB(anchors[leg], anchors[leg + 1]),
+      `segment ${JSON.stringify(anchors[leg])} -> ${JSON.stringify(anchors[leg + 1])} `
+      + `runs through the box at ${JSON.stringify(positions.b)}`);
+  }
+  // And the crossing run really does clear the row, rather than threading a
+  // gap that only happens to be empty in this fixture.
+  const lowest = 100 + height;
+  const channel = route.via.filter(([, y]) => y > lowest || y < 100);
+  assert.ok(channel.length >= 2, 'the route never leaves the row it started in');
+});
+
+test('[1.20] a skip-level edge escapes even when its own column is full', () => {
+  // The case the three-in-a-row fixture cannot reach, and the one that was
+  // actually broken. The detour used to drop from the source's own centre,
+  // which means dropping through the source's own COLUMN -- fine when the
+  // source is alone in it, impossible when it is not. Here `src` has a
+  // neighbour above and below, so there is no way down and no way up, and the
+  // old router gave up and left the edge running straight through `mid`.
+  //
+  // This repository's own map hit it on three of twelve edges, which is how
+  // it was found: adding the missing layout step to build-hero produced a
+  // diagram the Clean Flow gate refused.
+  /** @type {Record<string, [number, number]>} */
+  const positions = {
+    src: [380, 180], above: [380, 80], below: [380, 280],
+    mid: [680, 180], dst: [980, 180],
+  };
+  const size = /** @type {[number, number]} */ ([180, 60]);
+  const route = skipLevelDetours([{ from: 'src', to: 'dst' }], positions, size).get(0);
+  assert.ok(route, 'a full column left the edge running straight through mid');
+
+  const [width, height] = size;
+  const path = [
+    [positions.src[0] + width, positions.src[1] + height / 2],
+    ...route.via,
+    [positions.dst[0], positions.dst[1] + height / 2],
+  ];
+  const hits = ([bx, by]) => (p, q) => {
+    const [minX, maxX] = [Math.min(p[0], q[0]), Math.max(p[0], q[0])];
+    const [minY, maxY] = [Math.min(p[1], q[1]), Math.max(p[1], q[1])];
+    return maxX > bx && minX < bx + width && maxY > by && minY < by + height;
+  };
+  for (const name of ['above', 'below', 'mid']) {
+    const blocked = hits(positions[name]);
+    for (let leg = 0; leg < path.length - 1; leg += 1) {
+      assert.ok(!blocked(path[leg], path[leg + 1]),
+        `segment ${JSON.stringify(path[leg])} -> ${JSON.stringify(path[leg + 1])} `
+        + `runs through ${name} at ${JSON.stringify(positions[name])}`);
+    }
+  }
 });
 
 test('[1.20] a skip-level edge over an empty column is left straight', () => {
