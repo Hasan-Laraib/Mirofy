@@ -10,7 +10,7 @@
 // clean, and the tarball actually runs when installed. It is deliberately
 // slower than a publish would otherwise be. That is the trade.
 
-import { execFileSync, execSync } from 'node:child_process';
+import { execFileSync, execSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -186,6 +186,97 @@ try {
     refuse(`the installed package mapped ${JSON.stringify(drawn)}; expected both source modules`);
   }
 
+  // Every command the CLI ADVERTISES, run from the installed tarball.
+  //
+  // Rendering and mapping were the only two exercised, and `files` is an
+  // allowlist: two commands shipped to the registry that died on the first
+  // call with "Cannot find module", because the scripts/ helpers they spawn
+  // were not in it. The gate above passed the whole time -- neither command
+  // was on the path it walked.
+  //
+  // The advertised list is READ from the installed help text rather than
+  // written down here, so adding a command to usage() without teaching this
+  // guard to exercise it fails the publish instead of shipping untested.
+  const cli = path.join(installed, "bin/mirofy.mjs");
+  const run = (argv, cwd) => spawnSync(process.execPath, [cli, ...argv],
+    { cwd: cwd || probe, encoding: "utf8" });
+
+  const helpText = run(["--help"]).stdout || "";
+  const advertised = new Set();
+  for (const line of helpText.split(NEWLINE)) {
+    const match = line.match(/^s{2}S+s+([a-z][a-z-]*)/);
+    if (match) advertised.add(match[1]);
+  }
+  if (advertised.size < 10) {
+    refuse(`could not read the command list from the installed help text `
+      + `(found ${advertised.size}); the walk below would pass vacuously`);
+  }
+
+  const example = (name) => path.join(installed, "examples", name);
+  const ARCH = example("web-app.architecture.json");
+  fs.writeFileSync(path.join(probe, "d.mmd"), "graph TD" + NEWLINE + "  a-->b" + NEWLINE);
+
+  // "runs" must exit 0. "resolves" may refuse its arguments -- it wants a
+  // browser, a server, or a question this probe has no answer for -- but
+  // must still load every module it needs to say so, which is the failure
+  // this whole section exists for.
+  const WALK = {
+    map: { mode: "runs", argv: ["map", ".", path.join(probe, "m.html"),
+      "--out", path.join(probe, "mscan"), "--quiet"], cwd: repo },
+    render: { mode: "runs", argv: ["render", "architecture", ARCH, path.join(probe, "r.html")] },
+    compare: { mode: "runs", argv: ["compare", "architecture",
+      example("checkout-platform.base.architecture.json"),
+      example("checkout-platform.head.architecture.json"), path.join(probe, "c.html")] },
+    deliver: { mode: "runs", argv: ["deliver", "architecture", ARCH, path.join(probe, "dv.html"), "--json"] },
+    validate: { mode: "runs", argv: ["validate", "architecture", ARCH, "--json"] },
+    inspect: { mode: "runs", argv: ["inspect", "architecture", ARCH] },
+    check: { mode: "runs", argv: ["check", path.join(probe, "out.html")] },
+    guide: { mode: "runs", argv: ["guide", "a request with a cache miss", "--json"] },
+    brands: { mode: "runs", argv: ["brands", "stripe", "--json"] },
+    examples: { mode: "runs", argv: ["examples"] },
+    doctor: { mode: "runs", argv: ["doctor"] },
+    demo: { mode: "runs", argv: ["demo", path.join(probe, "demo")] },
+    init: { mode: "runs", argv: ["init", "architecture", path.join(probe, "i.json")] },
+    import: { mode: "runs", argv: ["import", "mermaid", path.join(probe, "d.mmd"),
+      path.join(probe, "im.json"), "--json"] },
+    repair: { mode: "runs", argv: ["repair", "architecture", ARCH, path.join(probe, "rp.json"), "--safe"] },
+    // Serves over HTTP until interrupted; running it here would hang the publish.
+    preview: { mode: "resolves", argv: ["preview"] },
+    // Drives real Chrome, which a publish must not require.
+    "visual-check": { mode: "resolves", argv: ["visual-check"] },
+  };
+
+  for (const name of advertised) {
+    if (!WALK[name]) {
+      refuse(`the CLI advertises ${name} and this guard does not exercise it. `
+        + `Add it to WALK in scripts/prepublish-guard.mjs -- an advertised command `
+        + `nobody runs before publishing is how check and examples shipped broken.`);
+    }
+  }
+  for (const name of Object.keys(WALK)) {
+    if (!advertised.has(name)) {
+      refuse(`this guard exercises ${name}, which the CLI no longer advertises. `
+        + `Remove it from WALK, or it is testing a command nobody can find.`);
+    }
+  }
+
+  const walked = [];
+  for (const [name, spec] of Object.entries(WALK)) {
+    const result = run(spec.argv, spec.cwd);
+    const output = String(result.stdout ?? "") + String(result.stderr ?? "");
+    // The packaging failure, in every spelling Node gives it.
+    if (/Cannot find module|ERR_MODULE_NOT_FOUND|MODULE_NOT_FOUND/.test(output)) {
+      refuse(`mirofy ${name}: cannot resolve a module from the installed package. `
+        + `Something it needs is missing from the files list in packages/core/package.json.`
+        + NEWLINE + output.slice(0, 800));
+    }
+    if (spec.mode === "runs" && result.status !== 0) {
+      refuse(`mirofy ${name}: exited ${result.status} when installed from the tarball.`
+        + NEWLINE + output.slice(0, 800));
+    }
+    walked.push(name);
+  }
+  say(`  walked ${walked.length} advertised command(s) from the installed package`);
   const bytes = fs.statSync(tarball).size;
   say(`  ${(bytes / 1024).toFixed(0)} KB, installs, renders, and maps a repository`);
 } catch (error) {
