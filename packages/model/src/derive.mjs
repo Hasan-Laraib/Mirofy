@@ -194,21 +194,34 @@ export function deriveFromGraph(graph, { includeExternal = true } = {}) {
 
     let toId = null;
     if (target.kind === 'external-package') {
-      if (!includeExternal) continue;
       toId = target.name;
-      if (!externals.has(toId)) {
-        externals.set(toId, {
-          id: toId,
-          authoredId: false,
-          kind: 'external',
-          labels: [toId],
-          sources: [],
-          evidenceRefs: [],
-          provenance: 'statically-derived',
-          metadata: { external: true },
-        });
+      // A sibling workspace package is not a third-party dependency.
+      //
+      // In a monorepo you import your neighbour BY ITS PACKAGE NAME, which is
+      // indistinguishable from an npm specifier until you check the manifests
+      // this scan already read. vercel/next.js drew `next`, `@next/env` and
+      // `@next/mdx` as dashed third-party boxes -- all three are in its own
+      // packages/ directory, and the workspace adapter had already found all
+      // twenty of them.
+      if (components.has(toId)) {
+        // Fall through to the internal branch below: the edge points at the
+        // package this repository builds, not at a published copy of it.
+      } else {
+        if (!includeExternal) continue;
+        if (!externals.has(toId)) {
+          externals.set(toId, {
+            id: toId,
+            authoredId: false,
+            kind: 'external',
+            labels: [toId],
+            sources: [],
+            evidenceRefs: [],
+            provenance: 'statically-derived',
+            metadata: { external: true },
+          });
+        }
+        externals.get(toId).evidenceRefs.push({ path: fact.location?.path, lines: fact.location?.lines });
       }
-      externals.get(toId).evidenceRefs.push({ path: fact.location?.path, lines: fact.location?.lines });
     } else {
       const owner = ownerOf(target.name, packages);
       if (!owner) { unowned += 1; continue; }
@@ -246,7 +259,10 @@ export function deriveFromGraph(graph, { includeExternal = true } = {}) {
     external.sources = external.evidenceRefs
       .filter((ref, index, all) => all.findIndex((other) => other.path === ref.path) === index)
       .map((ref) => ({ path: ref.path, line: ref.lines?.[0] }));
-    components.set(external.id, external);
+    // Never overwrite. A workspace package and an import of its name are the
+    // same thing, and the map wrote the external over the package -- which is
+    // how a repository ended up depending on packages it builds itself.
+    if (!components.has(external.id)) components.set(external.id, external);
   }
 
   // Two boxes reading the same word are worse than one long one.

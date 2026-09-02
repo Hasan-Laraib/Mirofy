@@ -230,6 +230,34 @@ test('[1.19] a builtin imported by its bare name is a builtin too', () => {
     'a real dependency must still be drawn -- this must not become a filter for short names');
 });
 
+test('[1.19] importing a sibling workspace package is not a third-party dependency', () => {
+  // In a monorepo you import your neighbour BY ITS PACKAGE NAME, which looks
+  // exactly like an npm specifier until you check the manifests the scan has
+  // already read. The external record then overwrote the workspace package of
+  // the same name in the component map, so the repository came out depending
+  // on packages it builds itself.
+  //
+  // vercel/next.js drew `next`, `@next/env` and `@next/mdx` as dashed
+  // third-party boxes. All three are in its own packages/ directory and the
+  // workspace adapter had found all twenty of them.
+  const sibling = graph();
+  sibling.facts.push({
+    subject: 'packages/api/src/index.mjs', predicate: 'depends-on', object: 'package:@acme/core',
+    provenance: 'statically-derived', location: { path: 'packages/api/src/index.mjs', lines: [1, 1] },
+  });
+  const derived = deriveFromGraph(sibling);
+  const core = derived.components.find((component) => component.id === '@acme/core');
+  assert.ok(core, '@acme/core is declared by a manifest in this repository');
+  assert.equal(core.kind, 'package',
+    'a workspace package must not be overwritten by an import of its own name');
+  assert.ok(core.sources.length && core.sources[0].path.endsWith('package.json'),
+    'and it must keep the manifest that proves it is ours');
+
+  // The edge is real either way; what changes is which component it lands on.
+  const edge = derived.relationships.find((r) => r.from === '@acme/api' && r.to === '@acme/core');
+  assert.ok(edge, 'the import between two workspace packages should still be an edge');
+});
+
 test('[1.19] path ownership resolves to the longest matching package', () => {
   // With a shorter prefix checked first, a nested package's files would be
   // attributed to its parent, and every edge from it would point at the wrong
