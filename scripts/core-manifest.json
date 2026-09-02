@@ -116,7 +116,7 @@
     "test/legend-contract.test.mjs": "4c3be972bcc2bdac339f90d4c96a820da018e6e7",
     "test/motion-governor.test.mjs": "1e3298154c170c6222b435c95a4a2aebe01947c2",
     "test/open-artifact.test.mjs": "22be2813e2f7a6f3841a7429f3c4e094365481fa",
-    "test/output-path.test.mjs": "e4dac8ec7e42bff9de738ac7e3941593bff844f3",
+    "test/output-path.test.mjs": "93e7086cb1d4b55e549e8078e7c805bf46bd0c3e",
     "test/presentation.test.mjs": "7efdcfbec69003ce9b3f1b6f85f57996a2956cd2",
     "test/preset-tryon.test.mjs": "320ae77fcb6ad0161ce981b03965930c21d1ed4b",
     "test/preview.test.mjs": "b4ddc74c256d315a2111888fac02612bcded35cd",

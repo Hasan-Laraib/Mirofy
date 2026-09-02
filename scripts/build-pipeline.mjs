@@ -35,8 +35,18 @@ const PACKAGES = ['evidence', 'scanner', 'model', 'compile', 'layout'];
 // '../../evidence/src/...', but core's own renderers climb one level further.
 const REWRITE = [["'../../core/", "'../../../"]];
 
-fs.rmSync(out, { recursive: true, force: true });
-fs.mkdirSync(out, { recursive: true });
+// Built beside the destination and swapped in, rather than deleted and rebuilt
+// in place. The in-place version left packages/core/pipeline absent for the
+// whole rebuild, and anything reading packages/core in that window -- the skill
+// bundle, a coverage walk -- failed with ENOENT on a file that exists a second
+// later. Twice today. The swap is two syscalls; the rebuild is seconds.
+// Dot-prefixed: while the build runs these ARE visible inside packages/core,
+// and everything that reads that package skips dot entries by a rule that
+// already exists. A `pipeline.next` sitting there would be an undecided
+// directory to the skill bundle -- the thing this whole shape keeps tripping on.
+const staging = path.join(repoRoot, 'packages/core/.pipeline-next');
+fs.rmSync(staging, { recursive: true, force: true });
+fs.mkdirSync(staging, { recursive: true });
 
 let files = 0;
 let rewritten = 0;
@@ -44,7 +54,7 @@ for (const name of PACKAGES) {
   for (const dir of ['src', 'bin']) {
     const from = path.join(repoRoot, 'packages', name, dir);
     if (!fs.existsSync(from)) continue;
-    const to = path.join(out, name, dir);
+    const to = path.join(staging, name, dir);
     fs.mkdirSync(to, { recursive: true });
     for (const entry of fs.readdirSync(from, { withFileTypes: true, recursive: true })) {
       if (!entry.isFile() || !entry.name.endsWith('.mjs')) continue;
@@ -75,7 +85,7 @@ try {
     'commit', '-qm', 'probe'], { cwd: probe, stdio: 'ignore' });
 
   const run = (rel, args = []) => execFileSync(process.execPath,
-    [path.join(out, rel), ...args], { cwd: probe, stdio: 'pipe', encoding: 'utf8' });
+    [path.join(staging, rel), ...args], { cwd: probe, stdio: 'pipe', encoding: 'utf8' });
   run('scanner/bin/scan.mjs');
   run('model/bin/model.mjs', ['--from-graph', '--graph', 'scan/evidence-graph.json']);
   run('compile/bin/compile.mjs');
@@ -90,6 +100,13 @@ try {
 } finally {
   fs.rmSync(probe, { recursive: true, force: true });
 }
+
+// Only now, with the copy proved to run, does it become the real one.
+const previous = path.join(repoRoot, 'packages/core/.pipeline-previous');
+fs.rmSync(previous, { recursive: true, force: true });
+if (fs.existsSync(out)) fs.renameSync(out, previous);
+fs.renameSync(staging, out);
+fs.rmSync(previous, { recursive: true, force: true });
 
 const kb = execFileSync(process.execPath, ['-e',
   `let n=0;const w=(d)=>{for(const e of require('fs').readdirSync(d,{withFileTypes:true}))`

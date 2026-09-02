@@ -15,6 +15,38 @@ stops being one.
 
 ## 2026-09-02
 
+### build-pipeline stopped deleting its own output mid-run
+
+It removed packages/core/pipeline and rebuilt it in place, so for the length of
+the rebuild that directory did not exist -- and anything reading packages/core
+in that window failed with ENOENT on a file that is there a second later. It
+cost two false gate failures today before the pattern was obvious.
+
+It stages into a dot-prefixed sibling now, proves the copy runs, and swaps it in
+with a rename: two syscalls instead of a seconds-long hole. Dot-prefixed because
+everything that reads packages/core already skips dot entries -- the same rule
+that fixed the bundle probe and the validator scratch.
+
+That is the fourth thing this week broken by a directory appearing or vanishing
+inside a package other code was reading, and the third fixed by the same rule.
+
+### A cross-drive test failure that named a path nobody wrote
+
+One Windows CI leg failed with:
+
+    ENOENT: mkdir '...Temp/<scratch>/input/D:/a/Mirofy'
+
+On Windows, path.relative returns an ABSOLUTE path when its two sides are on
+different drives -- it cannot express a relative one -- and joining that onto a
+temp path produces exactly that. CI puts the repository on D: and the temp
+directory on C:, so it could only ever appear there.
+
+The test premise is that the delivery candidate sits inside the linked
+directory. It now asserts that, naming both paths, instead of letting the
+violation turn into a confusing mkdir failure three lines later. Whether the
+candidate really does land outside on that runner is now a question the next red
+build answers directly rather than one somebody has to reconstruct.
+
 ### The Python adapter read almost nothing on a CRLF checkout
 
 JavaScript's `.` does not match a carriage return -- it counts as a line

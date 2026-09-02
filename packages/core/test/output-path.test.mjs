@@ -351,6 +351,17 @@ console.log(JSON.stringify({
   assert.equal(fs.existsSync(marker), true, `renderer did not start; stderr=${stderr}`);
   const candidatePath = fs.readFileSync(marker, 'utf8');
   const candidateRelative = path.relative(linkedDirectory, candidatePath);
+  // On Windows, path.relative returns an ABSOLUTE path when the two sides are on
+  // different drives -- it cannot express a relative one -- and joining that
+  // produced `...\Temp\<scratch>\input\D:\a\Mirofy`, which failed with an
+  // ENOENT naming a path nobody wrote. CI runs the repository on D: and the
+  // temp directory on C:, so it only ever appeared there.
+  //
+  // The test's premise is that the candidate sits inside the linked directory.
+  // If it does not, say so with both paths rather than turning it into a
+  // confusing mkdir failure three lines later.
+  assert.ok(candidateRelative && !path.isAbsolute(candidateRelative),
+    `candidate is not inside the linked directory: candidate=${candidatePath} linked=${linkedDirectory}`);
   fs.mkdirSync(path.dirname(path.join(inputDirectory, candidateRelative)), { recursive: true });
   fs.unlinkSync(linkedDirectory);
   fs.symlinkSync(inputDirectory, linkedDirectory, 'dir');

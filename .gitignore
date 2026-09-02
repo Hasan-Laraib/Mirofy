@@ -34,3 +34,8 @@ packages/core/pipeline/
 # Test scratch. Inside packages/core because ajv resolves through its
 # node_modules; dot-prefixed so everything reading that package skips it.
 packages/core/.scratch/
+
+# build-pipeline stages here and swaps atomically; dot-prefixed so everything
+# that reads packages/core skips it.
+packages/core/.pipeline-next/
+packages/core/.pipeline-previous/
