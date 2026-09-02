@@ -101,12 +101,46 @@ try {
   fs.rmSync(probe, { recursive: true, force: true });
 }
 
-// Only now, with the copy proved to run, does it become the real one.
-const previous = path.join(repoRoot, 'packages/core/.pipeline-previous');
-fs.rmSync(previous, { recursive: true, force: true });
-if (fs.existsSync(out)) fs.renameSync(out, previous);
-fs.renameSync(staging, out);
-fs.rmSync(previous, { recursive: true, force: true });
+/** Every file under `dir`, as a sorted list of [relative path, contents]. */
+function treeOf(dir) {
+  if (!fs.existsSync(dir)) return null;
+  const entries = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true, recursive: true })) {
+    if (!entry.isFile()) continue;
+    const full = path.join(entry.parentPath ?? entry.path, entry.name);
+    entries.push([path.relative(dir, full).split(path.sep).join('/'), fs.readFileSync(full, 'utf8')]);
+  }
+  entries.sort((left, right) => left[0].localeCompare(right[0]));
+  return JSON.stringify(entries);
+}
+
+// Nothing changed: keep the directory that is already there.
+//
+// The swap below renames packages/core/pipeline, and on Windows a directory
+// cannot be renamed while another process holds a file open under it. The
+// test suite runs its files in parallel and several of them spawn the CLI,
+// which imports from exactly this directory -- so `npm run check` failed at
+// random inside the skill-bundle test with a bare binding.rename error,
+// twice under the publish guard and never when run alone.
+//
+// Rebuilding is idempotent: the sources are copied verbatim apart from one
+// import rewrite, so an unchanged workspace produces a byte-identical tree.
+// That is the overwhelmingly common case -- every test run, every gate --
+// and it needs no rename at all. The swap is kept for when the tree really
+// did change, where a moment of contention is the correct cost.
+const built = treeOf(staging);
+const live = treeOf(out);
+if (live !== null && built === live) {
+  fs.rmSync(staging, { recursive: true, force: true });
+  console.log('build-pipeline: bundled pipeline already current; left in place');
+} else {
+  // Only now, with the copy proved to run, does it become the real one.
+  const previous = path.join(repoRoot, 'packages/core/.pipeline-previous');
+  fs.rmSync(previous, { recursive: true, force: true });
+  if (fs.existsSync(out)) fs.renameSync(out, previous);
+  fs.renameSync(staging, out);
+  fs.rmSync(previous, { recursive: true, force: true });
+}
 
 const kb = execFileSync(process.execPath, ['-e',
   `let n=0;const w=(d)=>{for(const e of require('fs').readdirSync(d,{withFileTypes:true}))`
