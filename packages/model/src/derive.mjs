@@ -27,6 +27,8 @@
 // modelling decision, so it comes back in the receipt with its reason rather
 // than vanishing.
 
+import { builtinModules } from 'node:module';
+
 const asArray = (value) => (Array.isArray(value) ? value : []);
 
 /** Facts, whether given a raw graph object or an EvidenceGraph instance. */
@@ -107,6 +109,8 @@ export function ownerOf(filePath, packages) {
   return null;
 }
 
+const NODE_BUILTINS = new Set(builtinModules);
+
 /** Classify a dependency target without guessing what it is. */
 export function classifyTarget(object) {
   const text = String(object ?? '');
@@ -114,7 +118,23 @@ export function classifyTarget(object) {
   // Python's standard library, for the same reason as node's: every file
   // imports os and typing, and drawing those buries the architecture.
   if (text.startsWith('package:python:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
-  if (text.startsWith('package:')) return { kind: 'external-package', name: text.slice('package:'.length) };
+  if (text.startsWith('package:')) {
+    const name = text.slice('package:'.length);
+    // `import fs from 'fs'` is the same builtin as `import fs from 'node:fs'`,
+    // and only the prefixed spelling was recognised. Pointed at shadcn-ui/ui,
+    // Mirofy drew `fs`, `path` and `crypto` as architecture components -- while
+    // the README promises builtins are "counted and named, not drawn". Both
+    // spellings appear in the same evidence graph, so half the builtins were
+    // being excluded and half were being drawn.
+    //
+    // Checked against Node's own list rather than a set maintained here: that
+    // list is the authority on what resolves to a builtin, and a hand-written
+    // copy goes stale the first time Node adds a module. A bare name that is
+    // also a builtin resolves to the builtin in Node too, unless something has
+    // gone out of its way to shadow it -- so this matches what actually runs.
+    if (NODE_BUILTINS.has(name)) return { kind: 'node-builtin', name };
+    return { kind: 'external-package', name };
+  }
   return { kind: 'path', name: text };
 }
 
@@ -227,6 +247,29 @@ export function deriveFromGraph(graph, { includeExternal = true } = {}) {
       .filter((ref, index, all) => all.findIndex((other) => other.path === ref.path) === index)
       .map((ref) => ({ path: ref.path, line: ref.lines?.[0] }));
     components.set(external.id, external);
+  }
+
+  // Two boxes reading the same word are worse than one long one.
+  //
+  // A workspace package drops its npm scope, because a monorepo where every
+  // box says `@next/` has spent its width on the part that is the same. An
+  // external keeps its full name. So `@shadcn/react` and the `react` on npm
+  // both came out as "react" -- two boxes, one word, in the same diagram, and
+  // no way for a reader to tell which was theirs.
+  //
+  // The scope comes back only where it is doing work. Shortening stays the
+  // default and the exception is the collision, so the common case is
+  // unchanged and the ambiguous one is impossible.
+  const byLabel = new Map();
+  for (const component of components.values()) {
+    const label = component.labels?.[0];
+    if (!label) continue;
+    if (!byLabel.has(label)) byLabel.set(label, []);
+    byLabel.get(label).push(component);
+  }
+  for (const sharing of byLabel.values()) {
+    if (sharing.length < 2) continue;
+    for (const component of sharing) component.labels = [component.id];
   }
 
   const notModelled = [];

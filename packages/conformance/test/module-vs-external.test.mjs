@@ -62,6 +62,22 @@ function nodeClasses(html) {
   return [...html.matchAll(/<rect[^>]*height="60"[^>]*class="(c-module|c-external)"/g)].map((m) => m[1]);
 }
 
+test('[4.17] a workspace package is my code, not somebody else’s', () => {
+  // The model derives a workspace package from a manifest INSIDE the tree and
+  // carries that manifest as its evidence. `external` means "outside the
+  // system" and is drawn dashed to say so, so sending a workspace package
+  // there states the opposite of the truth.
+  //
+  // Pointed at shadcn-ui/ui, every one of shadcn's own packages came out dashed
+  // beside its npm dependencies, with nothing separating them. A repository
+  // with no workspaces derives `module` and was always right, which is why the
+  // Python side never showed it.
+  assert.equal(schemaTypeFor('package'), 'module',
+    'a workspace package is code in this repository');
+  assert.equal(schemaTypeFor('external'), 'external',
+    'and an npm dependency is still outside it');
+});
+
 test('[4.17] a derived module keeps its own type instead of collapsing to external', () => {
   // The layout is where the flattening used to happen, so it is asserted at
   // the source and not only through the picture.

@@ -201,6 +201,35 @@ test('[1.19] an external package becomes a component, a builtin does not', () =>
   assert.ok(!derived.components.some((c) => /node:/.test(c.id)), 'a Node builtin became a component');
 });
 
+test('[1.19] a builtin imported by its bare name is a builtin too', () => {
+  // `import fs from 'fs'` and `import fs from 'node:fs'` are the same module,
+  // and only the prefixed spelling was recognised. Both appear in the same
+  // evidence graph of the same repository, so half the builtins were excluded
+  // and half were drawn as architecture components.
+  //
+  // Pointed at shadcn-ui/ui, Mirofy drew `fs`, `path` and `crypto` as boxes,
+  // while the README promises builtins are "counted and named, not drawn".
+  //
+  // The assertion above this one tested `/node:/` against component ids, which
+  // a bare `fs` passes without difficulty -- the check was written around the
+  // spelling rather than around the thing.
+  const withBare = graph();
+  withBare.facts.push({
+    subject: 'packages/api/src/index.mjs', predicate: 'depends-on', object: 'package:fs',
+    provenance: 'statically-derived', location: { path: 'packages/api/src/index.mjs', lines: [1, 1] },
+  });
+  withBare.facts.push({
+    subject: 'packages/api/src/index.mjs', predicate: 'depends-on', object: 'package:webcola',
+    provenance: 'statically-derived', location: { path: 'packages/api/src/index.mjs', lines: [2, 2] },
+  });
+  const derived = deriveFromGraph(withBare);
+  const ids = derived.components.map((component) => component.id);
+  assert.ok(!ids.includes('fs'),
+    `a bare builtin import became a component: ${JSON.stringify(ids)}`);
+  assert.ok(ids.includes('webcola'),
+    'a real dependency must still be drawn -- this must not become a filter for short names');
+});
+
 test('[1.19] path ownership resolves to the longest matching package', () => {
   // With a shorter prefix checked first, a nested package's files would be
   // attributed to its parent, and every edge from it would point at the wrong
@@ -269,16 +298,25 @@ test('[1.20] ids are made schema-safe consistently, and edges follow', () => {
 });
 
 test('[1.20] a kind the schema does not have becomes external, and says so', () => {
-  // `package` is not a schema type. Guessing "backend" from a package name
-  // would be exactly the invention refused everywhere else, so it becomes the
-  // type that claims least and the original is kept as a tag.
+  // Guessing "backend" from a package name would be the invention refused
+  // everywhere else, so an unrecognised kind becomes the type that claims
+  // least and the original is kept as a tag.
+  //
+  // `package` is no longer one of those. A workspace package is derived from a
+  // manifest INSIDE the tree and carries it as evidence, so `module` -- code in
+  // this repository -- is not a guess about what it does, it is the one thing
+  // actually known about it. Sending it to `external`, which is drawn dashed to
+  // mean “outside the system”, stated the opposite: shadcn-ui/ui came out with
+  // every one of shadcn's own packages dashed beside its npm dependencies.
   const { document, receipt } = viewToDocument(view(), { title: 'x' });
   const api = document.components.find((c) => c.label === 'api');
-  assert.equal(api.type, 'external');
+  assert.equal(api.type, 'module', 'a workspace package is code in this repository');
   assert.equal(api.tag, 'package', 'the original kind was lost');
   assert.ok(receipt.retyped.length >= 2, 'retyping was not reported');
   assert.equal(schemaTypeFor('database'), 'database');
-  assert.equal(schemaTypeFor('package'), 'external');
+  assert.equal(schemaTypeFor('package'), 'module');
+  // The rule this row is really about, on a kind nothing knows anything about.
+  assert.equal(schemaTypeFor('quantum-widget'), 'external');
 });
 
 test('[1.20] citations are kept only when they can be verified', () => {

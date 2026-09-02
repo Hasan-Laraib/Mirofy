@@ -38,9 +38,22 @@ const asArray = (value) => (Array.isArray(value) ? value : []);
  * what something does. Guessing "backend" from a package name would be exactly
  * the invention this project refuses everywhere else.
  */
+// A workspace package is code in THIS repository -- the model derived it from
+// a manifest inside the tree, and it carries that manifest as its evidence.
+// `external` means "outside the system", and it is drawn dashed to say so, so
+// sending a workspace package there states the opposite of the truth.
+//
+// Pointed at shadcn-ui/ui, every one of shadcn's own packages came out dashed,
+// beside the npm dependencies, with nothing to separate them. The Python side
+// never showed it: a repository with no workspaces derives `module`, which was
+// already right.
+const KIND_ALIASES = new Map([['package', 'module']]);
+
 export function schemaTypeFor(kind) {
   const text = String(kind ?? '').toLowerCase();
   if (SCHEMA_TYPES.has(text)) return text;
+  const alias = KIND_ALIASES.get(text);
+  if (alias) return alias;
   return 'external';
 }
 
@@ -422,6 +435,42 @@ export function skipLevelDetours(edges, positions, size) {
 const MAX_SOURCES = 3;
 let citationsTruncated = 0;
 
+// The renderer refuses a label wider than its box: textUnits(label) * 6.6 must
+// not exceed width + 8. Those numbers live in the architecture renderer, and
+// they are repeated here because layout cannot import from core -- so the
+// coupling is held by a test that renders a long label through the real
+// renderer rather than by these constants agreeing on trust.
+//
+// It matters because a derived label is somebody's DIRECTORY NAME. Pointed at
+// vercel/next.js, `map` died on
+// "nested-deps-app-router-many-pages" with "shorten the label or widen size",
+// which is advice the person running it cannot take: they would have to rename
+// a folder in their repository to get a diagram out.
+const LABEL_FACTOR = 6.6;
+const LABEL_SLACK = 8;
+const ELLIPSIS = String.fromCharCode(0x2026);
+
+/**
+ * `label`, shortened from the middle until it fits a box `width` wide.
+ *
+ * The middle, not the end: a flattened path shares long prefixes with its
+ * neighbours (`packages-react-dom-`...) and long suffixes distinguish them, so
+ * cutting the tail is what makes two boxes read the same. The full identity
+ * stays reachable -- the node keeps its id, and its citations name real files.
+ *
+ * @param {string} label
+ * @param {number} width
+ */
+export function fitLabel(label, width) {
+  const text = String(label ?? '');
+  const budget = Math.floor((width + LABEL_SLACK) / LABEL_FACTOR);
+  if (text.length <= budget || budget < 3) return text;
+  const keep = budget - 1;
+  const head = Math.ceil(keep / 2);
+  const tail = keep - head;
+  return text.slice(0, head) + ELLIPSIS + (tail ? text.slice(-tail) : '');
+}
+
 function citationsFor(node) {
   const all = asArray(node.evidenceRefs)
     .filter((ref) => ref && ref.path)
@@ -490,7 +539,7 @@ export function viewToDocument(view, options = {}) {
     return {
       id: idOf.get(node.id),
       type,
-      label: node.label ?? node.id,
+      label: fitLabel(node.label ?? node.id, size[0]),
       pos: [Math.round(position[0]), Math.round(position[1])],
       size,
       // The original kind survives where a reader can see it, rather than
