@@ -204,7 +204,12 @@ try {
   const helpText = run(["--help"]).stdout || "";
   const advertised = new Set();
   for (const line of helpText.split(NEWLINE)) {
-    const match = line.match(/^s{2}S+s+([a-z][a-z-]*)/);
+    // Anchored on the binary name, not on the line shape: each usage line is
+    // prefixed with however the CLI was invoked -- a bare `mirofy` when
+    // installed, a full script path from a checkout. Matching the prefix
+    // positionally found zero commands, and the guard above refused rather
+    // than walking an empty set, which is the only reason this was seen.
+      const match = line.match(/mirofy(?:\.mjs|-cli)?\s+([a-z][a-z-]*)/);
     if (match) advertised.add(match[1]);
   }
   if (advertised.size < 10) {
