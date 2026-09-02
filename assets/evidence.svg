@@ -138,6 +138,6 @@
           stroke-width="1.5" stroke-dasharray="5 4"/>
     <text class="sans gapk" x="26" y="215">NOT MODELLED</text>
     <text class="mono gaptx" x="130" y="215">packages/conformance/test/delivery.test.mjs</text>
-    <text class="mono gaptx dim" x="130" y="232">computed import specifier at line 69; the target cannot be known statically</text>
+    <text class="mono gaptx dim" x="130" y="232">computed import specifier at line 70; the target cannot be known statically</text>
   </g>
 </svg>

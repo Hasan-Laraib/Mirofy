@@ -15,6 +15,24 @@ stops being one.
 
 ## 2026-09-02
 
+### `map --out`, so it stops writing into your repository
+
+`mirofy map` drops five JSON files and an artifact next to your code. That is a
+surprise the first time, and the first person to run it on their own repository
+said so plainly. `--out <dir>` sends all of it somewhere else; without the flag
+nothing changes, and the intermediates still land in `<target>/scan`.
+
+Every pipeline step is now told its input and output explicitly, rather than
+each independently defaulting to `<root>/scan` -- which is fine right up until
+the two disagree.
+
+Adding the flag broke the parser it was added to. `map` split argv into "starts
+with --" and "everything else", so the VALUE of `--out` fell into the positional
+list and was read as the target directory. The first test of it passed anyway,
+because it wrote the flag last, where swallowing the value is harmless. Written
+flags-first -- a normal way to type it -- the target became the output directory.
+The test does it that way now, and both mistakes fail it.
+
 ### The test suite leaked 35 GB of temporary directories
 
 Test files create scratch repositories with `fs.mkdtempSync`, and most never

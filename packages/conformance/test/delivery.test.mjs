@@ -7,6 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { coreRoot, fixturesRoot, repoRoot } from '../src/render.mjs';
+const EOL = String.fromCharCode(10);
 
 const cli = path.join(coreRoot, 'bin/mirofy.mjs');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'product-delivery-'));
@@ -210,6 +211,56 @@ test('compare produces a Before/After delta receipt whose hashes match the real 
 // unknown-command fallback. The other four (guide/brands/doctor/demo) run
 // to completion with no arguments and are asserted against a real,
 // command-specific marker in their output.
+test('[6.8] map --out writes nothing into the repository it is pointed at', () => {
+  // `map` puts five JSON files and an artifact next to somebody's code. That is
+  // a surprise the first time, and the first person to run it on their own
+  // repository said so. --out moves all of it.
+  //
+  // The flag also broke the argument parser it was added to: argv was split into
+  // "starts with --" and "everything else", so the VALUE of --out landed in the
+  // positional list and was read as the target directory.
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-map-out-'));
+  const away = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-map-away-'));
+  try {
+    fs.mkdirSync(path.join(repo, 'src/api'), { recursive: true });
+    fs.mkdirSync(path.join(repo, 'src/store'), { recursive: true });
+    for (const rel of ['src/__init__.py', 'src/api/__init__.py', 'src/store/__init__.py']) {
+      fs.writeFileSync(path.join(repo, rel), '');
+    }
+    fs.writeFileSync(path.join(repo, 'src/api/routes.py'),
+      ['from ..store.repo import save', 'def app():', '    return save()', ''].join(EOL));
+    fs.writeFileSync(path.join(repo, 'src/store/repo.py'), ['def save():', '    return 1', ''].join(EOL));
+    for (const args of [['init', '-q'], ['add', '-A'],
+      ['-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'x']]) {
+      execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
+    }
+
+    const html = path.join(away, 'arch.html');
+    const scan = path.join(away, 'scan');
+    // Flags FIRST, which is a normal way to type it and the order that catches a
+    // parser which reads --out but does not consume its value: the value then
+    // falls through to the positional list and becomes the target directory.
+    // With the flag last, that mistake is invisible.
+    execFileSync(process.execPath,
+      [cli, 'map', '--out', scan, '--quiet', repo, html], { cwd: repo, stdio: 'ignore' });
+
+    assert.ok(fs.existsSync(html), 'the artifact goes where --out sends the run');
+    for (const name of ['evidence-graph.json', 'coverage.md', 'model.json', 'view.json', 'diagram.json']) {
+      assert.ok(fs.existsSync(path.join(scan, name)), `${name} should be under --out`);
+    }
+    // The point of the flag.
+    assert.ok(!fs.existsSync(path.join(repo, 'scan')), 'no scan/ may appear in the repository');
+    assert.ok(!fs.existsSync(path.join(repo, 'architecture.html')), 'no artifact either');
+    // And the target was still read as the target, not as the --out value.
+    const model = JSON.parse(fs.readFileSync(path.join(scan, 'model.json'), 'utf8'));
+    assert.ok((model.components ?? []).some((component) => component.id === 'src/api'),
+      `the repository was not the thing scanned: ${JSON.stringify((model.components ?? []).map((c) => c.id))}`);
+  } finally {
+    fs.rmSync(repo, { recursive: true, force: true });
+    fs.rmSync(away, { recursive: true, force: true });
+  }
+});
+
 test('the CLI exposes render, validate, deliver, check, guide, brands, doctor, and demo (6.8)', () => {
   const unknownCommand = (name) => new RegExp(`Unknown command "${name}"`);
 

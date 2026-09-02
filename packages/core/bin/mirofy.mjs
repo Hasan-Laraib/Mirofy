@@ -40,7 +40,7 @@ const SELF = invokedAs();
 
 function usage() {
   return `Usage:
-  ${SELF} map [directory] [output.html]        map a repository end to end
+  ${SELF} map [directory] [output.html] [--out dir] [--quiet]   map a repository end to end
   ${SELF} render <type> <input.json> [output.html] [--quality standard|showcase] [--repo-root path]
   ${SELF} compare architecture <base.json> <head.json> [output.html] [--receipt path] [--json] [--quality standard|showcase] [--repo-root path]
   ${SELF} deliver <type> <input.json> [output.html] [--json] [--open] [--quality standard|showcase] [--repo-root path]
@@ -2009,8 +2009,8 @@ const NEWLINE = String.fromCharCode(10);
 // 0.8% of a system presented without comment is the overstatement this project
 // exists to refuse -- and it is worse inside a 700 KB interactive viewer, which
 // looks like a considered answer.
-function coverageNote(target) {
-  const coveragePath = path.join(target, 'scan', 'coverage.md');
+function coverageNote(outDir) {
+  const coveragePath = path.join(outDir, 'coverage.md');
   if (!fs.existsSync(coveragePath)) return null;
   const coverage = fs.readFileSync(coveragePath, 'utf8');
   const summary = coverage.match(/Of (\d+) files: (\d+) analysed, \d+ with gaps, (\d+) not analysed/);
@@ -2032,16 +2032,38 @@ function coverageNote(target) {
 }
 
 function commandMap(argv) {
-  const flags = new Set(argv.filter((value) => value.startsWith('--')));
-  const positional = argv.filter((value) => !value.startsWith('--'));
+  // Parsed by walking, not by filtering: `--out <dir>` takes a value, and
+  // partitioning argv into "starts with --" and "everything else" put that
+  // value into the positional list, where it would have been read as the
+  // target directory or the output file.
+  const positional = [];
+  let quiet = false;
+  let outFlag = null;
+  for (let i = 0; i < argv.length; i += 1) {
+    const value = argv[i];
+    if (value === '--quiet') { quiet = true; continue; }
+    if (value === '--out') { outFlag = argv[i + 1]; i += 1; continue; }
+    if (value.startsWith('--')) continue;
+    positional.push(value);
+  }
   const target = path.resolve(positional[0] ?? '.');
   if (!fs.existsSync(target)) fail(`No such directory: ${target}`);
 
+  // Where the intermediates land. Default is `<target>/scan`, which is what
+  // this always did; `--out` exists because `map` writing five JSON files into
+  // somebody's repository is a surprise, and the first person to run it on
+  // their own code said so.
+  const outDir = path.resolve(outFlag ?? path.join(target, 'scan'));
+  fs.mkdirSync(outDir, { recursive: true });
+  const at = (name) => path.join(outDir, name);
+
+  // Every step is told its input and output explicitly. They used to rely on
+  // each defaulting to `<root>/scan`, which is fine until the two disagree.
   const steps = [
-    ['scanner/bin/scan.mjs', []],
-    ['model/bin/model.mjs', ['--from-graph', '--graph', path.join(target, 'scan', 'evidence-graph.json')]],
-    ['compile/bin/compile.mjs', []],
-    ['layout/bin/layout.mjs', []],
+    ['scanner/bin/scan.mjs', ['--out', outDir]],
+    ['model/bin/model.mjs', ['--from-graph', '--graph', at('evidence-graph.json'), '--out', at('model.json')]],
+    ['compile/bin/compile.mjs', ['--model', at('model.json'), '--out', at('view.json')]],
+    ['layout/bin/layout.mjs', ['--view', at('view.json'), '--out', at('diagram.json')]],
   ];
   for (const [rel, extra] of steps) {
     const script = pipelineStep(rel);
@@ -2053,25 +2075,25 @@ function commandMap(argv) {
         + `carries the pipeline under core/pipeline/.`);
     }
     const step = spawnSync(process.execPath, [script, ...extra, '--root', target],
-      { cwd: target, stdio: flags.has('--quiet') ? 'ignore' : 'inherit' });
+      { cwd: target, stdio: quiet ? 'ignore' : 'inherit' });
     if (step.status !== 0) {
       fail(`mirofy map failed at ${rel.split('/')[0]}. The step above printed why.`);
     }
   }
 
-  const diagram = path.join(target, 'scan', 'diagram.json');
+  const diagram = at('diagram.json');
   if (!fs.existsSync(diagram)) fail(`The pipeline produced no diagram at ${diagram}.`);
-  const view = JSON.parse(fs.readFileSync(path.join(target, 'scan', 'view.json'), 'utf8'));
+  const view = JSON.parse(fs.readFileSync(at('view.json'), 'utf8'));
   const drawn = (view.components ?? view.nodes ?? []).length;
   if (!drawn) {
     // An empty diagram is a real answer about a repository, and saying so is
     // better than rendering a blank page and calling it a success.
     // The most important place to explain it: nothing was drawn, and the
     // reason is almost always that nothing could be read.
-    const why = coverageNote(target);
+    const why = coverageNote(outDir);
     fail([
       'Nothing to draw: no dependencies between source directories were found.',
-      why ? `${NEWLINE}${why}` : `Look at ${path.join(target, 'scan', 'coverage.md')} for what was read and what was not.`,
+      why ? `${NEWLINE}${why}` : `Look at ${at('coverage.md')} for what was read and what was not.`,
     ].join(NEWLINE));
   }
 
@@ -2079,7 +2101,7 @@ function commandMap(argv) {
   commandRender(['architecture', diagram, output, '--repo-root', target]);
   console.log(`${NEWLINE}mirofy map: ${drawn} component(s) -> ${output}`);
 
-  const note = coverageNote(target);
+  const note = coverageNote(outDir);
   if (note) console.log(`${NEWLINE}WARNING: ${note}`);
 }
 

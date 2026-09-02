@@ -81,7 +81,9 @@ npx mirofy-cli init     # a starter document of your own to edit
 npx mirofy-cli render architecture architecture.json
 ```
 
-It reads JavaScript, TypeScript and **Python**. `map` runs the whole pipeline in the directory you point it at — scan, model,
+It reads JavaScript, TypeScript and **Python**. `map --out <dir>` puts the intermediates somewhere other than your repository;
+without it they land in `<target>/scan`. `map` runs the whole pipeline in the
+directory you point it at — scan, model,
 compile, layout, render — and writes `architecture.html` next to your code. It
 works on a repository that declares no workspaces: where there are no packages
 to draw, it models the **source directories** and the imports between them.
