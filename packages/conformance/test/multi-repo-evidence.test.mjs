@@ -163,3 +163,69 @@ test('[2.6] declaring both forms at once is refused rather than silently preferr
   assert.match(result.message, /declare either/i,
     'refused, but not for declaring both forms');
 });
+
+test('[2.6] a citation into a deeply nested file verifies, however long the path', (t) => {
+  // `git show <rev>:<path>` stats the path in the WORKING TREE before deciding
+  // it is an object, and on Windows a long enough one fails there with
+  // "Filename too long" -- while `git cat-file -p` reads the same blob without
+  // complaint, because it never touches the working tree.
+  //
+  // Found pointing Mirofy at fastapi/fastapi. Its deepest test fixture sits 222
+  // characters from the checkout root, so the citation to it was unverifiable
+  // and the whole render was refused -- over a file that was sitting right
+  // there, and that `git cat-file -t` had just confirmed was a blob.
+  //
+  // Nothing about the fix is Windows-specific: reading a blob is what was
+  // wanted, and asking for the blob rather than for a diff is simply correct.
+  const deep = path.join(tmp, 'deep');
+  // Long enough to trip the stat, short enough that git can still commit it.
+  // fastapi/fastapi's real case was 222 characters; overshooting to 250 made
+  // `git commit` itself fail with the same "Filename too long", which tests
+  // the filesystem rather than Mirofy.
+  const segments = [];
+  const leaf = 'target.js';
+  const pathFor = () => path.join(deep, 'src', ...segments, leaf);
+  // Measured on this machine: git show fails from 223 characters, git commit
+  // still succeeds at 235, and cat-file never minds. 230 sits in that window.
+  // The threshold is platform- and path-dependent -- on Linux there is none --
+  // so the assertion is correct everywhere and only actually bites on Windows.
+  while (pathFor().length < 230 && segments.length < 40) segments.push('nested_pkg');
+  const nested = path.dirname(pathFor());
+  try {
+    fs.mkdirSync(nested, { recursive: true });
+  } catch {
+    t.skip(`this filesystem refused a ${nested.length}-character path, so the `
+      + 'case cannot be built here');
+    return;
+  }
+  const file = path.join(nested, 'target.js');
+  fs.writeFileSync(file, Array.from({ length: 12 }, (_, i) => `line ${i + 1}`).join('\n') + '\n');
+  git(deep, 'init', '-q');
+  git(deep, 'config', 'user.email', 'test@example.com');
+  git(deep, 'config', 'user.name', 'Test');
+  git(deep, 'remote', 'add', 'origin', 'https://github.com/acme/deep.git');
+  git(deep, 'add', '.');
+  git(deep, 'commit', '-q', '-m', 'initial');
+  const revision = git(deep, 'rev-parse', 'HEAD');
+  const cited = path.relative(deep, file).split(path.sep).join('/');
+  t.diagnostic(`cited path is ${file.length} characters from the filesystem root`);
+
+  const result = render({
+    schema_version: 1,
+    diagram_type: 'architecture',
+    meta: {
+      title: 'Deep',
+      repository: { url: 'https://github.com/acme/deep', revision },
+    },
+    components: [{
+      id: 'deep', type: 'backend', label: 'Deep', pos: [80, 120], size: [200, 60],
+      sources: [{ path: cited, line: 2, end_line: 4 }],
+    }],
+    connections: [],
+  }, ['--repo-root', deep]);
+
+  assert.ok(result.ok,
+    `a citation to a file that exists at the pinned revision must verify: ${result.message}`);
+  assert.equal(result.payload.nodes.deep.length, 1,
+    'the verified citation should reach the artifact');
+});

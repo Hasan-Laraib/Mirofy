@@ -254,6 +254,35 @@ assertThat(
   unlisted.length === 0 ? `${adapterFiles.length} adapters, all listed`
     : `not described: ${unlisted.join(', ')}`,
 );
+// The same promise, in the place it matters more. When `map` reads nothing it
+// prints this list, and that is the one moment a user is actively asking what
+// the tool can do. It said "JavaScript and TypeScript imports, package.json
+// workspaces, Express and Next routes, and docker-compose" for five releases
+// after Python shipped -- so anyone who pointed it at a Python repository and
+// hit an unread file was told Python was not supported.
+const cliSource = fs.readFileSync(
+  path.join(repoRoot, 'packages/core/bin/mirofy.mjs'), 'utf8');
+const noteStart = cliSource.indexOf('files were not read by any adapter');
+const noteEnd = cliSource.indexOf('Every unread file is named in', noteStart);
+const coverageNoteText = noteStart < 0 || noteEnd < 0 ? ''
+  : cliSource.slice(noteStart, noteEnd);
+const namedInNote = {
+  imports: 'JavaScript and TypeScript imports',
+  python: 'Python imports',
+  workspace: 'workspaces',
+  routes: 'Express and Next routes',
+  compose: 'docker-compose',
+};
+const missingFromNote = adapterFiles.filter((name) => !(name in namedInNote)
+  || !coverageNoteText.includes(namedInNote[name]));
+assertThat(
+  'every scanner adapter is named in the note `map` prints when it reads nothing',
+  coverageNoteText.length > 0 && missingFromNote.length === 0,
+  coverageNoteText.length === 0
+    ? 'could not find the coverage note in bin/mirofy.mjs'
+    : (missingFromNote.length === 0 ? `${adapterFiles.length} adapters, all named`
+      : `the note does not mention: ${missingFromNote.join(', ')}`),
+);
 
 // ---------------------------------------------------------------------------
 // The two graphics at the top of the README

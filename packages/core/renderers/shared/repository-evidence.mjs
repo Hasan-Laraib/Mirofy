@@ -355,7 +355,15 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
         });
       }
       if (source.line) {
-        const content = runGit(realRoot, ['show', object]);
+        // `cat-file -p`, not `show`. Given <rev>:<path>, git show stats the
+        // path in the working tree before deciding it is an object, and on
+        // Windows a long enough one fails there with "Filename too long"
+        // while cat-file reads the same blob without complaint. Found on
+        // fastapi/fastapi, whose deepest test fixture is 222 characters from
+        // this checkout root -- every citation into a deeply nested file in a
+        // deeply cloned repository was unverifiable, and the render refused a
+        // document over a file that was sitting right there.
+        const content = runGit(realRoot, ['cat-file', '-p', object]);
         if (content.status !== 0) evidenceFailure('repository-evidence/file-unreadable', `${where} could not be read at revision ${revision}.`, {
           subject: { path: where, ...subjectExtra },
           evidence: { sourcePath: source.path, revision },

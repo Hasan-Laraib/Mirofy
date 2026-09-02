@@ -2048,8 +2048,9 @@ function coverageNote(outDir) {
   return [
     `${unread} of ${total} files were not read by any adapter.`,
     kinds.length ? `  Mostly: ${kinds.join(', ')}.` : '',
-    '  Mirofy currently reads JavaScript and TypeScript imports, package.json',
-    '  workspaces, Express and Next routes, and docker-compose. Nothing else.',
+    '  Mirofy currently reads JavaScript and TypeScript imports, Python imports,',
+    '  package.json workspaces, Express and Next routes, and docker-compose.',
+    '  Nothing else.',
     `  Every unread file is named in ${coveragePath}.`,
   ].filter(Boolean).join(NEWLINE);
 }
