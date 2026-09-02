@@ -15,6 +15,29 @@ stops being one.
 
 ## 2026-09-02
 
+### `from . import views` was recorded as a gap with the file sitting beside it
+
+The commonest relative form in Python, and the adapter resolved it by looking
+only for the package's `__init__.py`. A directory without one -- a namespace
+package, which is most benchmark fixtures and plenty of real code -- found
+nothing, and a real import became a recorded gap while the module it named sat
+in the same directory.
+
+The imported NAMES are tried first now, which is what the statement means:
+`from . import views` is an edge to `views.py`, not to a package file that may
+not exist. With an `__init__.py` present the answer is unchanged, and still
+prefers the module over the package.
+
+Found by reading the one gap a real repository produced rather than assuming it
+was that repository's problem. It was not: their code was correct and this was
+wrong about it. A gap that is really a tool limitation, presented as a fact
+about somebody's codebase, is the most expensive kind of wrong this project can
+be -- it looks exactly like the honesty it is meant to provide.
+
+That repository now maps with 1,282 facts and zero gaps.
+
+Released as 0.3.5.
+
 ### build-pipeline stopped deleting its own output mid-run
 
 It removed packages/core/pipeline and rebuilt it in place, so for the length of

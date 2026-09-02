@@ -237,6 +237,19 @@ export const pythonAdapter = {
         if (from) {
           const [, dots, dotted, imported] = from;
           if (dots.length > 0) {
+            // The imported NAMES first. `from . import views`, with views.py
+            // beside the importing file, is the commonest relative form there
+            // is -- and it was resolved by looking only for the package's
+            // __init__.py, so in a namespace package (no __init__.py at all) it
+            // found nothing and was recorded as a gap. The file was sitting
+            // right there. A real repository's Django case surfaced it.
+            //
+            // This also keeps `from .llm import client` pointing at the client
+            // module rather than at the package beside it, which is the edge
+            // the code actually has.
+            const deeper = importedModules(imported, rel, dots.length, dotted ?? '', files);
+            if (deeper.length) { for (const hit of deeper) record(hit); return; }
+
             const resolved = resolveRelative(dots.length, dotted ?? '', rel, files);
             if (resolved && 'tooHigh' in resolved) {
               gaps.push({
@@ -245,18 +258,7 @@ export const pythonAdapter = {
               });
               return;
             }
-            if (resolved) {
-              // `from .llm import client` where llm/client.py exists is an edge
-              // to that module, not to the package's __init__. The absolute
-              // branch already preferred the deeper target; the relative branch
-              // did not, so a relative import of a sibling module pointed at
-              // its package instead -- true, and one level less specific than
-              // the code actually is.
-              const deeper = importedModules(imported, rel, dots.length, dotted ?? '', files);
-              if (deeper.length) { for (const hit of deeper) record(hit); return; }
-              record(resolved.path);
-              return;
-            }
+            if (resolved) { record(resolved.path); return; }
             gaps.push({
               path: rel,
               reason: `relative import at line ${lineNumber} resolves to no file in this repository`,

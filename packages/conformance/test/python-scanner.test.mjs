@@ -125,6 +125,35 @@ test('[2.8] a CRLF checkout is read, not silently skipped', async () => {
   assert.deepEqual(facts.find((f) => f.object === 'src/other.py').location.lines, [2, 2]);
 });
 
+test('[2.8] `from . import x` resolves in a namespace package, with no __init__.py', async () => {
+  // The commonest relative form in Python, and it was resolved by looking only
+  // for the package's __init__.py. A directory without one -- a namespace
+  // package, which is most benchmark fixtures and plenty of real code -- found
+  // nothing and got recorded as a gap, with the imported file sitting right
+  // beside the importing one. Found in a real repository's Django case.
+  const repoRoot = makeRepo({
+    'app/urls.py': ['from django.urls import path', 'from . import views', ''].join(NL),
+    'app/views.py': 'def list_users():' + NL + '    return []' + NL,
+  });
+  const { facts, gaps } = await runAdapter(pythonAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, [], 'the sibling module is right there; nothing should be unresolved');
+  assert.deepEqual(facts.map((fact) => fact.object).sort(),
+    ['app/views.py', 'package:django'],
+    'the relative import must point at the module, not go missing');
+});
+
+test('[2.8] `from . import x` still prefers the module over the package __init__', async () => {
+  // With an __init__.py present the answer must not regress to it: the edge the
+  // code has is to the module it named.
+  const repoRoot = makeRepo({
+    'app/__init__.py': '',
+    'app/urls.py': 'from . import views' + NL,
+    'app/views.py': 'x = 1' + NL,
+  });
+  const { facts } = await runAdapter(pythonAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(facts.map((fact) => fact.object), ['app/views.py']);
+});
+
 test('[2.8] a computed python import is a Gap with its line, never a guessed fact', async () => {
   const repoRoot = makeRepo({
     'app.py': [
