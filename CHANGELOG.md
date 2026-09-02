@@ -17,6 +17,60 @@ stops being one.
 
 ## 2026-09-02
 
+### `map --out` left the diagram in your repository
+
+Reported by someone running the published release against their own code,
+following only the README. They used `--out` specifically to keep their
+repository clean, and `architecture.html` landed in it anyway.
+
+The two READMEs disagreed about the flag -- the root one said it moved
+"that and the intermediates", the package one said only the
+intermediates -- and the code did the latter. Two documents contradicting
+each other about one flag is its own signal.
+
+The flag is called `--out`, the root README promised the diagram moved,
+and that is what somebody asking to keep their tree clean means. So the
+behaviour now matches: `--out <dir>` is where the run's output goes,
+diagram included, and naming an output path still wins over both.
+
+Row 6.8's test asserted exactly this -- its comment says "--out moves all
+of it" -- and never proved it, because the fixture always passed an
+explicit HTML path. A fixture that always supplies the optional argument
+cannot see what happens when nobody supplies it. The same shape as the
+routing fixture whose outer columns escaped no matter what the router
+did. Two cases now cover the bare flag and the named path.
+
+### A box the budget stranded is no longer drawn alone
+
+Same report: `flask` sat unconnected in a corner. Every module importing
+it had been cut to fit the twelve-node budget, so its edges went with
+them and it was drawn as an island.
+
+A box with no edges says "this connects to nothing". When the model says
+otherwise, that is a false statement about the system, and a reader
+cannot tell it from a component that really is isolated. `compile` now
+omits such a node and records why. A component with no relationships at
+all still gets drawn -- it is isolated in the model too, and that is true
+and worth seeing.
+
+### The rounding test no longer fails when the hazard does not turn up
+
+The test added with the file-index fix required its fixture to produce a
+rounded-index collision on Windows, so that a pass could not be vacuous.
+That is not something a test controls: allocation depends on the volume
+and on what else is writing, and a loaded full-suite run found none while
+a run a minute earlier found seventeen.
+
+A gate that fails when the hazard fails to appear is a flaky gate, and a
+flaky gate gets ignored. It reports what it reached instead, and skips
+with a reason when it reached nothing.
+
+It also gains the case that was missing: a hard link IS an alias. Nothing
+covered the protection the identity comparison exists for, which is why
+"compare the paths instead" looked like a viable fix for the rounding
+when it would have silently removed it.
+
+
 ### Your code and somebody else's are no longer drawn the same way
 
 Released as 0.3.7.

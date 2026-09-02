@@ -211,6 +211,71 @@ test('compare produces a Before/After delta receipt whose hashes match the real 
 // unknown-command fallback. The other four (guide/brands/doctor/demo) run
 // to completion with no arguments and are asserted against a real,
 // command-specific marker in their output.
+test('[6.8] map --out carries the diagram too, with no output path named', () => {
+  // The test below names the output file, so it proved --out moved the five
+  // intermediates and never once proved it moved the artifact -- which it did
+  // not. Someone following the README ran `map . --out <dir>` to keep their
+  // repository clean, and architecture.html landed in their repository.
+  //
+  // A fixture that always passes the optional argument cannot see what happens
+  // when nobody passes it. Same shape as the routing fixture whose outer
+  // columns escaped no matter what the router did.
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-out-bare-'));
+  const away = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-out-away-'));
+  try {
+    fs.mkdirSync(path.join(repo, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(repo, 'src/__init__.py'), '');
+    fs.writeFileSync(path.join(repo, 'src/a.py'),
+      ['from .b import save', 'def app():', '    return save()', ''].join(EOL));
+    fs.writeFileSync(path.join(repo, 'src/b.py'), ['def save():', '    return 1', ''].join(EOL));
+    for (const args of [['init', '-q'], ['add', '-A'],
+      ['-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'x']]) {
+      execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
+    }
+
+    // No output path. This is the whole point.
+    execFileSync(process.execPath,
+      [cli, 'map', '.', '--out', away, '--quiet'], { cwd: repo, stdio: 'ignore' });
+
+    assert.ok(fs.existsSync(path.join(away, 'architecture.html')),
+      'the diagram belongs under --out, which is what the flag is called');
+    assert.ok(!fs.existsSync(path.join(repo, 'architecture.html')),
+      'nothing may land in a repository the caller asked to keep clean');
+    assert.ok(!fs.existsSync(path.join(repo, 'scan')), 'nor any intermediates');
+  } finally {
+    fs.rmSync(repo, { recursive: true, force: true });
+    fs.rmSync(away, { recursive: true, force: true });
+  }
+});
+
+test('[6.8] a named output path still wins over --out', () => {
+  // Someone who names a file has said where they want it, and a flag about
+  // where the run works must not overrule that.
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-out-named-'));
+  const away = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-out-namedaway-'));
+  try {
+    fs.mkdirSync(path.join(repo, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(repo, 'src/__init__.py'), '');
+    fs.writeFileSync(path.join(repo, 'src/a.py'),
+      ['from .b import save', 'def app():', '    return save()', ''].join(EOL));
+    fs.writeFileSync(path.join(repo, 'src/b.py'), ['def save():', '    return 1', ''].join(EOL));
+    for (const args of [['init', '-q'], ['add', '-A'],
+      ['-c', 'user.email=t@t', '-c', 'user.name=t', 'commit', '-qm', 'x']]) {
+      execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
+    }
+    const named = path.join(away, 'chosen.html');
+    execFileSync(process.execPath,
+      [cli, 'map', '.', named, '--out', path.join(away, 'work'), '--quiet'],
+      { cwd: repo, stdio: 'ignore' });
+    assert.ok(fs.existsSync(named), 'the named path is where the diagram goes');
+    assert.ok(!fs.existsSync(path.join(away, 'work', 'architecture.html')),
+      'and --out must not also write a second copy under its own name');
+  } finally {
+    fs.rmSync(repo, { recursive: true, force: true });
+    fs.rmSync(away, { recursive: true, force: true });
+  }
+});
+
 test('[6.8] map --out writes nothing into the repository it is pointed at', () => {
   // `map` puts five JSON files and an artifact next to somebody's code. That is
   // a surprise the first time, and the first person to run it on their own

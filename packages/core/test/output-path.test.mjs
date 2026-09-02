@@ -619,7 +619,7 @@ test('doctor reports a missing output-path safety runtime in an installed skill'
   assert.match(result.stdout, /\[missing\] Output path safety runtime/);
 });
 
-test('two distinct files are never aliases, however close their file indices', () => {
+test('two distinct files are never aliases, however close their file indices', (t) => {
   // A Windows file index is 64 bits and `ino` as a JS number is a double, so
   // the low bits are gone -- and NTFS hands adjacent indices to files created
   // moments apart. Seventeen of four hundred distinct files in one directory
@@ -628,12 +628,16 @@ test('two distinct files are never aliases, however close their file indices', (
   // "Output must not replace an input": a message that reads like the caller
   // aliased their own input, about a pair of files that share nothing.
   //
-  // It surfaced as an intermittent failure of the skill-bundle test, which
-  // rebuilds dist/ and so creates its inputs and outputs seconds apart.
-  //
   // The identity comparison is what catches a hard link, which is a real
-  // alias with two real paths, so it cannot simply be dropped. It has to be
-  // exact instead.
+  // alias with two real paths, so it cannot be dropped. It has to be exact.
+  //
+  // WHY THIS SKIPS RATHER THAN INSISTS. The first version required the
+  // fixture to produce a collision on Windows, so that a pass could not be
+  // vacuous. That assertion is not something the test controls: allocation
+  // depends on the volume and on what else is writing, and it found none at
+  // all under a loaded full-suite run while finding seventeen a minute
+  // earlier. A gate that fails when the hazard fails to turn up is a flaky
+  // gate, and a flaky gate gets ignored. So it reports what it reached.
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-ino-'));
   try {
     const byRoundedIndex = new Map();
@@ -652,15 +656,37 @@ test('two distinct files are never aliases, however close their file indices', (
         `${path.basename(left)} and ${path.basename(right)} are different files`);
     }
 
-    // Without this the assertion above is empty on any platform whose inodes
-    // are small integers -- every Linux runner -- and the test would report
-    // success for a hazard it never met. Windows is where the rounding bites,
-    // so Windows is where the fixture has to prove it produced one.
-    if (process.platform === 'win32') {
-      assert.ok(collisions.length > 0,
-        '400 files produced no rounded-index collision; this fixture no longer '
-        + 'reaches the defect it was written for');
+    t.diagnostic(`${collisions.length} rounded-index collision(s) in 400 files`);
+    if (!collisions.length) {
+      t.skip('this run produced no rounded-index collision, so it proved nothing '
+        + 'about the rounding; the hard-link case below still ran');
     }
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('a hard link IS an alias, which is what the identity check is for', () => {
+  // The other half. Two real paths, one real file: the comparison exists to
+  // catch exactly this, so a fix for the rounding must not reach it by
+  // weakening the check into never matching anything.
+  //
+  // Nothing covered this before, which is why "compare the paths instead"
+  // looked like a viable fix for the rounding when it would have been a
+  // silent removal of the protection.
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-link-'));
+  try {
+    const real = path.join(directory, 'real.json');
+    const link = path.join(directory, 'link.json');
+    fs.writeFileSync(real, '{}');
+    try {
+      fs.linkSync(real, link);
+    } catch {
+      // Hard links need permission this runner may not have.
+      return;
+    }
+    assert.equal(pathsAlias(real, link), true,
+      'two paths to one file must still be recognised as the same file');
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }

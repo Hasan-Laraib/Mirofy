@@ -169,6 +169,49 @@ test('[1.18] a budget smaller than the model omits the least-connected nodes, an
   }
 });
 
+test('[1.18] a node the budget stranded is omitted, not drawn alone', async () => {
+  // A box with no edges says "this connects to nothing". When every
+  // counterpart was simply cut to fit the budget, that is a false statement
+  // about the system, and a reader cannot tell it from a component that
+  // really is isolated.
+  //
+  // Reported from a real map: `flask` sat alone in a corner because the one
+  // module importing it did not make the top twelve.
+  //
+  // A planner that names the pair explicitly is used here, so the assertion
+  // is about the compiler rather than about which nodes the default planner
+  // happens to rank -- 'd' is reachable only through 'a'.
+  const { compileView } = await import('../../compile/src/compile.mjs');
+  const strandsD = { id: 'strands-d', plan: () => ({ select: ['b', 'c', 'd'], edges: null, groups: [], rank: [], mainPath: [] }) };
+  const view = compileView(model(), request({ budget: 3 }), { planner: strandsD });
+
+  const drawn = view.nodes.map((node) => node.id);
+  assert.ok(!drawn.includes('d'),
+    `d has only the edge a->d, and a was not selected: ${JSON.stringify(drawn)}`);
+  assert.deepEqual(drawn, ['b', 'c'], 'the connected pair must survive');
+
+  const record = view.omissions.find((entry) => entry.id === 'd' && entry.kind === 'component');
+  assert.ok(record, 'a stranded node must be recorded, not silently dropped');
+  assert.match(record.reason, /budget left out/,
+    'the reason must say the budget stranded it, not merely that it was unselected');
+});
+
+test('[1.18] a component isolated in the MODEL is still drawn', async () => {
+  // The other half of the rule, and the one that keeps the fix from becoming
+  // a filter that hides real answers. A component with no relationships at
+  // all is isolated in the model too; that is true, and worth seeing.
+  const { compileView } = await import('../../compile/src/compile.mjs');
+  const lonely = model();
+  lonely.components.push({
+    id: 'z', kind: 'backend', labels: ['Zeta'], sources: [], evidenceRefs: [],
+    provenance: 'authored', metadata: {}, authoredId: true,
+  });
+  const picksZ = { id: 'picks-z', plan: () => ({ select: ['a', 'b', 'z'], edges: null, groups: [], rank: [], mainPath: [] }) };
+  const view = compileView(lonely, request({ budget: 3 }), { planner: picksZ });
+  assert.ok(view.nodes.map((node) => node.id).includes('z'),
+    'a genuinely unconnected component must not be filtered away with the stranded ones');
+});
+
 test('[1.18] mainPath is a real path in the model, not a plausible sequence', async () => {
   const { compileView } = await import('../../compile/src/compile.mjs');
   const view = compileView(model(), request());

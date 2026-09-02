@@ -84,8 +84,9 @@ npx mirofy-cli render architecture architecture.json
 
 `map` runs the whole pipeline in the directory you point it at — scan, model,
 compile, layout, render — and writes `architecture.html` next to your code.
-`map --out <dir>` sends that and the intermediates somewhere else; without it
-they land in `<target>/scan`. It works on a repository that declares no
+`map --out <dir>` sends the diagram and the intermediates there instead, so
+nothing lands in your repository; without it the intermediates go to
+`<target>/scan`. Naming an output path still wins over both. It works on a repository that declares no
 workspaces: where there are no packages to draw, it models the **source
 directories** and the imports between them.
 

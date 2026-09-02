@@ -41,8 +41,9 @@ npx mirofy-cli validate architecture doc.json # check one without rendering
 npx mirofy-cli guide "an API request with a cache miss"
 ```
 
-`map --out <dir>` keeps the intermediates out of your repository; without it
-they land in `<target>/scan`.
+`map --out <dir>` keeps the diagram and the intermediates out of your
+repository; without it the intermediates land in `<target>/scan`. Naming an
+output path still wins over both.
 
 Citations need a pinned repository to verify against, which `map` reads from
 your `origin` remote. A checkout without one -- a bare `git init`, a mirror --

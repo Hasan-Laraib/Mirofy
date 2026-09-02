@@ -49,7 +49,7 @@ export function compileView(model, request, { planner = deterministicPlanner } =
   const omissions = [];
 
   // --- Selection: every selected id must exist. ---------------------------
-  const selected = [];
+  let selected = [];
   for (const id of plan.select) {
     if (!componentsById.has(id)) {
       throw new RangeError(
@@ -128,6 +128,33 @@ export function compileView(model, request, { planner = deterministicPlanner } =
       reason: 'not included in this view',
     });
   }
+
+  // --- Nodes the budget stranded. ----------------------------------------
+  // A box with no edges says "this connects to nothing". When the model says
+  // otherwise -- every counterpart was simply cut to fit the budget -- that is
+  // a false statement about the system, and a reader has no way to tell it
+  // from a genuinely isolated component.
+  //
+  // Seen on a real map: `flask` was drawn alone in a corner because the one
+  // thing importing it did not make the top twelve.
+  //
+  // A component with no relationships AT ALL stays. That box is isolated in
+  // the model too, and saying so is true and worth seeing.
+  const connected = new Set();
+  for (const edge of edges) { connected.add(edge.from); connected.add(edge.to); }
+  const stranded = selected.filter((id) => !connected.has(id)
+    && model.relationships.some((r) => r.from === id || r.to === id));
+  for (const id of stranded) {
+    selectedSet.delete(id);
+    omissions.push({
+      id,
+      kind: 'component',
+      reason: 'every relationship it has leads to a component the view budget '
+        + 'left out, so drawing it would show an isolated box that the model '
+        + 'contradicts',
+    });
+  }
+  if (stranded.length) selected = selected.filter((id) => selectedSet.has(id));
 
   // --- Intent. No coordinates: this describes relationships, not places. --
   const groups = [];

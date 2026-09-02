@@ -2130,7 +2130,13 @@ function commandMap(argv) {
     ].join(NEWLINE));
   }
 
-  const output = path.resolve(positional[1] ?? path.join(target, 'architecture.html'));
+  // --out is where the run's output goes, the diagram included. It moved the
+  // five intermediates and left architecture.html in the repository, which is
+  // not what the flag is called and not what the README promised -- somebody
+  // following it had to discover the positional argument to keep their tree
+  // clean, having asked for exactly that. An explicit path still wins over
+  // both, because someone who names a file has said where they want it.
+  const output = path.resolve(positional[1] ?? path.join(outFlag ? outDir : target, 'architecture.html'));
   commandRender(['architecture', diagram, output, '--repo-root', target]);
   console.log(`${NEWLINE}mirofy map: ${drawn} component(s) -> ${output}`);
 
