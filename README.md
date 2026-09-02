@@ -81,12 +81,30 @@ npx mirofy-cli init     # a starter document of your own to edit
 npx mirofy-cli render architecture architecture.json
 ```
 
-It reads JavaScript, TypeScript and **Python**. `map --out <dir>` puts the intermediates somewhere other than your repository;
-without it they land in `<target>/scan`. `map` runs the whole pipeline in the
-directory you point it at — scan, model,
-compile, layout, render — and writes `architecture.html` next to your code. It
-works on a repository that declares no workspaces: where there are no packages
-to draw, it models the **source directories** and the imports between them.
+`map` runs the whole pipeline in the directory you point it at — scan, model,
+compile, layout, render — and writes `architecture.html` next to your code.
+`map --out <dir>` sends that and the intermediates somewhere else; without it
+they land in `<target>/scan`. It works on a repository that declares no
+workspaces: where there are no packages to draw, it models the **source
+directories** and the imports between them.
+
+### What it reads
+
+**JavaScript and TypeScript** imports · **Python** imports · `package.json`
+workspaces · Express and Next routes · `docker-compose`.
+
+That is the whole list, and the list is the point. Everything else is
+**reported, not skipped**: `coverage.md` names every file no adapter opened,
+grouped by type, and `map` says so on its way out when the unread files
+outnumber the read ones. Point it at a Go repository and you get an honest empty
+answer naming 400 unread `.go` files — not a confident small one drawn from the
+two JavaScript files in an `examples/` folder.
+
+Python resolves by **file existence**, not by convention: relative imports
+against the importing file's directory, absolute ones against the repository
+root and any directory that actually holds a package. A specifier that matches
+two source roots is a gap naming both, because which one wins depends on
+`sys.path`, which is configuration and not in the source.
 
 `npx mirofy-cli guide "show an API request with a cache miss"` picks the
 diagram type for you if you are not sure which one you want.
@@ -276,8 +294,11 @@ omission. Every fact is labelled with one of six provenance classes, so
 
 The same rule holds where a decision has to be made that evidence cannot
 settle. A derived component's kind is `package` — the scanner knows a manifest
-exists, not whether something is a "backend". 734 imports of `node:fs` are
-*counted and named*, not drawn and not dropped in silence. A citation with no
+exists, not whether something is a "backend". 784 imports of Node builtins are
+*counted and named*, not drawn and not dropped in silence. In Python a computed
+`importlib.import_module(name)` is a gap with its line, and docstrings are
+blanked before parsing — a docstring full of example imports would otherwise
+become edges the code does not have, cited to prose. A citation with no
 pinned commit to verify against is discarded rather than shown, because a
 citation nobody can check is worse than none.
 

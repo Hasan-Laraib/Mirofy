@@ -15,6 +15,30 @@ stops being one.
 
 ## 2026-09-02
 
+### The READMEs say what it reads, and the npm page stops being an internal note
+
+Python support shipped without the README saying so beyond one sentence bolted
+onto the front of a paragraph about `--out`. There is now a **What it reads**
+section in both READMEs: JavaScript and TypeScript imports, Python imports,
+`package.json` workspaces, Express and Next routes, `docker-compose`. The list
+is short on purpose and the shortness is the point -- everything else is
+reported rather than skipped, which is the half that makes an empty answer
+honest rather than embarrassing.
+
+Two numbers in there are checked now. The prose said "734 imports of `node:fs`"
+where the figure was 784 and was never node:fs alone -- it was every Node
+builtin. A claim about counting rather than dropping, quietly wrong, is the
+worst one to leave unchecked. And a new adapter that nobody adds to the README
+is a capability users never learn about, so `check:readme` now fails when one
+is not described.
+
+`packages/core/README.md` is what npmjs.com renders on the package page, and it
+was an internal directory note about P0 and P1 phases -- no mention of `map`,
+of Python, or of what the package does. It now reads as a package front page,
+with the contributor rules kept below a fold rather than deleted.
+
+Released as 0.3.3.
+
 ### The flaky CI leg was a directory appearing and vanishing inside a package
 
 A single test on a single leg -- "legacy v1 explicit narrow viewBoxes" -- failed

@@ -223,6 +223,38 @@ relationships**`,
 mustContain('components drawn', `draws
 **${numberWord((view.components ?? view.nodes ?? []).length)}**`);
 
+// The README quotes what the model DECLINED to draw, as evidence that it counts
+// rather than drops. That number was written as "734 imports of `node:fs`" and
+// had drifted to 784 -- and was never node:fs alone, it was every Node builtin.
+// A figure about honesty that is quietly wrong is the worst one to leave
+// unchecked.
+const notModelled = model.notModelled ?? [];
+const builtins = notModelled.find((entry) => /builtin/i.test(entry.what ?? ''));
+within('Node builtin imports not drawn', /([\d,]+) imports of Node builtins/, builtins?.count ?? 0);
+// The adapter list is a promise about what the tool can read. A new adapter
+// that nobody adds to the README is a capability users never learn about; a
+// removed one is a lie.
+const adapterFiles = fs.readdirSync(path.join(repoRoot, 'packages/scanner/src/adapters'))
+  .filter((name) => name.endsWith('.mjs')).map((name) => name.replace(/\.mjs$/, ''));
+// Plain substrings, not regexes: a pattern written across a line break lost its
+// escape on the way into this file and became an unterminated literal. There is
+// nothing here that needs a regex.
+const namedInReadme = {
+  imports: 'JavaScript and TypeScript** imports',
+  python: '**Python** imports',
+  workspace: 'workspaces ',
+  routes: 'Express and Next routes',
+  compose: 'docker-compose',
+};
+const unlisted = adapterFiles.filter((name) => !(name in namedInReadme)
+  || !readme.includes(namedInReadme[name]));
+assertThat(
+  'every scanner adapter is named in the README',
+  unlisted.length === 0,
+  unlisted.length === 0 ? `${adapterFiles.length} adapters, all listed`
+    : `not described: ${unlisted.join(', ')}`,
+);
+
 // ---------------------------------------------------------------------------
 // The two graphics at the top of the README
 // ---------------------------------------------------------------------------

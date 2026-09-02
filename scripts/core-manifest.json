@@ -3,7 +3,7 @@
   "root": "packages/core",
   "files": {
     "LICENSE": "4c27b7152c7e4593dfdd153761ce178177d30464",
-    "README.md": "aa72211b39cba9d16db4c202f5927bc034f7ddb8",
+    "README.md": "f38a38976cb783c9b1aec4fd71093cc71aa82b37",
     "SKILL.md": "d2f80e34f0d87f1a9ad4cdde3c9b820d3d5b7b2a",
     "assets/template.html": "01ba1859645f72e95808f2f22c7450b5c9be21ec",
     "bin/mirofy.mjs": "7e3afabe2d0493bc5e45f845769db73a81baa7f3",
@@ -27,7 +27,7 @@
     "examples/production-deployment.architecture.json": "472cb83e5b92f7937c3e0a522fc90402d9e301bb",
     "examples/release-delivery.workflow.json": "915e39c47e095b99cab59f9525071fdfa97d0914",
     "examples/web-app.architecture.json": "9f6cb1404b005bd2feff1274cee73a1e94a2ae2c",
-    "package.json": "bdb836fe86d15526977c5af544e401a65ab3e238",
+    "package.json": "408836897613fe5bf8976488c5caf0adfd93e4f3",
     "recipes/scenarios.mjs": "8823cd09a66fbf1f275af572d451e30805bbd10e",
     "references/authoring-contract.md": "b085b41011eb9efa102490dea311e4c870542822",
     "references/brand-marks.md": "819bc5a2a5c0b6f7c9741a104cc8440e8870017f",
