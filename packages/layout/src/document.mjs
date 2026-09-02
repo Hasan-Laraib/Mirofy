@@ -587,6 +587,20 @@ export function viewToDocument(view, options = {}) {
     }
   }
 
+  // One word, said once. A derived map labels every edge `imports`, because
+  // every edge IS an import -- so the label distinguishes nothing and the
+  // diagram spends its whitespace repeating it. On shadcn-ui/ui that was the
+  // same word twenty-six times, overlapping into "impor imports" where two
+  // routes ran close together.
+  //
+  // Dropped only when EVERY edge agrees. The moment a map has two kinds of
+  // relationship the labels are load-bearing and all of them stay.
+  const edgeLabels = new Set(connections.map((c) => c.label ?? null));
+  const singleLabel = edgeLabels.size === 1 ? [...edgeLabels][0] : null;
+  if (singleLabel) {
+    for (const connection of connections) delete connection.label;
+  }
+
   const document = {
     schema_version: 1,
     diagram_type: 'architecture',
@@ -597,6 +611,8 @@ export function viewToDocument(view, options = {}) {
       title: typeof options.title === 'string' && options.title
         ? options.title
         : 'System model',
+      // The label the edges no longer each carry.
+      ...(singleLabel ? { subtitle: `every arrow: ${singleLabel}` } : {}),
     },
     components,
     connections,

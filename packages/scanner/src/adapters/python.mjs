@@ -121,6 +121,31 @@ function candidatesFor(dotted, root) {
  *
  * @returns {{path: string} | {ambiguous: string[]} | null}
  */
+/**
+ * What to record for a dotted import that resolved to nothing.
+ *
+ * `package:<top>` says "this came from a package manager", and for
+ * `from requests.adapters import HTTPAdapter` that is exactly right. But when
+ * `<top>` is a package that lives in THIS repository, the same fallback claims
+ * the repository depends on a published copy of itself.
+ *
+ * fastapi/fastapi drew a dashed third-party `fastapi` box beside its own solid
+ * `fastapi/security` and `fastapi/dependencies`: one line in one docs example
+ * imports `fastapi.temp_pydantic_v1_params`, which is not in the tree, and 1 of
+ * 1,406 facts was enough to put it on the diagram.
+ *
+ * The submodule is missing, and that is a gap -- the honest answer -- rather
+ * than a dependency nobody declared.
+ */
+function unresolvedTarget(dotted, files, roots) {
+  const top = dotted.split('.')[0];
+  if (STDLIB.has(top)) return { object: `package:python:${top}` };
+  if (top !== dotted && resolveAbsolute(top, files, roots)) {
+    return { missing: `${dotted} -- ${top} is a package in this repository, ${dotted} is not` };
+  }
+  return { object: `package:${top}` };
+}
+
 function resolveAbsolute(dotted, files, roots) {
   const hits = [];
   for (const root of roots) {
@@ -266,7 +291,6 @@ export const pythonAdapter = {
             return;
           }
           if (!dotted) return;
-          const top = dotted.split('.')[0];
           const inside = resolveAbsolute(dotted, files, roots);
           if (inside && 'ambiguous' in inside) {
             gaps.push({
@@ -287,7 +311,15 @@ export const pythonAdapter = {
             if (!recorded) record(inside.path);
             return;
           }
-          record(STDLIB.has(top) ? `package:python:${top}` : `package:${top}`);
+          const fallback = unresolvedTarget(dotted, files, roots);
+          if (fallback.missing) {
+            gaps.push({
+              path: rel,
+              reason: `import at line ${lineNumber} names ${fallback.missing}`,
+            });
+            return;
+          }
+          record(fallback.object);
           return;
         }
 
@@ -306,8 +338,15 @@ export const pythonAdapter = {
               continue;
             }
             if (inside && 'path' in inside) { record(inside.path); continue; }
-            const top = dotted.split('.')[0];
-            record(STDLIB.has(top) ? `package:python:${top}` : `package:${top}`);
+            const fallback = unresolvedTarget(dotted, files, roots);
+            if (fallback.missing) {
+              gaps.push({
+                path: rel,
+                reason: `import at line ${lineNumber} names ${fallback.missing}`,
+              });
+              continue;
+            }
+            record(fallback.object);
           }
         }
       });

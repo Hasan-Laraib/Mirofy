@@ -204,3 +204,42 @@ test('[2.8] a python file the walk skipped is not scanned, and one git ignores i
     'build output and vendored trees are not source somebody wrote');
   assert.deepEqual(facts.map((fact) => fact.object), ['package:python:json']);
 });
+
+test('[2.8] a missing submodule of a LOCAL package is a Gap, not a dependency on itself', async () => {
+  // `package:<top>` means "this came from a package manager", and for
+  // `from requests.adapters import HTTPAdapter` that is right. When `<top>` is
+  // a package in THIS repository, the same fallback claims the repository
+  // depends on a published copy of itself.
+  //
+  // fastapi/fastapi drew a dashed third-party `fastapi` box beside its own
+  // solid `fastapi/security` and `fastapi/dependencies`. One line in one docs
+  // example imports `fastapi.temp_pydantic_v1_params`, which is not in the
+  // tree -- 1 fact out of 1,406 was enough to put it on the diagram, and a
+  // reader would have concluded fastapi depends on fastapi.
+  const repoRoot = makeRepo({
+    'mylib/__init__.py': '',
+    'mylib/real.py': 'x = 1' + NL,
+    'app.py': ['from mylib.real import x', 'from mylib.absent import y', ''].join(NL),
+  });
+  const { facts, gaps } = await runAdapter(pythonAdapter, { repoRoot, revision: REVISION });
+
+  assert.ok(!facts.some((fact) => fact.object === 'package:mylib'),
+    `a package in this repository must not appear as a dependency: `
+    + `${JSON.stringify(facts.map((fact) => fact.object))}`);
+  assert.deepEqual(facts.map((fact) => fact.object), ['mylib/real.py'],
+    'the import that does resolve is still a fact');
+  assert.equal(gaps.length, 1, `expected one gap, got ${JSON.stringify(gaps)}`);
+  assert.match(gaps[0].reason, /mylib.absent/);
+});
+
+test('[2.8] a real third-party submodule still resolves to its package', async () => {
+  // The other half, and the reason the check is about THIS repository rather
+  // than about dots. Narrowing it to "any unresolved dotted import is a gap"
+  // would lose every third-party subpackage import in every Python project.
+  const repoRoot = makeRepo({
+    'app.py': 'from requests.adapters import HTTPAdapter' + NL,
+  });
+  const { facts, gaps } = await runAdapter(pythonAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, []);
+  assert.deepEqual(facts.map((fact) => fact.object), ['package:requests']);
+});
