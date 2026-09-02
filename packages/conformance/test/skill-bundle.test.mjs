@@ -96,7 +96,12 @@ test('a new directory in packages/core has to be decided about', () => {
   // not silently enlarge what every user installs -- but it also must not be
   // silently left out. The build refuses an entry it neither ships nor records
   // a reason for skipping.
-  const invented = path.join(repoRoot, 'packages/core/__bundle_probe__');
+  // Dot-prefixed, so the tests that copy packages/core wholesale skip it by the
+  // rule they already have. Named `__bundle_probe__` it was a live directory
+  // appearing and vanishing inside a package other tests were copying, and
+  // cli.test.mjs failed with ENOENT lstat'ing an entry that had just gone --
+  // intermittently, on one CI leg, looking like a flaky renderer.
+  const invented = path.join(repoRoot, 'packages/core/.bundle-probe');
   fs.mkdirSync(invented, { recursive: true });
   fs.writeFileSync(path.join(invented, 'keep.txt'), 'probe\n');
   try {

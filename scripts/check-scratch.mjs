@@ -115,6 +115,42 @@ check(
     : `writes into a package: ${strays.join('; ')}`,
 );
 
+// Directories made with plain mkdirSync inside packages/, too. The first
+// version of this check only knew about mkdtempSync, and the thing that was
+// actually breaking the suite was `fs.mkdirSync(packages/core/__bundle_probe__)`
+// -- a live directory appearing and vanishing inside a package that two other
+// tests copy wholesale, which failed them with ENOENT on an entry that had just
+// gone. Dot-prefixed names are exempt: everything that reads packages/core
+// already skips those, which is what makes them safe.
+const madeInPackages = [];
+for (const file of files) {
+  const unixPath = file.split(path.sep).join('/');
+  if (!unixPath.includes('/test/')) continue;
+  const text = fs.readFileSync(file, 'utf8');
+  // The path is built into a variable and the variable is what gets created:
+  //   const invented = path.join(repoRoot, 'packages/core/__bundle_probe__');
+  //   fs.mkdirSync(invented, { recursive: true });
+  // Matching `mkdirSync(path.join(...))` inline found nothing here, and the
+  // check passed on the very case it was written for.
+  for (const match of text.matchAll(/(?:const|let)\s+(\w+)\s*=\s*path\.join\([^;]*?'([^']*packages\/[^']*)'\s*\)/g)) {
+    const [, name, made] = match;
+    const leaf = made.slice(made.lastIndexOf('/') + 1);
+    if (leaf.startsWith('.')) continue;
+    // A plain string test, not a regex inside a template literal: there the
+    // backslashes resolve as string escapes before RegExp sees them, so the
+    // pattern became mkdirSync(s*<name><backspace> and matched nothing.
+    if (!text.includes('mkdirSync(' + name) && !text.includes('mkdirSync( ' + name)) continue;
+    madeInPackages.push(`${path.relative(repoRoot, file)} -> ${made}`);
+  }
+}
+
+check(
+  'no test creates a visible directory inside a package',
+  madeInPackages.length === 0,
+  madeInPackages.length === 0 ? 'nothing appears and vanishes inside a package mid-run'
+    : `appears inside a package: ${madeInPackages.join('; ')}`,
+);
+
 for (const result of results) {
   console.log(`  ${result.ok ? 'ok  ' : 'FAIL'}  ${result.claim}`);
   console.log(`          ${result.detail}`);

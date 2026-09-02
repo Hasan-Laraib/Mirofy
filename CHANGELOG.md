@@ -15,6 +15,42 @@ stops being one.
 
 ## 2026-09-02
 
+### The flaky CI leg was a directory appearing and vanishing inside a package
+
+A single test on a single leg -- "legacy v1 explicit narrow viewBoxes" -- failed
+on one CI run and passed on the next, which is the shape of a flaky renderer and
+was nothing of the kind. Chased under the full parallel suite, the real error
+surfaced in a different test entirely:
+
+    ENOENT: lstat 'packages/core/__bundle_probe__'
+      at copyInstalledSkill (cli.test.mjs)
+
+`skill-bundle.test.mjs` creates that directory inside packages/core, on purpose,
+to prove the bundle refuses an entry nobody decided about. It has to be there --
+that is what it tests. But `cli.test.mjs` and `degraded.test.mjs` copy
+packages/core wholesale, and a copy that enumerates a directory and then stats
+an entry which has since been deleted fails, intermittently, depending on
+ordering.
+
+Both copiers already skip dot-entries. Renaming the probe to `.bundle-probe`
+folds it into the rule that exists rather than adding another special case, and
+the build still refuses it, because build-skill has no dot exemption -- the one
+it briefly had was removed when its cause went away.
+
+`check:scratch` grew a fifth check for this: no test may create a VISIBLE
+directory inside a package. It only knew about mkdtempSync, and the thing
+actually breaking the suite was a plain mkdirSync.
+
+That check was wrong twice before it worked, both times silently. It matched
+`mkdirSync(path.join(...))` inline, while the code assigns the path to a
+variable first -- so it passed on the exact case it was written for. Then it
+built a RegExp inside a template literal, where the backslashes resolve as
+string escapes before RegExp ever sees them, and the pattern became
+`mkdirSync(s*<name><backspace>`. It is a plain string test now, with nothing
+left to collapse.
+
+Four consecutive full suite runs, clean.
+
 ### `map --out`, so it stops writing into your repository
 
 `mirofy map` drops five JSON files and an artifact next to your code. That is a
