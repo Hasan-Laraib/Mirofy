@@ -618,3 +618,50 @@ test('doctor reports a missing output-path safety runtime in an installed skill'
   assert.equal(result.status, 1);
   assert.match(result.stdout, /\[missing\] Output path safety runtime/);
 });
+
+test('two distinct files are never aliases, however close their file indices', () => {
+  // A Windows file index is 64 bits and `ino` as a JS number is a double, so
+  // the low bits are gone -- and NTFS hands adjacent indices to files created
+  // moments apart. Seventeen of four hundred distinct files in one directory
+  // collided under that rounding, which made a plain
+  // `render in.json out.html` refuse roughly one time in twenty with
+  // "Output must not replace an input": a message that reads like the caller
+  // aliased their own input, about a pair of files that share nothing.
+  //
+  // It surfaced as an intermittent failure of the skill-bundle test, which
+  // rebuilds dist/ and so creates its inputs and outputs seconds apart.
+  //
+  // The identity comparison is what catches a hard link, which is a real
+  // alias with two real paths, so it cannot simply be dropped. It has to be
+  // exact instead.
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-ino-'));
+  try {
+    const byRoundedIndex = new Map();
+    const collisions = [];
+    for (let i = 0; i < 400; i += 1) {
+      const file = path.join(directory, `f${i}.txt`);
+      fs.writeFileSync(file, 'x');
+      const rounded = fs.statSync(file).ino;
+      const earlier = byRoundedIndex.get(rounded);
+      if (earlier) collisions.push([earlier, file]);
+      byRoundedIndex.set(rounded, file);
+    }
+
+    for (const [left, right] of collisions) {
+      assert.equal(pathsAlias(left, right), false,
+        `${path.basename(left)} and ${path.basename(right)} are different files`);
+    }
+
+    // Without this the assertion above is empty on any platform whose inodes
+    // are small integers -- every Linux runner -- and the test would report
+    // success for a hazard it never met. Windows is where the rounding bites,
+    // so Windows is where the fixture has to prove it produced one.
+    if (process.platform === 'win32') {
+      assert.ok(collisions.length > 0,
+        '400 files produced no rounded-index collision; this fixture no longer '
+        + 'reaches the defect it was written for');
+    }
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});

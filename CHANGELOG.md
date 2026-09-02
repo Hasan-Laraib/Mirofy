@@ -2,7 +2,9 @@
 
 What changed, and why it was worth changing. Newest first.
 
-There are no releases yet, so entries are dated rather than versioned. Each one
+Entries are dated rather than versioned, because most of what is worth
+recording here does not line up with a version bump. Where an entry did ship
+as one, it says so. Each one
 records the decision, not only the diff — a line that says *what* a commit did
 is already in `git log`, and a changelog that repeats it is a second copy of
 something nobody was struggling to find.
@@ -14,6 +16,141 @@ stops being one.
 ---
 
 ## 2026-09-02
+
+### Your code and somebody else's are no longer drawn the same way
+
+Released as 0.3.7.
+
+The scanner has always known a derived module from a `package:` node.
+`packages/layout/src/document.mjs` flattened both onto the schema type
+`external` and kept the real kind in the free-form `tag`, so a Python
+repository came out as a dozen identical grey boxes. The distinction was
+found, carried most of the way, and dropped at the last step.
+
+Colour cannot carry it. The `okabe-ito` preset spends all seven of its
+colour-vision-distinct hues on the seven existing roles, and the pairwise
+dE00 separation test in `packages/conformance/test/tokens.test.mjs` is
+what would catch an eighth that only looked distinct to trichromats.
+Colouring on `tag` was the other tempting answer and is also wrong: that
+field carries arbitrary notes, `"tag": "new owner"` among them.
+
+So `module` is a real component type now, and the channel is stroke
+pattern -- dashed for third-party, solid for yours. No new token, all six
+presets, both themes, every colour vision type; and dashed already means
+"a boundary" on lanes and regions, which is what a dependency sits
+outside of. Row 4.17 asserts the two resolve to different *paint*, not
+merely different class names, because distinct classes painting
+identically would be the same defect wearing a new name.
+
+### A capped citation list now says what it was capped from
+
+The schema allows a component three sources, because a passport of
+forty-three links is not a passport. The layout truncated to fit and said
+nothing, so a node citing three files and a node citing forty-three
+rendered identically -- a bound on the *drawing* had quietly become a
+claim about the *evidence*. The receipt counted truncations already,
+which informs whoever ran the command rather than whoever reads the
+diagram.
+
+`source_count` travels with the shown few now, through schema validation
+and evidence verification, and the passport says "Showing 3 of 43". A
+complete list claims no total, or every passport would read "Showing 2 of
+2" and train readers to skip the line that matters.
+
+`map` also swallowed every flag it did not recognise, so it never
+forwarded `--repo-url`/`--revision` to the layout step -- which made the
+advice the layout prints when it drops citations impossible to follow
+through `map` at all. On a checkout without an origin remote that was
+silently every citation.
+
+### Three more commands were dead in every published version
+
+`mirofy import` died on its first call from an installed package with
+`Cannot find module 'node_modules/import/src/mermaid.mjs'`. The specifier
+climbed two levels out of `packages/core/bin`, which is correct in a
+checkout and points outside the package entirely once installed. `repair` and the static SVG
+export had the same defect.
+
+This is the same failure as `check` and `examples` below, four days
+later, which is the argument for the change that found it:
+`scripts/prepublish-guard.mjs` now walks every command the CLI
+*advertises*, reading the list from the installed package's own help text
+rather than a list written beside it. It refuses in both directions -- an
+advertised command nobody exercises fails the publish, and an entry for a
+command no longer advertised fails it too -- so neither list can rot
+without saying so. It caught `import` on its first complete run.
+
+### Skip-level edges route through the gutters
+
+I had called this one a project rather than a patch, and was wrong.
+
+The detour dropped from the source node's own centre, which means
+dropping through the source node's own column: fine when the source is
+alone in it, impossible when it has a neighbour above and one below. With
+no way down and no way up the router gave up and left the edge running
+straight through whatever sat between the columns.
+
+The space *between* two columns is empty by construction, so the riser
+goes there. Every corner is named, because `via` points are joined by
+straight segments rather than routed orthogonally -- two of them describe
+a diagonal the endpoint-side rule rejects.
+
+This repository's own map went from 3 clean-flow diagnostics to 0, and
+the twelve-node Python repository that had failed since 0.3.3 went from 9
+to 0.
+
+Found by fixing something else. `scripts/build-hero.mjs` re-ran scan,
+model and compile and then rendered a `diagram.json` from some earlier
+run -- it never ran layout -- so the hero could show a graph the current
+view no longer had. Adding the missing step produced a diagram the gate
+refused, which is what sent me into the router.
+
+The routing test named a *shape* -- `bottom` at both ends, every waypoint
+below every box -- so it failed the day the route improved, while a route
+that dived below and came back up through the node would have satisfied
+every line of it. It asserts the invariant now, with a full-column
+fixture beside it: the old three-in-a-row fixture cannot reach the real
+defect, because its outer columns escape whatever the riser does.
+
+### `render` refused about one output in twenty on Windows
+
+`pathsAlias` in `packages/core/renderers/shared/output-path.mjs` compares
+two files by device and inode, which is how it catches a hard link -- a
+real alias with two real paths, so the comparison cannot simply be
+dropped. It read the stats as plain numbers.
+
+A Windows file index is 64 bits and a JS number is a double, so the low
+bits are gone, and NTFS hands adjacent indices to files created moments
+apart. Seventeen of four hundred distinct files in one directory collided
+under that rounding. The effect on a user was `render in.json out.html`
+failing with "Output must not replace an input" -- a message that reads
+like they had aliased their own input, about two files that share
+nothing.
+
+Reading the stats as bigints fixes it exactly, with no loss of the hard
+link protection.
+
+Found because the skill-bundle test rebuilds `dist/` and therefore
+creates its inputs and outputs seconds apart, so it failed intermittently
+and looked like the Windows rename flake fixed the same day. The test for
+it asserts no two distinct files alias, and on Windows additionally
+asserts the fixture produced at least one rounded-index collision --
+without that, the assertion is empty on every Linux runner and the test
+would report success for a hazard it never met.
+
+### The bundled pipeline is not renamed when nothing changed
+
+`scripts/build-pipeline.mjs` swapped `packages/core/pipeline` into place
+by renaming it, and Windows will not rename a directory while another
+process holds a file open under it. The test runner runs its files in
+parallel and several spawn the CLI, which imports from exactly that
+directory, so the gate failed at random inside the skill-bundle test with
+a bare `binding.rename` error -- twice under the publish guard, never
+when the test ran alone.
+
+Rebuilding is idempotent, so an unchanged workspace produces a
+byte-identical tree, which is what every test run produces. That case
+keeps the directory already in place and renames nothing.
 
 ### `check` and `examples` were dead in every published version
 

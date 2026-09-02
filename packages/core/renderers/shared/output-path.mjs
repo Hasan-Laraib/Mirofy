@@ -220,8 +220,14 @@ function futurePathsAlias(leftPath, rightPath) {
 export function pathsAlias(leftPath, rightPath) {
   if (futurePathsAlias(leftPath, rightPath)) return true;
   try {
-    const left = fs.statSync(leftPath);
-    const right = fs.statSync(rightPath);
+    // BIGINT, or this comparison invents aliases. A Windows file index is 64
+    // bits and `ino` as a JS number is a double: the low bits are gone, and
+    // NTFS hands adjacent indices to files created moments apart. Sixteen of
+    // three hundred distinct files in one directory collided this way -- so a
+    // plain `render in.json out.html` refused about one time in twenty, with a
+    // message that reads like the caller had aliased their own input.
+    const left = fs.statSync(leftPath, { bigint: true });
+    const right = fs.statSync(rightPath, { bigint: true });
     return sameFileIdentity(left, right);
   } catch {
     return false;
