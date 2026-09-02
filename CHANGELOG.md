@@ -19,6 +19,8 @@ stops being one.
 
 ### `map --out` left the diagram in your repository
 
+Released as 0.3.8.
+
 Reported by someone running the published release against their own code,
 following only the README. They used `--out` specifically to keep their
 repository clean, and `architecture.html` landed in it anyway.
