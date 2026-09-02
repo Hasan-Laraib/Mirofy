@@ -78,8 +78,8 @@ const FIXTURES = {
 };
 
 const CATALOGS = {
-  architecture: ['frontend', 'backend', 'database', 'cloud', 'security', 'messagebus', 'external'],
-  workflow: ['frontend', 'backend', 'security', 'messagebus', 'database', 'cloud', 'external'],
+  architecture: ['frontend', 'backend', 'database', 'cloud', 'security', 'messagebus', 'module', 'external'],
+  workflow: ['frontend', 'backend', 'security', 'messagebus', 'database', 'cloud', 'module', 'external'],
   sequence: ['emphasis', 'return', 'security', 'dashed', 'default'],
   dataflow: ['emphasis', 'security', 'dashed', 'database', 'default'],
   lifecycle: ['start', 'active', 'waiting', 'decision', 'success', 'failure', 'neutral', 'external'],

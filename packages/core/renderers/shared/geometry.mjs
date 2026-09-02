@@ -1345,6 +1345,7 @@ export const componentFill = {
   cloud: 'c-cloud',
   security: 'c-security',
   messagebus: 'c-messagebus',
+  module: 'c-module',
   external: 'c-external'
 };
 
@@ -1355,6 +1356,7 @@ export const componentText = {
   cloud: 't-cloud',
   security: 't-security',
   messagebus: 't-messagebus',
+  module: 't-module',
   external: 't-external'
 };
 

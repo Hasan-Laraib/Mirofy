@@ -1395,6 +1395,24 @@ export const IMPORTED_ROWS = [
     proof: 'tokens.test.mjs',
     testTitle: 'the Okabe-Ito palette uses the published CVD-safe hues (4.13)',
   },
+  {
+    id: '4.17',
+    name: 'Repository code is drawn apart from third-party code',
+    // The single most useful kind distinction on a repository map, and for
+    // several releases it was found and then discarded: the scanner knew a
+    // derived module from a `package:` node, the layout flattened both to
+    // the schema type `external`, and every box came out identically grey.
+    // Colour cannot carry this. Row 4.13 spends all seven of the
+    // Okabe-Ito hues on the seven semantic roles, so an eighth would be
+    // distinguishable to trichromats only -- which is the failure that
+    // preset exists to prevent. Stroke pattern is the free channel:
+    // no new token, every preset, both themes, every colour vision type.
+    // The row is worded as "different paint", not "different class", because
+    // distinct class names resolving to identical fill and stroke would be
+    // the original defect with a new name on it.
+    proof: 'module-vs-external.test.mjs',
+    testTitle: '[4.17] and the two classes resolve to visibly different paint',
+  },
 
   // Phase 5 — Viewer (interactive; proved only in the CI browser job, Task 9).
   // Each row's testTitle is verified individually against the TAP output of

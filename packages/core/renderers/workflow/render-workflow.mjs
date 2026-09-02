@@ -927,6 +927,7 @@ const LEGEND_CATALOG = [
   'messagebus',
   'database',
   'cloud',
+  'module',
   'external',
 ].map((kind) => ({ kind, label: i18nText(workflow.meta.locale, `legend.workflow.${kind}`) }));
 

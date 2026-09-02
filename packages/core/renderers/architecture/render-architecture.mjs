@@ -104,6 +104,7 @@ const LEGEND_CATALOG = [
   'cloud',
   'security',
   'messagebus',
+  'module',
   'external',
 ].map((kind) => ({ kind, label: i18nText(arch.meta.locale, `legend.architecture.${kind}`) }));
 

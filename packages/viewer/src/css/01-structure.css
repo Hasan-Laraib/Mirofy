@@ -3617,7 +3617,15 @@
     .c-cloud      { fill: var(--cloud-fill);      stroke: var(--cloud-stroke); }
     .c-security   { fill: var(--security-fill);   stroke: var(--security-stroke); }
     .c-messagebus { fill: var(--messagebus-fill); stroke: var(--messagebus-stroke); }
-    .c-external   { fill: var(--external-fill);   stroke: var(--external-stroke); }
+    .c-module     { fill: var(--external-fill);   stroke: var(--external-stroke); }
+    /* Dashed, not a different hue. The okabe-ito preset spends all seven of
+       its colour-vision-distinct hues on the seven semantic roles, so an eighth
+       hue could not be distinguishable there. Stroke pattern is a free
+       channel that survives every preset, both themes and every colour
+       vision type -- and dashed already means "a boundary" on lanes and
+       regions, which is exactly what third-party code sits outside of. */
+    .c-external   { fill: var(--external-fill);   stroke: var(--external-stroke);
+                    stroke-dasharray: 5 3; }
 
     /* Text helpers */
     .t-primary { fill: var(--text); }
@@ -3629,6 +3637,7 @@
     .t-cloud      { fill: var(--cloud-stroke); }
     .t-security   { fill: var(--security-stroke); }
     .t-messagebus { fill: var(--messagebus-stroke); }
+    .t-module     { fill: var(--external-stroke); }
     .t-external   { fill: var(--external-stroke); }
 
     /* Semantic Sigils are small authored role stamps, not icons from a brand
@@ -3651,6 +3660,7 @@
     svg .s-cloud      { color: var(--cloud-stroke); }
     svg .s-security   { color: var(--security-stroke); }
     svg .s-messagebus { color: var(--messagebus-stroke); }
+    svg .s-module     { color: var(--external-stroke); }
     svg .s-external   { color: var(--external-stroke); }
 
     /* Brand Marks are authored identity badges. Their color is contained

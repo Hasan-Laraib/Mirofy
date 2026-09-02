@@ -89,7 +89,7 @@
       "maxItems": 2
     },
     "componentType": {
-      "enum": ["frontend", "backend", "database", "cloud", "security", "messagebus", "external"]
+      "enum": ["frontend", "backend", "database", "cloud", "security", "messagebus", "module", "external"]
     },
     "brandMark": {
       "oneOf": [

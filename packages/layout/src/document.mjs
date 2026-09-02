@@ -26,7 +26,7 @@ import { solve } from './solve.mjs';
 
 /** Component types the architecture schema accepts. */
 const SCHEMA_TYPES = new Set([
-  'frontend', 'backend', 'database', 'cloud', 'security', 'messagebus', 'external',
+  'frontend', 'backend', 'database', 'cloud', 'security', 'messagebus', 'module', 'external',
 ]);
 
 const asArray = (value) => (Array.isArray(value) ? value : []);
