@@ -801,7 +801,7 @@ async function commandRender(args) {
 async function renderStaticSvg({ type, input, output, quality, repoRoot }) {
   const [{ toStaticSvg }, { resolveTokens }] = await Promise.all([
     import('../renderers/shared/svg-static.mjs'),
-    import('../../viewer/src/tokens/tokens.mjs'),
+    import(bundledModule('viewer/src/tokens/tokens.mjs')),
   ]);
 
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-svg-static-'));
@@ -1823,7 +1823,7 @@ async function commandImport(argv) {
     fail(`import: could not read ${JSON.stringify(input)}: ${error.message}`);
   }
 
-  const { importMermaid } = await import('../../import/src/mermaid.mjs');
+  const { importMermaid } = await import(bundledModule('import/src/mermaid.mjs'));
   let result;
   try {
     result = importMermaid(text);
@@ -1879,7 +1879,7 @@ async function commandRepair(argv) {
     fail(`repair: could not read ${JSON.stringify(input)}: ${error.message}`);
   }
 
-  const { repairDocument } = await import('../../layout/src/repair.mjs');
+  const { repairDocument } = await import(bundledModule('layout/src/repair.mjs'));
   // What was already wrong, before repair touched anything. Without this the
   // report cannot tell a problem repair FAILED to fix from one it CAUSED --
   // and widening a component to fit its label really can change which side an
@@ -1988,6 +1988,29 @@ async function validateDocumentQuietly(type, filePath) {
 // the copy that ships (see scripts/build-pipeline.mjs), and packages/<name> is
 // the source of truth used from a checkout. Whichever is present wins; if
 // neither is, that is said plainly rather than surfaced as a missing file.
+/**
+ * A module this package reaches for outside its own tree, wherever it is.
+ *
+ * Three commands did this with a bare `../../<package>/src/x.mjs`, which is
+ * right in a checkout and resolves to node_modules/<package>/ once installed
+ * -- so `import`, `repair` and the static SVG export were dead in every
+ * published version, exactly as `check` and `examples` were. The publish
+ * guard walks the advertised commands now and caught the first of them.
+ *
+ * @param {string} relative e.g. `import/src/mermaid.mjs`
+ */
+function bundledModule(relative) {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  for (const candidate of [
+    path.join(here, '..', 'pipeline', relative),  // published tarball
+    path.join(here, '..', '..', relative),        // workspace checkout
+  ]) {
+    if (fs.existsSync(candidate)) return pathToFileURL(candidate).href;
+  }
+  fail(`This build is missing ${relative}. Reinstall mirofy-cli, or run from a checkout.`);
+  return relative;
+}
+
 function pipelineStep(name) {
   const here = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [

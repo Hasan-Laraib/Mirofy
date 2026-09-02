@@ -28,7 +28,11 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const out = path.join(repoRoot, 'packages/core/pipeline');
 
 // evidence first: the others import it.
-const PACKAGES = ['evidence', 'scanner', 'model', 'compile', 'layout'];
+// `import` and `viewer` are not pipeline steps. They are here because the
+// CLI dynamically imports a module from each -- mermaid import, and the
+// token model the static SVG export needs -- and a specifier that climbs
+// out of packages/core resolves to nothing at all once installed.
+const PACKAGES = ['evidence', 'scanner', 'model', 'compile', 'layout', 'import', 'viewer'];
 
 // The only cross-package specifier that moves. Copied to
 // packages/core/pipeline/<name>/src/x.mjs, a sibling under pipeline/ is still
