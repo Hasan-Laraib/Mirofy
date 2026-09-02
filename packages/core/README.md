@@ -44,6 +44,11 @@ npx mirofy-cli guide "an API request with a cache miss"
 `map --out <dir>` keeps the intermediates out of your repository; without it
 they land in `<target>/scan`.
 
+Citations need a pinned repository to verify against, which `map` reads from
+your `origin` remote. A checkout without one -- a bare `git init`, a mirror --
+has no repository to name, so pass `--repo-url` and `--revision` and the
+citations are kept instead of dropped.
+
 Installed globally with `npm install -g mirofy-cli`, the command is **`mirofy`**.
 The package carries the `-cli` suffix because npm refused the bare name as too
 close to the existing `minify`.

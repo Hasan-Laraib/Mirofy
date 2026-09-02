@@ -342,7 +342,7 @@
          renderer serves a node and a relationship. Keeping two would let the
          two subjects drift into reporting evidence differently, which is the
          one thing a trust panel must not do. */
-      function renderSourceEvidence(sources, provenanceClass) {
+      function renderSourceEvidence(sources, provenanceClass, sourceTotal) {
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
         repositoryLink.textContent = '';
@@ -392,6 +392,19 @@
           link.appendChild(sourcePath);
           evidenceLinks.appendChild(link);
         });
+        /* A capped list that does not say it is capped reads as the whole
+           truth. Three of forty-three and three of three looked identical
+           in this panel, which turns a bound on the DRAWING into a claim
+           about the EVIDENCE. */
+        if (sourceTotal && sourceTotal > sources.length) {
+          var more = document.createElement('p');
+          more.className = 'semantic-passport-source-more';
+          more.textContent = viewerText('viewer.passport.source.partial', {
+            shown: String(sources.length),
+            total: String(sourceTotal)
+          });
+          evidenceLinks.appendChild(more);
+        }
         evidence.hidden = false;
       }
       function renderPassport(id, node) {
@@ -402,7 +415,8 @@
         setPassportValue(document.getElementById('focus-brand'), node.getAttribute('data-node-brand'));
         semanticId.textContent = id;
         semanticId.hidden = false;
-        renderSourceEvidence(Mirofy.sourceEvidence.node(id), node.getAttribute('data-provenance'));
+        renderSourceEvidence(Mirofy.sourceEvidence.node(id), node.getAttribute('data-provenance'),
+          Mirofy.sourceEvidence.sourceTotal(id));
       }
       function relationshipsFor(id, byId) {
         var seen = {};

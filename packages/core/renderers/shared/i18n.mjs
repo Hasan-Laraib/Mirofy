@@ -404,6 +404,7 @@ const MESSAGE_PAIRS = {
   'viewer.passport.beaconEdge.other': ['{count} verified sources; focus this connection to inspect', '{count} 个已验证来源；聚焦此连接以检查'],
   'viewer.passport.repository.open': ['Open verified repository revision {revision}', '打开已验证的仓库修订版本 {revision}'],
   'viewer.passport.source.open': ['Open verified source {path} at revision {revision}', '打开修订版本 {revision} 中已验证的来源 {path}'],
+  'viewer.passport.source.partial': ['Showing {shown} of {total} cited sources', '显示 {total} 个引用来源中的 {shown} 个'],
   'viewer.passport.source.openLink': ['Open ↗', '打开 ↗'],
   'viewer.passport.reach.upstream.one': ['Trace {count} upstream authored node', '追踪 {count} 个上游编写节点'],
   'viewer.passport.reach.upstream.other': ['Trace {count} upstream authored nodes', '追踪 {count} 个上游编写节点'],

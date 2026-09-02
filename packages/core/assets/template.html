@@ -2007,6 +2007,14 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    /* Reads as a caption on the list above it, not as another link: the
+       sources it counts are real but not reachable from here. */
+    .semantic-passport-source-more {
+      margin: 0.25rem 0 0;
+      color: var(--text-faint);
+      font-size: 0.5625rem;
+      font-variant-numeric: tabular-nums;
+    }
     .relationship-lens-summary {
       display: block;
       margin-top: 0.12rem;
@@ -7775,6 +7783,15 @@
           var sources = payload && payload.edges ? payload.edges[String(key)] : null;
           return Array.isArray(sources) ? sources.slice() : [];
         },
+        /* How many citations the subject really has, when the document
+           carries only the first few. Zero means "the list is complete",
+           which is also what every artifact built before this existed
+           reports -- so the passport falls back to saying nothing. */
+        sourceTotal: function (id) {
+          var totals = payload && payload.sourceTotals;
+          var total = totals ? totals[id] : 0;
+          return typeof total === 'number' ? total : 0;
+        },
         installBeacons: installBeacons
       };
     })();
@@ -8124,7 +8141,7 @@
          renderer serves a node and a relationship. Keeping two would let the
          two subjects drift into reporting evidence differently, which is the
          one thing a trust panel must not do. */
-      function renderSourceEvidence(sources, provenanceClass) {
+      function renderSourceEvidence(sources, provenanceClass, sourceTotal) {
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
         repositoryLink.textContent = '';
@@ -8174,6 +8191,19 @@
           link.appendChild(sourcePath);
           evidenceLinks.appendChild(link);
         });
+        /* A capped list that does not say it is capped reads as the whole
+           truth. Three of forty-three and three of three looked identical
+           in this panel, which turns a bound on the DRAWING into a claim
+           about the EVIDENCE. */
+        if (sourceTotal && sourceTotal > sources.length) {
+          var more = document.createElement('p');
+          more.className = 'semantic-passport-source-more';
+          more.textContent = viewerText('viewer.passport.source.partial', {
+            shown: String(sources.length),
+            total: String(sourceTotal)
+          });
+          evidenceLinks.appendChild(more);
+        }
         evidence.hidden = false;
       }
       function renderPassport(id, node) {
@@ -8184,7 +8214,8 @@
         setPassportValue(document.getElementById('focus-brand'), node.getAttribute('data-node-brand'));
         semanticId.textContent = id;
         semanticId.hidden = false;
-        renderSourceEvidence(Mirofy.sourceEvidence.node(id), node.getAttribute('data-provenance'));
+        renderSourceEvidence(Mirofy.sourceEvidence.node(id), node.getAttribute('data-provenance'),
+          Mirofy.sourceEvidence.sourceTotal(id));
       }
       function relationshipsFor(id, byId) {
         var seen = {};

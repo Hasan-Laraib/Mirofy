@@ -150,6 +150,15 @@
           var sources = payload && payload.edges ? payload.edges[String(key)] : null;
           return Array.isArray(sources) ? sources.slice() : [];
         },
+        /* How many citations the subject really has, when the document
+           carries only the first few. Zero means "the list is complete",
+           which is also what every artifact built before this existed
+           reports -- so the passport falls back to saying nothing. */
+        sourceTotal: function (id) {
+          var totals = payload && payload.sourceTotals;
+          var total = totals ? totals[id] : 0;
+          return typeof total === 'number' ? total : 0;
+        },
         installBeacons: installBeacons
       };
     })();

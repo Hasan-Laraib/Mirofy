@@ -12,7 +12,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square" alt="MIT licensed">
   <img src="https://img.shields.io/badge/runtime%20dependencies-0-7c3aed?style=flat-square" alt="Zero runtime dependencies">
-  <img src="https://img.shields.io/badge/conformance-80%20rows%20proved-3b82f6?style=flat-square" alt="80 conformance rows proved without a browser">
+  <img src="https://img.shields.io/badge/conformance-81%20rows%20proved-3b82f6?style=flat-square" alt="81 conformance rows proved without a browser">
   <img src="https://img.shields.io/badge/output-one%20HTML%20file-7c3aed?style=flat-square" alt="Output is one HTML file">
 </p>
 
@@ -469,8 +469,8 @@ that made it is a diagram held hostage.
 
 ## What is proved
 
-The conformance matrix has **100 rows**. **80 are proved without a browser**;
-19 more need headless Chrome (`MIROFY_CHROME`), bringing the total to 99.
+The conformance matrix has **101 rows**. **81 are proved without a browser**;
+19 more need headless Chrome (`MIROFY_CHROME`), bringing the total to 100.
 
 ```bash
 npm run check    # lint, types, 1,000+ tests, golden parity, conformance, size, audit

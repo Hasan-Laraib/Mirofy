@@ -1499,6 +1499,14 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    /* Reads as a caption on the list above it, not as another link: the
+       sources it counts are real but not reachable from here. */
+    .semantic-passport-source-more {
+      margin: 0.25rem 0 0;
+      color: var(--text-faint);
+      font-size: 0.5625rem;
+      font-variant-numeric: tabular-nums;
+    }
     .relationship-lens-summary {
       display: block;
       margin-top: 0.12rem;

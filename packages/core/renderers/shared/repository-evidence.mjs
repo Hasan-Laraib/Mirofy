@@ -382,6 +382,10 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
 
   const nodes = Object.create(null);
   const edges = Object.create(null);
+  // How many citations a subject really has, when that is more than the few
+  // the document carries. Kept beside `nodes` rather than inside it: the
+  // array shape there is what every existing consumer reads.
+  const sourceTotals = Object.create(null);
   let referenceCount = 0;
 
   const components = Array.isArray(diagram.components) ? diagram.components : [];
@@ -390,6 +394,9 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     const verified = verifySources(component.sources, `/components/${componentIndex}/sources`, { componentId: component.id });
     referenceCount += verified.length;
     nodes[component.id] = verified;
+    if (Number.isInteger(component.source_count) && component.source_count > verified.length) {
+      sourceTotals[component.id] = component.source_count;
+    }
   }
 
   // Relationships are keyed by their array index, which is exactly what the
@@ -442,5 +449,6 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     referenceCount,
     nodes,
     edges,
+    sourceTotals,
   };
 }

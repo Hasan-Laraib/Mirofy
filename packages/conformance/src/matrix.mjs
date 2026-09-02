@@ -1083,6 +1083,29 @@ export const IMPORTED_ROWS = [
     testTitle: '[1.20] ids are made schema-safe consistently, and edges follow',
   },
   {
+    id: '1.21',
+    name: 'A truncated citation list says what it was truncated from',
+    // The schema allows a component three sources, because a passport of
+    // forty-three links is not a passport. The layout truncates to fit --
+    // and for several releases said nothing about it, so a node citing
+    // three files and a node citing forty-three rendered identically. A
+    // bound on the DRAWING had become a claim about the EVIDENCE.
+    //
+    // The receipt counted truncations already, which informs whoever RAN
+    // the command, not whoever READS the diagram. So the total travels with
+    // the shown few as `source_count`, through schema validation and
+    // evidence verification, into the artifact.
+    //
+    // Worded as reaching the ARTIFACT, not the document: the document is an
+    // intermediate, and both the validator and the evidence verifier have
+    // refused a new field before -- the validator did on the first run of
+    // this very row.
+    origin: 'N',
+    phase: 'P4',
+    proof: 'citation-count.test.mjs',
+    testTitle: '[1.21] the total reaches the artifact, not just the document',
+  },
+  {
     id: '1.11',
     name: 'Authored positions honoured as hard constraints',
     // Row 1.11 says explicit pos:[x,y] authoring is "replaced by intent +

@@ -2039,10 +2039,18 @@ function commandMap(argv) {
   const positional = [];
   let quiet = false;
   let outFlag = null;
+  let repoUrl = null;
+  let revision = null;
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === '--quiet') { quiet = true; continue; }
     if (value === '--out') { outFlag = argv[i + 1]; i += 1; continue; }
+    // Forwarded to the layout step, which is the only one that reads them.
+    // Without this the layout drops every citation and prints advice --
+    // "pass --repo-url and --revision" -- that `map` made impossible to
+    // follow, because the loop below swallows any flag it does not know.
+    if (value === '--repo-url') { repoUrl = argv[i + 1]; i += 1; continue; }
+    if (value === '--revision') { revision = argv[i + 1]; i += 1; continue; }
     if (value.startsWith('--')) continue;
     positional.push(value);
   }
@@ -2063,7 +2071,9 @@ function commandMap(argv) {
     ['scanner/bin/scan.mjs', ['--out', outDir]],
     ['model/bin/model.mjs', ['--from-graph', '--graph', at('evidence-graph.json'), '--out', at('model.json')]],
     ['compile/bin/compile.mjs', ['--model', at('model.json'), '--out', at('view.json')]],
-    ['layout/bin/layout.mjs', ['--view', at('view.json'), '--out', at('diagram.json')]],
+    ['layout/bin/layout.mjs', ['--view', at('view.json'), '--out', at('diagram.json'),
+      ...(repoUrl ? ['--repo-url', repoUrl] : []),
+      ...(revision ? ['--revision', revision] : [])]],
   ];
   for (const [rel, extra] of steps) {
     const script = pipelineStep(rel);

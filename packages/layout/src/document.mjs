@@ -387,7 +387,10 @@ function citationsFor(node) {
     }))
     .sort((left, right) => left.path.localeCompare(right.path) || (left.line ?? 0) - (right.line ?? 0));
   if (all.length > MAX_SOURCES) citationsTruncated += all.length - MAX_SOURCES;
-  return all.slice(0, MAX_SOURCES);
+  // The total travels with the shown few. Without it the artifact says
+  // "SRC 3" for a node with three citations and for one with forty-three,
+  // which is the cap quietly editing the evidence rather than bounding it.
+  return { list: all.slice(0, MAX_SOURCES), total: all.length };
 }
 
 /**
@@ -439,7 +442,7 @@ export function viewToDocument(view, options = {}) {
     const position = solved.positions[node.id] ?? [0, 0];
     // Computed ONCE: calling it for the length test and again for the value
     // counted every truncation twice in the receipt.
-    const citations = citationsFor(node);
+    const { list: citations, total: citationTotal } = citationsFor(node);
     return {
       id: idOf.get(node.id),
       type,
@@ -450,6 +453,7 @@ export function viewToDocument(view, options = {}) {
       // being quietly replaced by the schema's nearest neighbour.
       ...(node.kind && node.kind !== type ? { tag: String(node.kind) } : {}),
       ...(citations.length > 0 ? { sources: citations } : {}),
+      ...(citationTotal > citations.length ? { source_count: citationTotal } : {}),
     };
   });
 
@@ -484,6 +488,8 @@ export function viewToDocument(view, options = {}) {
       if (component.sources) {
         citationsDropped += component.sources.length;
         delete component.sources;
+        // The count described a list that is no longer there.
+        delete component.source_count;
       }
     }
   }
