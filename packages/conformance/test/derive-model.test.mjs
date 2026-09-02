@@ -486,3 +486,47 @@ test('[1.20] a detour never routes through another node', () => {
   const clear = channelX + 6 < 240 || channelX - 6 > 240 + size[0];
   assert.ok(clear, `channel at x=${channelX} runs through the node spanning 240..${240 + size[0]}`);
 });
+
+test('[1.20] a component with more citations than the schema allows is truncated, and says so', () => {
+  // The schema permits three sources per component. The document was built from
+  // every evidence ref the model held, so a dependency imported from four files
+  // -- which is most dependencies in most repositories -- produced a document
+  // the renderer then refused. One real repository arrived with 43 on `fastapi`.
+  const view = {
+    nodes: [{
+      id: 'fastapi',
+      kind: 'external',
+      evidenceRefs: Array.from({ length: 9 }, (_, i) => ({ path: `src/m${8 - i}.py`, lines: [i + 1, i + 1] })),
+    }],
+    edges: [],
+  };
+  // A repository must be resolvable or citations are dropped wholesale -- a
+  // citation nobody can verify against a commit is worse than none, which is a
+  // separate rule and not the one under test here.
+  const { document, receipt } = viewToDocument(view,
+    { repository: { url: 'https://example.invalid/repo', revision: 'a'.repeat(40) } });
+  const sources = document.components[0].sources;
+  assert.equal(sources.length, 3, 'the schema allows three, so three is what the document may carry');
+  assert.equal(receipt.citationsTruncated, 6, 'and the ones left behind are counted, not dropped in silence');
+  // Deterministic, so the same view renders the same document twice.
+  assert.deepEqual(sources.map((s) => s.path), ['src/m0.py', 'src/m1.py', 'src/m2.py']);
+});
+
+test('[1.20] a detour search does not give up because its rotation started out of range', () => {
+  // The starting offset rotates per edge so successive detours do not stack. It
+  // used to `break` on an offset that was too wide for the gap, which abandoned
+  // the search before trying any of the valid ones -- so once enough edges had
+  // been routed, later ones got no route and ran straight through whatever was
+  // between their ends. Isolated it always worked, because the counter is zero
+  // on the first edge.
+  const size = /** @type {[number, number]} */ ([180, 60]);
+  /** @type {Record<string, [number, number]>} */
+  const positions = {};
+  for (let row = 0; row < 8; row += 1) positions[`n${row}`] = [380, 80 + row * 100];
+  // Enough same-column edges to push the rotation right round.
+  const edges = [];
+  for (let i = 0; i < 8; i += 1) edges.push({ from: 'n0', to: `n${(i % 6) + 2}` });
+  const detours = sameColumnDetours(edges, positions, size, 120);
+  assert.equal(detours.size, edges.length,
+    `every same-column edge spanning two rows needs a route; got ${detours.size} of ${edges.length}`);
+});

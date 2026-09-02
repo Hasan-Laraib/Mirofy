@@ -79,6 +79,12 @@ if (json) {
     console.log(`layout: ${result.receipt.retyped.length} component(s) had no schema type and were rendered as `
       + '"external"; the original kind is kept as a tag.');
   }
+  if (result.receipt.citationsTruncated > 0) {
+    // Said out loud, because a component showing three citations when eleven
+    // files import it is a true statement that reads as a complete one.
+    console.log(`layout: ${result.receipt.citationsTruncated} citation(s) beyond the schema's three `
+      + 'per component; the model keeps all of them (scan/model.json).');
+  }
   if (result.receipt.citationsDropped > 0) {
     console.log(`layout: ${result.receipt.citationsDropped} citation(s) dropped -- no repository could be `
       + 'resolved to verify them against. Pass --repo-url and --revision to keep them.');

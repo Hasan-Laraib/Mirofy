@@ -15,6 +15,33 @@ stops being one.
 
 ## 2026-09-02
 
+### Two bugs that only a real repository could produce
+
+Running 0.3.5 against a 264-file Python project failed twice more, and both were
+hiding behind how little the tool had been asked to draw before.
+
+**Sources exceeded the schema.** A component may carry three, and the document
+was built from every evidence ref the model held. A dependency imported from
+four files -- which is most dependencies in most repositories -- produced a
+document the renderer then refused; `fastapi` arrived with 43. They are
+truncated to three now, deterministically by path and line so the same view
+renders the same document twice, and the layout says how many it left behind.
+The model keeps all of them. It stayed hidden because it only fires when such a
+component is among the dozen the bounded view draws, and which dozen that is
+moves when the evidence moves: one extra fact elsewhere surfaced it.
+
+**A detour search gave up early.** The starting offset rotates per edge so
+successive detours do not stack, and an offset too wide for the gap ended the
+search with `break` rather than skipping to the next one. So once enough edges
+had been routed, later ones got no route at all and ran straight through
+whatever sat between their ends -- five nodes, in this case. It passed in
+isolation every time, because the rotation counter is zero on the first edge.
+
+And `citationsFor` was called twice per component, once to test its length and
+once for its value, which counted every truncation twice in the receipt.
+
+Released as 0.3.6.
+
 ### `from . import views` was recorded as a gap with the file sitting beside it
 
 The commonest relative form in Python, and the adapter resolved it by looking

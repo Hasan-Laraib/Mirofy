@@ -240,7 +240,13 @@ export function sameColumnDetours(edges, positions, size, gapX) {
     for (let step = 0; step < 6; step += 1) {
       const offset = 32 + ((channel + step) % 6) * 26;
       const channelX = columnLeft - offset;
-      if (channelX <= 8 || offset >= gapX - 8) break;
+      // `continue`, NOT `break`. The starting offset rotates per edge so
+      // successive detours do not stack, and with `break` an edge whose
+      // rotation happened to begin on an out-of-range offset abandoned the
+      // search before trying any of the valid ones. It worked in isolation,
+      // where the counter is always zero, and failed on the twelfth edge of a
+      // real diagram -- which then ran straight through five nodes.
+      if (channelX <= 8 || offset >= gapX - 8) continue;
       const a = /** @type {[number, number]} */ ([channelX, from[1] + height / 2]);
       const b = /** @type {[number, number]} */ ([channelX, to[1] + height / 2]);
       if (segmentIsClear(a, b, boxes, size, [edge.from, edge.to])) { placed = [a, b]; break; }
@@ -322,6 +328,33 @@ export function skipLevelDetours(edges, positions, size) {
   return detours;
 }
 
+// The schema allows a component AT MOST THREE sources. The document was built
+// from every evidence ref the model held, and a dependency imported from four
+// files -- which is most dependencies in most repositories -- produced a
+// document the renderer then refused. `fastapi` arrived with 43.
+//
+// It stayed hidden because it only fires when such a component is among the
+// dozen the bounded view draws, and which dozen that is moves when the evidence
+// moves. One extra fact elsewhere in the graph surfaced it.
+//
+// Truncated deterministically, by path then line, so the same document renders
+// the same way twice. The full list is not lost: the model keeps every citation,
+// and viewToDocument reports how many it left behind.
+const MAX_SOURCES = 3;
+let citationsTruncated = 0;
+
+function citationsFor(node) {
+  const all = asArray(node.evidenceRefs)
+    .filter((ref) => ref && ref.path)
+    .map((ref) => ({
+      path: ref.path,
+      ...(Array.isArray(ref.lines) ? { line: ref.lines[0], end_line: ref.lines[1] } : {}),
+    }))
+    .sort((left, right) => left.path.localeCompare(right.path) || (left.line ?? 0) - (right.line ?? 0));
+  if (all.length > MAX_SOURCES) citationsTruncated += all.length - MAX_SOURCES;
+  return all.slice(0, MAX_SOURCES);
+}
+
 /**
  * Turn a compiled view into a renderable architecture document.
  *
@@ -334,6 +367,9 @@ export function skipLevelDetours(edges, positions, size) {
  * @returns {{document: object, receipt: object}}
  */
 export function viewToDocument(view, options = {}) {
+  // Reset per document. A module-level counter that survives between calls
+  // reports the previous document's truncations as this one's.
+  citationsTruncated = 0;
   if (!view || !Array.isArray(view.nodes)) {
     throw new TypeError('viewToDocument: a compiled view with nodes[] is required');
   }
@@ -366,6 +402,9 @@ export function viewToDocument(view, options = {}) {
     const type = schemaTypeFor(node.kind);
     if (type !== node.kind) retyped.push({ id: node.id, from: node.kind ?? null, to: type });
     const position = solved.positions[node.id] ?? [0, 0];
+    // Computed ONCE: calling it for the length test and again for the value
+    // counted every truncation twice in the receipt.
+    const citations = citationsFor(node);
     return {
       id: idOf.get(node.id),
       type,
@@ -375,16 +414,7 @@ export function viewToDocument(view, options = {}) {
       // The original kind survives where a reader can see it, rather than
       // being quietly replaced by the schema's nearest neighbour.
       ...(node.kind && node.kind !== type ? { tag: String(node.kind) } : {}),
-      ...(asArray(node.evidenceRefs).length > 0
-        ? {
-          sources: asArray(node.evidenceRefs)
-            .filter((ref) => ref && ref.path)
-            .map((ref) => ({
-              path: ref.path,
-              ...(Array.isArray(ref.lines) ? { line: ref.lines[0], end_line: ref.lines[1] } : {}),
-            })),
-        }
-        : {}),
+      ...(citations.length > 0 ? { sources: citations } : {}),
     };
   });
 
@@ -452,6 +482,9 @@ export function viewToDocument(view, options = {}) {
       // is the thing this project exists to prevent.
       omissions: asArray(view.omissions).length,
       citationsDropped,
+      // Citations beyond the schema's limit of three per component. The model
+      // keeps all of them; the document may not carry them.
+      citationsTruncated,
     },
   };
 }
