@@ -97,9 +97,15 @@ if (head) say(`  clean at ${head.slice(0, 12)}`);
 // ---------------------------------------------------------------------------
 say('running the full check (this takes a few minutes)');
 try {
-  execSync('npm run check', { cwd: repoRoot, stdio: ['ignore', 'ignore', 'pipe'] });
+  // Capture BOTH streams. Only stderr was kept, and every check here reports
+  // its failures on stdout -- so a refusal printed "npm run check failed:"
+  // followed by nothing, on a release job, where nobody can rerun it locally
+  // to find out. A gate that blocks a release without saying why is half a gate.
+  execSync('npm run check', { cwd: repoRoot, stdio: ['ignore', 'pipe', 'pipe'] });
 } catch (error) {
-  refuse(`\`npm run check\` failed:\n${String(error.stderr || '').slice(-2000)}`);
+  const output = `${String(error.stdout || '')}${String(error.stderr || '')}`;
+  refuse(`\`npm run check\` failed:
+${output.slice(-4000) || '(the check produced no output at all)'}`);
 }
 say('  passed');
 
