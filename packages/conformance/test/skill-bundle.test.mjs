@@ -20,6 +20,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -63,9 +64,36 @@ test('the bundle is named for the skill it contains', () => {
 
 test('the bundle omits what a user site never runs', () => {
   build();
-  for (const unwanted of ['test', 'scripts', 'node_modules']) {
+  for (const unwanted of ['test', 'node_modules']) {
     assert.equal(fs.existsSync(path.join(bundle, unwanted)), false,
       `the bundle ships ${unwanted}/`);
+  }
+  // scripts/ used to be on that list, and the assertion was encoding a bug: the
+  // CLI calls into two of those files at runtime, so a bundle without them had
+  // a dead `check` and a dead `examples`. What ships is those two and nothing
+  // else -- named, so adding a third is a decision somebody makes on purpose.
+  assert.deepEqual(fs.readdirSync(path.join(bundle, 'scripts')).sort(),
+    ['check-render-output.mjs', 'render-examples.mjs'],
+    'the bundle ships exactly the scripts the CLI runs, and no build tooling');
+});
+
+test('a shipped skill can run every command the CLI advertises', () => {
+  // `check` and `examples` were dead in every published version because the
+  // files they call were excluded, and nothing exercised them from an installed
+  // copy. Rendering worked, so the packaging looked fine.
+  build();
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-bundle-commands-'));
+  try {
+    const doc = path.join(repoRoot, 'packages/core/examples/web-app.architecture.json');
+    const out = path.join(scratch, 'out.html');
+    const cli = path.join(bundle, 'bin/mirofy.mjs');
+    execFileSync(process.execPath, [cli, 'render', 'architecture', doc, out], { stdio: 'ignore' });
+    const receipt = execFileSync(process.execPath, [cli, 'check', out], { encoding: 'utf8' });
+    assert.match(receipt, /"ok"\s*:\s*true/, 'check must run from a shipped bundle');
+    const listed = execFileSync(process.execPath, [cli, 'examples'], { encoding: 'utf8' });
+    assert.match(listed, /\.html/, 'examples must run from a shipped bundle');
+  } finally {
+    fs.rmSync(scratch, { recursive: true, force: true });
   }
 });
 

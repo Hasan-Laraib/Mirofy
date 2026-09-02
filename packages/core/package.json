@@ -71,6 +71,8 @@
     "references",
     "recipes",
     "delta",
-    "examples"
+    "examples",
+    "scripts/check-render-output.mjs",
+    "scripts/render-examples.mjs"
   ]
 }

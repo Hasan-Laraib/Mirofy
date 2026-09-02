@@ -15,6 +15,34 @@ stops being one.
 
 ## 2026-09-02
 
+### `check` and `examples` were dead in every published version
+
+`packages/core/package.json` listed the directories that ship, and `scripts/`
+was not among them -- but the CLI calls into `packages/core/scripts/check-render-output.mjs`
+at four sites and `packages/core/scripts/render-examples.mjs` at two. Installed from npm, both
+commands died with `Cannot find module`. From a git checkout they worked, which
+is why four releases went out with them broken. The skill bundle excluded the
+same directory, with the stated reason "build tooling, not runtime", which was
+simply false for two of its four files.
+
+Those two now ship, named individually so the two that really are build tooling
+stay out. A test asserted the bundle omits `scripts/` -- it had encoded the bug
+as the rule -- and now asserts what actually ships. A second test runs `render`,
+`check` and `examples` from an installed bundle, because rendering worked all
+along and that was exactly what made the packaging look fine.
+
+### A layer wider than five rows wraps into more columns
+
+Every node of one depth shared a single column, however many there were. A hub
+importing seven siblings therefore produced an eight-row ladder in two columns:
+2169px of artifact against a 900px viewport, which the tool's own `visual-check`
+rejected at every viewport it tests while `map` reported success and exited 0.
+
+Layers wrap at five rows now -- five because the viewer's viewport is wider than
+it is tall, so spending width is free and spending height costs a scrollbar. The
+same repository goes from 8 rows in 2 columns to 4 rows in 3, and its y extent
+from 700px to 300px.
+
 ### Two bugs that only a real repository could produce
 
 Running 0.3.5 against a 264-file Python project failed twice more, and both were

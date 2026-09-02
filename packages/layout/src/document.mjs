@@ -123,10 +123,34 @@ export function layeredPositions(view, { size = [180, 60], margin = 80, gapX = 1
     columns.get(column).push(id);
   }
 
+  // A LAYER WIDER THAN THIS WRAPS into further columns. Every node of one depth
+  // used to share a single column however many there were, so a hub importing
+  // seven siblings produced an eight-row ladder in two columns: the artifact ran
+  // to 2169px against a 900px viewport, the tool's own visual-check rejected it,
+  // and `map` reported success anyway. No amount of edge routing fixes a shape
+  // that is simply too tall -- the columns have to exist before anything can be
+  // routed between them.
+  //
+  // Five, because the viewer's viewport is wider than it is tall: spending the
+  // width is free and spending the height costs a scrollbar.
+  const MAX_ROWS = 5;
+  /** @type {string[][]} */
+  const slots = [];
+  for (const depth of [...columns.keys()].sort((left, right) => left - right)) {
+    const members = columns.get(depth);
+    const parts = Math.max(1, Math.ceil(members.length / MAX_ROWS));
+    // Balanced rather than greedy: 8 into two columns of 4, not 5 and 3.
+    const per = Math.ceil(members.length / parts);
+    for (let part = 0; part < parts; part += 1) {
+      const slice = members.slice(part * per, (part + 1) * per);
+      if (slice.length) slots.push(slice);
+    }
+  }
+
   /** @type {Record<string, [number, number]>} */
   const positions = {};
-  const tallest = Math.max(...[...columns.values()].map((column) => column.length), 1);
-  for (const [column, members] of columns) {
+  const tallest = Math.max(...slots.map((slot) => slot.length), 1);
+  slots.forEach((members, column) => {
     // Centre each column vertically so the diagram reads as a shape rather
     // than a ragged top edge.
     const offset = ((tallest - members.length) * (size[1] + gapY)) / 2;
@@ -136,8 +160,8 @@ export function layeredPositions(view, { size = [180, 60], margin = 80, gapX = 1
         margin + offset + row * (size[1] + gapY),
       ];
     });
-  }
-  return { positions, columns: columns.size, tallest };
+  });
+  return { positions, columns: slots.length, tallest };
 }
 
 /**
@@ -290,6 +314,7 @@ export function skipLevelDetours(edges, positions, size) {
   const columns = [...new Set(entries.map(([, [x]]) => x))].sort((left, right) => left - right);
   const columnOf = new Map(entries.map(([id, [x]]) => [id, columns.indexOf(x)]));
   const lowest = Math.max(...entries.map(([, [, y]]) => y)) + height;
+  const highest = Math.min(...entries.map(([, [, y]]) => y));
 
   const detours = new Map();
   let channel = 0;
@@ -309,21 +334,31 @@ export function skipLevelDetours(edges, positions, size) {
       && x > left && x < right && y < bottom && y + height > top);
     if (!blocked) continue;
 
-    // The horizontal run is below every box by construction, but the two drops
-    // into it are not: a node directly beneath either end would be crossed.
+    // BELOW *or* ABOVE. The horizontal run clears every box by construction, but
+    // the two drops into it do not: a node directly under either end is crossed
+    // on the way down. Routing below is the natural choice for a node at the
+    // bottom of its column and the wrong one for a node at the top -- and after
+    // layers began wrapping, a source in the top row with three nodes beneath it
+    // had no clear way down at all, so the edge stayed straight and ran through
+    // whatever sat between the columns.
     let placed = null;
-    for (let step = 0; step < 4; step += 1) {
-      const channelY = lowest + 34 + ((channel + step) % 4) * 24;
+    let side = 'bottom';
+    for (let step = 0; step < 8 && !placed; step += 1) {
+      const below = step % 2 === 0;
+      const nudge = 34 + (((channel + step) >> 1) % 4) * 24;
+      const channelY = below ? lowest + nudge : highest - nudge;
+      if (channelY <= 8) continue;
+      const edgeY = below ? height : 0;
       const a = /** @type {[number, number]} */ ([from[0] + width / 2, channelY]);
       const b = /** @type {[number, number]} */ ([to[0] + width / 2, channelY]);
-      const clear = segmentIsClear([from[0] + width / 2, from[1] + height], a, entries, size, [edge.from, edge.to])
-        && segmentIsClear([to[0] + width / 2, to[1] + height], b, entries, size, [edge.from, edge.to])
+      const clear = segmentIsClear([from[0] + width / 2, from[1] + edgeY], a, entries, size, [edge.from, edge.to])
+        && segmentIsClear([to[0] + width / 2, to[1] + edgeY], b, entries, size, [edge.from, edge.to])
         && segmentIsClear(a, b, entries, size, [edge.from, edge.to]);
-      if (clear) { placed = [a, b]; break; }
+      if (clear) { placed = [a, b]; side = below ? 'bottom' : 'top'; }
     }
     channel += 1;
     if (!placed) continue;
-    detours.set(index, { fromSide: 'bottom', toSide: 'bottom', via: placed });
+    detours.set(index, { fromSide: side, toSide: side, via: placed });
   }
   return detours;
 }
