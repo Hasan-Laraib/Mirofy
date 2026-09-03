@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 608" lang="en" display="block"><style>svg{width:100%;min-width:min(900px,100%);display:block;transform-origin:0 0;transition:transform 0.18s ease}.c-grid{stroke:#e2e8f0;fill:none}.c-mask{fill:#ffffff;stroke:none}.c-module{fill:rgba(148, 163, 184, 0.18);stroke:#64748b}.c-external{fill:rgba(148, 163, 184, 0.18);stroke:#64748b;stroke-dasharray:5 3}.t-primary{fill:#0f172a}.t-muted{fill:#64748b}.t-module{fill:#64748b}svg .semantic-sigil{fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:0.76;pointer-events:none}svg .semantic-sigil>*{vector-effect:non-scaling-stroke}svg .semantic-sigil .sigil-fill{fill:currentColor;stroke:none}svg .s-external{color:#64748b}.a-default{stroke:#94a3b8;fill:none}.m-default{fill:#94a3b8}.m-emphasis{fill:#059669}.m-security{fill:#e11d48}.m-dashed{fill:#7c3aed}/* build-hero */.a-default{stroke-dasharray:1;stroke-dashoffset:1;opacity:0;animation-duration:11s;animation-iteration-count:infinite;animation-timing-function:ease-in-out}.h-e0{animation-name:h-draw0}.h-e1{animation-name:h-draw1}.h-e2{animation-name:h-draw2}.h-e3{animation-name:h-draw3}.h-e4{animation-name:h-draw4}.h-e5{animation-name:h-draw5}.h-e6{animation-name:h-draw6}.h-e7{animation-name:h-draw7}.h-e8{animation-name:h-draw8}.h-e9{animation-name:h-draw9}.h-e10{animation-name:h-draw10}.h-e11{animation-name:h-draw11}.h-e12{animation-name:h-draw12}.h-e13{animation-name:h-draw13}@keyframes h-draw0{0%,4.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}4.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}9.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}21.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw1{0%,7.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}8.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}12.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}24.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw2{0%,11.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}11.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}16.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}28.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw3{0%,14.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}15.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}19.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}31.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw4{0%,18.4%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}19.0%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}23.4%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}35.4%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw5{0%,22.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}22.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}27.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}39.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw6{0%,25.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}26.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}30.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}42.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw7{0%,29.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}29.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}34.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}46.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw8{0%,32.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}33.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}37.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}49.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw9{0%,36.4%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}37.0%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}41.4%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}53.4%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw10{0%,40.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}40.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}45.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}57.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw11{0%,43.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}44.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}48.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}60.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw12{0%,47.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}47.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}52.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}64.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw13{0%,50.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}51.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}55.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}67.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@media (prefers-reduced-motion:reduce){.a-default{animation:none;opacity:1;stroke-dashoffset:0;stroke:#94a3b8}}</style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 508" lang="en" display="block"><style>svg{width:100%;min-width:min(900px,100%);display:block;transform-origin:0 0;transition:transform 0.18s ease}.c-grid{stroke:#e2e8f0;fill:none}.c-mask{fill:#ffffff;stroke:none}.c-module{fill:rgba(148, 163, 184, 0.18);stroke:#64748b}.c-external{fill:rgba(148, 163, 184, 0.18);stroke:#64748b;stroke-dasharray:5 3}.t-primary{fill:#0f172a}.t-muted{fill:#64748b}.t-module{fill:#64748b}svg .semantic-sigil{fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;opacity:0.76;pointer-events:none}svg .semantic-sigil>*{vector-effect:non-scaling-stroke}svg .semantic-sigil .sigil-fill{fill:currentColor;stroke:none}svg .s-external{color:#64748b}.a-default{stroke:#94a3b8;fill:none}.m-default{fill:#94a3b8}.m-emphasis{fill:#059669}.m-security{fill:#e11d48}.m-dashed{fill:#7c3aed}/* build-hero */.a-default{stroke-dasharray:1;stroke-dashoffset:1;opacity:0;animation-duration:11s;animation-iteration-count:infinite;animation-timing-function:ease-in-out}.h-e0{animation-name:h-draw0}.h-e1{animation-name:h-draw1}.h-e2{animation-name:h-draw2}.h-e3{animation-name:h-draw3}.h-e4{animation-name:h-draw4}.h-e5{animation-name:h-draw5}.h-e6{animation-name:h-draw6}.h-e7{animation-name:h-draw7}.h-e8{animation-name:h-draw8}.h-e9{animation-name:h-draw9}.h-e10{animation-name:h-draw10}.h-e11{animation-name:h-draw11}.h-e12{animation-name:h-draw12}.h-e13{animation-name:h-draw13}@keyframes h-draw0{0%,4.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}4.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}9.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}21.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw1{0%,7.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}8.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}12.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}24.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw2{0%,11.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}11.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}16.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}28.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw3{0%,14.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}15.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}19.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}31.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw4{0%,18.4%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}19.0%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}23.4%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}35.4%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw5{0%,22.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}22.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}27.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}39.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw6{0%,25.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}26.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}30.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}42.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw7{0%,29.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}29.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}34.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}46.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw8{0%,32.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}33.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}37.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}49.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw9{0%,36.4%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}37.0%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}41.4%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}53.4%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw10{0%,40.0%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}40.6%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}45.0%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}57.0%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw11{0%,43.6%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}44.2%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}48.6%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}60.6%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw12{0%,47.2%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}47.8%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}52.2%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}64.2%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@keyframes h-draw13{0%,50.8%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}51.4%{opacity:1;stroke-dashoffset:1;stroke:#2563eb}55.8%{opacity:1;stroke-dashoffset:0;stroke:#2563eb}67.8%,88%{opacity:1;stroke-dashoffset:0;stroke:#94a3b8}94%,100%{opacity:0;stroke-dashoffset:1;stroke:#2563eb}}@media (prefers-reduced-motion:reduce){.a-default{animation:none;opacity:1;stroke-dashoffset:0;stroke:#94a3b8}}</style>
         <title id="mirofy-diagram-title">System model</title>
         <desc id="mirofy-diagram-description">every arrow: imports</desc>
         <!-- Definitions -->
@@ -28,160 +28,160 @@
 
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path d="M 260 296 L 312 296 Q 320 296 320 288 L 320 118 Q 320 110 328 110 L 380 110" pathLength="1" class="a-default h-e0" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 324 L 312 324 Q 320 324 320 332 L 320 502 Q 320 510 328 510 L 380 510" pathLength="1" class="a-default h-e1" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 303 L 312 303 Q 320 303 320 295 L 320 218 Q 320 210 328 210 L 380 210" pathLength="1" class="a-default h-e2" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 317 L 312 317 Q 320 317 320 325 L 320 402 Q 320 410 328 410 L 380 410" pathLength="1" class="a-default h-e3" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 310 L 380 310" pathLength="1" class="a-default h-e4" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 310 L 312 310 Q 320 310 320 318 L 320 566 Q 320 574 328 574 L 612 574 Q 620 574 620 566 L 620 268 Q 620 260 628 260 L 680 260" pathLength="1" class="a-default h-e5" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 260 310 L 312 310 Q 320 310 320 318 L 320 566 Q 320 574 328 574 L 612 574 Q 620 574 620 566 L 620 368 Q 620 360 628 360 L 680 360" pathLength="1" class="a-default h-e6" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 860 346 L 912 346 Q 920 346 920 338 L 920 168 Q 920 160 928 160 L 980 160" pathLength="1" class="a-default h-e7" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 860 355.3333333333333 L 912 355.3333333333333 Q 920 355.3333333333333 920 347.3333333333333 L 920 268 Q 920 260 928 260 L 980 260" pathLength="1" class="a-default h-e8" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 860 364.6666666666667 L 980 364.6666666666667" pathLength="1" class="a-default h-e9" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 860 374 L 912 374 Q 920 374 920 382 L 920 452 Q 920 460 928 460 L 980 460" pathLength="1" class="a-default h-e10" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 560 210 L 612 210 Q 620 210 620 218 L 620 352 Q 620 360 628 360 L 680 360" pathLength="1" class="a-default h-e11" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 560 310 L 612 310 Q 620 310 620 302 L 620 268 Q 620 260 628 260 L 680 260" pathLength="1" class="a-default h-e12" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
-        <path d="M 560 410 L 612 410 Q 620 410 620 402 L 620 282 Q 620 274 628 274 L 680 274" pathLength="1" class="a-default h-e13" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 246 L 312 246 Q 320 246 320 238 L 320 168 Q 320 160 328 160 L 380 160" pathLength="1" class="a-default h-e0" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 260 L 312 260 Q 320 260 320 268 L 320 466 Q 320 474 328 474 L 612 474 Q 620 474 620 466 L 620 318 Q 620 310 628 310 L 680 310" pathLength="1" class="a-default h-e1" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 260 L 380 260" pathLength="1" class="a-default h-e2" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 260 L 312 260 Q 320 260 320 268 L 320 466 Q 320 474 328 474 L 612 474 Q 620 474 620 466 L 620 218 Q 620 210 628 210 L 680 210" pathLength="1" class="a-default h-e3" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 274 L 312 274 Q 320 274 320 282 L 320 352 Q 320 360 328 360 L 380 360" pathLength="1" class="a-default h-e4" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 260 L 312 260 Q 320 260 320 268 L 320 490 Q 320 498 328 498 L 912 498 Q 920 498 920 490 L 920 218 Q 920 210 928 210 L 980 210" pathLength="1" class="a-default h-e5" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 260 260 L 312 260 Q 320 260 320 268 L 320 490 Q 320 498 328 498 L 912 498 Q 920 498 920 490 L 920 318 Q 920 310 928 310 L 980 310" pathLength="1" class="a-default h-e6" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 1160 296 L 1212 296 Q 1220 296 1220 288 L 1220 118 Q 1220 110 1228 110 L 1280 110" pathLength="1" class="a-default h-e7" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 1160 305.3333333333333 L 1212 305.3333333333333 Q 1220 305.3333333333333 1220 297.3333333333333 L 1220 218 Q 1220 210 1228 210 L 1280 210" pathLength="1" class="a-default h-e8" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 1160 314.6666666666667 L 1280 314.6666666666667" pathLength="1" class="a-default h-e9" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 1160 324 L 1212 324 Q 1220 324 1220 332 L 1220 402 Q 1220 410 1228 410 L 1280 410" pathLength="1" class="a-default h-e10" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 560 260 L 612 260 Q 620 260 620 268 L 620 514 Q 620 522 628 522 L 912 522 Q 920 522 920 514 L 920 318 Q 920 310 928 310 L 980 310" pathLength="1" class="a-default h-e11" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 560 360 L 612 360 Q 620 360 620 368 L 620 514 Q 620 522 628 522 L 912 522 Q 920 522 920 514 L 920 218 Q 920 210 928 210 L 980 210" pathLength="1" class="a-default h-e12" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
+        <path d="M 860 210 L 980 210" pathLength="1" class="a-default h-e13" stroke-width="1.5" marker-end="url(#arrowhead)" stroke="#94a3b8" fill="none"/>
 
         <!-- Components -->
         <g id="node-mirofy-conformance">
           <title>conformance · Architecture component · package</title>
-          <rect x="80" y="280" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="80" y="280" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(86 286) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="80" y="230" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="80" y="230" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(86 236) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="170" y="314" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">conformance</text>
-        <text x="170" y="332" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="170" y="264" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">conformance</text>
+        <text x="170" y="282" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-mirofy-evidence">
           <title>evidence · Architecture component · package</title>
-          <rect x="680" y="230" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="680" y="230" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(686 236) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="980" y="180" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="980" y="180" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(986 186) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="770" y="264" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">evidence</text>
-        <text x="770" y="282" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="1070" y="214" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">evidence</text>
+        <text x="1070" y="232" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-mirofy-explain">
           <title>explain · Architecture component · package</title>
-          <rect x="380" y="80" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="80" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 86) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="380" y="130" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="380" y="130" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(386 136) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="470" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">explain</text>
-        <text x="470" y="132" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="470" y="164" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">explain</text>
+        <text x="470" y="182" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-mirofy-layout">
           <title>layout · Architecture component · package</title>
-          <rect x="380" y="180" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="180" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 186) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="380" y="230" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="380" y="230" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(386 236) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="470" y="214" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">layout</text>
-        <text x="470" y="232" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="470" y="264" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">layout</text>
+        <text x="470" y="282" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-mirofy-model">
           <title>model · Architecture component · package</title>
-          <rect x="380" y="280" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="280" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 286) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="380" y="330" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="380" y="330" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(386 336) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="470" y="314" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">model</text>
-        <text x="470" y="332" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="470" y="364" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">model</text>
+        <text x="470" y="382" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-mirofy-scanner">
           <title>scanner · Architecture component · package</title>
-          <rect x="380" y="380" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="380" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 386) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="680" y="180" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="680" y="180" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(686 186) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="470" y="414" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">scanner</text>
-        <text x="470" y="432" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="770" y="214" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">scanner</text>
+        <text x="770" y="232" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-mirofy-cli">
           <title>mirofy-cli · Architecture component · package</title>
-          <rect x="680" y="330" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="680" y="330" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(686 336) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="980" y="280" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="980" y="280" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(986 286) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="770" y="364" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">mirofy-cli</text>
-        <text x="770" y="382" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="1070" y="314" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">mirofy-cli</text>
+        <text x="1070" y="332" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-mirofy-benchmark">
           <title>benchmark · Architecture component · package</title>
-          <rect x="380" y="480" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="380" y="480" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-          <g class="semantic-sigil s-external" transform="translate(386 486) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="680" y="280" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="680" y="280" width="180" height="60" rx="6" class="c-module" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+          <g class="semantic-sigil s-external" transform="translate(686 286) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="3" y="3" width="10" height="10" rx="2"/>
             <circle cx="8" cy="8" r="1.2" class="sigil-fill"/>
           </g>
-          <text x="470" y="514" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">benchmark</text>
-        <text x="470" y="532" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
+          <text x="770" y="314" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">benchmark</text>
+        <text x="770" y="332" class="t-module" font-size="7" text-anchor="middle" fill="#64748b">package</text>
         </g>
 
         <g id="node-ajv-dist-2020-js">
           <title>ajv/dist/2020.js · Architecture component</title>
-          <rect x="980" y="130" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="980" y="130" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
-          <g class="semantic-sigil s-external" transform="translate(986 136) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="1280" y="80" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="1280" y="80" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
+          <g class="semantic-sigil s-external" transform="translate(1286 86) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="1070" y="164" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">ajv/dist/2020.js</text>
+          <text x="1370" y="114" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">ajv/dist/2020.js</text>
         </g>
 
         <g id="node-ajv-dist-standalone-index-js">
           <title>ajv/dist/standalone/index.js · Architecture component</title>
-          <rect x="980" y="230" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="980" y="230" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
-          <g class="semantic-sigil s-external" transform="translate(986 236) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="1280" y="180" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="1280" y="180" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
+          <g class="semantic-sigil s-external" transform="translate(1286 186) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="1070" y="264" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle" fill="#0f172a">ajv/dist/standalone/index.js</text>
+          <text x="1370" y="214" class="t-primary" font-size="10.2" font-weight="600" text-anchor="middle" fill="#0f172a">ajv/dist/standalone/index.js</text>
         </g>
 
         <g id="node-parse5">
           <title>parse5 · Architecture component</title>
-          <rect x="980" y="330" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="980" y="330" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
-          <g class="semantic-sigil s-external" transform="translate(986 336) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="1280" y="280" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="1280" y="280" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
+          <g class="semantic-sigil s-external" transform="translate(1286 286) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="1070" y="364" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">parse5</text>
+          <text x="1370" y="314" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">parse5</text>
         </g>
 
         <g id="node-saxes">
           <title>saxes · Architecture component</title>
-          <rect x="980" y="430" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
-          <rect x="980" y="430" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
-          <g class="semantic-sigil s-external" transform="translate(986 436) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
+          <rect x="1280" y="380" width="180" height="60" rx="6" class="c-mask" fill="#ffffff" stroke="none"/>
+          <rect x="1280" y="380" width="180" height="60" rx="6" class="c-external" stroke-width="1.5" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
+          <g class="semantic-sigil s-external" transform="translate(1286 386) scale(0.6875)" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity="0.76" color="#64748b">
             <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
             <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
           </g>
-          <text x="1070" y="464" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">saxes</text>
+          <text x="1370" y="414" class="t-primary" font-size="11" font-weight="600" text-anchor="middle" fill="#0f172a">saxes</text>
         </g>
 
         <!-- Connection labels -->
@@ -205,14 +205,14 @@
 
         <!-- Legend -->
         <g>
-          <text x="40" y="572" class="t-primary" font-size="12" font-weight="650" fill="#0f172a">Legend</text>
+          <text x="40" y="472" class="t-primary" font-size="12" font-weight="650" fill="#0f172a">Legend</text>
           <g>
-            <rect x="40" y="583" width="16" height="10" rx="2.5" class="c-module" stroke-width="1" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
-            <text x="62" y="592" class="t-muted" font-size="10" font-weight="500" fill="#64748b">Module</text>
+            <rect x="40" y="483" width="16" height="10" rx="2.5" class="c-module" stroke-width="1" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b"/>
+            <text x="62" y="492" class="t-muted" font-size="10" font-weight="500" fill="#64748b">Module</text>
           </g>
           <g>
-            <rect x="135" y="583" width="16" height="10" rx="2.5" class="c-external" stroke-width="1" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
-            <text x="157" y="592" class="t-muted" font-size="10" font-weight="500" fill="#64748b">External</text>
+            <rect x="135" y="483" width="16" height="10" rx="2.5" class="c-external" stroke-width="1" fill="rgba(148, 163, 184, 0.18)" stroke="#64748b" stroke-dasharray="5 3"/>
+            <text x="157" y="492" class="t-muted" font-size="10" font-weight="500" fill="#64748b">External</text>
           </g>
         </g>
       </svg>

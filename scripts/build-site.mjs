@@ -460,7 +460,7 @@ const index = `<!doctype html>
       <code><span class="dim">$</span> npx mirofy-cli map .</code>
     </div>
     <div class="three">
-      <div><strong>It reads your code</strong><span>Imports, manifests and routes become an evidence graph. What it cannot parse is recorded as a gap, never dropped.</span></div>
+      <div><strong>It reads your code</strong><span>JavaScript, TypeScript, Python, Go, Java, Rust and Kotlin imports, plus manifests and routes, become an evidence graph. What it cannot parse is recorded as a gap, never dropped.</span></div>
       <div><strong>It models what it found</strong><span>Packages if you have them, source directories if you do not. Nothing is invented to fill a hole.</span></div>
       <div><strong>It writes one file</strong><span><code>architecture.html</code>, next to your code. Every edge carries the file, line and commit it came from.</span></div>
     </div>

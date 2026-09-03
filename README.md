@@ -99,8 +99,8 @@ directories** and the imports between them.
 That is the whole list, and the list is the point. Everything else is
 **reported, not skipped**: `coverage.md` names every file no adapter opened,
 grouped by type, and `map` says so on its way out when the unread files
-outnumber the read ones. Point it at a Rust repository and you get an honest
-empty answer naming every unread `.rs` file — not a confident small one drawn
+outnumber the read ones. Point it at a Ruby repository and you get an honest
+empty answer naming every unread `.rb` file — not a confident small one drawn
 from the two JavaScript files in an `examples/` folder.
 
 Python resolves by **file existence**, not by convention: relative imports
@@ -115,9 +115,23 @@ dot is a domain, and a domain means a module fetched from somewhere. Java
 builds its index from the `package` statements files **declare**, not from
 directory layout: Maven convention puts `com.acme.store` under
 `src/main/java/com/acme/store` and convention is not always, but the
-declaration is what the compiler reads. In both, an import that names
-something inside this repository which is not there is a gap — never a
-dependency on a published copy of yourself.
+declaration is what the compiler reads.
+
+Rust peels a `use` from the right until a real file appears, because
+`use crate::a::b::C` does not say which of a, b or C is the file. It reads the
+crate name and the source root from `Cargo.toml` — including a declared
+`[lib] path`, since `src/` is only the default — and knows that Cargo compiles
+every direct child of `tests`, `benches` and `examples` as its own crate.
+
+Kotlin reads its type index from the `class` and `interface` declarations rather
+than from file names, because a Kotlin file need not be named after the type
+it holds and may declare several. It shares that index with Java: the two
+compile to one namespace and import each other freely, so an index of one
+extension reports a real edge to the other as a missing type.
+
+In every one of them, an import that names something inside this repository
+which is not there is a gap — never a dependency on a published copy of
+yourself.
 
 `npx mirofy-cli guide "show an API request with a cache miss"` picks the
 diagram type for you if you are not sure which one you want.
