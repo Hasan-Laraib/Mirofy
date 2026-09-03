@@ -19,6 +19,8 @@ stops being one.
 
 ### Verified on repositories where Rust and Kotlin are the PRIMARY language
 
+Released as 0.5.0.
+
 The first verification was not one. Rust had been run against
 vercel/next.js and Kotlin against spring-projects/spring-boot, and in
 both those languages sit beside a much larger JavaScript or Java
