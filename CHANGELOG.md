@@ -19,6 +19,8 @@ stops being one.
 
 ### The twelve-node budget went to scaffolding instead of the system
 
+Released as 0.3.9.
+
 Two people, independently, reported the same thing about the same
 repository: a single test fixture sat in the default view where a real
 module should have been.
