@@ -17,6 +17,35 @@ stops being one.
 
 ## 2026-09-03
 
+### Three more Rust defects, from reading deno's own diagram
+
+Looking at the picture rather than the number found what the number
+hid.
+
+`deno_core` and `deno_error` were drawn as dashed third-party boxes in
+deno, which builds one of them. An item that cannot be resolved inside a
+SIBLING crate was falling back to `package:<name>` -- the same mistake
+the Python and Java adapters each had to be taught, arriving a third
+time by a different route. The crate root is the honest target: the edge
+is to that crate, and which file inside it is what could not be worked
+out.
+
+Fixing that turned 274 facts into gaps rather than into edges, which
+exposed the real problem underneath. deno writes `path = "./lib.rs"` in
+several manifests, and keeping the `./` made the "is it in a
+subdirectory" test say yes, so the search went to `<crate>/./lib.rs` --
+a path no walk ever produces.
+
+And a crate at the repository ROOT has an empty base, which joined the
+ordinary way produced `/store.rs`: an absolute path, equally
+unproduceable. Both loops now share one helper, so they cannot disagree
+about it.
+
+deno went from 3,896 gaps to **24**, with 18,333 facts. `deno_error`,
+`serde`, `tokio` and `deno_semver` remain dashed, and all four are
+genuinely published crates this repository does not build.
+
+
 ### Verified on repositories where Rust and Kotlin are the PRIMARY language
 
 Released as 0.5.0.

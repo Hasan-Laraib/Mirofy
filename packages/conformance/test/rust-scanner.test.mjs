@@ -83,6 +83,31 @@ test('[2.20] a cargo name is not a code name', async () => {
     'a sibling workspace crate is this repository, not the registry');
 });
 
+test('[2.20] an unresolved item in a SIBLING crate is still this repository', async () => {
+  // A crate this repository BUILDS is not a dependency on a published copy of
+  // itself. Falling back to `package:<name>` drew deno_core and deno_error as
+  // dashed third-party boxes in deno, which builds both -- the same mistake the
+  // Python and Java adapters each had to be taught, arriving a third time by a
+  // different route.
+  //
+  // The crate root is the honest target: the edge is to that crate, and which
+  // file inside it is what could not be worked out.
+  const repoRoot = makeRepo({
+    'Cargo.toml': `[workspace]${NL}members = ["crates/a", "crates/b"]${NL}`,
+    'crates/a/Cargo.toml': manifest('demo-core'),
+    'crates/a/src/lib.rs': 'pub fn thing() {}' + NL,
+    'crates/b/Cargo.toml': manifest('demo-cli'),
+    // `inner` is not a file in demo-core; it is an inline module or a
+    // re-export, and either way the edge is to demo-core.
+    'crates/b/src/main.rs': ['use demo_core::inner::deep::Thing;', ''].join(NL),
+  });
+  const { facts, gaps } = await runAdapter(rustAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, []);
+  assert.deepEqual(facts.map((fact) => fact.object), ['crates/a/src/lib.rs'],
+    `a crate this repository builds must never be recorded as a package: `
+    + `${JSON.stringify(facts.map((fact) => fact.object))}`);
+});
+
 test('[2.20] a use inside a comment is not a fact, and block comments NEST', async () => {
   // `/* /* */ */` is ONE comment in Rust. A scanner that stops at the first
   // `*/` reads the tail as code, which is how a commented-out module becomes a
@@ -186,6 +211,28 @@ test('[2.20] a module path is read off the file that holds it', () => {
   assert.deepEqual(moduleOf('src/a/mod.rs', 'src'), ['a']);
   assert.deepEqual(moduleOf('src/lib.rs', 'src'), []);
   assert.deepEqual(moduleOf('crates/x/src/a.rs', 'crates/x/src'), ['a']);
+});
+
+test('[2.20] a crate whose sources are not under src/ is read anyway', async () => {
+  // `src/` is only Cargo’s default. `[lib] path = "lib.rs"` puts the sources in
+  // the crate directory itself, and deno does that for its main crate and
+  // several more -- 3,896 gaps, 27% of every fact in the repository, against
+  // directories that were never there.
+  //
+  // The `./` form is the same file. Keeping it made the subdirectory test say
+  // yes and sent the search to `<crate>/./lib.rs`, a path no walk produces.
+  for (const declaredPath of ['lib.rs', './lib.rs']) {
+    const repoRoot = makeRepo({
+      'Cargo.toml': `[package]${NL}name = "demo"${NL}${NL}[lib]${NL}path = "${declaredPath}"${NL}`,
+      'lib.rs': 'pub mod store;' + NL,
+      'store.rs': 'pub fn save() {}' + NL,
+      'api.rs': ['use crate::store::save;', ''].join(NL),
+    });
+    const { facts, gaps } = await runAdapter(rustAdapter, { repoRoot, revision: REVISION });
+    assert.deepEqual(gaps, [], `with path ${declaredPath}: ${JSON.stringify(gaps)}`);
+    assert.deepEqual(facts.map((fact) => fact.object), ['store.rs'],
+      `with path ${declaredPath}, the sources are where the manifest says`);
+  }
 });
 
 test('[2.20] a test, bench or example is its own crate', () => {

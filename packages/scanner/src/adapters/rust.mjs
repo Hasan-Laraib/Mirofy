@@ -152,7 +152,13 @@ export function cargoCrates(repoRoot, files) {
       }
       if (section !== 'lib' && section !== 'bin') continue;
       const target = line.match(/^\s*path\s*=\s*"([^"]+)"/);
-      if (target && !declared.includes(target[1])) declared.push(target[1]);
+      // `./lib.rs` and `lib.rs` name the same file. Keeping the `./` made the
+      // "is it in a subdirectory" test below say yes, so the search went to
+      // `<crate>/./lib.rs` -- a path no walk ever produces. deno writes it that
+      // way for deno_npm, deno_cache_dir and others: 274 gaps against files
+      // sitting exactly where the manifest said they were.
+      const at = target ? target[1].replace(/^[.][/]/, '') : null;
+      if (at && !declared.includes(at)) declared.push(at);
     }
     if (!name) continue;
     const dir = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
@@ -283,6 +289,10 @@ export const rustAdapter = {
       return names;
     }
 
+    // A crate at the repository root has an EMPTY base, and joining it the
+    // ordinary way produces `/store.rs` -- an absolute path no walk emits.
+    const under = (base, rest) => (base ? `${base}/${rest}` : rest);
+
     function resolveModule(base, roots, segments) {
       // The crate root is only an answer for `use crate::Item` -- one name,
       // which is an item declared in lib.rs. For anything deeper some file has
@@ -295,10 +305,10 @@ export const rustAdapter = {
       const floor = segments.length > 1 ? 1 : 0;
       for (let take = segments.length; take >= floor; take -= 1) {
         const prefix = segments.slice(0, take);
-        const joined = prefix.length ? `${base}/${prefix.join('/')}` : base;
+        const joined = prefix.length ? under(base, prefix.join('/')) : base;
         for (const candidate of prefix.length
           ? [`${joined}.rs`, `${joined}/mod.rs`]
-          : roots.map((root) => `${base}/${root}`)) {
+          : roots.map((root) => under(base, root))) {
           if (files.has(candidate)) return candidate;
         }
       }
@@ -306,10 +316,10 @@ export const rustAdapter = {
       // ancestor that DOES exist whether it declares the next name inline.
       for (let take = segments.length - 1; take >= 0; take -= 1) {
         const prefix = segments.slice(0, take);
-        const joined = prefix.length ? `${base}/${prefix.join('/')}` : base;
+        const joined = prefix.length ? under(base, prefix.join('/')) : base;
         const candidates = prefix.length
           ? [`${joined}.rs`, `${joined}/mod.rs`]
-          : roots.map((root) => `${base}/${root}`);
+          : roots.map((root) => under(base, root));
         // EVERY candidate at this level, not just the first that exists. A
         // crate with both a bin and a lib has two roots, and deno declares the
         // bin first while the inline `mod sys` is in the lib -- checking only
@@ -421,7 +431,27 @@ export const rustAdapter = {
           if (sibling && sibling !== owner) {
             const siblingTarget = targetOf(`${sibling.dir}/x.rs`, sibling.dir, sibling.declared);
             const file = resolveModule(siblingTarget.base, siblingTarget.roots, segments.slice(1));
-            record(file ?? `package:${crateName(head)}`);
+            if (file) { record(file); continue; }
+            // A sibling crate this repository BUILDS is not a dependency on a
+            // published copy of itself. Falling back to `package:<name>` drew
+            // deno_core and deno_error as dashed third-party boxes in deno,
+            // which builds both -- the same mistake the Python and Java
+            // adapters each had to be taught, arriving a third time by a
+            // different route.
+            //
+            // The crate root is the honest target: the edge is to that crate,
+            // and which file inside it is what could not be worked out.
+            const root = siblingTarget.roots
+              .map((name) => under(siblingTarget.base, name))
+              .find((candidate) => files.has(candidate));
+            if (root) { record(root); continue; }
+            gaps.push({
+              path: rel,
+              reason: `use at line ${lineNumber} names ${clause}, and crate `
+                + `${sibling.name} is built by this repository but has no file `
+                + `under ${siblingTarget.base}`,
+            });
+            continue;
             continue;
           }
           record(`package:${crateName(head)}`);
