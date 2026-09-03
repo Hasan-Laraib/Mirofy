@@ -19,6 +19,8 @@ stops being one.
 
 ### Go and Java adapters
 
+Released as 0.4.0.
+
 The largest gap this tool had. `spring-projects/spring-boot` has 81,000
 stars and Mirofy drew nothing from it; `.go` and `.rs` were among the
 biggest unread groups in every real repository it was pointed at.
