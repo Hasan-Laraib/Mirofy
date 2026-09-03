@@ -169,6 +169,144 @@ test('[1.18] a budget smaller than the model omits the least-connected nodes, an
   }
 });
 
+test('[1.18] the budget goes to the system, not to scaffolding that imports a popular package', async () => {
+  // Reported twice, independently, from the same repository: a single test
+  // fixture sat in the default twelve-node view where a real module should
+  // have been.
+  //
+  // Plain degree measured the wrong thing twice over. The top-ranked node was
+  // `fastapi` with degree 43 -- a dependency imported by dozens of benchmark
+  // fixtures, not part of the architecture at all -- and below it every
+  // fixture tied on degree 2, so which of them took the last slots was decided
+  // ALPHABETICALLY.
+  //
+  // The fixture below reproduces exactly that: the scaffolding outranks the
+  // system on plain degree AND sorts before it, so a ranking that has not
+  // actually changed draws the fixtures and drops the modules. An earlier
+  // version of this test used a shape where both rankings happened to agree,
+  // and it passed against the defect it was written for.
+  const { compileView } = await import('../../compile/src/compile.mjs');
+  const component = (id, kind) => ({
+    id, kind, labels: [id], sources: [], evidenceRefs: [],
+    provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const relationship = (id, from, to) => ({
+    id, kind: 'relationship', from, to, labels: [], sources: [],
+    evidenceRefs: [], provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const scaffolded = {
+    schemaVersion: 1,
+    components: [
+      component('core', 'module'), component('api', 'module'),
+      component('aaa_fixture_one', 'module'), component('aaa_fixture_two', 'module'),
+      component('ext_one', 'external'), component('ext_two', 'external'),
+    ],
+    relationships: [
+      // The system: one edge, so degree 1 each.
+      relationship('r1', 'api', 'core'),
+      // The scaffolding: degree 2 each, and it sorts first.
+      relationship('r2', 'aaa_fixture_one', 'ext_one'),
+      relationship('r3', 'aaa_fixture_one', 'ext_two'),
+      relationship('r4', 'aaa_fixture_two', 'ext_one'),
+      relationship('r5', 'aaa_fixture_two', 'ext_two'),
+    ],
+    boundaries: [],
+    provenanceSummary: { 'statically-derived': 5 },
+  };
+
+  const view = compileView(scaffolded, request({ budget: 4 }));
+  const drawn = view.nodes.map((node) => node.id);
+
+  assert.deepEqual(drawn.slice().sort(), ['api', 'core'],
+    `the view should be the system and nothing else: ${JSON.stringify(drawn)}`);
+  // And the budget was 4. Two good boxes beat two good boxes plus two
+  // arbitrary ones: the budget is a cap, not a quota.
+  const omitted = view.omissions.filter((entry) => entry.kind === 'component').map((entry) => entry.id);
+  for (const id of ['aaa_fixture_one', 'aaa_fixture_two']) {
+    assert.ok(omitted.includes(id), `${id} must be recorded as omitted, not silently dropped`);
+  }
+});
+
+test('[1.18] a dependency the drawn system uses is kept as context', async () => {
+  // The other half. Excluding scaffolding must not turn into excluding every
+  // dependency: what the system rests on is part of its shape.
+  const { compileView } = await import('../../compile/src/compile.mjs');
+  const withDep = model();
+  withDep.components.push({
+    id: 'webcola2', kind: 'external', labels: ['webcola2'], sources: [], evidenceRefs: [],
+    provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  withDep.relationships.push({
+    id: 'r-dep', kind: 'relationship', from: 'a', to: 'webcola2', labels: [], sources: [],
+    evidenceRefs: [], provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const view = compileView(withDep, request({ budget: 6 }));
+  assert.ok(view.nodes.map((node) => node.id).includes('webcola2'),
+    'a dependency of a drawn module belongs in the view');
+});
+test('[1.18] the planner itself stops at the system, rather than filling the budget', async () => {
+  // Asserted against the PLANNER, not through the compiler.
+  //
+  // The compiler strands a node whose every edge was cut, so a planner that
+  // pads its selection with unrelated boxes produces the same final view as
+  // one that does not -- the compiler quietly cleans up after it. That makes
+  // the end-to-end assertion above unable to see the difference, and two
+  // planted regressions passed it.
+  //
+  // Selecting only what belongs is still the right behaviour: it is the
+  // difference between a planner that means what it says and one that is
+  // wrong in a way something downstream happens to hide.
+  const { deterministicPlanner } = await import('../../compile/src/planners/deterministic.mjs');
+  const component = (id, kind) => ({
+    id, kind, labels: [id], sources: [], evidenceRefs: [],
+    provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const relationship = (id, from, to) => ({
+    id, kind: 'relationship', from, to, labels: [], sources: [],
+    evidenceRefs: [], provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const scaffolded = {
+    schemaVersion: 1,
+    components: [
+      component('core', 'module'), component('api', 'module'),
+      component('aaa_fixture_one', 'module'), component('aaa_fixture_two', 'module'),
+      component('ext_one', 'external'), component('ext_two', 'external'),
+    ],
+    relationships: [
+      relationship('r1', 'api', 'core'),
+      relationship('r2', 'aaa_fixture_one', 'ext_one'),
+      relationship('r3', 'aaa_fixture_one', 'ext_two'),
+      relationship('r4', 'aaa_fixture_two', 'ext_one'),
+      relationship('r5', 'aaa_fixture_two', 'ext_two'),
+    ],
+    boundaries: [],
+    provenanceSummary: { 'statically-derived': 5 },
+  };
+
+  const plan = deterministicPlanner.plan(scaffolded, { budget: 6 });
+  assert.deepEqual(plan.select.slice().sort(), ['api', 'core'],
+    `the planner had room for six and should have selected two: `
+    + `${JSON.stringify(plan.select)}`);
+});
+
+test('[1.18] a repository with no internal edges still gets a view', async () => {
+  // The ranking above sees nothing in a single-module repository, or in a set
+  // of files with no dependencies between them. An empty diagram would be a
+  // worse answer than a plain one -- and this is not hypothetical: it broke
+  // `map` on a two-file Python repository the moment the ranking changed.
+  const { compileView } = await import('../../compile/src/compile.mjs');
+  const alone = {
+    schemaVersion: 1,
+    components: [{ id: 'src', kind: 'module', labels: ['src'], sources: [], evidenceRefs: [], provenance: 'statically-derived', metadata: {}, authoredId: false }],
+    relationships: [],
+    boundaries: [],
+    provenanceSummary: { 'statically-derived': 1 },
+  };
+  const view = compileView(alone, request({ budget: 12 }));
+  assert.deepEqual(view.nodes.map((node) => node.id), ['src'],
+    'a repository with one component must still produce a diagram of it');
+});
+
 test('[1.18] a node the budget stranded is omitted, not drawn alone', async () => {
   // A box with no edges says "this connects to nothing". When every
   // counterpart was simply cut to fit the budget, that is a false statement

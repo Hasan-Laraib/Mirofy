@@ -434,6 +434,22 @@ assertThat(
 // So the registry decides which of the two this file is allowed to be. When
 // npm cannot be reached the question is not asked -- being offline is not
 // evidence about anything.
+// The version the package README tells people to pin to has to be a version
+// that exists. It is an example, so it goes stale silently -- and stale advice
+// about pinning is worse than none, because the person following it gets a
+// version older than the one being described around it.
+const packageReadme = fs.readFileSync(
+  path.join(repoRoot, 'packages/core/README.md'), 'utf8');
+const shipped = JSON.parse(fs.readFileSync(
+  path.join(repoRoot, 'packages/core/package.json'), 'utf8')).version;
+const pinExample = `npx mirofy-cli@${shipped} map .`;
+assertThat(
+  'the pinning example names the version this repository ships',
+  packageReadme.includes(pinExample),
+  packageReadme.includes(pinExample) ? `pins ${shipped}`
+    : `packages/core/README.md does not contain: "${pinExample}"`,
+);
+
 const i18nSource = fs.readFileSync(
   path.join(repoRoot, 'packages/core/renderers/shared/i18n.mjs'), 'utf8');
 // The passport line the README quotes has to be the line the viewer renders.

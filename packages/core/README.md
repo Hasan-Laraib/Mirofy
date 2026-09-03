@@ -50,6 +50,18 @@ your `origin` remote. A checkout without one -- a bare `git init`, a mirror --
 has no repository to name, so pass `--repo-url` and `--revision` and the
 citations are kept instead of dropped.
 
+## Pin it if you build on it
+
+`npx mirofy-cli` resolves to the newest version every time it runs. This is
+moving fast enough that two people reviewing the same repository a day apart
+reached different conclusions, and the earlier one was already out of date
+when it was written. If anything you do depends on the output -- a CI step, a
+committed diagram, a comparison over time -- name the version:
+
+```bash
+npx mirofy-cli@0.3.8 map .
+```
+
 Installed globally with `npm install -g mirofy-cli`, the command is **`mirofy`**.
 The package carries the `-cli` suffix because npm refused the bare name as too
 close to the existing `minify`.
