@@ -95,6 +95,17 @@ export function declaredPackage(code) {
 }
 
 /** Group a third-party package name to a stable, readable box name. */
+/** The package an import names, with every trailing type segment removed. */
+export function externalPackage(imported) {
+  const segments = String(imported).split('.');
+  while (segments.length > 1) {
+    const last = segments[segments.length - 1];
+    if (last !== '*' && !/^[A-Z]/.test(last)) break;
+    segments.pop();
+  }
+  return segments.join('.');
+}
+
 export function externalName(imported) {
   const segments = String(imported).split('.');
   // Drop the trailing type name so the box is a package rather than a class.
@@ -209,6 +220,19 @@ export const javaAdapter = {
           for (let cut = parts.length - 1; cut >= 1; cut -= 1) {
             const candidate = parts.slice(0, cut).join('.');
             if (!declaredIn.has(candidate)) continue;
+            // And the segment after it has to look like a TYPE. A package
+            // segment is lowercase by universal convention, so a lowercase one
+            // here means the candidate is a PREFIX of somebody else's package,
+            // not the package this import is in.
+            //
+            // google/guava declares com.google.common, and Truth -- a separate
+            // library -- lives in com.google.common.truth. Peeling on the
+            // declaration alone matched guava for every Truth import and
+            // reported 834 gaps against a library guava merely shares a prefix
+            // with. Declaration says the package is ours; capitalisation says
+            // the next thing is a type rather than a deeper package. Neither
+            // is sufficient alone, which two planted regressions confirm.
+            if (!/^[A-Z]/.test(parts[cut] ?? '')) continue;
             asPackage = candidate;
             outermost = parts.slice(0, cut + 1).join('.');
             break;
@@ -216,7 +240,16 @@ export const javaAdapter = {
         }
 
         const exact = namesType ? typeAt.get(outermost) : undefined;
-        if (exact && exact !== rel) { record(exact); return; }
+        if (exact) {
+          // A file importing a nested type of ITSELF is the inside of one
+          // component, not an edge and not a gap. Java requires the import for
+          // a statically imported nested enum constant even within the same
+          // file, so this is ordinary rather than exotic: every one of the 137
+          // gaps left on spring-boot and all 34 on guava were this.
+          if (exact === rel) return;
+          record(exact);
+          return;
+        }
         if (declaredIn.has(asPackage)) {
           const owner = declaredIn.get(asPackage).filter((file) => file !== rel);
           if (!owner.length) return; // a type importing its own file is not an edge
@@ -231,7 +264,13 @@ export const javaAdapter = {
           });
           return;
         }
-        record(`package:${externalName(named)}`);
+        // Grouped at three segments for readability, but never to a name this
+        // repository itself declares. guava IS com.google.common, and Truth
+        // lives in com.google.common.truth -- capping that to three segments
+        // would put a dependency box on the canvas named after guava.
+        let external = externalName(named);
+        if (declaredIn.has(external)) external = externalPackage(named);
+        record(`package:${external}`);
       });
     }
 

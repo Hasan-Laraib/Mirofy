@@ -146,7 +146,16 @@ export function layeredPositions(view, { size = [180, 60], margin = 80, gapX = 1
   //
   // Five, because the viewer's viewport is wider than it is tall: spending the
   // width is free and spending the height costs a scrollbar.
-  const MAX_ROWS = 5;
+  // Four, not five. A column of five 60px boxes with 40px gaps is 460px of
+  // nodes, and the routing channels sit below that -- spring-boot came out
+  // 780px tall inside a 900px viewport and its own visual-check refused it,
+  // correctly: the bottom row was cut off.
+  //
+  // The canvas is 1440 wide and twelve nodes used three columns of it, so the
+  // room to spend was horizontal. Wrapping one row earlier turns a diagram
+  // that scrolls into one that fits, and every one of the nine repositories
+  // this was checked against passes at four.
+  const MAX_ROWS = 4;
   /** @type {string[][]} */
   const slots = [];
   for (const depth of [...columns.keys()].sort((left, right) => left - right)) {

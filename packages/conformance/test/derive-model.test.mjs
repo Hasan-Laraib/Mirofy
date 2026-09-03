@@ -201,6 +201,26 @@ test('[1.19] an external package becomes a component, a builtin does not', () =>
   assert.ok(!derived.components.some((c) => /node:/.test(c.id)), 'a Node builtin became a component');
 });
 
+test('[1.19] a module path is labelled by what a developer calls it', async () => {
+  // A Go module path carries its host. In a 180px box
+  // `github.com/stretchr/testify/assert` renders as
+  // `github.com/str...estify/assert` -- the truncation keeps the part every Go
+  // dependency shares and eats the part that identifies this one.
+  //
+  // A display choice, stated rather than implied: the component keeps its full
+  // id, and the passport and citations still carry it.
+  const { shortExternal } = await import('../../model/src/derive.mjs');
+  assert.equal(shortExternal('github.com/stretchr/testify/assert'), 'testify/assert');
+  assert.equal(shortExternal('golang.org/x/sync/errgroup'), 'sync/errgroup');
+  // Only a name shaped like a module path: a first segment with a dot in it.
+  assert.equal(shortExternal('@acme/thing'), '@acme/thing', 'an npm scope is untouched');
+  assert.equal(shortExternal('react'), 'react');
+  assert.equal(shortExternal('org.springframework.boot'), 'org.springframework.boot',
+    'a Java package has no slashes and is not a path');
+  assert.equal(shortExternal('gopkg.in/yaml.v3'), 'gopkg.in/yaml.v3',
+    'two segments is already short enough to leave alone');
+});
+
 test('[1.19] a builtin imported by its bare name is a builtin too', () => {
   // `import fs from 'fs'` and `import fs from 'node:fs'` are the same module,
   // and only the prefixed spelling was recognised. Both appear in the same
@@ -470,14 +490,19 @@ test('a detour with nowhere to go is left straight rather than sent off-canvas',
 test('the layered layout emits a document its own renderer accepts', () => {
   // Two nodes share a column when the depth pass cannot settle them, which is
   // what a CYCLE does -- and a package graph is full of cycles. Here `a` and
-  // `e` point at each other, so both fall to the same depth as b, c and d, and
-  // the a -> e edge has three nodes standing in its way.
+  // `e` point at each other, so both fall to the same depth as b and c, and
+  // the a -> e edge has two nodes standing in its way.
+  //
+  // FOUR at that depth, not five: a column wraps at four, so a fifth would put
+  // `e` in the next column and this would silently stop testing anything. The
+  // assertion below says so rather than trusting the fixture, and it is what
+  // caught the change that took the cap from five to four.
   const view = {
     type: 'architecture',
-    nodes: ['root', 'a', 'b', 'c', 'd', 'e'].map((id) => ({ id, label: id, kind: 'package' })),
+    nodes: ['root', 'a', 'b', 'c', 'e'].map((id) => ({ id, label: id, kind: 'package' })),
     edges: [
       { from: 'root', to: 'a' }, { from: 'root', to: 'b' }, { from: 'root', to: 'c' },
-      { from: 'root', to: 'd' }, { from: 'root', to: 'e' },
+      { from: 'root', to: 'e' },
       { from: 'a', to: 'e', label: 'imports' }, { from: 'e', to: 'a' },
     ],
   };
@@ -576,6 +601,32 @@ test('[1.20] a skip-level edge escapes even when its own column is full', () => 
         + `runs through ${name} at ${JSON.stringify(positions[name])}`);
     }
   }
+});
+
+test('[1.20] a wide layer wraps before it grows taller than a screen', () => {
+  // A column of five 60px boxes with 40px gaps is 460px of nodes, and the
+  // routing channels sit below that. spring-projects/spring-boot came out
+  // 780px tall inside a 900px viewport and its own `visual-check` refused it,
+  // correctly: the bottom row was cut off.
+  //
+  // Asserted as a HEIGHT rather than as the constant, because the constant is
+  // not the point -- what matters is that a dozen nodes fit on a screen. A
+  // future change to box size or gap that quietly reintroduces the overflow
+  // fails here rather than in somebody's browser.
+  // TEN, measured rather than assumed. Twelve wraps to four per column at
+  // either cap, so a fixture of twelve cannot tell the two apart and the first
+  // version of this test passed against the layout it was written to change.
+  // Ten gives five per column at the old cap and four at the new one.
+  const nodes = Array.from({ length: 10 }, (_, i) => ({
+    id: `n${i}`, label: `n${i}`, kind: 'module', evidenceRefs: [],
+  }));
+  const positions = layeredPositions({ nodes, edges: [] });
+  const bottom = Math.max(...Object.values(positions.positions).map(([, y]) => y)) + 60;
+  assert.ok(bottom <= 500,
+    `ten nodes reached ${bottom}px, which does not leave room for the routing `
+    + `channels below them inside a 900px viewport`);
+  assert.ok(positions.tallest <= 4,
+    `a column holds at most four: ${positions.tallest}`);
 });
 
 test('[1.20] a skip-level edge over an empty column is left straight', () => {

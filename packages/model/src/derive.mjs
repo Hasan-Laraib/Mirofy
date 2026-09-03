@@ -111,6 +111,31 @@ export function ownerOf(filePath, packages) {
 
 const NODE_BUILTINS = new Set(builtinModules);
 
+/**
+ * A readable label for a dependency whose name is a path.
+ *
+ * A Go module path carries its host: `github.com/stretchr/testify/assert`.
+ * The box is 180px wide, so that renders as `github.com/str...estify/assert`
+ * -- the truncation keeps the part every Go dependency shares and eats the
+ * part that identifies this one.
+ *
+ * The last two segments are what a Go developer calls it. This is a display
+ * choice like the Java three-segment grouping, stated rather than implied: the
+ * component keeps its full id, and the passport and citations still carry it.
+ *
+ * Applied only to a name shaped like a module path -- a first segment with a
+ * dot in it, which is a domain -- so an npm scope like `@acme/thing` and a
+ * plain package name are untouched.
+ *
+ * @param {string} id
+ */
+export function shortExternal(id) {
+  const text = String(id);
+  const segments = text.split('/');
+  if (segments.length < 3 || !segments[0].includes('.')) return text;
+  return segments.slice(-2).join('/');
+}
+
 /** Classify a dependency target without guessing what it is. */
 export function classifyTarget(object) {
   const text = String(object ?? '');
@@ -217,7 +242,7 @@ export function deriveFromGraph(graph, { includeExternal = true } = {}) {
             id: toId,
             authoredId: false,
             kind: 'external',
-            labels: [toId],
+            labels: [shortExternal(toId)],
             sources: [],
             evidenceRefs: [],
             provenance: 'statically-derived',

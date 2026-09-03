@@ -210,6 +210,56 @@ test('[2.19] a nested type resolves to the file that holds it', async () => {
     'however deeply nested, the edge points at the file that declares the outer type');
 });
 
+test('[2.19] a file importing its own nested type is neither an edge nor a Gap', async () => {
+  // Java requires the import for a statically imported nested enum constant
+  // even inside the same file, so this is ordinary rather than exotic.
+  //
+  // It is the inside of one component: recording an edge would draw a box
+  // pointing at itself, and recording a gap would claim the type is missing
+  // when it is right there. Every one of the 137 gaps left on spring-boot and
+  // all 34 on guava were this.
+  const repoRoot = makeRepo({
+    'FeatureTest.java': [
+      'package com.acme;',
+      '',
+      'import static com.acme.FeatureTest.Example.BAR;',
+      '',
+      'public class FeatureTest {',
+      '  enum Example { BAR }',
+      '}',
+      '',
+    ].join(NL),
+  });
+  const { facts, gaps } = await runAdapter(javaAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, [], `its own nested type is not missing: ${JSON.stringify(gaps)}`);
+  assert.deepEqual(facts, [], 'and a component does not depend on itself');
+});
+
+test('[2.19] another library sharing our package prefix is not ours', async () => {
+  // google/guava declares com.google.common. Truth is a SEPARATE library and
+  // lives in com.google.common.truth. Peeling on the declaration alone matched
+  // guava for every Truth import and reported 834 gaps -- 28% of the files in
+  // the repository -- against a library it merely shares a prefix with.
+  //
+  // A package segment is lowercase by universal convention, so a lowercase
+  // segment after the candidate means the candidate is a PREFIX of somebody
+  // else's package rather than the package this import is in.
+  const repoRoot = makeRepo({
+    'common/Lists.java': file('com.acme.common', 'Lists'),
+    'App.java': file('com.acme', 'App', [
+      'com.acme.common.Lists',              // ours
+      'com.acme.common.truth.Truth',        // somebody else's, same prefix
+    ]),
+  });
+  const { facts, gaps } = await runAdapter(javaAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, [],
+    `a different library sharing our prefix is not an unresolved import of ours: `
+    + `${JSON.stringify(gaps)}`);
+  assert.deepEqual(facts.map((fact) => fact.object).sort(),
+    ['common/Lists.java', 'package:com.acme.common.truth'],
+    'ours resolves to its file; theirs is a dependency');
+});
+
 test('[2.19] a nested type of a type we do NOT have is still a Gap', async () => {
   // The other half. Peeling must not become a way to attribute anything
   // starting with a familiar prefix to ourselves: on gson these are the

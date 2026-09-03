@@ -191,6 +191,29 @@ test('[2.18] a repository with no go.mod records gaps rather than inventing a mo
     ['package:github.com/x/y', 'package:go:fmt']);
 });
 
+test('[2.18] a tracked package called `build` is source, and an ignored one is not', async () => {
+  // The walk used to skip `build` and `dist` BY NAME. moby/moby has four Go
+  // packages called `build`, and all 53 imports of them were recorded as gaps
+  // against directories the walk had refused to look at -- the tool reporting
+  // that it could not resolve something it had declined to see.
+  //
+  // Generated output is what git ignores, and git is asked directly. A tracked
+  // directory called `build` is a directory somebody committed.
+  const repoRoot = makeRepo({
+    '.gitignore': 'dist/' + NL,
+    'go.mod': 'module example.com/m' + NL,
+    'build/build.go': 'package build' + NL,
+    'dist/generated.go': 'package dist' + NL,
+    'main.go': ['package main', '', 'import "example.com/m/build"', ''].join(NL),
+  });
+  const { facts, gaps, inventory } = await runAdapter(goAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, [],
+    `a committed package named build is source: ${JSON.stringify(gaps)}`);
+  assert.deepEqual(facts.map((fact) => fact.object), ['build/build.go']);
+  assert.ok(!inventory.includes('dist/generated.go'),
+    'and a directory git ignores is still not read');
+});
+
 test('[2.18] a file the walk skipped is not scanned, and one git ignores is not either', async () => {
   const repoRoot = makeRepo({
     '.gitignore': 'generated/' + NL,

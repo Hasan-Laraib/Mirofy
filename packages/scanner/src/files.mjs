@@ -26,9 +26,19 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { posixPath } from './adapter.mjs';
 
-// Directories that are never source: a package manager's, git's own, and the
-// conventional output names. `scan` is this tool's own output.
-export const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', 'coverage', 'preview', 'scan']);
+// Directories that are never source: a package manager's, git's own, and this
+// tool's own output.
+//
+// `dist` and `build` USED TO BE HERE, and the comment on gitIgnored below has
+// always said why they should not be -- skipping by name over-reaches, and a
+// repository with real source in `build/` loses it silently. moby/moby proved
+// it: four Go packages named `build`, 53 imports of them, every one recorded
+// as a gap against a directory the walk had refused to look at. The tool was
+// reporting that it could not resolve something it had declined to see.
+//
+// Generated output is what git ignores, and git is asked directly a few lines
+// down. A tracked directory called `build` is a directory somebody committed.
+export const SKIP_DIRS = new Set(['node_modules', '.git', 'coverage', 'preview', 'scan']);
 
 /**
  * Which of these paths git is ignoring.
