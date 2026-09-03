@@ -242,6 +242,8 @@ const adapterFiles = fs.readdirSync(path.join(repoRoot, 'packages/scanner/src/ad
 const namedInReadme = {
   imports: 'JavaScript and TypeScript** imports',
   python: '**Python** imports',
+  go: '**Go** imports',
+  java: '**Java** imports',
   workspace: 'workspaces ',
   routes: 'Express and Next routes',
   compose: 'docker-compose',
@@ -269,6 +271,8 @@ const coverageNoteText = noteStart < 0 || noteEnd < 0 ? ''
 const namedInNote = {
   imports: 'JavaScript and TypeScript imports',
   python: 'Python imports',
+  go: 'Go imports',
+  java: 'Java imports',
   workspace: 'workspaces',
   routes: 'Express and Next routes',
   compose: 'docker-compose',

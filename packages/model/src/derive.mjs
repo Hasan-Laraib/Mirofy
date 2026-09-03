@@ -118,6 +118,10 @@ export function classifyTarget(object) {
   // Python's standard library, for the same reason as node's: every file
   // imports os and typing, and drawing those buries the architecture.
   if (text.startsWith('package:python:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
+  // Go's standard library and the JDK, for the same reason: every file in the
+  // language imports some of it, so drawing those edges buries the architecture.
+  if (text.startsWith('package:go:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
+  if (text.startsWith('package:jdk:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
   if (text.startsWith('package:')) {
     const name = text.slice('package:'.length);
     // `import fs from 'fs'` is the same builtin as `import fs from 'node:fs'`,
@@ -283,9 +287,35 @@ export function deriveFromGraph(graph, { includeExternal = true } = {}) {
     if (!byLabel.has(label)) byLabel.set(label, []);
     byLabel.get(label).push(component);
   }
+  // Lengthened by the SHORTEST suffix that tells them apart, not replaced by
+  // the whole id.
+  //
+  // Falling back to the full id is fine when two names collide and terrible
+  // when a hundred do. A Java repository mirrors its package tree under
+  // src/main/java and src/test/java, so every package collides with itself and
+  // every box became a path: `gson/src/main/java/com/google/gson`, which the
+  // renderer then middle-truncates to `gson/src/main/...m/google/gson`. The
+  // distinguishing part is one segment; the rest is what they have in common.
   for (const sharing of byLabel.values()) {
     if (sharing.length < 2) continue;
-    for (const component of sharing) component.labels = [component.id];
+    for (const component of sharing) {
+      const segments = String(component.id).split('/');
+      let label = component.labels?.[0] ?? component.id;
+      for (let take = 2; take <= segments.length; take += 1) {
+        label = segments.slice(-take).join('/');
+        const clash = sharing.some((other) => other !== component
+          && String(other.id).split('/').slice(-take).join('/') === label);
+        if (!clash) break;
+      }
+      // Keep the two segments that carry meaning and elide the shared middle.
+      // `main/java/com/google/gson` and `test/java/com/google/gson` differ in
+      // one segment five deep; spelling out the four they share to reach it
+      // spends the whole box on the part that is the same.
+      const parts = label.split('/');
+      component.labels = [parts.length > 2
+        ? `${parts[0]}/…/${parts[parts.length - 1]}`
+        : label];
+    }
   }
 
   const notModelled = [];

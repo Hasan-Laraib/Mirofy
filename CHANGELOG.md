@@ -17,6 +17,70 @@ stops being one.
 
 ## 2026-09-03
 
+### Go and Java adapters
+
+The largest gap this tool had. `spring-projects/spring-boot` has 81,000
+stars and Mirofy drew nothing from it; `.go` and `.rs` were among the
+biggest unread groups in every real repository it was pointed at.
+
+Both resolve the way the language itself does, rather than by
+convention:
+
+**Go** reads the module path `go.mod` declares, so an import beginning
+with it is this repository's own package and resolves to the directory
+it names -- and only because that directory holds Go files. The standard
+library is decided the way the toolchain decides it: a first path
+segment containing a dot is a domain, and a domain means a module
+fetched from somewhere. `fmt` and `net/http` cannot be fetched. A
+hand-maintained list would go stale the first time Go adds a package.
+
+**Java** builds its index from the `package` statements files declare,
+not from directory layout. Maven convention puts `com.acme.store` under
+`src/main/java/com/acme/store`, and convention is not always -- generated
+sources, multi-module builds and `src/test/java` all break the mapping,
+while the declaration is what the compiler reads. A third-party import
+names a package and not an artifact, so external names group at three
+segments; that is a stated convention for the box, not a claim about
+which jar it came from.
+
+In both, an import naming something inside this repository that is not
+there is a gap. Never a dependency on a published copy of yourself.
+
+On `gin-gonic/gin`: 518 facts from 99 Go files in 101 ms, no gaps. On
+`google/gson`: 2,651 facts from 264 Java files in 208 ms, and 20 gaps
+that are all `com.google.gson.protobuf.*` -- classes generated from
+`.proto` at build time and genuinely absent from the tree.
+
+Two defects the real repositories found, each of which the fixtures
+written first could not reach:
+
+- A **static import** carries an extra segment: the member. Treating it
+  as the type name put the package one segment too deep, so
+  `import static com.google.gson.GsonBuilder.x` looked for a package
+  called `com.google.gson.GsonBuilder` and recorded a third-party
+  `com.google.gson`. 106 facts said gson depends on a published copy of
+  itself.
+- A **nested type** puts two or more capitalised segments in a row.
+  Peeling one left the same failure for
+  `com.google.gson.ReflectionAccessFilter.FilterResult`, which was the
+  remaining 84. Peeling now stops at a package the repository declares
+  rather than at a capitalisation rule, so it rests on what the
+  repository says about itself.
+
+### Colliding labels lengthen by the shortest suffix that separates them
+
+Falling back to the full id is fine when two names collide and terrible
+when a hundred do. A Java repository mirrors its package tree under
+`src/main/java` and `src/test/java`, so every package collided with
+itself and every box became a path -- `gson/src/main/java/com/google/gson`,
+which the renderer then middle-truncated into
+`gson/src/main/...m/google/gson`.
+
+The distinguishing part is one segment and the rest is what they have in
+common, so the label keeps the two segments that carry meaning and elides
+the middle: `main/.../gson` and `test/.../gson`.
+
+
 ### The twelve-node budget went to scaffolding instead of the system
 
 Released as 0.3.9.

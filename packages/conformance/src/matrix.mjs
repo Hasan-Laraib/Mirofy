@@ -264,6 +264,44 @@ export const IMPORTED_ROWS = [
     testTitle: '[2.8] import scanner reports static, re-export, require and literal dynamic imports with exact lines',
   },
   {
+    id: '2.18',
+    name: 'Scanner: Go imports',
+    // Third language. Go states its own resolution rule in the repository:
+    // go.mod declares the module path, so an import beginning with it is this
+    // repository's own package and resolves to the directory it names -- and
+    // only because that directory holds Go files. The standard library is
+    // decided the way the toolchain decides it, by whether the first path
+    // segment contains a dot, rather than by a list that would go stale.
+    //
+    // An import inside this module naming a directory that is not there is a
+    // Gap. Recording it as a third-party module would say the repository
+    // depends on a published copy of itself.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'go-scanner.test.mjs',
+    testTitle: '[2.18] go imports resolve against the module path go.mod declares',
+  },
+  {
+    id: '2.19',
+    name: 'Scanner: Java imports',
+    // Fourth language, and the largest single gap this tool had:
+    // spring-projects/spring-boot has 81,000 stars and Mirofy drew nothing.
+    //
+    // The index is built from the `package` statements files DECLARE rather
+    // than from directory layout. Maven convention puts com.acme.store under
+    // src/main/java/com/acme/store, and convention is not always -- generated
+    // sources, multi-module builds and src/test/java all break the mapping,
+    // while the declaration is what the compiler reads.
+    //
+    // A third-party import names a package and not an artifact, so external
+    // names are grouped at three segments. That is a stated convention for
+    // the box, not a claim about which jar it came from.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'java-scanner.test.mjs',
+    testTitle: '[2.19] the index is built from what files DECLARE, not from directory layout',
+  },
+  {
     id: '2.9',
     name: 'Scanner: workspace/package topology',
     // package.json workspaces -> contains-package and depends-on facts,

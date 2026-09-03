@@ -20,10 +20,13 @@ import { runAdapter } from '../src/adapter.mjs';
 import { workspaceAdapter } from '../src/adapters/workspace.mjs';
 import { importsAdapter } from '../src/adapters/imports.mjs';
 import { pythonAdapter } from '../src/adapters/python.mjs';
+import { goAdapter } from '../src/adapters/go.mjs';
+import { javaAdapter } from '../src/adapters/java.mjs';
 import { routesAdapter } from '../src/adapters/routes.mjs';
 import { composeAdapter } from '../src/adapters/compose.mjs';
 
-const ADAPTERS = [workspaceAdapter, importsAdapter, pythonAdapter, routesAdapter, composeAdapter];
+const ADAPTERS = [workspaceAdapter, importsAdapter, pythonAdapter, goAdapter, javaAdapter,
+  routesAdapter, composeAdapter];
 
 function parseArgs(argv) {
   const args = { repoRoot: process.cwd(), out: null };

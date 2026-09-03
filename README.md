@@ -13,7 +13,7 @@
   <a href="https://www.npmjs.com/package/mirofy-cli"><img src="https://img.shields.io/npm/v/mirofy-cli?style=flat-square&color=3b82f6&label=mirofy-cli" alt="mirofy-cli on npm"></a>
   <img src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square" alt="MIT licensed">
   <img src="https://img.shields.io/badge/runtime%20dependencies-0-7c3aed?style=flat-square" alt="Zero runtime dependencies">
-  <img src="https://img.shields.io/badge/conformance-81%20rows%20proved-3b82f6?style=flat-square" alt="81 conformance rows proved without a browser">
+  <img src="https://img.shields.io/badge/conformance-83%20rows%20proved-3b82f6?style=flat-square" alt="83 conformance rows proved without a browser">
   <img src="https://img.shields.io/badge/output-one%20HTML%20file-7c3aed?style=flat-square" alt="Output is one HTML file">
 </p>
 
@@ -92,21 +92,32 @@ directories** and the imports between them.
 
 ### What it reads
 
-**JavaScript and TypeScript** imports · **Python** imports · `package.json`
-workspaces · Express and Next routes · `docker-compose`.
+**JavaScript and TypeScript** imports · **Python** imports · **Go** imports ·
+**Java** imports · `package.json` workspaces · Express and Next routes ·
+`docker-compose`.
 
 That is the whole list, and the list is the point. Everything else is
 **reported, not skipped**: `coverage.md` names every file no adapter opened,
 grouped by type, and `map` says so on its way out when the unread files
-outnumber the read ones. Point it at a Go repository and you get an honest empty
-answer naming 400 unread `.go` files — not a confident small one drawn from the
-two JavaScript files in an `examples/` folder.
+outnumber the read ones. Point it at a Rust repository and you get an honest
+empty answer naming every unread `.rs` file — not a confident small one drawn
+from the two JavaScript files in an `examples/` folder.
 
 Python resolves by **file existence**, not by convention: relative imports
 against the importing file's directory, absolute ones against the repository
 root and any directory that actually holds a package. A specifier that matches
 two source roots is a gap naming both, because which one wins depends on
 `sys.path`, which is configuration and not in the source.
+
+Go resolves against the module path `go.mod` **declares**, and decides the
+standard library the way the toolchain does — a first path segment containing a
+dot is a domain, and a domain means a module fetched from somewhere. Java
+builds its index from the `package` statements files **declare**, not from
+directory layout: Maven convention puts `com.acme.store` under
+`src/main/java/com/acme/store` and convention is not always, but the
+declaration is what the compiler reads. In both, an import that names
+something inside this repository which is not there is a gap — never a
+dependency on a published copy of yourself.
 
 `npx mirofy-cli guide "show an API request with a cache miss"` picks the
 diagram type for you if you are not sure which one you want.
@@ -481,8 +492,8 @@ that made it is a diagram held hostage.
 
 ## What is proved
 
-The conformance matrix has **101 rows**. **81 are proved without a browser**;
-19 more need headless Chrome (`MIROFY_CHROME`), bringing the total to 100.
+The conformance matrix has **103 rows**. **83 are proved without a browser**;
+19 more need headless Chrome (`MIROFY_CHROME`), bringing the total to 102.
 
 ```bash
 npm run check    # lint, types, 1,000+ tests, golden parity, conformance, size, audit
