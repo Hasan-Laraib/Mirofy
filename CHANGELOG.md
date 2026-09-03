@@ -27,7 +27,7 @@ Java adapter read the other 8,623 files beside them.
 **Rust.** A module is a file or a directory with `mod.rs`, and
 `use crate::a::b::C` does not say which of a, b or C is the file, so
 resolution peels from the right until a real file appears. The crate root
-is floored out for anything deeper than one name -- `src/lib.rs` always
+is floored out for anything deeper than one name -- a crate root always
 exists, so without that floor it answers every unresolvable import, and
 usually with the importing file itself.
 
@@ -56,14 +56,14 @@ inventory, because coverage has to say which files each one examined.
 
 ### Two defects the real repositories found
 
-`crate::util` from `tests/eviction.rs` is `tests/util.rs`, not
-`src/util.rs`: Cargo compiles every direct child of `tests`, `benches`
-and `examples` as its own crate. next.js produced 34 gaps against
-exactly that, with the file sitting right beside the test.
+`crate::util` from an integration test names the module beside that test,
+not one under the crate source root: Cargo compiles every direct child of
+tests, benches and examples as its own crate. next.js produced 34 gaps
+against exactly that, with the file sitting right beside the test.
 
 And `#[cfg(test)] mod tests { use super::*; }` -- the commonest shape in
 Rust -- resolved `super` as the file's PARENT and walked to the crate
-root, recording an edge to `lib.rs`. A wrong answer rather than a gap,
+root, recording an edge to the crate root. A wrong answer rather than a gap,
 which is worse, and one that inflated the fact count of every Rust
 repository with tests in it. Inside an inline module `super` reaches this
 same file, which is the inside of one component: not an edge, not a gap.
