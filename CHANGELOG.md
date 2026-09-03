@@ -15,6 +15,58 @@ stops being one.
 
 ---
 
+## 2026-09-03
+
+### The twelve-node budget went to scaffolding instead of the system
+
+Two people, independently, reported the same thing about the same
+repository: a single test fixture sat in the default view where a real
+module should have been.
+
+Plain degree measured the wrong thing twice over. The top-ranked node was
+`fastapi` with degree 43 -- a dependency imported by dozens of benchmark
+fixtures, not part of the architecture at all. Below it every one of
+those fixtures tied on degree 2, so which of them took the last slots was
+decided alphabetically.
+
+`packages/compile/src/planners/deterministic.mjs` now ranks by INTERNAL
+degree: relationships whose both ends are the repository's own code. That
+separates the two without guessing which directories look like tests --
+a fixture importing nothing but third-party packages carries no
+information about how this system fits together, and its internal degree
+is zero for that reason rather than because of its path. On the reported
+repository it drops every fixture to zero and leaves exactly the nine
+real modules.
+
+Dependencies come next, but only where something already drawn uses one.
+`fastapi` fails that test; `anthropic`, `openai` and `fastmcp` pass it.
+That is the honest reading of the same evidence: nothing in that system
+imports fastapi, its benchmark fixtures do.
+
+The budget is a cap, not a quota. Nine good boxes out of twelve beat nine
+plus three arbitrary ones. A repository this ranking cannot see at all --
+one module, or files with no dependencies between them -- falls back to
+plain degree, because an empty diagram is a worse answer than a plain
+one. That case is not hypothetical: it broke `map` on a two-file Python
+repository the moment the ranking changed.
+
+Two of the three bites only fail against the PLANNER rather than through
+the compiler. The compiler strands a node whose every edge was cut, so a
+planner that pads its selection produces the same final view as one that
+does not -- and the end-to-end assertion could not tell them apart. The
+first fixture written for this row had the same problem: both rankings
+happened to agree on it, and it passed against the defect it was written
+for.
+
+### The README says to pin the version
+
+Both reviews said the same thing, and they were right for a reason
+visible in their own reports: `npx mirofy-cli` resolves to the newest
+version every time, and one reviewer's conclusions were already out of
+date by the time they were written. A check keeps the pinning example
+naming a version that actually exists.
+
+
 ## 2026-09-02
 
 ### `map --out` left the diagram in your repository
