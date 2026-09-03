@@ -131,8 +131,11 @@ const NODE_BUILTINS = new Set(builtinModules);
  */
 export function shortExternal(id) {
   const text = String(id);
-  const segments = text.split('/');
-  if (segments.length < 3 || !segments[0].includes('.')) return text;
+  const all = text.split('/');
+  if (all.length < 3 || !all[0].includes('.')) return text;
+  // A Go major-version segment carries no identity. `gotest.tools/v3/assert`
+  // shortened to `v3/assert`, which names the version and drops the library.
+  const segments = all.filter((segment, index) => index === 0 || !/^v[0-9]+$/.test(segment));
   return segments.slice(-2).join('/');
 }
 

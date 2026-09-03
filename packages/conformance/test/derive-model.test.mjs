@@ -212,6 +212,10 @@ test('[1.19] a module path is labelled by what a developer calls it', async () =
   const { shortExternal } = await import('../../model/src/derive.mjs');
   assert.equal(shortExternal('github.com/stretchr/testify/assert'), 'testify/assert');
   assert.equal(shortExternal('golang.org/x/sync/errgroup'), 'sync/errgroup');
+  // A Go major-version segment carries no identity: `gotest.tools/v3/assert`
+  // shortened to `v3/assert`, which names the version and drops the library.
+  assert.equal(shortExternal('gotest.tools/v3/assert'), 'gotest.tools/assert');
+  assert.equal(shortExternal('github.com/containerd/containerd/v2/core'), 'containerd/core');
   // Only a name shaped like a module path: a first segment with a dot in it.
   assert.equal(shortExternal('@acme/thing'), '@acme/thing', 'an npm scope is untouched');
   assert.equal(shortExternal('react'), 'react');
