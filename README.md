@@ -13,7 +13,7 @@
   <a href="https://www.npmjs.com/package/mirofy-cli"><img src="https://img.shields.io/npm/v/mirofy-cli?style=flat-square&color=3b82f6&label=mirofy-cli" alt="mirofy-cli on npm"></a>
   <img src="https://img.shields.io/badge/license-MIT-3b82f6?style=flat-square" alt="MIT licensed">
   <img src="https://img.shields.io/badge/runtime%20dependencies-0-7c3aed?style=flat-square" alt="Zero runtime dependencies">
-  <img src="https://img.shields.io/badge/conformance-83%20rows%20proved-3b82f6?style=flat-square" alt="83 conformance rows proved without a browser">
+  <img src="https://img.shields.io/badge/conformance-85%20rows%20proved-3b82f6?style=flat-square" alt="85 conformance rows proved without a browser">
   <img src="https://img.shields.io/badge/output-one%20HTML%20file-7c3aed?style=flat-square" alt="Output is one HTML file">
 </p>
 
@@ -93,8 +93,8 @@ directories** and the imports between them.
 ### What it reads
 
 **JavaScript and TypeScript** imports · **Python** imports · **Go** imports ·
-**Java** imports · `package.json` workspaces · Express and Next routes ·
-`docker-compose`.
+**Java** imports · **Rust** imports · **Kotlin** imports ·
+`package.json` workspaces · Express and Next routes · `docker-compose`.
 
 That is the whole list, and the list is the point. Everything else is
 **reported, not skipped**: `coverage.md` names every file no adapter opened,
@@ -492,8 +492,8 @@ that made it is a diagram held hostage.
 
 ## What is proved
 
-The conformance matrix has **103 rows**. **83 are proved without a browser**;
-19 more need headless Chrome (`MIROFY_CHROME`), bringing the total to 102.
+The conformance matrix has **105 rows**. **85 are proved without a browser**;
+19 more need headless Chrome (`MIROFY_CHROME`), bringing the total to 104.
 
 ```bash
 npm run check    # lint, types, 1,000+ tests, golden parity, conformance, size, audit

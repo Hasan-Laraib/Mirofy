@@ -16,7 +16,8 @@ Zero runtime dependencies. The artifact opens from disk, with no server.
 ## What it reads
 
 JavaScript and TypeScript imports · Python imports · Go imports · Java imports ·
-`package.json` workspaces · Express and Next routes · `docker-compose`.
+Rust imports · Kotlin imports · `package.json` workspaces · Express and Next
+routes · `docker-compose`.
 
 That is the whole list, and the list is the point. Everything else is
 **reported, not skipped**: the run writes a `coverage.md` naming every file no

@@ -22,11 +22,13 @@ import { importsAdapter } from '../src/adapters/imports.mjs';
 import { pythonAdapter } from '../src/adapters/python.mjs';
 import { goAdapter } from '../src/adapters/go.mjs';
 import { javaAdapter } from '../src/adapters/java.mjs';
+import { rustAdapter } from '../src/adapters/rust.mjs';
+import { kotlinAdapter } from '../src/adapters/kotlin.mjs';
 import { routesAdapter } from '../src/adapters/routes.mjs';
 import { composeAdapter } from '../src/adapters/compose.mjs';
 
 const ADAPTERS = [workspaceAdapter, importsAdapter, pythonAdapter, goAdapter, javaAdapter,
-  routesAdapter, composeAdapter];
+  rustAdapter, kotlinAdapter, routesAdapter, composeAdapter];
 
 function parseArgs(argv) {
   const args = { repoRoot: process.cwd(), out: null };

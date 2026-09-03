@@ -17,6 +17,62 @@ stops being one.
 
 ## 2026-09-03
 
+### Rust and Kotlin adapters
+
+Six languages now. Both were named in the coverage report as the largest
+things Mirofy could not read: 1,038 `.rs` files in vercel/next.js, and
+437 `.kt` files in spring-projects/spring-boot that sat unread while the
+Java adapter read the other 8,623 files beside them.
+
+**Rust.** A module is a file or a directory with `mod.rs`, and
+`use crate::a::b::C` does not say which of a, b or C is the file, so
+resolution peels from the right until a real file appears. The crate root
+is floored out for anything deeper than one name -- `src/lib.rs` always
+exists, so without that floor it answers every unresolvable import, and
+usually with the importing file itself.
+
+Cargo names are not code names. Cargo.toml says `next-build` and the code
+says `next_build`, so an index keyed on the manifest spelling records
+every internal crate-to-crate edge in every Rust workspace as a
+third-party dependency.
+
+**Kotlin.** Two things are not like Java. A Kotlin file need not be named
+after the type it declares and may declare several, so the type index is
+read from the declarations rather than from the file name. And an import
+may name a top-level function, which is a lowercase tail where Java would
+only ever have a type -- and which collides with the rule that stops
+another library's package being mistaken for ours.
+
+### The two JVM adapters share one declaration index
+
+Java and Kotlin compile to one namespace and import each other freely. An
+index of one extension cannot see the other, and the import lands in the
+worst bucket available: the package IS declared here, so the type looks
+missing, and a real edge is reported as a gap.
+
+spring-boot produced 112 of those, every one a Kotlin file importing a
+Java type from spring-boot itself. Each adapter still owns its own
+inventory, because coverage has to say which files each one examined.
+
+### Two defects the real repositories found
+
+`crate::util` from `tests/eviction.rs` is `tests/util.rs`, not
+`src/util.rs`: Cargo compiles every direct child of `tests`, `benches`
+and `examples` as its own crate. next.js produced 34 gaps against
+exactly that, with the file sitting right beside the test.
+
+And `#[cfg(test)] mod tests { use super::*; }` -- the commonest shape in
+Rust -- resolved `super` as the file's PARENT and walked to the crate
+root, recording an edge to `lib.rs`. A wrong answer rather than a gap,
+which is worse, and one that inflated the fact count of every Rust
+repository with tests in it. Inside an inline module `super` reaches this
+same file, which is the inside of one component: not an edge, not a gap.
+next.js went from 8,085 facts with 34 gaps to 7,923 with zero.
+
+After both: **spring-boot 78,368 facts with zero gaps** across Java and
+Kotlin, **next.js 7,923 Rust facts with zero gaps**.
+
+
 ### Go and Java adapters
 
 Released as 0.4.0.

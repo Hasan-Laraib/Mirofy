@@ -150,6 +150,8 @@ export function classifyTarget(object) {
   // language imports some of it, so drawing those edges buries the architecture.
   if (text.startsWith('package:go:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
   if (text.startsWith('package:jdk:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
+  if (text.startsWith('package:rust:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
+  if (text.startsWith('package:kotlin:')) return { kind: 'node-builtin', name: text.slice('package:'.length) };
   if (text.startsWith('package:')) {
     const name = text.slice('package:'.length);
     // `import fs from 'fs'` is the same builtin as `import fs from 'node:fs'`,

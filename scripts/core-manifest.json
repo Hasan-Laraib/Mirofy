@@ -3,10 +3,10 @@
   "root": "packages/core",
   "files": {
     "LICENSE": "4c27b7152c7e4593dfdd153761ce178177d30464",
-    "README.md": "7dc6dab3375c7335be10e09c7b35c224a4024e6e",
+    "README.md": "61cb76d3c764bcec37c8a12bf3c98407773899b3",
     "SKILL.md": "d2f80e34f0d87f1a9ad4cdde3c9b820d3d5b7b2a",
     "assets/template.html": "6de73c7424b6992fe71cbe6b401dae3f9fc28666",
-    "bin/mirofy.mjs": "984cd37d1f3c85220bcd2e6a1c2ab20dab6eeed9",
+    "bin/mirofy.mjs": "d8e02aed369c3461662948609e103805bb4ca50a",
     "bin/open-artifact.mjs": "878f6b4caa06b5ed2185ae45fb3be9675925ce5b",
     "bin/preview.mjs": "c81c1ce6e98394fcc68d4c3a86028c63fa56cf33",
     "bin/visual-check.mjs": "4c958e96ca58312f9f54026c64d5360801f155b4",

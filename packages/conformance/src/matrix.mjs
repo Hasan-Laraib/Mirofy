@@ -302,6 +302,49 @@ export const IMPORTED_ROWS = [
     testTitle: '[2.19] the index is built from what files DECLARE, not from directory layout',
   },
   {
+    id: '2.20',
+    name: 'Scanner: Rust imports',
+    // Fifth language, and the largest unread group this tool ever reported:
+    // 1,038 .rs files in vercel/next.js, a whole toolchain inside a
+    // TypeScript project and invisible.
+    //
+    // A module is a file or a directory with mod.rs, and `use crate::a::b::C`
+    // does not say which of a, b or C is the file. Resolution peels from the
+    // right until a real file appears -- with the crate root floored out for
+    // anything deeper than one name, because lib.rs always exists and would
+    // otherwise answer every unresolvable import.
+    //
+    // Cargo names are not code names: Cargo.toml says `next-build` and the
+    // code says `next_build`, so an index keyed on the manifest spelling
+    // records every internal crate-to-crate edge as a third-party dependency.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'rust-scanner.test.mjs',
+    testTitle: '[2.20] crate, super and self resolve against the files that are there',
+  },
+  {
+    id: '2.21',
+    name: 'Scanner: Kotlin imports',
+    // Sixth language. spring-projects/spring-boot has 437 Kotlin files, and
+    // the coverage report named every one of them as unread while the Java
+    // adapter read the other 8,623.
+    //
+    // Two things are not like Java. A Kotlin file need not be named after the
+    // type it declares and may declare several, so the type index is read from
+    // the declarations rather than from the file name. And an import may name
+    // a top-level function, which is a lowercase tail where Java would only
+    // ever have a type.
+    //
+    // Both JVM adapters share one declaration index, because Java and Kotlin
+    // compile to one namespace and import each other freely -- an index of one
+    // extension reports a real edge to the other as a missing type, which is
+    // 112 of spring-boot`s gaps before they shared.
+    origin: 'N',
+    phase: 'P1c',
+    proof: 'kotlin-scanner.test.mjs',
+    testTitle: '[2.21] a type is found by its DECLARATION, not by the file name',
+  },
+  {
     id: '2.9',
     name: 'Scanner: workspace/package topology',
     // package.json workspaces -> contains-package and depends-on facts,

@@ -29,6 +29,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { repositoryFiles } from '../files.mjs';
+import { jvmDeclarations } from '../jvm-index.mjs';
 
 export const JAVA_EXTENSIONS = Object.freeze(['.java']);
 
@@ -137,11 +138,14 @@ export const javaAdapter = {
     const inventory = all.filter((file) => JAVA_EXTENSIONS.includes(path.extname(file)));
     if (!inventory.length) return { facts, gaps, inventory };
 
-    // Pass one: what this repository declares. Built from `package` statements
-    // rather than from directory layout, because the declaration is what the
-    // compiler reads and the layout is only a convention.
-    const declaredIn = new Map(); // package -> [file, ...]
-    const typeAt = new Map();     // package.Type -> file
+    // Pass one: what this repository declares, across BOTH JVM languages.
+    // Java and Kotlin compile to one namespace and import each other freely,
+    // so an index of .java alone reports a real edge to a Kotlin type as a
+    // missing type. Built from `package` statements rather than from directory
+    // layout, because the declaration is what the compiler reads and the
+    // layout is only a convention.
+    const { declaredIn, typeAt, unreadable } = jvmDeclarations(repoRoot, all);
+    gaps.push(...unreadable.filter((entry) => JAVA_EXTENSIONS.includes(path.extname(entry.path))));
     const sources = new Map();    // file -> stripped source
     for (const rel of inventory) {
       let source;
@@ -153,14 +157,6 @@ export const javaAdapter = {
       }
       const code = stripNonCode(source);
       sources.set(rel, code);
-      const declared = declaredPackage(code);
-      if (!declared) continue; // the default package: legal, and names nothing
-      if (!declaredIn.has(declared)) declaredIn.set(declared, []);
-      declaredIn.get(declared).push(rel);
-      // A file named Thing.java declares the public type Thing. That is not a
-      // convention -- the compiler requires it of every public type.
-      const base = path.basename(rel, '.java');
-      typeAt.set(`${declared}.${base}`, rel);
     }
 
     for (const rel of inventory) {
