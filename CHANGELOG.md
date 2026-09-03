@@ -38,6 +38,15 @@ is zero for that reason rather than because of its path. On the reported
 repository it drops every fixture to zero and leaves exactly the nine
 real modules.
 
+A third of the budget, at most, is kept for what the drawn system rests
+on -- reserved against what is actually there, never a fixed slice, so a
+system with three dependencies gives up three slots and one with none
+gives up nothing. Ranking the system first without that went too far in
+both directions: fastapi’s own modules filled all twelve slots and the
+diagram stopped showing that FastAPI is built on Starlette, while a
+repository whose packages mostly import npm rather than each other drew
+two modules and ten dependencies. Cap-not-quota applies to context too.
+
 Dependencies come next, but only where something already drawn uses one.
 `fastapi` fails that test; `anthropic`, `openai` and `fastmcp` pass it.
 That is the honest reading of the same evidence: nothing in that system

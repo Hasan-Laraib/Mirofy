@@ -289,6 +289,79 @@ test('[1.18] the planner itself stops at the system, rather than filling the bud
     + `${JSON.stringify(plan.select)}`);
 });
 
+test('[1.18] a system that could fill the budget still shows what it rests on', async () => {
+  // Ranking the system first is right, and on its own it went too far. Given
+  // twelve slots, fastapi's own modules filled all twelve and the diagram no
+  // longer showed that FastAPI is built on Starlette -- one of the more useful
+  // things about FastAPI, and visible in the evidence the whole time.
+  const { deterministicPlanner } = await import('../../compile/src/planners/deterministic.mjs');
+  const component = (id, kind) => ({
+    id, kind, labels: [id], sources: [], evidenceRefs: [],
+    provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const relationship = (id, from, to) => ({
+    id, kind: 'relationship', from, to, labels: [], sources: [],
+    evidenceRefs: [], provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  // Eight modules in a chain -- more than enough to take every slot -- and one
+  // dependency that the first of them uses.
+  const ids = Array.from({ length: 8 }, (_, i) => `m${i}`);
+  const chained = {
+    schemaVersion: 1,
+    components: [...ids.map((id) => component(id, 'module')), component('runtime', 'external')],
+    relationships: [
+      ...ids.slice(1).map((id, i) => relationship(`r${i}`, ids[i], id)),
+      relationship('r-dep', 'm0', 'runtime'),
+    ],
+    boundaries: [],
+    provenanceSummary: { 'statically-derived': 9 },
+  };
+
+  const plan = deterministicPlanner.plan(chained, { budget: 8 });
+  assert.ok(plan.select.includes('runtime'),
+    `what the system rests on must survive a system that could fill the budget: `
+    + `${JSON.stringify(plan.select)}`);
+  const modules = plan.select.filter((id) => id !== 'runtime');
+  assert.ok(modules.length >= 6,
+    `the system must still dominate its own diagram: ${JSON.stringify(plan.select)}`);
+});
+
+test('[1.18] a small system is not padded out with its dependency list', async () => {
+  // The other direction, and a real repository: packages that mostly import
+  // npm rather than each other. Letting dependencies run to the budget drew
+  // two modules and ten dependencies -- a diagram of somebody else's code.
+  const { deterministicPlanner } = await import('../../compile/src/planners/deterministic.mjs');
+  const component = (id, kind) => ({
+    id, kind, labels: [id], sources: [], evidenceRefs: [],
+    provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const relationship = (id, from, to) => ({
+    id, kind: 'relationship', from, to, labels: [], sources: [],
+    evidenceRefs: [], provenance: 'statically-derived', metadata: {}, authoredId: false,
+  });
+  const deps = Array.from({ length: 20 }, (_, i) => `dep${String(i).padStart(2, '0')}`);
+  const lopsided = {
+    schemaVersion: 1,
+    components: [
+      component('one', 'module'), component('two', 'module'),
+      ...deps.map((id) => component(id, 'external')),
+    ],
+    relationships: [
+      relationship('r-sys', 'one', 'two'),
+      ...deps.map((id, i) => relationship(`rd${i}`, 'one', id)),
+    ],
+    boundaries: [],
+    provenanceSummary: { 'statically-derived': 21 },
+  };
+
+  const plan = deterministicPlanner.plan(lopsided, { budget: 12 });
+  assert.ok(plan.select.length <= 6,
+    `two modules and twenty dependencies should not become a twelve-box `
+    + `diagram: ${JSON.stringify(plan.select)}`);
+  assert.ok(plan.select.includes('one') && plan.select.includes('two'),
+    'both modules of the system belong in it');
+});
+
 test('[1.18] a repository with no internal edges still gets a view', async () => {
   // The ranking above sees nothing in a single-module repository, or in a set
   // of files with no dependencies between them. An empty diagram would be a

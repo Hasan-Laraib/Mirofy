@@ -104,14 +104,42 @@ export const deterministicPlanner = {
     const byRank = (rankOf) => (a, b) => (rankOf.get(b.id) - rankOf.get(a.id))
       || a.id.localeCompare(b.id);
 
-    // The system first, ranked by how much of it connects to the rest of it.
-    const system = [...model.components]
+    // The system, ranked by how much of it connects to the rest of it.
+    const ranked = [...model.components]
       .filter((component) => internalDegree.get(component.id) > 0)
       .sort(byRank(internalDegree))
-      .slice(0, request.budget)
       .map((component) => component.id);
 
-    const selected = [...system];
+    /** Dependencies of `ids` -- what those components rest on. */
+    const dependenciesOf = (ids) => {
+      const near = new Set();
+      for (const relationship of model.relationships) {
+        if (ids.has(relationship.from)) near.add(relationship.to);
+        if (ids.has(relationship.to)) near.add(relationship.from);
+      }
+      return [...model.components]
+        .filter((component) => component.kind === 'external')
+        .filter((component) => near.has(component.id) && !ids.has(component.id))
+        .sort(byRank(degree))
+        .map((component) => component.id);
+    };
+
+    // Room is kept for what the system rests on, up to a third of the budget.
+    //
+    // Ranking the system first is right, and on its own it went too far: given
+    // twelve slots fastapi's own modules filled all of them and the diagram no
+    // longer showed that FastAPI is built on Starlette, which is one of the
+    // more useful things about FastAPI. A repository whose packages mostly
+    // import npm rather than each other went the other way -- two modules and
+    // ten dependencies.
+    //
+    // Reserved against what is actually THERE, never a fixed slice: a system
+    // with three dependencies gives up three slots, not four, and one with
+    // none gives up nothing.
+    const wanted = dependenciesOf(new Set(ranked.slice(0, request.budget)));
+    const reserve = Math.min(wanted.length, Math.floor(request.budget / 3));
+
+    const selected = ranked.slice(0, Math.max(0, request.budget - reserve));
     const taken = new Set(selected);
 
     // Then the dependencies the drawn system actually uses.
@@ -119,22 +147,29 @@ export const deterministicPlanner = {
     // Adjacency to something already selected is the test, not degree. On the
     // repository that prompted this, `fastapi` has degree 43 and every one of
     // those edges comes from a benchmark fixture -- nothing in the system
-    // imports it. Adding it on degree alone would put a box on the canvas
-    // that the drawn system has no relationship with, and then the compiler
-    // would have to strand it back out again.
-    const adjacent = new Set();
-    for (const relationship of model.relationships) {
-      if (taken.has(relationship.from)) adjacent.add(relationship.to);
-      if (taken.has(relationship.to)) adjacent.add(relationship.from);
-    }
-    for (const component of [...model.components].sort(byRank(degree))) {
-      if (selected.length >= request.budget) break;
-      if (taken.has(component.id) || component.kind !== 'external') continue;
-      if (!adjacent.has(component.id)) continue;
-      selected.push(component.id);
-      taken.add(component.id);
+    // imports it. Adding it on degree alone would put a box on the canvas the
+    // drawn system has no relationship with, which the compiler would then
+    // have to strand back out again.
+    // Capped at the reserve, not run to the budget. A repository whose
+    // packages mostly import npm rather than each other has a small system and
+    // a large dependency list, and letting the second fill the canvas produces
+    // a diagram of somebody else's code: two modules and ten dependencies on
+    // one real repository. Cap not quota applies to context as well.
+    let placed = 0;
+    for (const id of dependenciesOf(taken)) {
+      if (selected.length >= request.budget || placed >= reserve) break;
+      placed += 1;
+      selected.push(id);
+      taken.add(id);
     }
 
+    // Anything the reserve did not need goes back to the system.
+    for (const id of ranked) {
+      if (selected.length >= request.budget) break;
+      if (taken.has(id)) continue;
+      selected.push(id);
+      taken.add(id);
+    }
     // THE BUDGET IS A CAP, NOT A QUOTA. Nine good boxes out of twelve is a
     // better answer than nine plus three arbitrary ones, and filling the
     // remainder with whatever ranked next is precisely the complaint that
