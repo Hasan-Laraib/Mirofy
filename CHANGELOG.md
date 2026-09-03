@@ -37,7 +37,7 @@ subdirectory" test say yes, so the search went to `<crate>/./lib.rs` --
 a path no walk ever produces.
 
 And a crate at the repository ROOT has an empty base, which joined the
-ordinary way produced `/store.rs`: an absolute path, equally
+ordinary way produced a leading-slash absolute path, equally
 unproduceable. Both loops now share one helper, so they cannot disagree
 about it.
 
