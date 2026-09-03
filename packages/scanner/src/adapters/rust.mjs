@@ -136,16 +136,27 @@ export function cargoCrates(repoRoot, files) {
     // name of its own, and `name` under [dependencies.foo] is a different key.
     let section = '';
     let name = null;
+    // WHERE THE SOURCES ARE, when the manifest says so. `src/` is only the
+    // default: `[lib] path = "lib.rs"` puts them in the crate directory itself,
+    // and denoland/deno does exactly that for its main crate and several more.
+    // Assuming `src/` produced 3,896 gaps -- 27% of every fact in the
+    // repository -- against directories that were never there.
+    const declared = [];
     for (const line of text.split(/\r?\n/)) {
-      const header = line.match(/^\s*\[([^\]]+)\]/);
+      const header = line.match(/^\s*\[+([^\]]+)\]+/);
       if (header) { section = header[1].trim(); continue; }
-      if (section !== 'package') continue;
-      const match = line.match(/^\s*name\s*=\s*"([^"]+)"/);
-      if (match) { name = match[1]; break; }
+      if (section === 'package') {
+        const match = line.match(/^\s*name\s*=\s*"([^"]+)"/);
+        if (match && !name) name = match[1];
+        continue;
+      }
+      if (section !== 'lib' && section !== 'bin') continue;
+      const target = line.match(/^\s*path\s*=\s*"([^"]+)"/);
+      if (target && !declared.includes(target[1])) declared.push(target[1]);
     }
     if (!name) continue;
     const dir = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
-    crates.push({ name: crateName(name), dir, manifest: rel });
+    crates.push({ name: crateName(name), dir, manifest: rel, declared });
   }
   return crates.sort((left, right) => right.dir.length - left.dir.length);
 }
@@ -164,12 +175,22 @@ export function cargoCrates(repoRoot, files) {
  * @param {string} rel file path relative to the repository
  * @param {string} crateDir the crate's directory
  */
-export function targetOf(rel, crateDir) {
+export function targetOf(rel, crateDir, declared = []) {
   const prefix = crateDir ? `${crateDir}/` : '';
   const inside = crateDir ? rel.slice(crateDir.length + 1) : rel;
   for (const dir of ['tests', 'benches', 'examples']) {
     if (!inside.startsWith(`${dir}/`)) continue;
     return { base: `${prefix}${dir}`, roots: [] };
+  }
+  // A declared `path` is relative to the crate directory, so `lib.rs` means
+  // the crate directory IS the source root. Anything under a subdirectory --
+  // the ordinary `src/lib.rs` -- names that subdirectory instead.
+  const fromManifest = declared.filter((p) => !p.includes('/'));
+  if (fromManifest.length) return { base: crateDir, roots: fromManifest };
+  const nested = declared.find((p) => p.includes('/'));
+  if (nested) {
+    const dir = nested.slice(0, nested.lastIndexOf('/'));
+    return { base: `${prefix}${dir}`, roots: [nested.slice(dir.length + 1)] };
   }
   return { base: `${prefix}src`, roots: ['lib.rs', 'main.rs'] };
 }
@@ -239,6 +260,29 @@ export const rustAdapter = {
      * The tail of a `use` may be a type or a function rather than a module, and
      * nothing in the specifier says which.
      */
+    // Which modules a file declares INLINE, read on demand and remembered.
+    //
+    // `pub(crate) mod sys { ... }` in a crate root means `crate::sys::CliSys`
+    // lives in that same file, and no `sys.rs` exists anywhere. denoland/deno
+    // does this and the peel below cannot see it: it looks for files, and this
+    // module is not one.
+    const inlineCache = new Map();
+    function inlineModsOf(file) {
+      if (inlineCache.has(file)) return inlineCache.get(file);
+      const names = new Set();
+      try {
+        const code = stripNonCode(fs.readFileSync(path.join(repoRoot, file), 'utf8'));
+        for (const line of code.split(/\r?\n/)) {
+          const match = line.match(/^\s*(?:pub(?:\([^)]*\))?\s+)?mod\s+(\w+)\s*{/);
+          if (match) names.add(match[1]);
+        }
+      } catch {
+        // Unreadable here is reported where the file is scanned.
+      }
+      inlineCache.set(file, names);
+      return names;
+    }
+
     function resolveModule(base, roots, segments) {
       // The crate root is only an answer for `use crate::Item` -- one name,
       // which is an item declared in lib.rs. For anything deeper some file has
@@ -258,6 +302,28 @@ export const rustAdapter = {
           if (files.has(candidate)) return candidate;
         }
       }
+      // The peel found no file. Before calling it a gap, ask the deepest
+      // ancestor that DOES exist whether it declares the next name inline.
+      for (let take = segments.length - 1; take >= 0; take -= 1) {
+        const prefix = segments.slice(0, take);
+        const joined = prefix.length ? `${base}/${prefix.join('/')}` : base;
+        const candidates = prefix.length
+          ? [`${joined}.rs`, `${joined}/mod.rs`]
+          : roots.map((root) => `${base}/${root}`);
+        // EVERY candidate at this level, not just the first that exists. A
+        // crate with both a bin and a lib has two roots, and deno declares the
+        // bin first while the inline `mod sys` is in the lib -- checking only
+        // the first left 43 of its uses unresolved.
+        let found = null;
+        let sawFile = false;
+        for (const candidate of candidates) {
+          if (!files.has(candidate)) continue;
+          sawFile = true;
+          if (inlineModsOf(candidate).has(segments[take])) { found = candidate; break; }
+        }
+        if (found) return found;
+        if (sawFile) break;
+      }
       return null;
     }
 
@@ -270,7 +336,7 @@ export const rustAdapter = {
         continue;
       }
       const owner = crateOf(rel);
-      const target = owner ? targetOf(rel, owner.dir) : null;
+      const target = owner ? targetOf(rel, owner.dir, owner.declared) : null;
       const here = target ? moduleOf(rel, target.base) : [];
       const lines = stripNonCode(source).split(/\r?\n/);
 
@@ -353,8 +419,8 @@ export const rustAdapter = {
           // anything else came from the registry.
           const sibling = byName.get(crateName(head));
           if (sibling && sibling !== owner) {
-            const file = resolveModule(`${sibling.dir ? `${sibling.dir}/` : ''}src`,
-              ['lib.rs', 'main.rs'], segments.slice(1));
+            const siblingTarget = targetOf(`${sibling.dir}/x.rs`, sibling.dir, sibling.declared);
+            const file = resolveModule(siblingTarget.base, siblingTarget.roots, segments.slice(1));
             record(file ?? `package:${crateName(head)}`);
             continue;
           }

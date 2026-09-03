@@ -33,7 +33,14 @@ const STRIP = { '.java': stripJava, '.kt': stripKotlin, '.kts': stripKotlin };
  * type it holds and may declare several -- the one assumption Java allows and
  * Kotlin does not.
  */
-const KOTLIN_DECLARATION = /^\s*(?:@\w+\s+)*(?:public\s+|internal\s+|private\s+|abstract\s+|open\s+|sealed\s+|data\s+|value\s+|inner\s+|annotation\s+|enum\s+)*(?:class|interface|object|typealias)\s+([A-Za-z_]\w*)/;
+// Every modifier Kotlin allows before a declaration, `fun` included.
+//
+// `fun interface Dns { }` is a SAM interface and ordinary Kotlin. Leaving
+// `fun` out of the list meant okhttp3.Dns, okhttp3.Interceptor and
+// leakcanary's EventListener were not in the type index at all -- 35 of
+// okhttp's 109 gaps and 27 of leakcanary's 134, against types declared in
+// the very repositories importing them.
+const KOTLIN_DECLARATION = /^\s*(?:@\w+\s+)*(?:(?:public|private|protected|internal|abstract|final|open|sealed|data|value|inner|annotation|enum|fun|expect|actual|external|inline|companion)\s+)*(?:class|interface|object|typealias)\s+([A-Za-z_]\w*)/;
 
 const PACKAGE_LINE = /^\s*package\s+([\w.]+)\s*;?\s*$/;
 

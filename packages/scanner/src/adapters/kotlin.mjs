@@ -104,7 +104,14 @@ export function declaredPackage(code) {
   return null;
 }
 
-const DECLARATION = /^\s*(?:@\w+\s+)*(?:public\s+|internal\s+|private\s+|abstract\s+|open\s+|sealed\s+|data\s+|value\s+|inner\s+|annotation\s+|enum\s+)*(?:class|interface|object|typealias)\s+([A-Za-z_]\w*)/;
+// Every modifier Kotlin allows before a declaration, `fun` included.
+//
+// `fun interface Dns { }` is a SAM interface and ordinary Kotlin. Leaving
+// `fun` out of the list meant okhttp3.Dns, okhttp3.Interceptor and
+// leakcanary's EventListener were not in the type index at all -- 35 of
+// okhttp's 109 gaps and 27 of leakcanary's 134, against types declared in
+// the very repositories importing them.
+const DECLARATION = /^\s*(?:@\w+\s+)*(?:(?:public|private|protected|internal|abstract|final|open|sealed|data|value|inner|annotation|enum|fun|expect|actual|external|inline|companion)\s+)*(?:class|interface|object|typealias)\s+([A-Za-z_]\w*)/;
 
 /**
  * Every type a Kotlin file declares at the top level.
@@ -149,6 +156,25 @@ export function externalPackage(imported) {
 /** Is this import shipped with Kotlin or the JVM? */
 export function isBuiltin(imported) {
   return BUILTIN_PREFIXES.some((prefix) => String(imported).startsWith(prefix));
+}
+
+/**
+ * Does this name look like a TYPE rather than a top-level constant?
+ *
+ * Both start with a capital. A Kotlin type is PascalCase (`Dns`,
+ * `EventListener`) and a top-level constant is SCREAMING_SNAKE (`USER_AGENT`,
+ * `TYPE_A`, `UTC`) -- and okhttp imports plenty of the latter, which were
+ * looked up in the type index, not found, and reported as gaps.
+ *
+ * A type genuinely named `URL` is read as a constant and resolves to its
+ * package rather than its file. That is a less precise citation, not a wrong
+ * component, which is the right way round for a rule that has to guess.
+ *
+ * @param {string} name
+ */
+export function looksLikeType(name) {
+  const text = String(name);
+  return /^[A-Z]/.test(text) && !/^[A-Z0-9_]+$/.test(text);
 }
 
 const IMPORT_LINE = /^\s*import\s+([\w.]+(?:\.\*)?)(?:\s+as\s+\w+)?\s*;?\s*$/;
@@ -227,7 +253,7 @@ export const kotlinAdapter = {
             // A lowercase TAIL -- a top-level function -- needs no peel at all:
             // the default package below already names it, which is why removing
             // this branch changes no test and it is therefore not written.
-            if (!/^[A-Z]/.test(after)) continue;
+            if (!looksLikeType(after)) continue;
             asPackage = candidate;
             outermost = parts.slice(0, cut + 1).join('.');
             break;
@@ -245,7 +271,7 @@ export const kotlinAdapter = {
           if (!owner.length) return;
           // A top-level function, or a wildcard: the package is the target, and
           // any file declaring it is a citation a reader can open.
-          if (wildcard || !/^[A-Z]/.test(parts[parts.length - 1])) {
+          if (wildcard || !looksLikeType(parts[parts.length - 1])) {
             record(owner[0]);
             return;
           }

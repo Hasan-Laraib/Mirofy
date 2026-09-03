@@ -17,6 +17,51 @@ stops being one.
 
 ## 2026-09-03
 
+### Verified on repositories where Rust and Kotlin are the PRIMARY language
+
+The first verification was not one. Rust had been run against
+vercel/next.js and Kotlin against spring-projects/spring-boot, and in
+both those languages sit beside a much larger JavaScript or Java
+codebase. Neither exercised a repository built in the language.
+
+Four that are -- denoland/deno, tokio-rs/tokio, square/okhttp and
+square/leakcanary -- found four defects in one sitting.
+
+**`src/` is only a default.** `[lib] path = "lib.rs"` puts a crate's
+sources in its own directory, and deno does that for its main crate and
+several more. Assuming `src/` produced **3,896 gaps on deno, 27% of every
+fact in the repository**, against directories that were never there. The
+manifest is read now.
+
+**An inline module is not a file.** `pub(crate) mod sys { ... }` in a
+crate root means `crate::sys::CliSys` lives in that same file and no
+`sys.rs` exists anywhere. The peel looks for files and cannot see one, so
+before calling it a gap it now asks the deepest ancestor that does exist
+whether it declares the name inline.
+
+That fix landed with a stray `break` left over from the code it
+replaced, which exited the search after the first level and never reached
+the crate root. It looked correct and moved four gaps out of 323 -- the
+kind of wrong that reads as right until the numbers are checked.
+
+**`fun interface` is ordinary Kotlin.** Leaving `fun` out of the modifier
+list kept `okhttp3.Dns`, `okhttp3.Interceptor` and leakcanary's
+`EventListener` out of the type index entirely, and every import of them
+was recorded as a missing type -- in the repositories that declare them.
+
+**A SCREAMING_SNAKE constant is not a type.** Both start with a capital.
+`USER_AGENT`, `TYPE_A` and `UTC` were looked up in the type index, not
+found, and reported as gaps. A type genuinely named `URL` now resolves to
+its package rather than its file: a less precise citation, not a wrong
+component, which is the right way round for a rule that has to guess.
+
+After all four: **okhttp 6,802 facts with 2 gaps** (was 109),
+**leakcanary 6,154 with 3** (was 134), **deno 18,080 with 277** (was
+3,896), **tokio 6,436 with 49**. The long tail that remains is `#[path]`
+attributes, cfg-gated modules and re-exports -- 1.5% on deno, 0.8% on
+tokio, each recorded with its line.
+
+
 ### Rust and Kotlin adapters
 
 Six languages now. Both were named in the coverage report as the largest

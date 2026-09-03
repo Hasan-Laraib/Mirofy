@@ -13,7 +13,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import {
-  kotlinAdapter, stripNonCode, declaredTypes, declaredPackage, isBuiltin,
+  kotlinAdapter, stripNonCode, declaredTypes, declaredPackage, isBuiltin, looksLikeType,
 } from '../../scanner/src/adapters/kotlin.mjs';
 import { runAdapter } from '../../scanner/src/adapter.mjs';
 
@@ -75,12 +75,18 @@ test('[2.21] declaredTypes reads the shapes Kotlin actually uses', () => {
     'object F',
     'interface G',
     'typealias H = String',
+    // `fun interface` is a SAM interface and ordinary Kotlin. Leaving `fun`
+    // out of the modifier list kept okhttp3.Dns, okhttp3.Interceptor and
+    // leakcanary EventListener out of the type index entirely.
+    'fun interface J',
+    'value class K(val x: Int)',
+    'expect class L',
     'internal open class I',
     '  class NotTopLevel',
     'fun notAType() {}',
   ].join(NL);
   const found = declaredTypes(code);
-  for (const name of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']) {
+  for (const name of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']) {
     assert.ok(found.includes(name), `${name} should be a declared type: ${found.join(', ')}`);
   }
   assert.ok(!found.includes('notAType'), 'a function is not a type');
@@ -113,6 +119,27 @@ test('[2.21] Kotlin and the JVM are named rather than drawn', async () => {
   assert.deepEqual(facts.map((fact) => fact.object).sort(),
     ['package:kotlin:kotlin.collections', 'package:kotlin:kotlinx.coroutines',
       'package:org.springframework.boot']);
+});
+
+test('[2.21] a SCREAMING_SNAKE constant is not a type', async () => {
+  // Both start with a capital. A Kotlin type is PascalCase and a top-level
+  // constant is SCREAMING_SNAKE, and okhttp imports plenty of the latter --
+  // `USER_AGENT`, `TYPE_A`, `UTC` -- which were looked up in the type index,
+  // not found, and reported as gaps. 31 of its 56 remaining ones.
+  assert.equal(looksLikeType('Dns'), true);
+  assert.equal(looksLikeType('EventListener'), true);
+  assert.equal(looksLikeType('USER_AGENT'), false);
+  assert.equal(looksLikeType('UTC'), false, 'no underscore, still a constant');
+  assert.equal(looksLikeType('helper'), false);
+
+  const repoRoot = makeRepo({
+    'internal/Util.kt': ['package com.acme.internal', '', 'const val USER_AGENT = "x"', ''].join(NL),
+    'App.kt': ['package com.acme', '', 'import com.acme.internal.USER_AGENT', '', 'class App', ''].join(NL),
+  });
+  const { facts, gaps } = await runAdapter(kotlinAdapter, { repoRoot, revision: REVISION });
+  assert.deepEqual(gaps, [],
+    `a top-level constant is not a missing type: ${JSON.stringify(gaps)}`);
+  assert.deepEqual(facts.map((fact) => fact.object), ['internal/Util.kt']);
 });
 
 test('[2.21] a top-level function import resolves to its package', async () => {
