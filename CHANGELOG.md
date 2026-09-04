@@ -19,6 +19,8 @@ stops being one.
 
 ### Three more Rust defects, from reading deno's own diagram
 
+Released as 0.5.1.
+
 Looking at the picture rather than the number found what the number
 hid.
 
