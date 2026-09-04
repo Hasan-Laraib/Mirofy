@@ -1,0 +1,552 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Gutter routing",
+    "subtitle": "a skip-level edge in a full column"
+  },
+  "components": [
+    {
+      "id": "c1",
+      "type": "module",
+      "label": "main/…/autoconfigure",
+      "pos": [
+        380,
+        130
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c2",
+      "type": "module",
+      "label": "main/…/boot",
+      "pos": [
+        680,
+        130
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c3",
+      "type": "module",
+      "label": "main/…/context",
+      "pos": [
+        380,
+        230
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c4",
+      "type": "module",
+      "label": "main/…/properties",
+      "pos": [
+        80,
+        80
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c5",
+      "type": "module",
+      "label": "main/…/condition",
+      "pos": [
+        380,
+        330
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c6",
+      "type": "module",
+      "label": "main/…/runner",
+      "pos": [
+        80,
+        180
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c7",
+      "type": "module",
+      "label": "main/…/ssl",
+      "pos": [
+        80,
+        280
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c8",
+      "type": "module",
+      "label": "main/…/resources",
+      "pos": [
+        80,
+        380
+      ],
+      "size": [
+        180,
+        60
+      ]
+    },
+    {
+      "id": "c9",
+      "type": "external",
+      "label": "org.springframework.context",
+      "pos": [
+        680,
+        230
+      ],
+      "size": [
+        180,
+        60
+      ],
+      "source_count": 4370
+    },
+    {
+      "id": "c10",
+      "type": "external",
+      "label": "org.jspecify.annotations",
+      "pos": [
+        680,
+        330
+      ],
+      "size": [
+        180,
+        60
+      ],
+      "source_count": 2837
+    },
+    {
+      "id": "c11",
+      "type": "external",
+      "label": "org.junit.jupiter",
+      "pos": [
+        980,
+        180
+      ],
+      "size": [
+        180,
+        60
+      ],
+      "source_count": 3992
+    },
+    {
+      "id": "c12",
+      "type": "external",
+      "label": "org.springframework.beans",
+      "pos": [
+        980,
+        280
+      ],
+      "size": [
+        180,
+        60
+      ],
+      "source_count": 1944
+    }
+  ],
+  "connections": [
+    {
+      "from": "c1",
+      "to": "c10"
+    },
+    {
+      "from": "c1",
+      "to": "c12",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          620,
+          160
+        ],
+        [
+          620,
+          474
+        ],
+        [
+          920,
+          474
+        ],
+        [
+          920,
+          310
+        ]
+      ]
+    },
+    {
+      "from": "c1",
+      "to": "c5",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [
+        [
+          348,
+          160
+        ],
+        [
+          348,
+          360
+        ]
+      ]
+    },
+    {
+      "from": "c1",
+      "to": "c9"
+    },
+    {
+      "from": "c1",
+      "to": "c2"
+    },
+    {
+      "from": "c5",
+      "to": "c10"
+    },
+    {
+      "from": "c5",
+      "to": "c12",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          620,
+          360
+        ],
+        [
+          620,
+          474
+        ],
+        [
+          920,
+          474
+        ],
+        [
+          920,
+          310
+        ]
+      ]
+    },
+    {
+      "from": "c5",
+      "to": "c9"
+    },
+    {
+      "from": "c5",
+      "to": "c1",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [
+        [
+          322,
+          360
+        ],
+        [
+          322,
+          160
+        ]
+      ]
+    },
+    {
+      "from": "c3",
+      "to": "c10"
+    },
+    {
+      "from": "c3",
+      "to": "c12",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          620,
+          260
+        ],
+        [
+          620,
+          498
+        ],
+        [
+          920,
+          498
+        ],
+        [
+          920,
+          310
+        ]
+      ]
+    },
+    {
+      "from": "c3",
+      "to": "c9"
+    },
+    {
+      "from": "c3",
+      "to": "c2"
+    },
+    {
+      "from": "c3",
+      "to": "c11",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          620,
+          260
+        ],
+        [
+          620,
+          498
+        ],
+        [
+          920,
+          498
+        ],
+        [
+          920,
+          210
+        ]
+      ]
+    },
+    {
+      "from": "c6",
+      "to": "c10",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          210
+        ],
+        [
+          320,
+          522
+        ],
+        [
+          620,
+          522
+        ],
+        [
+          620,
+          360
+        ]
+      ]
+    },
+    {
+      "from": "c6",
+      "to": "c12",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          210
+        ],
+        [
+          320,
+          522
+        ],
+        [
+          920,
+          522
+        ],
+        [
+          920,
+          310
+        ]
+      ]
+    },
+    {
+      "from": "c6",
+      "to": "c3"
+    },
+    {
+      "from": "c6",
+      "to": "c9",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          210
+        ],
+        [
+          320,
+          546
+        ],
+        [
+          620,
+          546
+        ],
+        [
+          620,
+          260
+        ]
+      ]
+    },
+    {
+      "from": "c2",
+      "to": "c10",
+      "fromSide": "left",
+      "toSide": "left",
+      "via": [
+        [
+          596,
+          160
+        ],
+        [
+          596,
+          360
+        ]
+      ]
+    },
+    {
+      "from": "c2",
+      "to": "c12"
+    },
+    {
+      "from": "c2",
+      "to": "c9"
+    },
+    {
+      "from": "c4",
+      "to": "c10",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          110
+        ],
+        [
+          320,
+          546
+        ],
+        [
+          620,
+          546
+        ],
+        [
+          620,
+          360
+        ]
+      ]
+    },
+    {
+      "from": "c4",
+      "to": "c12",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          110
+        ],
+        [
+          320,
+          474
+        ],
+        [
+          920,
+          474
+        ],
+        [
+          920,
+          310
+        ]
+      ]
+    },
+    {
+      "from": "c4",
+      "to": "c9",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          110
+        ],
+        [
+          320,
+          474
+        ],
+        [
+          620,
+          474
+        ],
+        [
+          620,
+          260
+        ]
+      ]
+    },
+    {
+      "from": "c7",
+      "to": "c10",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          310
+        ],
+        [
+          320,
+          498
+        ],
+        [
+          620,
+          498
+        ],
+        [
+          620,
+          360
+        ]
+      ]
+    },
+    {
+      "from": "c8",
+      "to": "c11",
+      "fromSide": "right",
+      "toSide": "left",
+      "via": [
+        [
+          320,
+          410
+        ],
+        [
+          320,
+          498
+        ],
+        [
+          920,
+          498
+        ],
+        [
+          920,
+          210
+        ]
+      ]
+    }
+  ]
+}

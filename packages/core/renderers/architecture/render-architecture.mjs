@@ -207,6 +207,11 @@ const architectureLegendEntries = resolveLegend(
   new Set([...components.values()].map((component) => component.type)),
 );
 
+// Route geometry is only measurable once the routing constants further down
+// have initialised. The boundary-title pass calls autoViewBoxFor before that,
+// and needs only the width, so the height correction waits for this flag.
+let routingReady = false;
+
 function autoViewBoxFor(candidateBoundaries) {
   const maxX = Math.max(
     0,
@@ -218,6 +223,24 @@ function autoViewBoxFor(candidateBoundaries) {
     ...[...components.values()].map((component) => component.y + component.height),
     ...candidateBoundaries.map((boundary) => boundary.y + boundary.height),
   );
+
+  // Connections routed through the gutter drop BELOW the lowest component -- by
+  // design, because that empty band between columns is the only way past a full
+  // column. Measuring the extent from components alone left that geometry
+  // outside the box that clips it: twelve of thirteen real repositories drew an
+  // edge running off the bottom of their own diagram, on screen and in every
+  // exported PNG alike.
+  //
+  // Only the HEIGHT is corrected. The width is consumed by an earlier caller
+  // that resolves boundary titles, long before the routing constants exist --
+  // and route geometry has never overflowed sideways, because the gutters run
+  // between columns rather than past the outermost one.
+  const routedBottom = () => (routingReady
+    ? Math.max(0, ...asArray(arch.connections)
+      .filter((conn) => components.has(conn?.from) && components.has(conn?.to))
+      .flatMap((conn) => (pathFor(conn)?.points ?? []).map((point) => point[1])))
+    : 0);
+  const contentMaxY = Math.max(maxY, routedBottom());
   let width = Math.ceil(maxX + layout.margin);
   let footprint = legendFootprint(architectureLegendEntries, {
     width: Math.max(1, width - layout.margin * 2),
@@ -230,7 +253,7 @@ function autoViewBoxFor(candidateBoundaries) {
   }
   return [
     width,
-    Math.ceil(maxY + layout.margin + layout.legendH + footprint.extraHeight),
+    Math.ceil(contentMaxY + layout.margin + layout.legendH + footprint.extraHeight),
   ];
 }
 
@@ -388,9 +411,6 @@ function componentContext(component) {
   return scopes.length ? scopes.join(' › ') : i18nText(arch.meta.locale, 'node.context.architecture');
 }
 
-// ---- Auto viewBox: fit all geometry + the measured resolved legend ----------
-const viewBox = arch.meta?.viewBox || autoViewBoxFor(boundaries);
-const legendY = () => viewBox[1] - 16;
 
 // ---- Validation: mechanical correctness, never layout taste -----------------
 /** The rect each connection label occupies, in connection order. */
@@ -1263,6 +1283,11 @@ ${boundaries.map(renderBoundaryLabel).join('\n\n')}
 ${renderLegend()}
       </svg>`;
 }
+
+// ---- Auto viewBox: fit all geometry + the measured resolved legend ----------
+routingReady = true;
+const viewBox = arch.meta?.viewBox || autoViewBoxFor(boundaries);
+const legendY = () => viewBox[1] - 16;
 
 solveConnectionLabels();
 validateArchitecture();

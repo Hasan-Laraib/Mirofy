@@ -1,6 +1,6 @@
 {
   "name": "mirofy-cli",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "type": "module",
   "description": "Repository diagrams that cite their sources. Every edge names the file, line and commit it came from, and every file it could not read is listed by name. Reads JavaScript, TypeScript, Python, Go, Java, Rust and Kotlin. Zero dependencies, one self-contained HTML file.",
   "license": "MIT",

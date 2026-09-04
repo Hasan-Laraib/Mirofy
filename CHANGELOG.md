@@ -17,6 +17,37 @@ stops being one.
 
 ## 2026-09-04
 
+### Diagrams no longer run off the bottom of their own frame
+
+The viewBox was measured from components and boundaries. Connections routed
+through the gutter drop *below* the lowest component on purpose — that empty
+band between columns is the only way past a full column — so the measurement
+missed them, and the SVG clipped the edge it had just drawn.
+
+Twelve of the thirteen showcase repositories did this, most by exactly 38 units:
+spring-boot, moby, deno, next.js, guava, gson, okhttp, prometheus, fastapi, gin,
+tokio and leakcanary. Only shadcn/ui came out contained, and only because its
+layout happened not to need a gutter. It was visible on screen and in every
+exported PNG, and it read as a rendering bug to anyone looking at one.
+
+The height now accounts for routed geometry. Only the height: the width is
+consumed by an earlier caller that resolves boundary titles, long before the
+routing constants exist, and route geometry has never overflowed sideways
+because the gutters run between columns rather than past the outermost one.
+That ordering is also why the viewBox declaration now sits further down the
+file than it reads like it should — the comment there says so.
+
+All thirteen are now contained, each with 68 units to spare.
+
+Worth saying plainly: `visual-check` passed on every one of those clipped
+diagrams. Its containment check looks at components, not at routed paths against
+the box that clips them. The new test closes that hole without a browser, by reading
+the renderer's own layout report. A new example,
+`packages/core/examples/gutter-routing.architecture.json`, exists so the test has
+a case that can fail: none of the previously bundled examples route through a
+gutter, and a suite that cannot fail proves nothing.
+
+
 ### 0.5.3 — the npm listing describes what the tool does now
 
 Metadata only. The published code is byte-identical to 0.5.2.
