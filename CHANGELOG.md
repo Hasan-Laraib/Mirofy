@@ -17,6 +17,19 @@ stops being one.
 
 ## 2026-09-04
 
+### 0.5.3 — the npm listing describes what the tool does now
+
+Metadata only. The published code is byte-identical to 0.5.2.
+
+The keywords named five diagram types and not one of the six languages Mirofy
+reads, so somebody searching npm for "go dependency graph" or "rust import
+graph" — most of the audience — could not find it. The description said "Five
+diagram types" and never mentioned that it maps a repository at all.
+
+Both now say what it does. This is a listing change, not a behaviour change, and
+it gets a version because npm has no other way to publish one.
+
+
 ### The audit gate stopped conflating an outage with a clean bill of health
 
 `check:audit` was `npm audit --audit-level=high`, which exits non-zero for two
