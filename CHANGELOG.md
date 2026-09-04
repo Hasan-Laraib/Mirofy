@@ -15,6 +15,20 @@ stops being one.
 
 ---
 
+## 2026-09-04
+
+### 0.5.1
+
+Released as 0.5.1. No behaviour change beyond what the 2026-09-03 entries
+below describe: the three Rust defects found by reading deno's diagram,
+and the README and site copy for six languages. This entry exists because
+those fixes were committed after the previous release and the freshness
+check is right that a reader deserves to know which version carries them.
+
+Verified from the registry against all thirteen repositories in the
+showcase before this line was written.
+
+
 ## 2026-09-03
 
 ### Three more Rust defects, from reading deno's own diagram
