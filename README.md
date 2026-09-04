@@ -123,8 +123,9 @@ crate name and the source root from `Cargo.toml` — including a declared
 `[lib] path`, since `src/` is only the default — and knows that Cargo compiles
 every direct child of `tests`, `benches` and `examples` as its own crate.
 
-Kotlin reads its type index from the `class` and `interface` declarations rather
-than from file names, because a Kotlin file need not be named after the type
+Kotlin reads its type index from the declarations themselves — `class`, `interface`,
+`object`, `typealias` and `fun interface` among them — rather than from file
+names, because a Kotlin file need not be named after the type
 it holds and may declare several. It shares that index with Java: the two
 compile to one namespace and import each other freely, so an index of one
 extension reports a real edge to the other as a missing type.
