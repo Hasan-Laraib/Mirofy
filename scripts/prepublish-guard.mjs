@@ -10,6 +10,7 @@
 // clean, and the tarball actually runs when installed. It is deliberately
 // slower than a publish would otherwise be. That is the trade.
 
+import { npmCli } from './lib/npm-cli.mjs';
 import { execFileSync, execSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -19,31 +20,8 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const corePath = path.join(repoRoot, 'packages/core');
 
-/**
- * Run npm without going through a shell.
- *
- * `shell: true` works and Node warns about it, because it concatenates
- * arguments rather than escaping them. Naming npm.cmd directly does not work
- * either: Node refuses to spawn a .cmd without a shell -- the mitigation for
- * CVE-2024-27980 -- and fails with EINVAL.
- *
- * The way through is npm's own JavaScript entry point, run on the Node that is
- * already here. npm sets npm_execpath to exactly that when it runs a script,
- * which is the context this guard executes in; the fallbacks are for running
- * it by hand.
- */
-function npmCli() {
-  const fromEnv = process.env.npm_execpath;
-  if (fromEnv && fromEnv.endsWith('.js') && fs.existsSync(fromEnv)) return fromEnv;
-  const nodeDir = path.dirname(process.execPath);
-  for (const candidate of [
-    path.join(nodeDir, 'node_modules/npm/bin/npm-cli.js'),
-    path.join(nodeDir, '../lib/node_modules/npm/bin/npm-cli.js'),
-  ]) {
-    if (fs.existsSync(candidate)) return candidate;
-  }
-  return null;
-}
+// npmCli lives in scripts/lib/npm-cli.mjs -- check-audit.mjs needs the same
+// resolver, and two copies of it would drift.
 
 /** @param {string[]} argv @param {object} options */
 function runNpm(argv, options) {

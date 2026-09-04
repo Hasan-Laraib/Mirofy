@@ -18,7 +18,7 @@
     "build": "node scripts/build-artifacts.mjs",
     "check:artifacts": "node scripts/build-artifacts.mjs --check",
     "check:size": "node scripts/check-size-budget.mjs",
-    "check:audit": "npm audit --audit-level=high",
+    "check:audit": "node scripts/check-audit.mjs",
     "check:readme": "node scripts/check-readme-claims.mjs",
     "check:changelog": "node scripts/check-changelog.mjs",
     "check:lockfile": "node scripts/check-lockfile.mjs",

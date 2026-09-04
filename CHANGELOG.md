@@ -17,6 +17,27 @@ stops being one.
 
 ## 2026-09-04
 
+### The audit gate stopped conflating an outage with a clean bill of health
+
+`check:audit` was `npm audit --audit-level=high`, which exits non-zero for two
+very different things: a high-severity advisory against something we ship, and
+npm's advisory endpoint being unreachable. On 2026-09-04 the bulk advisories
+endpoint returned 503, and the 0.5.1 publish workflow died at that step with
+`Nothing was published` — a release held hostage by someone else's incident.
+
+The obvious repair, making the step non-fatal, is worse than the disease: a gate
+that reports success when it did not run is a gate that lies. So the two are now
+told apart. A vulnerability fails, as before. An unreachable endpoint prints
+`UNVERIFIED` in the same shape as a failure, says which endpoint and which
+status, and does not block — it is not a pass and does not read as one.
+
+A spawn failure is a third case and is ours, not the registry's: it fails loudly,
+because a gate that reports `UNVERIFIED` forever is a gate that never runs.
+
+The decision is a pure function of npm's report, so both branches are tested — an
+outage is not something a test can wait for.
+
+
 ### 0.5.1
 
 Released as 0.5.1. No behaviour change beyond what the 2026-09-03 entries
