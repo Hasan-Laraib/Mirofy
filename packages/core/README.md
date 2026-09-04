@@ -60,7 +60,7 @@ when it was written. If anything you do depends on the output -- a CI step, a
 committed diagram, a comparison over time -- name the version:
 
 ```bash
-npx mirofy-cli@0.5.1 map .
+npx mirofy-cli@0.5.2 map .
 ```
 
 Installed globally with `npm install -g mirofy-cli`, the command is **`mirofy`**.

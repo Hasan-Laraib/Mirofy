@@ -38,16 +38,16 @@ The decision is a pure function of npm's report, so both branches are tested —
 outage is not something a test can wait for.
 
 
-### 0.5.1
+### 0.5.2
 
-Released as 0.5.1. No behaviour change beyond what the 2026-09-03 entries
+Released as 0.5.2. (0.5.1 was tagged but never published: npm's advisory
+endpoint was down and the release gate could not tell that apart from a finding,
+which is the defect fixed above.) No behaviour change beyond what the 2026-09-03 entries
 below describe: the three Rust defects found by reading deno's diagram,
 and the README and site copy for six languages. This entry exists because
 those fixes were committed after the previous release and the freshness
 check is right that a reader deserves to know which version carries them.
 
-Verified from the registry against all thirteen repositories in the
-showcase before this line was written.
 
 
 ## 2026-09-03
