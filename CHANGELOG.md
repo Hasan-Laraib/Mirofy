@@ -15,7 +15,7 @@ stops being one.
 
 ---
 
-## 2026-09-05
+## 2026-09-06
 
 ### `--layout-json` was truncating its own output
 
