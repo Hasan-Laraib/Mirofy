@@ -46,7 +46,7 @@
     "layout": "node packages/layout/bin/layout.mjs"
   },
   "devDependencies": {
-    "@types/node": "^18",
+    "@types/node": "^26",
     "axe-core": "4.10.2",
     "eslint": "^9.15.0",
     "marked": "14.1.3",
