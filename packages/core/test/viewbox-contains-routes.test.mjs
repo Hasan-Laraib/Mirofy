@@ -24,15 +24,34 @@ const root = path.resolve(here, '..');
 const examples = fs.readdirSync(path.join(root, 'examples'))
   .filter((name) => name.endsWith('.architecture.json'));
 
-/** @param {string} example @returns {{viewBox: number[], connections: object[]}} */
+/**
+ * The renderer's own layout report for one example.
+ *
+ * The report is read through a pipe, and a pipe truncates. Say so plainly when
+ * it happens: a JSON syntax error at byte 8176 reads like a parser bug, and the
+ * hours go into the wrong place.
+ *
+ * @param {string} example
+ * @returns {{viewBox: number[], components: object[], connections: object[]}}
+ */
 function layoutOf(example) {
+  const file = path.join(root, 'examples', example);
   const out = execFileSync(process.execPath, [
     path.join(root, 'bin', 'mirofy.mjs'),
-    'validate', 'architecture',
-    path.join(root, 'examples', example),
-    '--layout-json',
-  ], { encoding: 'utf8' });
-  return JSON.parse(out);
+    'validate', 'architecture', file, '--layout-json',
+  ], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
+
+  const source = JSON.parse(fs.readFileSync(file, 'utf8'));
+  let report;
+  try {
+    report = JSON.parse(out);
+  } catch (error) {
+    assert.fail(`${example}: the layout report did not survive the pipe -- ${out.length} bytes read, `
+      + `and JSON.parse failed (${error.message}). That is truncation, not malformed output.`);
+  }
+  assert.equal(report.connections.length, source.connections.length,
+    `${example}: the report carries ${report.connections.length} of ${source.connections.length} connections`);
+  return report;
 }
 
 // The fixture that made the bug reproducible: a skip-level edge in a full

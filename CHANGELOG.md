@@ -15,6 +15,34 @@ stops being one.
 
 ---
 
+## 2026-09-05
+
+### `--layout-json` was truncating its own output
+
+`render-architecture.mjs` wrote the layout report with `console.log` and then
+called `process.exit(0)` to skip writing the HTML file. When stdout is a pipe —
+which it is whenever anything consumes that JSON — the write is asynchronous,
+and exiting terminated the process before the buffer drained.
+
+Reports under the pipe capacity arrived whole. Larger ones arrived cut off, and
+the caller saw a JSON syntax error at a byte offset, which reads like a parser
+bug rather than truncation. On macOS with Node 18 and 20 the cut fell at 8176
+bytes: `production-deployment` (9,713 bytes) and `gutter-routing` (13,026) lost
+their tails, while `web-app` (6,482) and `brand-aware-delivery` (5,820) were
+fine — the split was purely size, not content.
+
+The write now happens on the normal exit path, with `writeDiagram` in an `else`
+rather than skipped by an early exit, so Node flushes stdout on the way out.
+
+The test that found this now says so in its own words: it reports the byte count
+and calls it truncation, and it checks that the report carries as many
+connections as the document it was built from — because a report can be short
+without being invalid JSON.
+
+This was invisible until the viewBox test started reading large reports through
+a pipe. Nothing else in the repository consumed `--layout-json` at that size.
+
+
 ## 2026-09-04
 
 ### Diagrams no longer run off the bottom of their own frame

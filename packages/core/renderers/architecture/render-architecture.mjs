@@ -1291,16 +1291,24 @@ const legendY = () => viewBox[1] - 16;
 
 solveConnectionLabels();
 validateArchitecture();
+// stdout is a PIPE when anything consumes this, and a pipe write is
+// asynchronous. `console.log` followed by `process.exit(0)` terminated the
+// process before the buffer drained, so a report larger than the pipe capacity
+// arrived truncated -- and truncated JSON is not an error the caller sees as
+// truncation, it is a syntax error at a byte offset that looks like a parser
+// bug. macOS on Node 18 and 20 cut it at 8176 bytes.
+//
+// Ending the process normally instead lets Node flush stdout on the way out.
 if (layoutJsonMode) {
-  console.log(JSON.stringify(buildLayoutReport(), null, 2));
-  process.exit(0);
+  process.stdout.write(JSON.stringify(buildLayoutReport(), null, 2) + String.fromCharCode(10));
+} else {
+  writeDiagram({
+    outPath,
+    template,
+    diagramType: 'architecture',
+    meta: arch.meta,
+    svg: renderSvg(),
+    cards: arch.cards,
+    sourceEvidence,
+  });
 }
-writeDiagram({
-  outPath,
-  template,
-  diagramType: 'architecture',
-  meta: arch.meta,
-  svg: renderSvg(),
-  cards: arch.cards,
-  sourceEvidence,
-});
