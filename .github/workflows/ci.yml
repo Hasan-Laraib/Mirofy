@@ -96,3 +96,33 @@ jobs:
           MIROFY_CHROME: ${{ steps.chrome.outputs.chrome-path }}
           MIROFY_CHROME_NO_SANDBOX: '1'
         run: npm run test:conformance
+
+  # One context to require, instead of thirteen.
+  #
+  # The matrix produces `check (ubuntu-latest, 18)` and eleven siblings, and a
+  # ruleset that names them all goes stale the moment the matrix changes: a
+  # required context that never reports leaves every pull request waiting
+  # forever on a job that no longer exists. This job depends on all of them and
+  # is the only name the ruleset has to know.
+  #
+  # `if: always()` is what makes it a gate rather than a passenger. Without it
+  # the job is skipped when a dependency fails, and a skipped required check
+  # reports neutral -- which GitHub accepts as success.
+  ci:
+    name: CI passed
+    needs: [check, browser]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job must have succeeded
+        env:
+          CHECK: ${{ needs.check.result }}
+          BROWSER: ${{ needs.browser.result }}
+        run: |
+          echo "check:   $CHECK"
+          echo "browser: $BROWSER"
+          if [ "$CHECK" != "success" ] || [ "$BROWSER" != "success" ]; then
+            echo "::error::CI did not pass"
+            exit 1
+          fi

@@ -17,6 +17,35 @@ stops being one.
 
 ## 2026-09-06
 
+### Three gates that were not doing their job
+
+**CI was enforced by nothing.** The `protect main` ruleset covered deletion and
+non-fast-forward and required no status checks at all, so a red build blocked no
+merge and no push — which is how main sat broken for a day without anyone being
+told. Requiring the twelve matrix contexts by name would have been worse than
+nothing: a required context that stops reporting leaves every pull request
+waiting forever on a job that no longer exists. CI now ends with one aggregate
+job, `CI passed`, that depends on the others and is the only name the ruleset
+has to know. It carries `if: always()` because a skipped required check reports
+neutral, and GitHub accepts neutral as success.
+
+**The changelog gate could not be passed by a bot.** Every open Dependabot pull
+request failed on it: the bump touches `.github`, becomes the newest change to
+watched code, and asks for prose its author cannot write. The freshness check
+now walks back to the newest commit by a person. A dependency bump still belongs
+in the record — it goes in at release time, written by whoever decided to ship
+it, which is where a reader can be told why it mattered.
+
+**The size budget had run out of headroom.** 6 MB was chosen when the tree
+measured 3.9 MB, leaving 2.1 MB for evidence sources that have since landed. The
+tree now measures 6.0 MB, so the gate had 1,742 bytes of room and failed on a
+changelog paragraph. That is not a bulk regression, and a gate that fires on
+prose teaches people to delete prose. 8 MB restores the same absolute headroom
+the original choice had, and the report now names the largest *areas* as well as
+the largest files, because growth between releases shows up in a directory long
+before it shows up in a single file.
+
+
 ### `--layout-json` was truncating its own output
 
 `render-architecture.mjs` wrote the layout report with `console.log` and then

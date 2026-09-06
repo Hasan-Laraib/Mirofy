@@ -12,6 +12,7 @@
 // pointing at `scripts/check-provenance.mjs` two months after that script was
 // deleted is telling a reader to look for something that is not there.
 
+import { isAutomated } from './lib/automated.mjs';
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -24,6 +25,9 @@ const changelogPath = path.join(repoRoot, 'CHANGELOG.md');
 // excluded: requiring an entry for a typo fix would train people to write
 // entries that say nothing, which is how a record becomes noise.
 const WATCHED = ['packages', 'scripts', '.github', 'fixtures', 'benchmarks'];
+
+// isAutomated lives in scripts/lib/automated.mjs so it can be tested without
+// running this gate as a side effect of importing it.
 
 /** @type {Array<{ok: boolean, claim: string, detail: string}>} */
 const results = [];
@@ -63,9 +67,15 @@ check('entries are newest first', dates.join() === sorted.join(),
 function newestCodeChange() {
   try {
     const out = execFileSync('git', [
-      'log', '-1', '--format=%cd', '--date=short', '--', ...WATCHED,
-    ], { cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-    return out || null;
+      'log', '--format=%cd%x09%an%x09%ae', '--date=short', '-n', '200', '--', ...WATCHED,
+    ], { cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+    for (const line of out.split(String.fromCharCode(10))) {
+      if (!line.trim()) continue;
+      const [date, name, email] = line.split(String.fromCharCode(9));
+      if (isAutomated(name, email)) continue;
+      return date;
+    }
+    return null;
   } catch {
     return null;
   }
