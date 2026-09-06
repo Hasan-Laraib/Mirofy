@@ -62,7 +62,7 @@ for (const name of PACKAGES) {
     fs.mkdirSync(to, { recursive: true });
     for (const entry of fs.readdirSync(from, { withFileTypes: true, recursive: true })) {
       if (!entry.isFile() || !entry.name.endsWith('.mjs')) continue;
-      const rel = path.relative(from, path.join(entry.parentPath ?? entry.path, entry.name));
+      const rel = path.relative(from, path.join(entry.parentPath, entry.name));
       const source = fs.readFileSync(path.join(from, rel), 'utf8');
       let text = source;
       for (const [find, replace] of REWRITE) text = text.split(find).join(replace);
@@ -111,7 +111,7 @@ function treeOf(dir) {
   const entries = [];
   for (const entry of fs.readdirSync(dir, { withFileTypes: true, recursive: true })) {
     if (!entry.isFile()) continue;
-    const full = path.join(entry.parentPath ?? entry.path, entry.name);
+    const full = path.join(entry.parentPath, entry.name);
     entries.push([path.relative(dir, full).split(path.sep).join('/'), fs.readFileSync(full, 'utf8')]);
   }
   entries.sort((left, right) => left[0].localeCompare(right[0]));

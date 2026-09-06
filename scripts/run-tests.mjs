@@ -3,7 +3,8 @@
 //
 // Why not a shell glob: pwsh on windows-latest does not expand
 // it. Why not `node --test <dir>`: errors with "Cannot find module" on Node 24.
-// Why not Node's own --test glob: requires Node 21+, and the CI matrix includes 18.
+// Why not Node's own --test glob: it requires Node 21+, and the matrix still
+// covers 20.
 
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';

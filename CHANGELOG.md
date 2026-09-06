@@ -17,6 +17,25 @@ stops being one.
 
 ## 2026-09-06
 
+### Node 18 is no longer supported, and one dependency was never used
+
+Node 18 reached end of life on 30 April 2025. It stayed in the CI matrix, and
+keeping it had a cost that was easy to miss: `Dirent.parentPath` arrived in Node
+20.12, so `scripts/build-pipeline.mjs` carried `entry.parentPath ?? entry.path`
+to work on 18 — and `@types/node` 26 removed `.path` from the type. The fallback
+that existed for the old runtime was the only thing failing against the new
+types.
+
+The matrix is now 20, 22 and 24, `engines` says `>=20.12.0` — the release the
+field actually landed in, not a round number — and the fallback is gone.
+Typecheck passes against both `@types/node` 18 and 26, which is what lets the
+pending bump through.
+
+`marked` is removed. It was declared in the root devDependencies, imported
+nowhere, and `npm ls` showed nothing else pulling it in. It arrived with a
+docs-PDF feature whose code left along with `docs/`.
+
+
 ### Three gates that were not doing their job
 
 **CI was enforced by nothing.** The `protect main` ruleset covered deletion and

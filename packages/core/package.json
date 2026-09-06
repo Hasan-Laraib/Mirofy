@@ -9,7 +9,7 @@
     "mirofy-cli": "bin/mirofy.mjs"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20.12.0"
   },
   "scripts": {
     "generate:brand-marks": "node scripts/generate-brand-marks.mjs",
