@@ -47,7 +47,7 @@
     "check:brand-marks": "node packages/core/scripts/generate-brand-marks.mjs --check"
   },
   "devDependencies": {
-    "@types/node": "^18",
+    "@types/node": "^26",
     "axe-core": "4.13.0",
     "eslint": "^9.15.0",
     "typescript": "^5.7.2"
