@@ -15,6 +15,28 @@ stops being one.
 
 ---
 
+## 2026-09-07
+
+### The site shows the evidence, not only the argument
+
+The landing page explained what Mirofy does and showed it mapping itself. The
+thirteen-repository run — the part that answers "does this work on code you did
+not write?" — lived only in a folder on a laptop. A reader arriving from a link
+saw the claim and none of the proof.
+
+There is now a section for it: totals, and every repository with the revision it
+was measured at, the language, the files walked, the facts recorded, and the
+count of references it could not resolve. That last column is printed rather
+than rounded away, because a diagram showing twelve boxes from a
+thirty-thousand-file repository has made a choice and hiding it is how these
+things start lying.
+
+The figures come from `scripts/showcase.json` rather than from prose in the
+template, so the numbers on the site and the numbers in the record cannot drift
+apart, and changing them is a diff someone reviews rather than an edit inside a
+string.
+
+
 ## 2026-09-06
 
 ### `check:brand-marks` now runs, and now runs in the gate

@@ -114,6 +114,17 @@ run([cli, 'render', 'architecture', path.join(repoRoot, 'scan/diagram.json'),
   '--repo-root', repoRoot], 'render self-model preview');
 thumbnailise(path.join(siteRoot, 'previews/self-model.svg'));
 
+// Thirteen repositories Mirofy had never seen. Read from a file rather than
+// written into the page, so the figures on the site and the figures in the
+// record cannot drift apart -- and so changing them is a diff someone reviews.
+const showcase = JSON.parse(fs.readFileSync(path.join(repoRoot, 'scripts/showcase.json'), 'utf8'));
+const proof = showcase.repositories.reduce((total, repo) => ({
+  files: total.files + repo.files,
+  facts: total.facts + repo.facts,
+  clean: total.clean + (repo.gaps === 0 ? 1 : 0),
+}), { files: 0, facts: 0, clean: 0 });
+const languages = new Set(showcase.repositories.map((repo) => repo.language)).size;
+
 const graph = JSON.parse(fs.readFileSync(path.join(repoRoot, 'scan/evidence-graph.json'), 'utf8'));
 const model = JSON.parse(fs.readFileSync(path.join(repoRoot, 'scan/model.json'), 'utf8'));
 const view = JSON.parse(fs.readFileSync(path.join(repoRoot, 'scan/view.json'), 'utf8'));
@@ -347,6 +358,20 @@ const index = `<!doctype html>
   .receipt dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 500; }
   .receipt .row.mute dd { color: var(--dim); }
 
+  /* ---- the proof table ---- */
+  .proof { margin-top: 24px; border: 1px solid var(--line); border-radius: 12px;
+           background: var(--surface); overflow-x: auto; }
+  .proof table { border-collapse: collapse; width: 100%; font-size: 13.5px;
+                 font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .proof th, .proof td { text-align: left; padding: 8px 14px; white-space: nowrap;
+                         border-bottom: 1px solid var(--line); }
+  .proof th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+              color: var(--dim); background: var(--sunk); font-weight: 500; }
+  .proof tbody tr:last-child td { border-bottom: 0; }
+  .proof td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  .proof td.zero { color: var(--accent); }
+  .proof .lang { color: var(--dim); }
+
   /* ---- the self-model card ---- */
   .feature {
     display: block; margin-top: 24px; border: 1px solid var(--line); border-radius: 14px;
@@ -503,6 +528,50 @@ const index = `<!doctype html>
       ${counts.gaps} file(s) could not be read, and they are counted rather than
       skipped. An empty answer here means <em>not found</em> — never
       <em>does not exist</em>.
+    </p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Thirteen repositories it had never seen</h2>
+    <p class="lead">
+      A tool that reads other people&rsquo;s repositories has to be tested against
+      other people&rsquo;s repositories. Each one below was cloned fresh at the
+      revision named and mapped with one command.
+    </p>
+
+    <div class="receipt">
+      <div class="receipt-head">measured ${showcase.measuredOn} &middot; mirofy-cli ${showcase.toolVersion}, installed from the registry</div>
+      <dl>
+        <div class="row"><dt>facts recorded</dt><dd>${proof.facts.toLocaleString('en')}</dd></div>
+        <div class="row"><dt>files walked</dt><dd>${proof.files.toLocaleString('en')}</dd></div>
+        <div class="row"><dt>languages read</dt><dd>${languages}</dd></div>
+        <div class="row mute"><dt>with no unresolved reference at all</dt><dd>${proof.clean} of ${showcase.repositories.length}</dd></div>
+      </dl>
+    </div>
+
+    <div class="proof">
+      <table>
+        <thead>
+          <tr><th scope="col">repository</th><th scope="col">at</th><th scope="col">language</th>
+            <th scope="col">files</th><th scope="col">facts</th><th scope="col">unresolved</th></tr>
+        </thead>
+        <tbody>
+${showcase.repositories.map((repo) => `          <tr><td>${repo.slug}</td><td class="lang">${repo.revision.slice(0, 7)}</td><td class="lang">${repo.language}</td><td class="n">${repo.files.toLocaleString('en')}</td><td class="n">${repo.facts.toLocaleString('en')}</td><td class="n${repo.gaps === 0 ? ' zero' : ''}">${repo.gaps}</td></tr>`).join(String.fromCharCode(10))}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="note" style="margin-top:22px">
+      ${showcase.note}
+    </p>
+
+    <p class="note" style="margin-top:14px">
+      Those runs found thirteen defects in Mirofy, every one of them fixed. A
+      diagram that shows twelve boxes from a thirty-thousand-file repository has
+      made a choice, and hiding that choice is how diagrams start lying &mdash; so
+      the unresolved column is printed rather than rounded away.
     </p>
   </div>
 </section>

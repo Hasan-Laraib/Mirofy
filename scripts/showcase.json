@@ -1,0 +1,112 @@
+{
+  "measuredOn": "2026-09-03",
+  "reverifiedOn": "2026-09-04",
+  "toolVersion": "0.5.2",
+  "note": "Each repository cloned fresh at the revision named, mapped with mirofy-cli installed from the npm registry. Re-verified 2026-09-04: files, facts and gaps exact on all thirteen; check and visual-check passed on every one.",
+  "repositories": [
+    {
+      "slug": "spring-projects/spring-boot",
+      "language": "Java",
+      "files": 11787,
+      "facts": 78368,
+      "gaps": 0,
+      "revision": "87cacdaabd38be0b8c0bc4a9809fbea35c9e48f8"
+    },
+    {
+      "slug": "moby/moby",
+      "language": "Go",
+      "files": 12871,
+      "facts": 51193,
+      "gaps": 0,
+      "revision": "41587e08da00a68b04f9b85ee02e78504a78467f"
+    },
+    {
+      "slug": "vercel/next.js",
+      "language": "TypeScript",
+      "files": 30168,
+      "facts": 40461,
+      "gaps": 917,
+      "revision": "5b8c866c3216c93aac9cce62e4809cec464ba47e"
+    },
+    {
+      "slug": "google/guava",
+      "language": "Java",
+      "files": 3352,
+      "facts": 38885,
+      "gaps": 0,
+      "revision": "14c81e523a4bae39b4329d6476e293867f3169c6"
+    },
+    {
+      "slug": "denoland/deno",
+      "language": "Rust",
+      "files": 14324,
+      "facts": 22002,
+      "gaps": 236,
+      "revision": "a961cdec3b1948844414ebeecc697dcad76df2d1"
+    },
+    {
+      "slug": "shadcn-ui/ui",
+      "language": "TypeScript",
+      "files": 5554,
+      "facts": 13807,
+      "gaps": 231,
+      "revision": "71e50952fbb7eda2c992660d36cd58671a2edf42"
+    },
+    {
+      "slug": "prometheus/prometheus",
+      "language": "Go",
+      "files": 1638,
+      "facts": 7664,
+      "gaps": 1,
+      "revision": "d141c42f7c53caf25e294a5488cf5f5c3f358d1a"
+    },
+    {
+      "slug": "square/okhttp",
+      "language": "Kotlin",
+      "files": 823,
+      "facts": 7260,
+      "gaps": 3,
+      "revision": "2ea8dc55a234cea410b2e4f26b36cb367cc98f4a"
+    },
+    {
+      "slug": "tokio-rs/tokio",
+      "language": "Rust",
+      "files": 849,
+      "facts": 6436,
+      "gaps": 49,
+      "revision": "6858348ad2e576f1b5380bf3ec5cac1d19bd4608"
+    },
+    {
+      "slug": "square/leakcanary",
+      "language": "Kotlin",
+      "files": 1047,
+      "facts": 6170,
+      "gaps": 3,
+      "revision": "66aab8d2ab695c4e1c013ed1bd5c3884939c1e2f"
+    },
+    {
+      "slug": "fastapi/fastapi",
+      "language": "Python",
+      "files": 3101,
+      "facts": 3555,
+      "gaps": 165,
+      "revision": "50113da16fec53b66b80d75e80a89296de4fa5a5"
+    },
+    {
+      "slug": "google/gson",
+      "language": "Java",
+      "files": 298,
+      "facts": 2663,
+      "gaps": 8,
+      "revision": "b3f4ca20087f9066de4c340522ff84e0558e1ad1"
+    },
+    {
+      "slug": "gin-gonic/gin",
+      "language": "Go",
+      "files": 118,
+      "facts": 518,
+      "gaps": 0,
+      "revision": "dcaa4296d111981ffb31ac3eba90bb63e1eb5ab9"
+    }
+  ]
+}
