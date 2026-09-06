@@ -49,7 +49,7 @@
     "renderers/shared/diagnostics.mjs": "032c009171ff770aa5dae7e46dda9ce0b37f85a9",
     "renderers/shared/engineering-profiles.mjs": "6fca42b561f52713a306d1e4248f4d2542d097d3",
     "renderers/shared/evidence-provenance.mjs": "7e5e6fae070aad465a6135fb536438627fe426c1",
-    "renderers/shared/generated-brand-marks.mjs": "69dbb7c1c290f28620705486ecacba4d2184f634",
+    "renderers/shared/generated-brand-marks.mjs": "c4f09f498d54869b988f1b1fac992a0848f156cc",
     "renderers/shared/generated-validators.mjs": "41b502ba38785f637deaf3a7b13fff40078af414",
     "renderers/shared/geometry.mjs": "2413f4d4239c813675d7f85c370eb42704884b27",
     "renderers/shared/hosts.mjs": "1ed0624bd2d798e138bac96cb56bfe0b0ddf73e5",
