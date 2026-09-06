@@ -10,10 +10,32 @@ const root = path.resolve(here, '..');
 const catalogPath = path.join(root, 'brand-marks', 'catalog.json');
 const outputPath = path.join(root, 'renderers', 'shared', 'generated-brand-marks.mjs');
 const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-const simpleIconsVersion = JSON.parse(fs.readFileSync(
-  path.join(root, 'node_modules', 'simple-icons', 'package.json'),
-  'utf8',
-)).version;
+// Where simple-icons actually is, rather than where a single-package layout
+// would put it. npm hoists dependencies to the workspace root, so the literal
+// `packages/core/node_modules/simple-icons` this used to read did not exist and
+// `--check` died with ENOENT every time it was run. Nothing noticed, because
+// nothing ran it.
+//
+// `simple-icons/package.json` is not an exported subpath, so it cannot be
+// resolved directly; resolve the entry point Node itself would import and walk
+// up to the manifest that owns it.
+function versionOfSimpleIcons() {
+  const entry = fileURLToPath(import.meta.resolve('simple-icons'));
+  let dir = path.dirname(entry);
+  for (let up = 0; up < 6; up += 1) {
+    const manifest = path.join(dir, 'package.json');
+    if (fs.existsSync(manifest)) {
+      const parsed = JSON.parse(fs.readFileSync(manifest, 'utf8'));
+      if (parsed.name === 'simple-icons') return parsed.version;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  throw new Error('could not locate the simple-icons manifest from ' + entry);
+}
+
+const simpleIconsVersion = versionOfSimpleIcons();
 const simpleBySlug = new Map(Object.values(simpleIcons)
   .filter((icon) => icon && typeof icon === 'object' && icon.slug && icon.path)
   .map((icon) => [icon.slug, icon]));

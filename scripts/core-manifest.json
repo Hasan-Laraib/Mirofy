@@ -74,7 +74,7 @@
     "schemas/sequence.schema.json": "2358265d1fb69f5c7df6d778e33d67b2f7beee32",
     "schemas/workflow.schema.json": "0b9f572fac641ccea04920788c3d45bc927b07bd",
     "scripts/check-render-output.mjs": "704b96503b581493e17e83d8d9001be7418f9295",
-    "scripts/generate-brand-marks.mjs": "73490babbbbde02ffd6f657ab9edb5538bee5cca",
+    "scripts/generate-brand-marks.mjs": "0b7c62d4d2bb2032774afb4eaef99e7f6dd7e26b",
     "scripts/generate-validators.mjs": "ab205bd1a586e764e9ee06d1940b6dba15a6653a",
     "scripts/render-examples.mjs": "9889a2f7a41c73907a048a30e3f6671dc7a616d7",
     "test/adaptive-reader-layout.test.mjs": "f7f03eedd9b3f02aa1c0c3d0f34651b76774feaf",

@@ -17,6 +17,26 @@ stops being one.
 
 ## 2026-09-06
 
+### `check:brand-marks` now runs, and now runs in the gate
+
+It read the simple-icons manifest from a node_modules directory inside
+packages/core to learn which version generated the committed marks. npm hoists
+dependencies to the workspace root, so that path has never existed and the check
+died with ENOENT on every invocation. Nothing noticed, because nothing invoked
+it: the script was declared in `packages/core/package.json` and referenced from
+nowhere else.
+
+The manifest is not an exported subpath of the package and cannot be resolved
+directly, so it now resolves the entry point Node itself would import and walks
+up to the manifest that owns it.
+
+It is wired into `npm run check`. That turns a dependency bump that did nothing
+into one that does something: every entry in `generated-brand-marks.mjs` records
+the `providerVersion` it came from, so bumping simple-icons without regenerating
+is drift, and the gate says so instead of shipping marks whose provenance names
+a version that no longer produced them.
+
+
 ### Node 18 is no longer supported, and one dependency was never used
 
 Node 18 reached end of life on 30 April 2025. It stayed in the CI matrix, and
