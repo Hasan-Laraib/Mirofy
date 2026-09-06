@@ -333,7 +333,15 @@ test('exactly 107 brand marks are catalogued and pinned to one Simple Icons vers
   const simpleIconsMarks = receipt.marks.filter((m) => m.provenance.provider === 'Simple Icons');
   assert.ok(simpleIconsMarks.length > 100, 'expected the vast majority of marks to be Simple Icons sourced');
   const versions = new Set(simpleIconsMarks.map((m) => m.provenance.providerVersion));
-  assert.deepEqual([...versions], ['16.28.0'], 'Simple Icons brand marks must be pinned to one exact version');
+  // Read from the dependency rather than repeated here. A literal makes every
+  // simple-icons bump edit two files that must agree, and the failure when they
+  // disagree points at this test rather than at the marks -- which is how the
+  // last bump looked like a broken test instead of unregenerated output.
+  const declared = JSON.parse(fs.readFileSync(
+    new URL('../../core/package.json', import.meta.url), 'utf8',
+  )).devDependencies['simple-icons'];
+  assert.deepEqual([...versions], [declared],
+    'Simple Icons brand marks must be pinned to the exact version packages/core depends on');
   for (const mark of receipt.marks) {
     assert.match(mark.hex, /^[0-9A-Fa-f]{6}$/, `${mark.id} has no valid pinned hex colour`);
     assert.equal(typeof mark.provenance.provider, 'string');
