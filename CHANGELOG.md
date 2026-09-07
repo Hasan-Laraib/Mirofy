@@ -17,6 +17,34 @@ stops being one.
 
 ## 2026-09-08
 
+### 0.6.0 — the agent channels, opened
+
+Two ways an agent can reach this, researched rather than guessed at, and one of
+them turned out to have been open the whole time.
+
+**Skills.** `npx skills add Hasan-Laraib/Mirofy` already worked. It was never
+documented, so nobody could know. Tested rather than assumed — the reading of
+the specification said the walker only looks at the repository root, `skills/`
+and a few agent directories, which would have missed `packages/core/SKILL.md`
+and meant real work to fix. It finds it. One command installs the skill for
+Claude Code, Cursor, Gemini CLI, Amp and a dozen more, and the README says so
+now. The whole gap was a missing line of documentation.
+
+**MCP registry.** This needed the work. The official registry proves a publisher
+owns a package by matching `mcpName` in `package.json` against `name` in
+`server.json`, so both are here, along with the launch arguments that select the
+`mcp` subcommand rather than starting the bare CLI — without them a client runs
+`mirofy-cli` with no command and gets usage text on stdout, which is a parse
+error rather than a message anyone reads.
+
+`check:server-json` gates the four claims that file makes about a package living
+somewhere else: the ownership name, the package identity, the version, and the
+launch arguments. A version drift there is not cosmetic — it is either a
+rejected publish or an accepted entry pointing at something nobody can install.
+This project shipped that exact class of bug twice in one day, `SKILL.md` saying
+`0.1.0` against a package on `0.5.5`, and `pipeline.svg` saying 14 gaps against
+a scan that said 15. Both were caught by gates. This is the gate for that file.
+
 ### The MCP server was finished, working, and unreachable
 
 Nine tools over stdio — `callers`, `dependencies`, `impact`, `upstream`,

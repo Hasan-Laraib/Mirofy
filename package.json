@@ -35,7 +35,7 @@
     "scan": "node packages/scanner/bin/scan.mjs",
     "model": "node packages/model/bin/model.mjs",
     "compile": "node packages/compile/bin/compile.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:brand-marks && npm run check:size && npm run check:audit && npm run check:readme && npm run check:changelog && npm run check:lockfile && npm run check:scratch",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run test:golden && npm run check:template && npm run check:drift && npm run test:conformance && npm run check:artifacts && npm run check:brand-marks && npm run check:size && npm run check:audit && npm run check:readme && npm run check:server-json && npm run check:changelog && npm run check:lockfile && npm run check:scratch",
     "test:quarantine": "node scripts/run-tests.mjs --quarantine",
     "explain": "node packages/explain/bin/explain.mjs",
     "assert": "node packages/explain/bin/assert.mjs",
@@ -44,7 +44,8 @@
     "drift": "node packages/explain/bin/drift.mjs",
     "export": "node packages/export/bin/export.mjs",
     "layout": "node packages/layout/bin/layout.mjs",
-    "check:brand-marks": "node packages/core/scripts/generate-brand-marks.mjs --check"
+    "check:brand-marks": "node packages/core/scripts/generate-brand-marks.mjs --check",
+    "check:server-json": "node scripts/check-server-json.mjs"
   },
   "devDependencies": {
     "@types/node": "^26",

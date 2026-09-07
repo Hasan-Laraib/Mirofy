@@ -82,6 +82,16 @@ npx mirofy-cli init     # a starter document of your own to edit
 npx mirofy-cli render architecture architecture.json
 ```
 
+**Give it to your agent instead** — one line, and the skill installs for Claude
+Code, Cursor, Gemini CLI, Amp and a dozen others:
+
+```bash
+npx skills add Hasan-Laraib/Mirofy
+```
+
+Then ask: *map this repository's architecture*. Your agent reads
+[`SKILL.md`](packages/core/SKILL.md) and drives the same CLI.
+
 `map` runs the whole pipeline in the directory you point it at — scan, model,
 compile, layout, render — and writes `architecture.html` next to your code.
 `map --out <dir>` sends the diagram and the intermediates there instead, so
@@ -187,7 +197,7 @@ npm run layout                  # view        → positioned document
 node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html --repo-root .
 ```
 
-Against **this repository** it records **1,100 facts** across **198 files**,
+Against **this repository** it records **1,220 facts** across **221 files**,
 with **15 gaps** it could not read; derives **18 components and 20
 relationships** — every one citing the file and line it came from — and draws
 **twelve**, recording what it left out and why.
