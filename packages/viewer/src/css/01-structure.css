@@ -4590,6 +4590,16 @@
 }
 .attribution[hidden] { display: none; }
 .attribution-text { pointer-events: none; }
+.attribution-create {
+  color: var(--muted);
+  text-decoration: none;
+  border-left: 1px solid var(--border);
+  padding-left: 8px;
+  white-space: nowrap;
+}
+.attribution-create:hover { color: var(--text); }
+.attribution-create:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+.attribution-create[hidden] { display: none; }
 .attribution-dismiss {
   all: unset;
   cursor: pointer;

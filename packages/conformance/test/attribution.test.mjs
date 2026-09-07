@@ -45,6 +45,44 @@ test('[6.12] the rendered artifact carries attribution markup', () => {
   assert.match(rendered, /Made with Mirofy/, 'a rendered artifact carries no attribution string');
 });
 
+// The one link in the footer, and the only place in the project where an
+// artifact points anywhere. A diagram of a private codebase gets shared; the
+// person it is shared with is the only audience this project ever reaches
+// without asking. That is worth a link and worth being careful with.
+test('[6.12] the footer link carries nothing about the diagram', () => {
+  assert.match(template, /id="attribution-create"/, 'the viewer offers no way to make one');
+
+  const anchor = /<a class="attribution-create"[\s\S]*?>/.exec(template);
+  assert.ok(anchor, 'the create link is not an anchor');
+  assert.match(anchor[0], /rel="[^"]*noreferrer[^"]*"/, 'the link leaks a referrer');
+  assert.match(anchor[0], /referrerpolicy="no-referrer"/,
+    'the link relies on rel alone, which older engines ignore');
+
+  // The address is a constant with no interpolation. A template literal here
+  // is how a repository path or a diagram title ends up in a query string.
+  const url = /var CREATE_URL = '([^']+)';/.exec(template);
+  assert.ok(url, 'the create address is not a single constant');
+  assert.doesNotMatch(url[1], /[?#]/, `the address carries a query or fragment: ${url[1]}`);
+  assert.doesNotMatch(url[1], /\$\{|\+/, `the address is built rather than fixed: ${url[1]}`);
+});
+
+// Exports are the artifacts that travel furthest and are the least revocable.
+// The footer belongs to the interactive viewer alone.
+test('[6.12] the footer link is absent from print, embeds and every export', () => {
+  assert.match(template, /@media print \{ \.attribution \{ display: none; \} \}/,
+    'the footer prints');
+  assert.match(template, /\[data-embed='1'\] \.attribution \{ display: none; \}/,
+    'the footer shows in an embed');
+
+  // The card draws from the locale dictionary, so the guard that matters is
+  // that the link label never became part of a card string.
+  const i18n = fs.readFileSync(path.join(coreRoot, 'renderers/shared/i18n.mjs'), 'utf8');
+  const card = /'viewer\.attribution\.card':\s*\[([^\]]*)\]/.exec(i18n);
+  assert.ok(card, 'the card attribution string is gone');
+  assert.doesNotMatch(card[1], /Create yours|创建/,
+    'the card carries a call to action instead of a provenance statement');
+});
+
 test('[6.12] attribution says what made the diagram, and claims nothing about it', () => {
   // Attribution is a provenance statement, not an endorsement. A footer that
   // said "validated" or "verified" would be making a claim about the reader's
@@ -52,7 +90,8 @@ test('[6.12] attribution says what made the diagram, and claims nothing about it
   // Share Cards already hold to.
   const i18n = fs.readFileSync(path.join(coreRoot, 'renderers/shared/i18n.mjs'), 'utf8');
   const lines = i18n.split('\n').filter((line) => line.includes('viewer.attribution.'));
-  assert.equal(lines.length, 2, 'expected exactly a footer and a card attribution string');
+  assert.equal(lines.length, 3,
+    'expected exactly a footer string, a card string, and the viewer link label');
   for (const line of lines) {
     assert.doesNotMatch(line, /verified|validated|correct|accurate/i,
       `attribution claims something about the diagram: ${line.trim()}`);

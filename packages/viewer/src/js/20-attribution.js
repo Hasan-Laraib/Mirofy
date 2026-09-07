@@ -4,6 +4,14 @@
 
       Mirofy.attribution = (function () {
         var STORAGE_KEY = 'mirofy-attribution-dismissed';
+        // Where a reader who liked someone else's diagram goes to make one.
+        // The repository, not the project site: it survives a rename and
+        // outlives whatever happens to be deployed. Nothing about the
+        // diagram travels with it -- no title, no path, no graph, no query
+        // string at all -- and the referrer is suppressed in the markup, so
+        // the destination cannot learn the file name of somebody's private
+        // architecture from a shared artifact.
+        var CREATE_URL = 'https://github.com/Hasan-Laraib/Mirofy';
         var root = document.getElementById('attribution');
         var text = document.getElementById('attribution-text');
         var dismiss = document.getElementById('btn-attribution-dismiss');
@@ -36,6 +44,12 @@
         function init() {
           if (!root || !text) return;
           text.textContent = viewerText('viewer.attribution.footer');
+          var create = document.getElementById('attribution-create');
+          if (create) {
+            create.textContent = viewerText('viewer.attribution.create');
+            create.href = CREATE_URL;
+            create.hidden = false;
+          }
           if (readStored() === '1') hide(false);
           else show();
           if (dismiss) {

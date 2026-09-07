@@ -176,12 +176,19 @@ const MESSAGE_PAIRS = {
   'viewer.export.downloadedReach': ['Downloaded Reach Share Card', '已下载可达范围分享卡片'],
   'viewer.export.downloadedWebm': ['Downloaded WebM', '已下载 WebM'],
   'viewer.export.recording': ['Recording 6 seconds of motion…', '正在录制 6 秒动效…'],
-  // Attribution. Deliberately a name and nothing else: no URL, because a
-  // link baked into every artifact someone shares outlives the address it
-  // points at, and no claim about the diagram, because attribution says what
-  // made a thing, never that the thing is correct.
+  // Attribution. Deliberately a name and nothing else: no URL in the STRING,
+  // because the card draws these into an image, where a link cannot be clicked
+  // and a dead address rots in plain sight -- and no claim about the diagram,
+  // because attribution says what made a thing, never that the thing is right.
+  //
+  // The viewer footer is the one surface where a link belongs, and its address
+  // lives in the markup rather than here: that footer is HTML, the reader can
+  // dismiss it, and it is absent from print, from embeds and from every export.
+  // The address is the repository rather than the project site, because a
+  // repository URL survives a rename and outlives whatever is deployed today.
   'viewer.attribution.footer': ['Made with Mirofy', '由 Mirofy 生成'],
   'viewer.attribution.card': ['Made with Mirofy', '由 Mirofy 生成'],
+  'viewer.attribution.create': ['Create yours', '创建你自己的'],
   'viewer.export.card.routeSummary.one': ['Route: {source} → {target} · {count} directed hop', '路径：{source} → {target} · {count} 个有向跳转'],
   'viewer.export.card.routeSummary.other': ['Route: {source} → {target} · {count} directed hops', '路径：{source} → {target} · {count} 个有向跳转'],
   'viewer.export.card.reachSummary': ['Authored {direction} from {origin} · {nodes} · {links} · max {hops}', '从{origin}开始的编写{direction} · {nodes} · {links} · 最深 {hops}'],

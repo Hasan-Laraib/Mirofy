@@ -17,6 +17,36 @@ stops being one.
 
 ## 2026-09-07
 
+### A shared diagram can now become somebody's first diagram
+
+The viewer footer said `Made with Mirofy` and stopped there. Every artifact
+anyone shared was a dead end: a reader who liked it had a name and no way to act
+on it. The footer now carries one link, `Create yours`, beside the name.
+
+This deliberately bends a rule written a few weeks ago — *no URL, because a link
+baked into every artifact someone shares outlives the address it points at, and a
+dead link is worse than a name.* That reasoning is sound where it was aimed: the
+Share Card draws attribution into an **image**, where a link cannot be clicked
+and a stale address rots in plain sight. The card is untouched and still carries
+the name alone. The viewer footer is a different surface — HTML, dismissible, and
+absent from print, from embeds and from every export — and the link lives in the
+markup rather than in the locale strings, so the card cannot inherit it.
+
+The address is the repository, not the project site, because a repository URL
+survives a rename and outlives whatever is deployed at the time.
+
+What travels with it: nothing. No query string, no fragment, no title, no
+repository path, no graph. The address is a fixed constant rather than anything
+built at runtime, `rel` carries `noreferrer` and the anchor sets
+`referrerpolicy="no-referrer"`, and the reader can dismiss the whole pill and
+have that remembered. People point this at private codebases; a link that told
+the destination the file name of somebody's private architecture would be a
+defect, not a growth channel.
+
+Row 6.12 now covers all of that, and each assertion was checked by planting its
+opposite: dropping `noreferrer`, dropping the referrer policy, appending the
+diagram title to the address, and letting the footer print all fail the row.
+
 ### CI is now enforced, with the maintainer exempt
 
 The `protect main` ruleset covered deletion and non-fast-forward and required no
