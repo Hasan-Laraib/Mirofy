@@ -17,6 +17,31 @@ stops being one.
 
 ## 2026-09-07
 
+### CI is now enforced, with the maintainer exempt
+
+The `protect main` ruleset covered deletion and non-fast-forward and required no
+status checks, so a red build blocked nothing — which is how main sat broken for
+a day without anyone being told, and how a commit that broke it got pushed over
+the top.
+
+It now requires the `CI passed` context. Pull requests cannot be merged red;
+seven dependency pull requests were sitting in exactly that position last week.
+Repository admin is on the bypass list, so pushing to main directly still works
+and the release flow is unchanged.
+
+Being straight about what that does not cover: the bypass belongs to the role,
+so it exempts the maintainer from the rule that would have caught the
+maintainer. It closes the contributor path completely and leaves the direct-push
+path where it was. The remedy there is looking at CI after pushing, which is a
+habit rather than a setting.
+
+Two choices worth recording. The required context is a single aggregate job
+rather than the twelve matrix legs, because a ruleset naming the legs goes stale
+the moment the matrix changes, and a required check that never reports leaves a
+pull request waiting forever on a job that no longer exists. And "require
+branches to be up to date" is off: with it on, a queue of dependency updates
+becomes a treadmill where each merge invalidates the rest.
+
 ### The site shows the evidence, not only the argument
 
 The landing page explained what Mirofy does and showed it mapping itself. The

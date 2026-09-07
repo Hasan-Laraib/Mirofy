@@ -99,6 +99,13 @@ jobs:
 
   # One context to require, instead of thirteen.
   #
+  # THE NAME BELOW IS LOAD-BEARING OUTSIDE THIS FILE. The repository's
+  # `protect main` ruleset requires the status check literally named
+  # "CI passed". Renaming this job does not fail anything here -- it makes the
+  # required check stop reporting, and a required check that never reports
+  # leaves every pull request waiting forever on a job that no longer exists.
+  # Rename it and the ruleset together, or not at all.
+  #
   # The matrix produces `check (ubuntu-latest, 18)` and eleven siblings, and a
   # ruleset that names them all goes stale the moment the matrix changes: a
   # required context that never reports leaves every pull request waiting
