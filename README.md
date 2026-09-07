@@ -188,7 +188,7 @@ node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html
 ```
 
 Against **this repository** it records **1,100 facts** across **198 files**,
-with **14 gaps** it could not read; derives **18 components and 20
+with **15 gaps** it could not read; derives **18 components and 20
 relationships** — every one citing the file and line it came from — and draws
 **twelve**, recording what it left out and why.
 
@@ -360,8 +360,12 @@ The same queries over MCP — nine tools, the same engine, not a second
 implementation that could disagree with the CLI:
 
 ```json
-{ "mcpServers": { "mirofy": { "command": "node", "args": ["packages/mcp/bin/mcp.mjs"] } } }
+{ "mcpServers": { "mirofy": { "command": "npx", "args": ["-y", "mirofy-cli", "mcp"] } } }
 ```
+
+Point any MCP client at that. It reads `./scan` — whatever `map --out ./scan`
+last wrote — relative to the directory the client starts it in; `--model` and
+`--graph` override. No clone, and nothing to install first.
 
 The incompleteness warning is in the **prose** an agent reads, not only the
 JSON. Most clients feed the text to the model and drop the rest.

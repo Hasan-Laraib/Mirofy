@@ -15,6 +15,45 @@ stops being one.
 
 ---
 
+## 2026-09-08
+
+### The MCP server was finished, working, and unreachable
+
+Nine tools over stdio — `callers`, `dependencies`, `impact`, `upstream`,
+`path`, `find`, `orphans`, `gaps`, `summary` — answering from the same engine
+the CLI uses, so the two cannot disagree. It worked. Nobody could run it.
+
+`packages/mcp` was marked `private: true` and never published. `explain`, which
+it imports, was not among the packages staged into the published tarball. And
+the configuration in the README read:
+
+    { "command": "node", "args": ["packages/mcp/bin/mcp.mjs"] }
+
+a path that resolves for exactly one person: someone who has cloned this
+repository. Every agent client that speaks MCP — which is most of them now —
+was shut out of a finished feature by packaging alone.
+
+It is now a CLI command, so it travels with the package that is already
+published rather than becoming a second thing to release:
+
+    { "mcpServers": { "mirofy": { "command": "npx", "args": ["-y", "mirofy-cli", "mcp"] } } }
+
+`explain` and `mcp` join the staged packages. The server resolves `./scan`
+against the CALLER's working directory rather than a checkout root, which is the
+difference between "works for the author" and "works": the old entry point
+defaulted to its own repository's `scan/`, correct for one machine. The version
+it reports to clients is read from the manifest rather than repeated — the
+private package said `0.1.0` while the tool was on `0.5.5`.
+
+Verified from a packed tarball, not from the checkout: install, `map`, then
+`initialize` and a `tools/call` over stdio.
+
+This also added a gap to Mirofy's own scan, 14 to 15, and the README and
+`assets/pipeline.svg` now say 15. The new gap is the dynamic import this command
+uses to reach the staged module. The scanner cannot statically resolve a
+computed specifier, so it reports one — which is the tool doing exactly what it
+promises, on its own source.
+
 ## 2026-09-07
 
 ### The skill description advertises what the tool is actually best at

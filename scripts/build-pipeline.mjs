@@ -32,7 +32,14 @@ const out = path.join(repoRoot, 'packages/core/pipeline');
 // CLI dynamically imports a module from each -- mermaid import, and the
 // token model the static SVG export needs -- and a specifier that climbs
 // out of packages/core resolves to nothing at all once installed.
-const PACKAGES = ['evidence', 'scanner', 'model', 'compile', 'layout', 'import', 'viewer'];
+//
+// `explain` and `mcp` are here for the same reason, and were missing for
+// longer. The MCP server answers nine questions about a mapped repository and
+// works -- from a checkout. It was marked private, never published, and the
+// config in the README named packages/mcp/bin/mcp.mjs, a path that exists only
+// for someone who cloned this. Every agent client that speaks MCP was shut out
+// of a working feature. `mcp` imports `explain`, so both travel or neither does.
+const PACKAGES = ['evidence', 'scanner', 'model', 'compile', 'layout', 'import', 'viewer', 'explain', 'mcp'];
 
 // The only cross-package specifier that moves. Copied to
 // packages/core/pipeline/<name>/src/x.mjs, a sibling under pipeline/ is still

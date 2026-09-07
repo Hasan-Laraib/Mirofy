@@ -5,10 +5,19 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import readline from 'node:readline';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(__dirname, '..');
+// Reported to MCP clients as the server version. Read from the manifest rather
+// than repeated, because a hardcoded one drifts: packages/mcp said 0.1.0 while
+// the package was on 0.5.5.
+const VERSION = (() => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(skillRoot, 'package.json'), 'utf8')).version;
+  } catch { return '0.0.0'; }
+})();
 
 const TYPES = new Set(['architecture', 'workflow', 'sequence', 'dataflow', 'lifecycle']);
 
@@ -48,6 +57,7 @@ function usage() {
   ${SELF} validate <type> <input.json> [--json] [--layout-json] [--quality standard|showcase] [--repo-root path]
   ${SELF} inspect <type> <input.json>
   ${SELF} check <output.html>
+  ${SELF} mcp [--model scan/model.json] [--graph scan/evidence-graph.json]
   ${SELF} visual-check <output.html> [--json]
   ${SELF} guide [scenario or question] [--json] [--lang en|zh]
   ${SELF} brands [name, alias, domain, or category] [--json]
@@ -1301,6 +1311,61 @@ async function commandPreview(args) {
   }
 }
 
+/**
+ * Serve the mapped repository to an agent over MCP, on stdio.
+ *
+ * The paths default to ./scan, which is where `map --out ./scan` writes, and
+ * they resolve against the CALLER's working directory rather than anything
+ * near this file. The version that shipped in the repository resolved them
+ * against its own checkout root, which is correct for exactly one user.
+ *
+ * stdout is the protocol channel. Nothing may be written there that is not a
+ * JSON-RPC message -- a stray line is a parse error in the client rather than
+ * a message anyone reads -- so every diagnostic here goes to stderr.
+ */
+async function commandMcp(argv) {
+  const flags = { model: path.join(process.cwd(), 'scan', 'model.json'),
+    graph: path.join(process.cwd(), 'scan', 'evidence-graph.json') };
+  for (let i = 0; i < argv.length; i += 1) {
+    if (argv[i].startsWith('--')) { flags[argv[i].slice(2)] = argv[i + 1]; i += 1; }
+  }
+
+  const modelPath = path.resolve(flags.model);
+  if (!fs.existsSync(modelPath)) {
+    process.stderr.write(`mirofy mcp: no system model at ${modelPath}.${String.fromCharCode(10)}`
+      + 'Run: mirofy map . out.html --out ./scan' + String.fromCharCode(10));
+    process.exit(2);
+  }
+
+  const { handleLine } = await import(bundledModule('mcp/src/server.mjs'));
+  const graphPath = path.resolve(flags.graph);
+  const context = {
+    model: JSON.parse(fs.readFileSync(modelPath, 'utf8')),
+    graph: fs.existsSync(graphPath) ? JSON.parse(fs.readFileSync(graphPath, 'utf8')) : null,
+    serverInfo: { name: 'mirofy', version: VERSION },
+  };
+  if (!context.graph) {
+    process.stderr.write('mirofy mcp: no evidence graph beside the model; answers will report '
+      + `completeness they cannot verify.${String.fromCharCode(10)}`);
+  }
+
+  const rl = readline.createInterface({ input: process.stdin, terminal: false });
+  rl.on('line', (line) => {
+    let response;
+    try {
+      response = handleLine(line, context);
+    } catch (error) {
+      // A throw would kill the session and the client would see a closed pipe
+      // with no explanation. Report it and keep serving.
+      response = { jsonrpc: '2.0', id: null,
+        error: { code: -32603, message: `mirofy mcp: ${error.message ?? error}` } };
+    }
+    if (response !== null) process.stdout.write(`${JSON.stringify(response)}${String.fromCharCode(10)}`);
+  });
+  rl.on('close', () => process.exit(0));
+  await new Promise(() => {});
+}
+
 function commandCheck(args) {
   const [html] = args;
   if (!html) fail(usage());
@@ -2173,6 +2238,9 @@ switch (command) {
     break;
   case 'inspect':
     commandValidate([...args, '--layout-json']);
+    break;
+  case 'mcp':
+    await commandMcp(args);
     break;
   case 'check':
     commandCheck(args);
