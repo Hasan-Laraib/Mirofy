@@ -1,9 +1,9 @@
 ---
 name: mirofy
-description: Create polished, validated architecture, workflow, sequence, data-flow, and lifecycle/state diagrams as explorable standalone HTML with inline SVG, dark/light themes, optional trace motion, and PNG/JPEG/WebP/SVG/WebM export. Accept plain-language requirements or pasted Mermaid flowchart, sequenceDiagram, and stateDiagram input; inspect repository evidence when the diagram must reflect real code. Use when the user asks to visualize system architecture, infrastructure, cloud/security/network topology, technical workflows, API call sequences, request lifecycles, data pipelines, ETL/ELT, data lineage, state machines, or to convert/beautify Mermaid.
+description: Map an existing repository into an architecture diagram where every edge cites the file, line and commit it came from, and every file that could not be read is named rather than skipped. Reads JavaScript, TypeScript, Python, Go, Java, Rust and Kotlin imports, package.json workspaces, Express and Next routes, and docker-compose. Also creates validated architecture, workflow, sequence, data-flow and lifecycle/state diagrams as standalone HTML, from plain-language requirements or pasted Mermaid flowchart, sequenceDiagram and stateDiagram input. Use when the user asks to map, diagram or understand an existing codebase, to see what a repository depends on, to find its module or import structure, to onboard onto unfamiliar code, to check whether a diagram still matches the code, or to visualize system architecture, infrastructure, cloud/network topology, technical workflows, API call sequences, request lifecycles, data pipelines, ETL/ELT, data lineage, state machines, or to convert/beautify Mermaid.
 license: MIT
 metadata:
-  version: "0.1.0"
+  version: "0.5.5"
   author: Hasan-Laraib
   based_on: Cocoon-AI/architecture-diagram-generator (MIT, v1.0)
 ---

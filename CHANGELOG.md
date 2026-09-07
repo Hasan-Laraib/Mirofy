@@ -17,6 +17,26 @@ stops being one.
 
 ## 2026-09-07
 
+### The skill description advertises what the tool is actually best at
+
+`SKILL.md` is how an agent decides whether to invoke this at all, and it opened
+with creating diagrams from a typed JSON specification. Mapping an existing
+repository — the thing with thirteen repositories of evidence behind it — was one
+subordinate clause near the end. An agent asked to *"map this repository"* or
+*"what does this codebase depend on"* had weak signal to match on.
+
+Mapping now leads, with the phrasing people actually use: map, understand an
+existing codebase, what a repository depends on, module or import structure,
+onboard onto unfamiliar code, check whether a diagram still matches the code. The
+seven languages are named, because a description that lists them is a description
+someone searching for Go or Rust can find. The Mermaid vocabulary stays.
+
+The description has a hard 1024-character limit and the first rewrite came in at
+1,147. What went, on the grounds that nobody invokes a skill because of them: the
+export format list and the theme and motion options.
+
+`metadata.version` also said `0.1.0` while the package was on `0.5.5`.
+
 ### A shared diagram can now become somebody's first diagram
 
 The viewer footer said `Made with Mirofy` and stopped there. Every artifact
