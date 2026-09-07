@@ -206,6 +206,14 @@ try {
   const WALK = {
     map: { mode: "runs", argv: ["map", ".", path.join(probe, "m.html"),
       "--out", path.join(probe, "mscan"), "--quiet"], cwd: repo },
+    // Runs AFTER map, and depends on it: the model it serves is the one map
+    // just wrote into probe/mscan. spawnSync hands it a stdin that is already
+    // closed, so the server reads EOF, shuts down and exits 0 -- which
+    // exercises the whole path (resolve the staged module, load a real model,
+    // speak the protocol) without hanging the publish the way preview would.
+    mcp: { mode: "runs", argv: ["mcp",
+      "--model", path.join(probe, "mscan", "model.json"),
+      "--graph", path.join(probe, "mscan", "evidence-graph.json")] },
     render: { mode: "runs", argv: ["render", "architecture", ARCH, path.join(probe, "r.html")] },
     compare: { mode: "runs", argv: ["compare", "architecture",
       example("checkout-platform.base.architecture.json"),
