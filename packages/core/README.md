@@ -40,6 +40,38 @@ npx mirofy-cli init                           # a starter document to edit
 npx mirofy-cli render architecture doc.json   # render a document you wrote
 npx mirofy-cli validate architecture doc.json # check one without rendering
 npx mirofy-cli guide "an API request with a cache miss"
+npx mirofy-cli mcp                            # serve the map to an agent
+```
+
+## Give it to your agent
+
+The same tool, reached three other ways. All of them run this package — the
+agent never draws the diagram, it runs the command you would have run, so
+nothing it reports can drift from what the CLI reports.
+
+**As a skill**, for Claude Code, Cursor, Gemini CLI, Amp and around seventy
+others:
+
+```bash
+npx skills add Hasan-Laraib/Mirofy
+```
+
+**As an MCP server** — nine tools that answer what depends on what, each answer
+carrying a file, a line and a commit rather than a recollection. Listed in the
+official registry as `io.github.Hasan-Laraib/mirofy`:
+
+```json
+{ "mcpServers": { "mirofy": { "command": "npx", "args": ["-y", "mirofy-cli", "mcp"] } } }
+```
+
+It reads `./scan` — whatever `map --out ./scan` last wrote — relative to the
+directory the client starts it in. `--model` and `--graph` override that.
+
+**As a Claude Code plugin**, which carries the skill and the MCP server together:
+
+```
+/plugin marketplace add Hasan-Laraib/Mirofy
+/plugin install mirofy@mirofy
 ```
 
 `map --out <dir>` keeps the diagram and the intermediates out of your

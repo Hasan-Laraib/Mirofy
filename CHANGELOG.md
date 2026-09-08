@@ -17,6 +17,28 @@ stops being one.
 
 ## 2026-09-08
 
+### The docs caught up with the week
+
+Three surfaces had fallen behind, and the npm one mattered most.
+
+**`packages/core/README.md`** is what appears on npmjs.com, and it knew nothing
+about any of it — no skill, no MCP server, no plugin, not even the `mcp`
+command. Every route added this week was invisible on the page most people
+actually land on. It now carries all four, and the sentence that keeps them from
+reading as four products: the agent never draws the diagram, it runs the command
+you would have run, so nothing it reports can drift from what the CLI reports.
+
+**`CONTRIBUTING.md`** described a gate list that had drifted badly — a 10 MB
+budget that is 8, a 56-row matrix that is 105, `check:audit` described as the
+raw `npm audit` it stopped being, and four gates missing entirely. It is
+rebuilt from the actual chain, and it now says why three of them exist: each was
+added because something failed *silently* rather than loudly, which is the only
+kind of failure that earns a gate.
+
+It also still claimed Node `>=18`. The floor is `>=20.12` — the release
+`Dirent.parentPath` landed in, which `build-pipeline` now uses without a
+fallback.
+
 ### A Claude Code plugin, carrying both halves
 
 `.claude-plugin/marketplace.json` declares one plugin that brings the skill and

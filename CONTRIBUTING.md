@@ -61,20 +61,41 @@ npm run lint              # eslint .
 npm run typecheck         # tsc --noEmit
 npm run test              # node:test suites outside the conformance matrix
 npm run test:golden       # digest parity against the recorded golden renders
+npm run check:template    # packages/core/assets/template.html matches its sources
 npm run check:drift       # packages/core/ matches its reviewed manifest
-npm run test:conformance  # the 56-row parity matrix
+npm run test:conformance  # the conformance matrix: 105 rows, 85 proved without a browser
 npm run check:artifacts   # npm run build's own output reproduces the golden digests
-npm run check:size        # 10 MB tracked-tree budget
-npm run check:audit       # npm audit --audit-level=high
+npm run check:brand-marks # the committed marks match the installed simple-icons
+npm run check:size        # 8 MB tracked-tree budget
+npm run check:audit       # dependency advisories, with an outage told apart from a finding
 npm run check:readme      # every number in README.md, derived rather than trusted
+npm run check:server-json # server.json agrees with the package it publishes
 npm run check:changelog   # CHANGELOG.md covers the newest code change
 npm run check:lockfile    # package-lock.json agrees with the manifests
-npm run check             # all of the above, in order
+npm run check:scratch     # no test writes scratch inside a package
+npm run check             # all sixteen, in order
 ```
+
+Three of those exist because the thing they check failed silently rather than
+loudly, which is the only kind of failure worth a gate:
+
+- **`check:audit`** passing during an npm outage is worse than failing. It
+  reports `UNVERIFIED` when the advisory endpoint cannot be reached, which is
+  neither a pass nor a block — a gate that reports success when it did not run
+  is a gate that lies.
+- **`check:brand-marks`** could not run at all for as long as it existed: it
+  read `simple-icons` from a path npm never writes to. Nothing noticed, because
+  nothing invoked it.
+- **`check:server-json`** guards four claims that file makes about a package
+  living somewhere else. A version drift there is a rejected publish, or an
+  accepted registry entry pointing at something nobody can install.
 
 ## Scope and constraints
 
-- Node `>=18`, pure ESM throughout.
+- Node `>=20.12`, pure ESM throughout. The floor is 20.12 rather than a round
+  20 because that is where `Dirent.parentPath` landed, and
+  `scripts/build-pipeline.mjs` uses it without a fallback. Node 18 reached end
+  of life on 30 April 2025 and left the CI matrix on 2026-09-06.
 - Zero runtime dependencies (`dependencies` absent from every workspace
   `package.json` — this is itself a proved conformance row, 6.9).
 - The product is `mirofy` on npm and `Mirofy` in prose. The originating
