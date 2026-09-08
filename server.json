@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Hasan-Laraib/mirofy",
   "title": "Mirofy",
-  "description": "Ask an existing repository what depends on what, and get answers that cite the file, line and commit they came from. Nine tools over the same engine the CLI uses, answering from a scan of the code rather than from a model's recollection of it.",
+  "description": "Ask a repository what depends on what. Every answer cites the file, line and commit it came from.",
   "version": "0.6.0",
   "repository": {
     "url": "https://github.com/Hasan-Laraib/Mirofy",

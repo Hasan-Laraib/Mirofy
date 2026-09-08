@@ -36,6 +36,14 @@ check('the version it advertises is the version being published',
   server.version === pkg.version && npmPackage?.version === pkg.version,
   `server.json ${server.version}, package entry ${npmPackage?.version}, package.json ${pkg.version}`);
 
+// The registry caps the description at 100 characters and rejects the publish
+// with a 422 if it is longer. Ours was 232 on the first attempt, and only the
+// registry itself said so -- a round trip to a live service to learn a constant.
+const DESCRIPTION_MAX = 100;
+check(`the description fits the ${DESCRIPTION_MAX}-character limit the registry enforces`,
+  server.description.length <= DESCRIPTION_MAX,
+  `${server.description.length} characters`);
+
 // The launch line is the whole point of the entry. If the argument that selects
 // the MCP subcommand goes missing, clients start the CLI with no command and
 // get usage text on stdout -- which is a parse error in the client.
