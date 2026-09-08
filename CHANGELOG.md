@@ -17,6 +17,22 @@ stops being one.
 
 ## 2026-09-08
 
+### The site says how an agent reaches it
+
+The landing page argued the idea and showed the evidence, and said nothing about
+the three routes added this week. It is the page every post points at, so a
+reader arriving from one saw a CLI and nothing else.
+
+A section after **One command**: the skill, the MCP server, the plugin. It ends
+on the sentence that makes them one thing rather than four — the agent never
+draws the diagram, it runs the command you would have run, so nothing it reports
+can drift from what the CLI reports.
+
+The registry name is read from `server.json` rather than typed into the
+template. A second copy is a second place to be wrong, and a wrong one sends a
+reader to nothing; `check:server-json` already holds that file to the package it
+advertises, so the page inherits a checked claim instead of making a new one.
+
 ### The npm page is watched now, which is why the root README never drifted
 
 Two README files, one gate. The root one stayed correct through a week of daily

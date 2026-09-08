@@ -117,6 +117,10 @@ thumbnailise(path.join(siteRoot, 'previews/self-model.svg'));
 // Thirteen repositories Mirofy had never seen. Read from a file rather than
 // written into the page, so the figures on the site and the figures in the
 // record cannot drift apart -- and so changing them is a diff someone reviews.
+// The MCP registry name is published; typing it here is a second place for it
+// to be wrong, and a wrong one sends a reader to nothing. check:server-json
+// already holds this file to the package it advertises.
+const registry = JSON.parse(fs.readFileSync(path.join(repoRoot, 'server.json'), 'utf8'));
 const showcase = JSON.parse(fs.readFileSync(path.join(repoRoot, 'scripts/showcase.json'), 'utf8'));
 const proof = showcase.repositories.reduce((total, repo) => ({
   files: total.files + repo.files,
@@ -489,6 +493,31 @@ const index = `<!doctype html>
       <div><strong>It models what it found</strong><span>Packages if you have them, source directories if you do not. Nothing is invented to fill a hole.</span></div>
       <div><strong>It writes one file</strong><span><code>architecture.html</code>, next to your code. Every edge carries the file, line and commit it came from.</span></div>
     </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Or your agent runs it</h2>
+    <p class="lead">
+      Three other ways to the same package. The agent never draws the diagram
+      &mdash; it runs the command you would have run, which is why nothing it
+      reports can drift from what the CLI reports.
+    </p>
+
+    <div class="three">
+      <div><strong>As a skill</strong><span>One line installs it for Claude Code, Cursor, Codex, Gemini CLI, Amp, Cline, Zed, Windsurf and around seventy others.<br><code>npx skills add Hasan-Laraib/Mirofy</code></span></div>
+      <div><strong>As an MCP server</strong><span>Nine tools that answer what depends on what, each answer carrying a file, a line and a commit. In the official registry as <code>${registry.name}</code>.</span></div>
+      <div><strong>As a Claude Code plugin</strong><span>The skill and the MCP server in one install.<br><code>/plugin install mirofy@mirofy</code></span></div>
+    </div>
+
+    <p class="note" style="margin-top:26px">
+      This is the same argument the rest of this page makes, pointed at agents.
+      An agent asked <em>what depends on this?</em> will otherwise answer from
+      its recollection of a codebase it half-read. These tools answer from a
+      scan of the code, and every answer names the line it came from &mdash; a
+      way of getting a model to cite rather than recall.
+    </p>
   </div>
 </section>
 
