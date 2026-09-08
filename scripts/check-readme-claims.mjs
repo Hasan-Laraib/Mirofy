@@ -30,6 +30,14 @@ import { TOOLS } from '../packages/mcp/src/server.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readme = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
 
+// The page npmjs.com renders. It had no gate at all, and drifted for a week:
+// every route added -- the skill, the MCP server, the plugin, the mcp command
+// itself -- was invisible on the surface most people land on. The root README
+// stayed correct across the same week precisely because this file watches it.
+const npmReadme = fs.readFileSync(path.join(repoRoot, 'packages/core/README.md'), 'utf8');
+const manifest = JSON.parse(fs.readFileSync(path.join(repoRoot, 'packages/core/package.json'), 'utf8'));
+const serverJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'server.json'), 'utf8'));
+
 /** @type {Array<{claim: string, ok: boolean, detail: string}>} */
 const results = [];
 
@@ -45,6 +53,20 @@ function mustContain(claim, expected) {
     claim,
     ok,
     detail: ok ? expected : `README does not contain: ${JSON.stringify(expected)}`,
+  });
+}
+
+/**
+ * As mustContain, for the page npmjs.com shows.
+ *
+ * @param {string} claim @param {string} expected
+ */
+function npmMustContain(claim, expected) {
+  const ok = npmReadme.includes(expected);
+  results.push({
+    claim: `npm page: ${claim}`,
+    ok,
+    detail: ok ? expected : `packages/core/README.md does not contain: ${JSON.stringify(expected)}`,
   });
 }
 
@@ -608,6 +630,24 @@ function readJson(relative) {
 }
 
 /** Run a repository script, failing loudly rather than checking a stale file. */
+/**
+ * The commands the CLI advertises, read from its own --help.
+ *
+ * Parsed rather than listed here, because a list here is a second place to
+ * forget. The publish guard reads the same text for the same reason.
+ *
+ * @returns {Set<string>}
+ */
+function cliCommands() {
+  const help = run([path.join(repoRoot, 'packages/core/bin/mirofy.mjs'), '--help'], 'mirofy --help');
+  const found = new Set();
+  for (const line of help.split(String.fromCharCode(10))) {
+    const match = /mirofy(?:[.]mjs)?[ ]+([a-z][a-z-]*)/.exec(line);
+    if (match) found.add(match[1]);
+  }
+  return found;
+}
+
 function run(argv, label) {
   try {
     return execFileSync(process.execPath, argv, { cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -617,6 +657,45 @@ function run(argv, label) {
     process.exit(2);
   }
 }
+
+// ---------------------------------------------------------------------------
+// The page npmjs.com renders
+// ---------------------------------------------------------------------------
+// The pinned example is the claim most likely to rot: it names an exact
+// version, so it is wrong the moment one ships without it being edited. It was
+// edited by hand on six consecutive releases in a single day. Remembering is
+// not a mechanism.
+npmMustContain(`the pinned example names the current version`,
+  `npx mirofy-cli@${manifest.version} map .`);
+
+// Every command the page teaches must exist. Read the commands OUT of the
+// page rather than listing them here: a list here checks that the CLI has the
+// commands this file remembers, which is not the same claim and cannot fail
+// when the page changes. The first version of this check made exactly that
+// mistake and passed while the page documented a command called `serve`.
+const documented = new Set();
+for (const line of npmReadme.split(String.fromCharCode(10))) {
+  const match = /npx mirofy-cli ([a-z][a-z-]*)/.exec(line);
+  if (match) documented.add(match[1]);
+}
+const advertised = cliCommands();
+assertThat(`npm page: it documents at least the core commands`,
+  documented.size >= 5, `${documented.size} command(s) documented`);
+for (const command of [...documented].sort()) {
+  assertThat(`npm page: the CLI has the ${command} command it documents`,
+    advertised.has(command),
+    advertised.has(command) ? `${command} is advertised by --help`
+      : `packages/core/README.md documents ${command}, which the CLI does not advertise`);
+}
+
+// The registry name is published; a wrong one sends people to nothing.
+npmMustContain(`the MCP registry name matches server.json`, serverJson.name);
+
+// Zero runtime dependencies is a claim the manifest can settle.
+assertThat(`npm page: zero runtime dependencies is true`,
+  Object.keys(manifest.dependencies ?? {}).length === 0
+    && npmReadme.includes('Zero runtime dependencies'),
+  `${Object.keys(manifest.dependencies ?? {}).length} dependencies declared`);
 
 const failed = results.filter((result) => !result.ok);
 for (const result of results) {

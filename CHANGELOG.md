@@ -17,7 +17,35 @@ stops being one.
 
 ## 2026-09-08
 
-### The docs caught up with the week
+### The npm page is watched now, which is why the root README never drifted
+
+Two README files, one gate. The root one stayed correct through a week of daily
+changes; the npm one — the surface most people actually land on — went stale
+within days. The difference was not care. `check:readme` watches one of them.
+
+It watches both now, and the eleven new claims are chosen for the ones that rot:
+
+- **The pinned example names the current version.** It says `@0.6.0`, and it is
+  wrong the moment a release ships without someone editing it. It was edited by
+  hand on six consecutive releases in one day. Remembering is not a mechanism.
+- **Every command the page teaches exists.** The commands are read *out of* the
+  page and checked against the CLI's own `--help`.
+- **The MCP registry name matches `server.json`**, because a wrong one sends
+  people to nothing.
+- **Zero runtime dependencies**, settled against the manifest rather than
+  asserted.
+
+The command check was written wrong first, and it is worth recording how. It
+began as a hardcoded list — `map`, `demo`, `init`, `render`, `validate`,
+`guide`, `mcp` — asked against the CLI. That passes whatever the page says: it
+verifies the CLI has the commands *this file remembers*, which is a different
+claim. Planting the defect exposed it — the page was made to document a command
+called `serve` and the check stayed green. Reading the commands out of the page
+makes the same mutation fail, as it should.
+
+Every one of the new claims was checked by planting its opposite: a version bump
+without the pin, a documented command the CLI lacks, a stripped command list, a
+changed registry name, and a runtime dependency appearing.
 
 Three surfaces had fallen behind, and the npm one mattered most.
 
