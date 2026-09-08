@@ -1,0 +1,40 @@
+{
+  "name": "mirofy",
+  "owner": {
+    "name": "Hasan-Laraib",
+    "url": "https://github.com/Hasan-Laraib"
+  },
+  "description": "Repository diagrams that cite their sources, and nine tools for asking a codebase what depends on what.",
+  "plugins": [
+    {
+      "name": "mirofy",
+      "displayName": "Mirofy",
+      "source": {
+        "source": "npm",
+        "package": "mirofy-cli"
+      },
+      "description": "Map a repository into a diagram where every edge cites the file, line and commit it came from, and ask it what depends on what.",
+      "homepage": "https://hasan-laraib.github.io/Mirofy/",
+      "repository": "https://github.com/Hasan-Laraib/Mirofy",
+      "license": "MIT",
+      "category": "developer-tools",
+      "keywords": [
+        "architecture-diagram",
+        "dependency-graph",
+        "code-visualization",
+        "repository-analysis",
+        "static-analysis",
+        "provenance"
+      ],
+      "skills": [
+        "./"
+      ],
+      "mcpServers": {
+        "mirofy": {
+          "command": "npx",
+          "args": ["-y", "mirofy-cli", "mcp"]
+        }
+      }
+    }
+  ]
+}

@@ -92,6 +92,17 @@ npx skills add Hasan-Laraib/Mirofy
 Then ask: *map this repository's architecture*. Your agent reads
 [`SKILL.md`](packages/core/SKILL.md) and drives the same CLI.
 
+**In Claude Code**, the plugin carries both the skill and the MCP server:
+
+```
+/plugin marketplace add Hasan-Laraib/Mirofy
+/plugin install mirofy@mirofy
+```
+
+Every one of these routes is the same package. The agent never draws the
+diagram — it runs the CLI you would have run, which is why nothing it reports
+can drift from what the CLI reports.
+
 `map` runs the whole pipeline in the directory you point it at — scan, model,
 compile, layout, render — and writes `architecture.html` next to your code.
 `map --out <dir>` sends the diagram and the intermediates there instead, so

@@ -17,6 +17,31 @@ stops being one.
 
 ## 2026-09-08
 
+### A Claude Code plugin, carrying both halves
+
+`.claude-plugin/marketplace.json` declares one plugin that brings the skill and
+the MCP server together, so a Claude Code user gets both from one install rather
+than wiring an MCP server by hand after adding a skill.
+
+The interesting part is what the first attempt got wrong. `"source": "./"` reads
+like the obvious choice — the plugin is this repository — and it fails:
+installing copies the whole monorepo into the plugin cache, hits the workspace
+symlinks under `node_modules`, and dies with `EPERM` on Windows. A plugin has no
+business shipping a monorepo.
+
+The source is the npm package instead. It is already published, already
+versioned, already carries `SKILL.md` at its root, and is a few hundred
+kilobytes rather than a working tree. `skills` is then simply `./`.
+
+Verified by installing it and reading the inventory back rather than trusting
+the manifest: **Skills (1) mirofy, MCP servers (1) mirofy**, ~354 tokens
+always-on. The test marketplace and plugin were removed afterwards.
+
+That makes three routes to the same package, and the README now says the thing
+that keeps them from reading as three products: the agent never draws the
+diagram. It runs the CLI you would have run, which is why nothing it reports can
+drift from what the CLI reports.
+
 ### 0.6.0 — the agent channels, opened
 
 Two ways an agent can reach this, researched rather than guessed at, and one of
