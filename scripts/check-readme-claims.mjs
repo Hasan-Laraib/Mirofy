@@ -35,6 +35,13 @@ const readme = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
 // itself -- was invisible on the surface most people land on. The root README
 // stayed correct across the same week precisely because this file watches it.
 const npmReadme = fs.readFileSync(path.join(repoRoot, 'packages/core/README.md'), 'utf8');
+
+// SKILL.md is how an agent decides whether to invoke this at all, and its
+// frontmatter version has now rotted twice: it said 0.1.0 against a package on
+// 0.5.5, was fixed, and said 0.5.5 against a package on 0.6.0 two days later.
+// Both times a person had to notice. Nothing else in this file needs a human
+// to remember it, and neither does this.
+const skill = fs.readFileSync(path.join(repoRoot, 'packages/core/SKILL.md'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(repoRoot, 'packages/core/package.json'), 'utf8'));
 const serverJson = JSON.parse(fs.readFileSync(path.join(repoRoot, 'server.json'), 'utf8'));
 
@@ -696,6 +703,48 @@ assertThat(`npm page: zero runtime dependencies is true`,
   Object.keys(manifest.dependencies ?? {}).length === 0
     && npmReadme.includes('Zero runtime dependencies'),
   `${Object.keys(manifest.dependencies ?? {}).length} dependencies declared`);
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// SKILL.md
+// ---------------------------------------------------------------------------
+/**
+ * One frontmatter field, read without a regular expression.
+ *
+ * Every regex in this area was written twice: the first version lost its
+ * backslashes on the way into the file and matched nothing.
+ *
+ * @param {string} name
+ * @returns {string|null}
+ */
+function frontmatterField(name) {
+  const marker = name + ':';
+  for (const line of skill.split(String.fromCharCode(10))) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith(marker)) continue;
+    return trimmed.slice(marker.length).trim().replace(/^"|"$/g, '');
+  }
+  return null;
+}
+
+const skillVersion = frontmatterField('version');
+assertThat(`SKILL.md: the version it reports is the version that ships`,
+  skillVersion === manifest.version,
+  `SKILL.md says ${skillVersion ?? '(none)'}, the package is ${manifest.version}`);
+
+// The description is the field an agent matches on, and its limit is hard.
+// A longer one is truncated or rejected depending on the runtime, and either
+// way the trigger phrases at the end are the ones lost.
+const skillDescription = frontmatterField('description');
+assertThat(`SKILL.md: the description fits the 1024-character limit`,
+  skillDescription !== null && skillDescription.length <= 1024,
+  `${skillDescription ? skillDescription.length : 0} characters`);
+
+// The name is what an agent invokes, and what the plugin and the skills
+// registry both key on.
+const skillName = frontmatterField('name');
+assertThat(`SKILL.md: its name matches the package it drives`,
+  skillName === 'mirofy', `SKILL.md declares ${skillName ?? '(none)'}`);
 
 const failed = results.filter((result) => !result.ok);
 for (const result of results) {

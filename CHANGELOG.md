@@ -15,6 +15,29 @@ stops being one.
 
 ---
 
+## 2026-09-10
+
+### SKILL.md is watched, after its version rotted twice in three days
+
+It said `0.1.0` while the package was on `0.5.5`. That was fixed on the 7th,
+with an entry in this file about it. It then said `0.5.5` while the package was
+on `0.6.0`, because 0.6.0 shipped the next day and nobody edited the field.
+
+Twice is not carelessness, it is a missing mechanism. The version, the name and
+the description length are now three of the claims `check:readme` verifies, and
+each was checked by planting its opposite: a version left behind by a release, a
+skill renamed away from its package, and a description pushed past the limit.
+
+The description limit is worth stating plainly rather than leaving as a number.
+It is 1024 characters, it is hard, and a longer one is truncated or rejected
+depending on the runtime — either way the losses come off the end, which is
+exactly where the trigger phrases are. The current description sits at 1,008.
+
+Written without regular expressions, deliberately. The first version of this
+check used four of them, and every one lost its backslashes on the way into the
+file and matched nothing — a check that passes because its pattern is broken is
+the precise failure this file exists to prevent.
+
 ## 2026-09-08
 
 ### The site says how an agent reaches it
