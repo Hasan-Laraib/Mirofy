@@ -47,7 +47,34 @@ than mitigating them:
 - **The published artifact is one file.** It opens from disk with no server and
   no external requests.
 
+## What it does do: shell access
+
+Supply-chain scanners flag this package for **shell access**, and the flag is
+correct. It is worth explaining rather than explaining away, because a project
+that asks you to check its claims should be able to account for its own alerts.
+
+It spawns two things, and only these two:
+
+- **`git`**, four times: `rev-parse HEAD` for the commit an artifact cites,
+  `check-ignore --stdin` so the walk respects your `.gitignore`, and `-C
+  <repo> …` for the file and line evidence behind each edge. This one is not
+  removable. The product's whole claim is that every relationship names the
+  commit it came from, and nothing can answer that but git.
+- **Node itself** (`process.execPath`), for the pipeline steps and, on request,
+  Chrome for `visual-check`.
+
+What it does not do, which is the part the alert cannot distinguish:
+
+- **No shell.** There is no `shell: true` anywhere. Every call is
+  `execFileSync`/`spawnSync` with an argument array, so nothing is
+  shell-interpolated and no metacharacter in a path or branch name is executed.
+- **No command built from a string.** No `exec()` with a template literal, and
+  no command assembled from user input.
+
+`npm run check:shell` holds both of those to be true, so they are checked
+claims rather than assurances.
+
 ## Supported versions
 
-The latest release. This project is at `0.1.0` and moves quickly; fixes go to
+The latest release. This project is at `0.6.0` and moves quickly; fixes go to
 `main` and into the next version rather than back to older ones.

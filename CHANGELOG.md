@@ -17,6 +17,39 @@ stops being one.
 
 ## 2026-09-10
 
+### The supply-chain alert, explained and then held to
+
+Scanners flag this package for **shell access**. The flag is correct, and a
+project that asks you to check its claims should account for its own alerts
+rather than explaining them away.
+
+It spawns two things. `git` — `rev-parse HEAD` for the commit an artifact
+cites, `check-ignore --stdin` so the walk respects your `.gitignore`, and
+`-C <repo> …` for the file and line behind each edge. That one is not
+removable: the whole claim is that every relationship names the commit it came
+from, and nothing but git can answer that. And Node itself, for the pipeline
+steps and, on request, Chrome for `visual-check`.
+
+What the alert cannot distinguish is the part that matters. There is no shell —
+every call passes an argument array, so no metacharacter in a path or a branch
+name is ever executed — and no command is assembled from a string. SECURITY.md
+now says so, and `check:shell` holds it true rather than leaving it an
+assurance. Both claims were checked by planting their opposite.
+
+For scale: every skill on the skills.sh audit index, Anthropic's and Vercel's
+included, shows 0 Socket alerts, so this one is a genuine outlier and worth
+answering. Snyk's Med Risk is not — Vercel's own `find-skills` carries it.
+
+`check:shell` took three attempts, and the failures are the reason it exists.
+The first matched call sites and flagged eighteen `regex.exec(line)` calls in
+the parsers, none of them a child process. The second used a character class
+whose backslash did not survive being written into the file, so `[{,s]` matched
+nothing and the check passed while a planted `execSync` import sat in the tree.
+It compares exact names now. A check that passes because its own pattern is
+broken is the failure this repository exists to refuse.
+
+SECURITY.md also said the project was at `0.1.0`. It is at `0.6.0`.
+
 ### SKILL.md is watched, after its version rotted twice in three days
 
 It said `0.1.0` while the package was on `0.5.5`. That was fixed on the 7th,
