@@ -197,8 +197,13 @@ tool that reaches the network.
 
 ## The pipeline, one step at a time
 
-`mirofy map` is these five steps in order. Run them yourself when you want to
-keep an intermediate, or point a step somewhere else:
+`mirofy map` is these five steps in order. If you only want the intermediates,
+`mirofy map . out.html --out ./scan` writes every one of them — the evidence
+graph, the model, the view and the positioned document — into that directory.
+
+To run a step on its own, or point one somewhere else, you need **a checkout**;
+these are the repository's own npm scripts, not commands the installed package
+exposes:
 
 ```bash
 npm run scan                    # repository  → evidence graph
@@ -208,8 +213,8 @@ npm run layout                  # view        → positioned document
 node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html --repo-root .
 ```
 
-Against **this repository** it records **1,220 facts** across **221 files**,
-with **15 gaps** it could not read; derives **18 components and 20
+Against **this repository** it records **1,227 facts** across **223 files**,
+with **16 gaps** it could not read; derives **18 components and 20
 relationships** — every one citing the file and line it came from — and draws
 **twelve**, recording what it left out and why.
 
@@ -360,10 +365,10 @@ drawing is never mistaken for a claim about the evidence.
 ### It answers questions about your system
 
 ```bash
-npm run explain -- callers api     # what points at api
-npm run explain -- impact api      # what is downstream of it
-npm run explain -- find payment    # id, label, kind or metadata match
-npm run explain -- gaps            # what the scan could not read
+mirofy explain callers api     # what points at api
+mirofy explain impact api      # what is downstream of it
+mirofy explain find payment    # id, label, kind or metadata match
+mirofy explain gaps            # what the scan could not read
 ```
 
 Every answer names the unread files that could change it. *"Nothing calls
@@ -377,8 +382,11 @@ running system, and Mirofy has no evidence for that.
 
 ### Your agent can ask too
 
-The same queries over MCP — nine tools, the same engine, not a second
-implementation that could disagree with the CLI:
+The same queries over MCP — 11 tools, the same engine, not a second
+implementation that could disagree with the CLI. `assert` and `timeline` are
+there too, because "is this change allowed" and "what has been moving here" are
+questions an agent asks *while* editing, and one that has to shell out to ask
+them will not ask at all:
 
 ```json
 { "mcpServers": { "mirofy": { "command": "npx", "args": ["-y", "mirofy-cli", "mcp"] } } }
@@ -394,7 +402,7 @@ JSON. Most clients feed the text to the model and drop the rest.
 ### It checks architecture rules — with three outcomes, not two
 
 ```bash
-npm run assert     # reads architecture-rules.json
+mirofy assert     # reads architecture-rules.json
 ```
 
 `pass`, `fail`, and **`unproven`**. A rule that found no violation over a scan
@@ -419,8 +427,8 @@ fails to parse instead. And a rule that passes on the strength of one says so:
 ### It tells you what is moving
 
 ```bash
-npm run timeline                                # cited-file churn, newest first
-npm run drift -- --base a.json --head b.json    # what two scans say differently
+mirofy timeline                                # cited-file churn, newest first
+mirofy drift --base a.json --head b.json       # what two scans say differently
 ```
 
 Drift reports changed facts and nothing else — no score, no risk label, no merge
@@ -508,7 +516,8 @@ pull request or a Notion page, though — all of them strip scripts. So:
 # 19 KB standalone SVG: no scripts, no stylesheet needed
 node packages/core/bin/mirofy.mjs render architecture in.json out.svg --format svg-static
 
-# or open it in an editor you already own
+# or open it in an editor you already own — from a checkout; the export
+# package is not bundled into the published CLI
 npm run export -- drawio     architecture in.json
 npm run export -- excalidraw architecture in.json
 ```

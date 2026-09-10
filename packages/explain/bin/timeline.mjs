@@ -1,4 +1,5 @@
-// `npm run timeline -- [--limit 5] [--top 15] [--json] [--since <git-date>]`
+// `mirofy timeline [--limit 5] [--top 15] [--json] [--since <git-date>]`
+// (in a checkout: `npm run timeline -- ...`)
 //
 // How the system changed, from the history it is already cited to (row 6.20).
 //
@@ -9,13 +10,18 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { buildTimeline } from '../src/timeline.mjs';
+import { commitsForRepo } from '../src/git-log.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+// Which repository's history to read. Defaults to this checkout, so the npm
+// script behaves exactly as it always has; `mirofy timeline` passes `--root`
+// so an installed copy reads the user's repository rather than its own
+// node_modules. Without it the command was correct and useless once installed:
+// every path it asked git about belonged to the wrong repository.
+const selfRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 
-const flags = { limit: 5, top: 15, model: path.join(repoRoot, 'scan', 'model.json') };
+const flags = { limit: 5, top: 15 };
 let json = false;
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i += 1) {
@@ -23,36 +29,19 @@ for (let i = 0; i < argv.length; i += 1) {
   if (argv[i].startsWith('--')) { flags[argv[i].slice(2)] = argv[i + 1]; i += 1; }
 }
 
+const repoRoot = flags.root ? path.resolve(flags.root) : selfRoot;
+if (!flags.model) flags.model = path.join(repoRoot, 'scan', 'model.json');
+
 const modelPath = path.resolve(flags.model);
 if (!fs.existsSync(modelPath)) {
-  console.error(`timeline: no system model at ${modelPath}. Run \`npm run scan\` then \`npm run model\`.`);
+  console.error(`timeline: no system model at ${modelPath}. Run \`mirofy map .\` to produce one `
+    + '(in a checkout: `npm run scan && npm run model`).');
   process.exit(2);
 }
 const model = JSON.parse(fs.readFileSync(modelPath, 'utf8'));
 
-const cache = new Map();
-/** Commits touching one path, newest first. */
-function commitsFor(filePath) {
-  if (cache.has(filePath)) return cache.get(filePath);
-  let commits = [];
-  try {
-    const args = ['log', '--follow', '--date=iso-strict', '--format=%H%ad%an%s'];
-    if (flags.since) args.push(`--since=${flags.since}`);
-    args.push('--', filePath);
-    const out = execFileSync('git', args, { cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-    commits = out.split('\n').filter(Boolean).map((line) => {
-      const [sha, date, author, subject] = line.split('');
-      return { sha: sha.slice(0, 7), date, author, subject };
-    });
-  } catch {
-    // A path git does not know is not an error: the model can cite a file that
-    // was deleted, or that lives in another repository entirely. It simply has
-    // no history here, and an empty list says exactly that.
-    commits = [];
-  }
-  cache.set(filePath, commits);
-  return commits;
-}
+// Bound to the repository named by --root, and memoised there.
+const commitsFor = commitsForRepo(repoRoot, { since: flags.since });
 
 const report = buildTimeline({ model, commitsFor, limit: Number(flags.limit) });
 

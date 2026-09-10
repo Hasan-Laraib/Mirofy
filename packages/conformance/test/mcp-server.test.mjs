@@ -62,10 +62,19 @@ test('[6.18] a notification draws no response at all', () => {
   assert.equal(handleLine('   ', context), null, 'a blank line produced a message');
 });
 
-test('[6.18] every advertised tool maps to a real query verb', () => {
+// `assert` and `timeline` are tools that are NOT query verbs. They answer the
+// questions an agent asks WHILE editing -- "is this change allowed", "what has
+// been moving here" -- and they need more than the model: rules to check, and
+// a repository to read history from. Both arrive on the context, so the server
+// stays a pure function of (message, context) and these tests keep driving it
+// without a filesystem.
+const NON_VERB_TOOLS = new Set(['assert', 'timeline']);
+
+test('[6.18] every advertised tool is either a query verb or a declared extra', () => {
   assert.ok(TOOLS.length >= 8, `only ${TOOLS.length} tools advertised`);
   for (const tool of TOOLS) {
-    assert.ok(VERBS.includes(tool.name), `tool ${tool.name} has no matching query verb`);
+    assert.ok(VERBS.includes(tool.name) || NON_VERB_TOOLS.has(tool.name),
+      `tool ${tool.name} is neither a query verb nor a declared extra`);
     assert.equal(tool.inputSchema.type, 'object', `${tool.name} has no object input schema`);
     assert.ok(tool.description.length > 40, `${tool.name} has a description too thin to act on`);
   }
@@ -73,6 +82,66 @@ test('[6.18] every advertised tool maps to a real query verb', () => {
   // an agent cannot reach.
   const advertised = new Set(TOOLS.map((t) => t.name));
   for (const verb of VERBS) assert.ok(advertised.has(verb), `verb ${verb} is not exposed as a tool`);
+  // The extras must be advertised too, or they are unreachable in exactly the
+  // way that kept all four of these commands off the CLI for five releases.
+  for (const name of NON_VERB_TOOLS) {
+    assert.ok(advertised.has(name), `${name} is declared an extra but not advertised`);
+  }
+});
+
+test('[6.18] assert over MCP reports unproven rather than treating a gap as a pass', () => {
+  const withRules = {
+    ...context,
+    graph: { gaps: [{ path: 'src/unread.js', reason: 'could not parse' }] },
+    rules: [{ id: 'no-cycles', kind: 'no-cycles' }],
+  };
+  const response = handleMessage({
+    jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'assert', arguments: {} },
+  }, withRules);
+  const text = response.result.content[0].text;
+  assert.match(text, /unproven/i, 'a rule checked over an incomplete scan must not read as passing');
+  assert.match(text, /not a passing rule/i, 'the reader is never told what unproven means');
+});
+
+test('[6.18] assert with no rules refuses rather than reporting that nothing failed', () => {
+  // The dangerous answer is "0 failed". An agent reading that from a session
+  // which had no rules has been told the architecture is clean by a check that
+  // never ran.
+  const response = handleMessage({
+    jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'assert', arguments: {} },
+  }, { ...context, rules: null });
+  assert.equal(response.result.isError, true);
+  assert.match(response.result.content[0].text, /no architecture rules/i);
+  assert.doesNotMatch(response.result.content[0].text, /0 failed/);
+});
+
+test('[6.18] assert accepts rules passed with the call', () => {
+  const response = handleMessage({
+    jsonrpc: '2.0', id: 1, method: 'tools/call',
+    params: { name: 'assert', arguments: { rules: [{ id: 'inline', kind: 'no-cycles' }] } },
+  }, { ...context, rules: null });
+  assert.notEqual(response.result.isError, true);
+  assert.match(response.result.content[0].text, /inline/);
+});
+
+test('[6.18] timeline over MCP says it has no history rather than reporting none', () => {
+  const response = handleMessage({
+    jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'timeline', arguments: {} },
+  }, { ...context, commitsFor: undefined });
+  assert.equal(response.result.isError, true);
+  assert.match(response.result.content[0].text, /no access to git history/i);
+});
+
+test('[6.18] timeline over MCP carries the churn caveat into the text an agent reads', () => {
+  const withHistory = {
+    ...context,
+    commitsFor: () => [{ sha: 'abc1234', date: '2026-01-01', author: 'a', subject: 'change' }],
+  };
+  const response = handleMessage({
+    jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'timeline', arguments: {} },
+  }, withHistory);
+  assert.match(response.result.content[0].text, /did not necessarily change this component/i,
+    'churn must never be presented as the component having changed');
 });
 
 test('[6.18] no tool description promises more than the model can support', () => {

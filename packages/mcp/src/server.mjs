@@ -25,10 +25,14 @@
 // lives in bin/mcp.mjs and does nothing but read lines and write lines, so the
 // protocol can be tested without spawning anything.
 
-import { explain, VERBS } from '../../explain/src/query.mjs';
+import { explain, VERBS, indexModel, incompletenessFor } from '../../explain/src/query.mjs';
+import { assertRules, OUTCOMES } from '../../explain/src/assert.mjs';
+import { buildTimeline } from '../../explain/src/timeline.mjs';
 
 /** The MCP revision this server implements. */
 export const PROTOCOL_VERSION = '2024-11-05';
+
+const NEWLINE = String.fromCharCode(10);
 
 const JSONRPC = '2.0';
 
@@ -126,6 +130,44 @@ export const TOOLS = Object.freeze([
     description: 'The shape of the model: component, relationship and boundary counts, and provenance mix.',
     inputSchema: { type: 'object', properties: {} },
   },
+  // The two below do not go through the query engine. They are here because
+  // they answer the questions an agent asks WHILE changing code -- "is this
+  // change allowed" and "what has been moving here" -- and an agent that has
+  // to shell out to answer them will not ask at all.
+  //
+  // `drift` is deliberately NOT offered. It compares two scans, which is a
+  // pull-request question rather than a query, and inventing a second graph
+  // for this session to diff against would be a made-up answer.
+  {
+    name: 'assert',
+    description: 'Check architecture rules against the model. THREE outcomes, not two: pass, fail, and '
+      + 'unproven — a rule that found no violation in a scan with unread files has not been shown to '
+      + 'hold. Never read unproven as passing. Rules come from the repository unless you pass your own.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        rules: {
+          type: 'array',
+          description: 'Rules to check. Omit to use the repository\'s architecture-rules.json. '
+            + 'Each is {id, kind, ...}; kind is one of forbid-dependency, require-dependency, '
+            + 'no-cycles, max-fan-in, max-fan-out.',
+        },
+      },
+    },
+  },
+  {
+    name: 'timeline',
+    description: 'How often each component\'s cited files have changed, from git history. This is '
+      + 'CITED-FILE CHURN: a commit here touched a file the component is cited to, which is not the '
+      + 'same as the component changing shape or meaning. Components with no citations are reported '
+      + 'separately rather than as unchanged.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        limit: { type: 'number', description: 'Most recent commits to keep per component. Defaults to 5.' },
+      },
+    },
+  },
 ]);
 
 const result = (id, value) => ({ jsonrpc: JSONRPC, id, result: value });
@@ -164,6 +206,101 @@ export function toolContent(answer) {
   };
 }
 
+/**
+ * A tool that cannot run because the session was not given what it needs.
+ *
+ * This is content, not a protocol error, and it says which input is missing
+ * rather than returning an empty answer. An agent that reads "0 rules failed"
+ * from a session that had no rules has been misled; one that reads this can
+ * ask the user for a rule file.
+ */
+const unavailable = (text) => ({ content: [{ type: 'text', text }], isError: true });
+
+/** `assert` over the session's model, with the rules the caller or repository supplied. */
+function assertTool(args, context) {
+  const rules = Array.isArray(args.rules) && args.rules.length ? args.rules : context.rules;
+  if (!Array.isArray(rules) || rules.length === 0) {
+    return unavailable('assert: no architecture rules in this session. Pass `rules` with the call, '
+      + 'or start the server in a repository that has an architecture-rules.json.');
+  }
+  const report = assertRules({
+    index: indexModel(context.model),
+    incompleteness: incompletenessFor(context.graph),
+    rules,
+    acknowledgements: context.acknowledgedGaps ?? [],
+    // Never silently tolerated over MCP. The caller sees `unproven` in the
+    // result and decides; a server that quietly accepted it would be handing
+    // an agent a green light it did not earn.
+    allowUnproven: false,
+  });
+
+  const lines = [`${report.passed} passed, ${report.failed} failed, ${report.unproven} unproven `
+    + `of ${report.total}.`];
+  for (const outcome of report.results) {
+    const mark = outcome.outcome === OUTCOMES.PASS ? 'pass'
+      : outcome.outcome === OUTCOMES.FAIL ? 'FAIL' : 'UNPROVEN';
+    lines.push(`[${mark}] ${outcome.id} — ${outcome.reason}`);
+    for (const violation of outcome.violations.slice(0, 5)) {
+      if (violation.cycle) lines.push(`    cycle: ${violation.cycle.join(' -> ')}`);
+      else if (violation.missing) lines.push(`    ${violation.from} reaches nothing matching ${violation.to}`);
+      else if (violation.component) lines.push(`    ${violation.component}: ${violation.degree} > ${violation.limit}`);
+      else lines.push(`    ${violation.from} -> ${violation.to}`);
+    }
+  }
+  if (report.unproven > 0) {
+    lines.push('An unproven rule is not a passing rule: the violation could be in a file the scan '
+      + 'could not read. Check `gaps` before treating this as clean.');
+  }
+  return {
+    content: [
+      { type: 'text', text: lines.join(NEWLINE) },
+      { type: 'text', text: JSON.stringify(report, null, 2) },
+    ],
+    isError: false,
+  };
+}
+
+/** `timeline` over the session's model, using the git reader the host supplied. */
+function timelineTool(args, context) {
+  if (typeof context.commitsFor !== 'function') {
+    return unavailable('timeline: this session has no access to git history. Start the server from '
+      + 'inside the repository the model was built from.');
+  }
+  const report = buildTimeline({
+    model: context.model,
+    commitsFor: context.commitsFor,
+    limit: Number.isFinite(Number(args.limit)) ? Number(args.limit) : 5,
+  });
+  const lines = [`${report.measures} across ${report.components} cited component(s).`];
+  for (const entry of report.entries.slice(0, 15)) {
+    lines.push(`${String(entry.commitCount).padStart(4)} commit(s)  ${entry.label} (${entry.id})`);
+  }
+  if (report.uncitedComponents > 0) {
+    lines.push(`${report.uncitedComponents} component(s) have no cited source paths, so history `
+      + 'cannot speak to them. That is unknown, not unchanged.');
+  }
+  lines.push(report.claim);
+  return {
+    content: [
+      { type: 'text', text: lines.join(NEWLINE) },
+      { type: 'text', text: JSON.stringify(report, null, 2) },
+    ],
+    isError: false,
+  };
+}
+
+/**
+ * Run one tool and return MCP content.
+ *
+ * The nine query verbs share one shape and one formatter; `assert` and
+ * `timeline` answer different questions and carry their own.
+ */
+export function callTool(name, args, context) {
+  if (name === 'assert') return assertTool(args, context);
+  if (name === 'timeline') return timelineTool(args, context);
+  return toolContent(runTool(name, args, context));
+}
+
 /** Map a tool call onto the query engine. */
 function runTool(name, args, context) {
   const verbArgs = {
@@ -192,8 +329,15 @@ function runTool(name, args, context) {
 /**
  * Handle one JSON-RPC message.
  *
+ * `rules`, `acknowledgedGaps` and `commitsFor` are what the two non-query
+ * tools need, and they arrive on the context rather than being read here: the
+ * host supplies them, so this stays a pure function of (message, context) and
+ * the tests drive it without a filesystem or a repository.
+ *
  * @param {object} message
- * @param {{model: object, graph: object|null, serverInfo?: object}} context
+ * @param {{model: object, graph: object|null, serverInfo?: object,
+ *          rules?: Array<object>|null, acknowledgedGaps?: Array<object>,
+ *          commitsFor?: (path: string) => Array<object>}} context
  * @returns {object|null} the response, or null for a notification
  */
 export function handleMessage(message, context) {
@@ -224,7 +368,7 @@ export function handleMessage(message, context) {
       const { name, arguments: args = {} } = message.params ?? {};
       if (!name) return failure(message.id, ERRORS.INVALID_PARAMS, 'tools/call needs a tool name.');
       try {
-        return result(message.id, toolContent(runTool(name, args, context)));
+        return result(message.id, callTool(name, args, context));
       } catch (error) {
         // A bad component id is the caller's mistake, not a server fault, and
         // it comes back as tool content rather than a protocol error: the

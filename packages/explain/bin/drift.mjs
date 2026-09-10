@@ -1,4 +1,5 @@
-// `npm run drift -- --base <graph.json> --head <graph.json> [--json] [--markdown]`
+// `mirofy drift --base <graph.json> --head <graph.json> [--json] [--markdown]`
+// (in a checkout: `npm run drift -- ...`)
 //
 // Evidence drift between two scans (P5.1). Reports changed facts and nothing
 // else: no score, no risk label, no merge recommendation.

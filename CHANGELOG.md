@@ -17,6 +17,57 @@ stops being one.
 
 ## 2026-09-10
 
+### Four commands that shipped, were tested, and could not be run
+
+`explain`, `assert`, `timeline` and `drift` were written, tested, and inside
+the published tarball. No user could reach any of them.
+
+They existed only as root-repo npm scripts, so they ran for someone who had
+cloned this monorepo and for nobody else. The roadmap marked all four shipped —
+and it was right about the code, which is why nothing looked wrong. The README
+was worse than silent: it documented all four in the product's own feature
+voice, as `npm run assert`, `npm run timeline`, `npm run explain`. Anyone who
+read the front page and installed the package found none of them, and the
+README that actually ships to npm did not mention them at all.
+
+Every gate was green throughout. `check:readme` verified the *numbers* in the
+root README and the *commands* in the npm one; the publish guard walked what
+the CLI advertised. Nothing asked whether the front page told people to run
+something they could not.
+
+So: all four are CLI commands now, and `assert` and `timeline` are MCP tools as
+well, because "is this change allowed" and "what has been moving here" are
+questions an agent asks *while* editing — one that has to shell out to ask them
+will not ask at all.
+
+The second half of the bug was quieter than the routing. Each command's
+defaults resolved against its own installation directory, so even once reached,
+`timeline` would have read the history of `node_modules`. They take `--root`
+now, the CLI passes the working directory, and the tests run every command from
+inside a throwaway repository **with no explicit paths** — passing `--model`
+would exercise the command and walk straight past the bug.
+
+Three smaller things fell out of the same defect. The error hints said *"run
+`npm run scan`"*, which an installed reader cannot do either. `npm run export`
+was offered as a user-facing escape hatch, and the export package is not
+bundled into the CLI at all — it is labelled as needing a checkout now. And the
+git-log reader moved out of `packages/explain/bin/timeline.mjs` into
+`packages/explain/src/git-log.mjs`, so the MCP server and the command share one
+invocation rather than two copies that drift.
+
+`check:readme` gained the claim that catches this class, and it took two
+attempts to make a real one. The obvious check — every command shown must be
+one the CLI advertises — passes happily on `npm run assert`, because there is
+no `mirofy` token in that line to notice. The claim that actually bites is
+narrower: when a name is **both** something the CLI advertises and an npm
+script, the page must teach the CLI spelling. `check` is the one documented
+exception, since `npm run check` is this repository's whole gate while
+`mirofy check` validates a rendered artifact — four shared letters and nothing
+else in common.
+
+Verified by planting the original defect back and watching the gate fail, and
+by removing `--root` and watching seven of the fourteen new tests fail.
+
 ### The supply-chain alert, explained and then held to
 
 Scanners flag this package for **shell access**. The flag is correct, and a

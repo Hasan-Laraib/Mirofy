@@ -148,6 +148,12 @@ try {
   fs.writeFileSync(path.join(repo, 'src/api/routes.mjs'),
     ["import { save } from '../store/repo.mjs';", 'export const app = () => save();', ''].join(NEWLINE));
   fs.writeFileSync(path.join(repo, 'src/store/repo.mjs'), 'export const save = () => 1;' + NEWLINE);
+  // `assert` needs a rule file to have anything to say. A rule that actually
+  // EVALUATES on this subject is the point: a walk proving only that the
+  // command can refuse its arguments would not prove it can judge one.
+  fs.writeFileSync(path.join(repo, 'architecture-rules.json'), JSON.stringify({
+    rules: [{ id: 'no-cycles-in-subject', kind: 'no-cycles' }],
+  }));
   for (const args of [['init', '-q'], ['add', '-A'],
     ['-c', 'user.email=probe@local', '-c', 'user.name=probe', 'commit', '-qm', 'probe']]) {
     execFileSync('git', args, { cwd: repo, stdio: 'ignore' });
@@ -214,6 +220,18 @@ try {
     mcp: { mode: "runs", argv: ["mcp",
       "--model", path.join(probe, "mscan", "model.json"),
       "--graph", path.join(probe, "mscan", "evidence-graph.json")] },
+    // The four evidence commands, run from INSIDE the mapped subject with no
+    // explicit paths. That is deliberate: each one defaults its model, graph
+    // and rules against the working directory, and every one of them used to
+    // default against its own installation instead -- which is precisely how
+    // all four shipped unreachable. Passing --model here would walk past the
+    // bug this walk exists to catch.
+    explain: { mode: "runs", argv: ["explain", "summary"], cwd: repo },
+    assert: { mode: "runs", argv: ["assert", "--allow-unproven"], cwd: repo },
+    timeline: { mode: "runs", argv: ["timeline"], cwd: repo },
+    drift: { mode: "runs", argv: ["drift",
+      "--base", path.join(repo, "scan", "evidence-graph.json"),
+      "--head", path.join(repo, "scan", "evidence-graph.json")], cwd: repo },
     render: { mode: "runs", argv: ["render", "architecture", ARCH, path.join(probe, "r.html")] },
     compare: { mode: "runs", argv: ["compare", "architecture",
       example("checkout-platform.base.architecture.json"),
