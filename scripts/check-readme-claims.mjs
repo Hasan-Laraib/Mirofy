@@ -746,6 +746,139 @@ const skillName = frontmatterField('name');
 assertThat(`SKILL.md: its name matches the package it drives`,
   skillName === 'mirofy', `SKILL.md declares ${skillName ?? '(none)'}`);
 
+// ---------------------------------------------------------------------------
+// Commands a reader is told to run must be commands that reader can run
+// ---------------------------------------------------------------------------
+// The npm page has been checked for this since 0.5. The ROOT README never was,
+// and that is where it went wrong: `explain`, `assert`, `timeline` and `drift`
+// were written, tested and shipped inside the tarball, and the front page
+// documented all four in the product's own feature voice --
+//
+//     ### It checks architecture rules — with three outcomes, not two
+//     npm run assert
+//
+// `npm run` works inside a clone of this monorepo and nowhere else. Anyone who
+// read that page and installed the package found no such command, and the
+// shipped README did not mention the four at all. Every gate passed
+// throughout: this file checked the root README's NUMBERS and the npm page's
+// COMMANDS, and nothing checked the root README's commands.
+//
+// The rule below is about the reader, not the string. A command shown in a
+// code block is an instruction, and an instruction that cannot be followed is
+// the same unchecked claim this page argues against making.
+
+const NL = String.fromCharCode(10);
+
+/**
+ * Commands a page tells its reader to run, from fenced code blocks only --
+ * prose that happens to contain the word is not an instruction.
+ *
+ * String operations rather than a pattern: this file is edited by tools that
+ * collapse backslash escapes, and a character class that quietly lost a
+ * bracket would match nothing and pass every time.
+ *
+ * @param {string} page
+ * @returns {Map<string, number>} command -> first line it appears on
+ */
+function shownCommands(page) {
+  const found = new Map();
+  let inFence = false;
+  let lineNo = 0;
+  for (const line of page.split(NL)) {
+    lineNo += 1;
+    if (line.trimStart().startsWith('```')) { inFence = !inFence; continue; }
+    if (!inFence) continue;
+    const trimmed = line.trim();
+    if (trimmed.startsWith('#')) continue;
+    const tokens = trimmed.split(' ').filter(Boolean);
+    for (let i = 0; i < tokens.length - 1; i += 1) {
+      const token = tokens[i];
+      if (token !== 'mirofy' && token !== 'mirofy-cli' && !token.endsWith('mirofy.mjs')) continue;
+      const next = tokens[i + 1];
+      if (!next || next.startsWith('-') || next.startsWith('<') || next.startsWith('[')) continue;
+      if (!found.has(next)) found.set(next, lineNo);
+    }
+  }
+  return found;
+}
+
+// A walk over an empty set passes vacuously. The CLI has advertised more than
+// ten commands since 0.4, and the root README shows several.
+assertThat(`readme: the CLI advertises a command list to check against`,
+  advertised.size >= 10, `--help yielded ${advertised.size} command(s)`);
+
+const rootShown = shownCommands(readme);
+assertThat(`README.md: it shows commands to check`,
+  rootShown.size >= 5, `${rootShown.size} command(s) shown in code blocks`);
+
+const rootUnreachable = [...rootShown.entries()].filter(([command]) => !advertised.has(command));
+assertThat(`README.md: every command it shows is one the CLI advertises`,
+  rootUnreachable.length === 0,
+  rootUnreachable.map(([command, line]) => `line ${line}: "${command}"`).join(', '));
+
+// The npm page's reader installed a package. They have no npm scripts, so an
+// instruction to run one is an instruction they cannot follow.
+assertThat(`npm page: it never tells an installed reader to \`npm run\``,
+  !npmReadme.includes('npm run'),
+  'the page npmjs.com renders points at scripts only a checkout has');
+
+// Named explicitly, so the four that were unreachable cannot quietly leave the
+// page they were missing from.
+for (const command of ['explain', 'assert', 'timeline', 'drift']) {
+  assertThat(`npm page: it documents \`${command}\``,
+    documented.has(command), `packages/core/README.md does not show ${command}`);
+}
+
+// Wherever the root README does say `npm run`, the script must exist. It is
+// allowed to -- a checkout is a real audience -- but naming a script that was
+// renamed is the same rot in a different place.
+const scripts = new Set(Object.keys(JSON.parse(
+  fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8')).scripts ?? {}));
+const namedScripts = new Set();
+for (const line of readme.split(NL)) {
+  let from = 0;
+  for (;;) {
+    const at = line.indexOf('npm run ', from);
+    if (at === -1) break;
+    // The name ends at whitespace, at the closing backtick when the mention is
+    // inline prose, or at sentence punctuation. Taking the token whole read
+    // "build:template`." as a script name and failed on a script that exists.
+    let name = line.slice(at + 'npm run '.length).trim().split(' ')[0];
+    const tick = name.indexOf(String.fromCharCode(96));
+    if (tick !== -1) name = name.slice(0, tick);
+    while (name.length && '.,;:)]"\''.includes(name[name.length - 1])) name = name.slice(0, -1);
+    if (name) namedScripts.add(name);
+    from = at + 1;
+  }
+}
+const missingScripts = [...namedScripts].filter((name) => !scripts.has(name));
+assertThat(`README.md: every \`npm run\` it names is a script that exists`,
+  missingScripts.length === 0, `no such script: ${missingScripts.join(', ')}`);
+
+// The claim that actually catches the bug.
+//
+// The three above do not, and it is worth saying why rather than leaving a
+// reassuring row. The defect was `npm run assert` in the root README, offered
+// as the way to use the product. It contains no `mirofy` token, so the
+// "commands it shows" walk never sees it; `assert` is a real script, so the
+// walk above passes. Both were green while the page was wrong.
+//
+// What was actually wrong is narrower: `assert` had become a CLI command, and
+// the page still taught the checkout-only spelling. So -- when a name is BOTH
+// something the CLI advertises and an npm script, the page must teach the CLI.
+const SAME_NAME_DIFFERENT_THING = new Set([
+  // `npm run check` is this repository's whole gate -- lint, types, tests,
+  // conformance, size, audit. `mirofy check` validates one rendered artifact.
+  // They share four letters and nothing else, and the README means the gate.
+  'check',
+]);
+const shouldBeCli = [...namedScripts]
+  .filter((name) => advertised.has(name) && !SAME_NAME_DIFFERENT_THING.has(name));
+assertThat(`README.md: teaches \`mirofy <cmd>\`, not \`npm run <cmd>\`, for commands the CLI has`,
+  shouldBeCli.length === 0,
+  `${shouldBeCli.join(', ')} — the CLI advertises these, so a reader who installed the `
+    + 'package cannot follow an `npm run` instruction for them');
+
 const failed = results.filter((result) => !result.ok);
 for (const result of results) {
   console.log(`  ${result.ok ? 'ok  ' : 'FAIL'}  ${result.claim}`);

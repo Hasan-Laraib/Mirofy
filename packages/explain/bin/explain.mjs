@@ -1,4 +1,5 @@
-// `npm run explain -- <verb> [args] [--json] [--depth N] [--model path] [--graph path]`
+// `mirofy explain <verb> [args] [--json] [--depth N] [--model path] [--graph path]`
+// (in a checkout: `npm run explain -- <verb> ...`)
 //
 // Graph queries over the system model (row 6.19).
 //
@@ -21,10 +22,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { explain, VERBS } from '../src/query.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+// Defaults are resolved AFTER parsing, against `--root` when it is given.
+// `mirofy explain` passes it so an installed copy reads the user's scan rather
+// than looking for one inside its own node_modules.
+const selfRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 
 const argv = process.argv.slice(2);
-const flags = { depth: 3, model: path.join(repoRoot, 'scan', 'model.json'), graph: path.join(repoRoot, 'scan', 'evidence-graph.json') };
+const flags = { depth: 3 };
 const positional = [];
 let json = false;
 for (let i = 0; i < argv.length; i += 1) {
@@ -34,6 +38,10 @@ for (let i = 0; i < argv.length; i += 1) {
   if (arg.startsWith('--')) { flags[arg.slice(2)] = argv[i + 1]; i += 1; continue; }
   positional.push(arg);
 }
+
+const repoRoot = flags.root ? path.resolve(flags.root) : selfRoot;
+if (!flags.model) flags.model = path.join(repoRoot, 'scan', 'model.json');
+if (!flags.graph) flags.graph = path.join(repoRoot, 'scan', 'evidence-graph.json');
 
 const [verb, ...args] = positional;
 if (!verb || !VERBS.includes(verb)) {
@@ -46,8 +54,11 @@ if (!verb || !VERBS.includes(verb)) {
 function readJson(file, what) {
   if (!fs.existsSync(file)) {
     // Naming the command that produces the missing input, rather than the
-    // missing file alone: the answer to "no model.json" is always `npm run model`.
-    console.error(`explain: no ${what} at ${file}. Run \`npm run scan\` then \`npm run model\` first.`);
+    // missing file alone. It named `npm run model` until 0.6.1, which works
+    // only inside a clone of this monorepo -- the same mistake that kept this
+    // command unreachable to everyone who installed it.
+    console.error(`explain: no ${what} at ${file}. Run \`mirofy map .\` to produce one `
+      + '(in a checkout: `npm run scan && npm run model`).');
     process.exit(2);
   }
   return JSON.parse(fs.readFileSync(file, 'utf8'));

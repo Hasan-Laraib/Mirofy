@@ -43,6 +43,20 @@ npx mirofy-cli guide "an API request with a cache miss"
 npx mirofy-cli mcp                            # serve the map to an agent
 ```
 
+Once a repository is mapped, four commands read the evidence it produced:
+
+```bash
+npx mirofy-cli explain callers api     # what points at something, with citations
+npx mirofy-cli explain gaps            # what the scan could not read
+npx mirofy-cli assert                  # architecture rules: pass, fail, unproven
+npx mirofy-cli timeline                # how often each component's cited files change
+npx mirofy-cli drift --base a.json --head b.json   # what two scans say differently
+```
+
+`assert` has **three** outcomes, not two. A rule that found no violation over a
+scan with unread files has not been *shown* to hold, so `unproven` is its own
+result and never counts as passing.
+
 ## Give it to your agent
 
 The same tool, reached three other ways. All of them run this package — the

@@ -1,4 +1,5 @@
-// `npm run assert -- [--rules architecture-rules.json] [--json] [--allow-unproven]`
+// `mirofy assert [--rules architecture-rules.json] [--json] [--allow-unproven]`
+// (in a checkout: `npm run assert -- ...`)
 //
 // Architecture rules as CI checks (row 3.15).
 //
@@ -13,14 +14,13 @@ import { fileURLToPath } from 'node:url';
 import { indexModel, incompletenessFor } from '../src/query.mjs';
 import { assertRules, OUTCOMES } from '../src/assert.mjs';
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+// Defaults are resolved AFTER parsing, against `--root` when it is given, so
+// `mirofy assert` reads the rules and scan of the repository the user is in
+// rather than the ones inside its own installation.
+const selfRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 
 const argv = process.argv.slice(2);
-const flags = {
-  rules: path.join(repoRoot, 'architecture-rules.json'),
-  model: path.join(repoRoot, 'scan', 'model.json'),
-  graph: path.join(repoRoot, 'scan', 'evidence-graph.json'),
-};
+const flags = {};
 let json = false;
 let allowUnproven = false;
 for (let i = 0; i < argv.length; i += 1) {
@@ -28,6 +28,11 @@ for (let i = 0; i < argv.length; i += 1) {
   if (argv[i] === '--allow-unproven') { allowUnproven = true; continue; }
   if (argv[i].startsWith('--')) { flags[argv[i].slice(2)] = argv[i + 1]; i += 1; }
 }
+
+const repoRoot = flags.root ? path.resolve(flags.root) : selfRoot;
+if (!flags.rules) flags.rules = path.join(repoRoot, 'architecture-rules.json');
+if (!flags.model) flags.model = path.join(repoRoot, 'scan', 'model.json');
+if (!flags.graph) flags.graph = path.join(repoRoot, 'scan', 'evidence-graph.json');
 
 function read(file, what, hint) {
   if (!fs.existsSync(file)) {
@@ -37,7 +42,11 @@ function read(file, what, hint) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-const model = read(path.resolve(flags.model), 'system model', 'Run `npm run scan` then `npm run model`.');
+// The hint names a command the reader can actually run. It used to name
+// `npm run scan`, which works only inside a clone of this monorepo -- the same
+// mistake that kept this command unreachable in the first place.
+const model = read(path.resolve(flags.model), 'system model',
+  'Run `mirofy map .` to produce one (in a checkout: `npm run scan && npm run model`).');
 const graph = fs.existsSync(path.resolve(flags.graph))
   ? JSON.parse(fs.readFileSync(path.resolve(flags.graph), 'utf8'))
   : null;

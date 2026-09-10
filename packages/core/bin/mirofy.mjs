@@ -58,6 +58,10 @@ function usage() {
   ${SELF} inspect <type> <input.json>
   ${SELF} check <output.html>
   ${SELF} mcp [--model scan/model.json] [--graph scan/evidence-graph.json]
+  ${SELF} explain <verb> [args] [--json] [--depth N]   callers, dependencies, impact, upstream, path, find, orphans, gaps, summary
+  ${SELF} assert [--rules architecture-rules.json] [--json] [--allow-unproven]
+  ${SELF} timeline [--limit 5] [--top 15] [--since <git-date>] [--json]
+  ${SELF} drift --base <graph.json> --head <graph.json> [--json] [--markdown]
   ${SELF} visual-check <output.html> [--json]
   ${SELF} guide [scenario or question] [--json] [--lang en|zh]
   ${SELF} brands [name, alias, domain, or category] [--json]
@@ -1323,6 +1327,39 @@ async function commandPreview(args) {
  * JSON-RPC message -- a stray line is a parse error in the client rather than
  * a message anyone reads -- so every diagnostic here goes to stderr.
  */
+/**
+ * The four evidence commands, run from the bundled `explain` package.
+ *
+ * These were written, tested and shipped inside the tarball, and no user could
+ * reach any of them: they existed only as root-repo npm scripts, so they ran
+ * for someone who had cloned the monorepo and for nobody else. Worse, the
+ * README advertised all four in the product's own voice, which made the
+ * project's front page a claim its artifact did not support.
+ *
+ * Each one already accepted the flags it needed; only its DEFAULTS pointed at
+ * the monorepo. `--root` is passed here so an installed copy reads the
+ * repository the user is standing in rather than its own node_modules, and it
+ * is the same flag name the scan pipeline already uses for the same idea.
+ *
+ * @param {string} name  the bin under explain/bin/
+ * @param {string[]} argv
+ * @param {{root?: boolean}} [options]  root:false for a command that takes explicit paths
+ */
+function commandExplainTool(name, argv, options = {}) {
+  const script = pipelineStep(`explain/bin/${name}.mjs`);
+  if (!script) {
+    fail(`This build has no ${name} step.${NEWLINE}${NEWLINE}`
+      + 'Run it from a checkout, or reinstall mirofy-cli -- the published package '
+      + 'carries the pipeline under core/pipeline/.');
+  }
+  // `--root` is prepended, never appended: a user's own --root must win, and
+  // the bins take the LAST value for a repeated flag.
+  const rooted = options.root === false ? argv : ['--root', process.cwd(), ...argv];
+  const step = spawnSync(process.execPath, [script, ...rooted],
+    { cwd: process.cwd(), stdio: 'inherit' });
+  process.exit(step.status ?? 1);
+}
+
 async function commandMcp(argv) {
   const flags = { model: path.join(process.cwd(), 'scan', 'model.json'),
     graph: path.join(process.cwd(), 'scan', 'evidence-graph.json') };
@@ -1338,11 +1375,36 @@ async function commandMcp(argv) {
   }
 
   const { handleLine } = await import(bundledModule('mcp/src/server.mjs'));
+  const { commitsForRepo } = await import(bundledModule('explain/src/git-log.mjs'));
   const graphPath = path.resolve(flags.graph);
+
+  // `assert` and `timeline` need more than the model: rules to check, and a
+  // repository to read history from. Both are supplied HERE rather than read
+  // inside the server, so the protocol layer stays a pure function of
+  // (message, context) and the tests keep driving it without a filesystem.
+  const rulesPath = path.resolve(flags.rules ?? path.join(process.cwd(), 'architecture-rules.json'));
+  let rules = null;
+  let acknowledgedGaps = [];
+  if (fs.existsSync(rulesPath)) {
+    try {
+      const ruleFile = JSON.parse(fs.readFileSync(rulesPath, 'utf8'));
+      rules = ruleFile.rules ?? ruleFile;
+      acknowledgedGaps = ruleFile.acknowledgedGaps ?? [];
+    } catch (error) {
+      // A malformed rule file must not take the whole server down: every other
+      // tool still works, and `assert` will say it has no rules.
+      process.stderr.write(`mirofy mcp: could not read ${rulesPath}: ${error.message}`
+        + `${String.fromCharCode(10)}`);
+    }
+  }
+
   const context = {
     model: JSON.parse(fs.readFileSync(modelPath, 'utf8')),
     graph: fs.existsSync(graphPath) ? JSON.parse(fs.readFileSync(graphPath, 'utf8')) : null,
     serverInfo: { name: 'mirofy', version: VERSION },
+    rules,
+    acknowledgedGaps,
+    commitsFor: commitsForRepo(process.cwd()),
   };
   if (!context.graph) {
     process.stderr.write('mirofy mcp: no evidence graph beside the model; answers will report '
@@ -2241,6 +2303,20 @@ switch (command) {
     break;
   case 'mcp':
     await commandMcp(args);
+    break;
+  case 'explain':
+    commandExplainTool('explain', args);
+    break;
+  case 'assert':
+    commandExplainTool('assert', args);
+    break;
+  case 'timeline':
+    commandExplainTool('timeline', args);
+    break;
+  case 'drift':
+    // Takes two explicit graph paths and reads no scan of its own, so it has
+    // no repository to be rooted in.
+    commandExplainTool('drift', args, { root: false });
     break;
   case 'check':
     commandCheck(args);
