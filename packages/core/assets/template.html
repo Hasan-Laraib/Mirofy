@@ -8167,8 +8167,8 @@
         /* The slug and the revision link come from the payload, which the
            host adapter built. Deriving them here meant assuming one forge's
            URL shape: on anything but GitHub the link 404'd and the slug
-           displayed as a full URL. Older artifacts carry neither field, so
-           both fall back to the previous behaviour. */
+           displayed as a full URL. Older artifacts carry neither field: the
+           slug falls back to the previous behaviour, the link does not. */
         var slug = repository.slug
           || repository.url.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, '');
         /* A local repository has no tree URL. Hide the link rather than
