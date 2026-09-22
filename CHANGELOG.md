@@ -15,6 +15,50 @@ stops being one.
 
 ---
 
+## 2026-09-22
+
+### A repository on a forge we do not recognise is no longer a rendering failure
+
+`detectHost()` knows six public forges. Until now, a diagram whose repository
+was not on one of them could not be rendered at all: the evidence path raised
+`repository-evidence/url-invalid` and stopped. Self-hosted GitLab, self-hosted
+Gitea and enterprise GitHub were all excluded, which is an odd thing for a tool
+whose stated value is that it runs offline.
+
+The reason the failure existed was that the renderer wanted to build a web
+link, and could not. But **the link was never the evidence.** A fact's
+substance is its path, its line range and its revision, and all three are
+present and checkable in a local checkout. Making the convenience mandatory
+inverted the priority.
+
+So an unrecognised host is now a supported state. Such a repository reports
+`host: "local"` and `treeUrl: null` — a consumer can act on that without
+parsing prose — and the returned object carries a `limitations` entry naming
+the repository, the reason, and the URL that was declared. An author who
+mistyped `guthub.com` sees their typo there rather than silently losing their
+links. `limitations` is absent, not empty, when every repository is hosted, so
+nothing changes for anyone who was already fine.
+
+A malformed value that is not a URL at all still fails. That is an authoring
+mistake, not a property of the repository, and the two should not collapse
+into one.
+
+The viewer previously filled a missing tree URL by concatenating
+`repository.url + '/tree/' + revision`. With `treeUrl` now legitimately null
+that fallback would have fabricated a link to a destination that does not
+exist, so the anchor is hidden instead. A dead link claims a destination
+exists; no link claims nothing.
+
+**What this does not cover.** A repository with *no remote at all* is still
+refused, and deliberately so: three separate things block it — the evidence
+path requires an origin remote, the published JSON schema makes an
+`https://` url required, and the layout binary drops a repository that has no
+origin before the new code is ever reached. Relaxing a published schema is a
+public-contract change that deserves its own design rather than a quiet
+widening here.
+
+---
+
 ## 2026-09-10
 
 ### Four commands that shipped, were tested, and could not be run
@@ -1127,7 +1171,8 @@ patterns in the Python adapter end that way. On a Windows clone of a real
 it: no error, no warning, just a nearly empty diagram that looked like a correct
 answer. Every Windows checkout of every Python project would have hit it.
 
-Splitting on `/?
+Splitting on `/
+?
 /` instead of `'
 '` fixes it. On that same repository:
 
