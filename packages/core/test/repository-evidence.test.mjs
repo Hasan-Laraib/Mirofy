@@ -1,46 +1,17 @@
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { startPreview } from '../bin/preview.mjs';
+// The throwaway checkout and the diagram that cites it are shared with
+// repository-evidence-local.test.mjs rather than copied into it: a copied
+// fixture drifts, and two suites testing subtly different repositories is
+// exactly the kind of quiet divergence this module exists to prevent.
+import { fixture, git, skillRoot } from './helpers/evidence-repo.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const skillRoot = path.resolve(here, '..');
 const cli = path.join(skillRoot, 'bin', 'mirofy.mjs');
-
-function git(repo, ...args) {
-  return execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
-}
-
-function fixture() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-evidence-repo-'));
-  fs.mkdirSync(path.join(root, 'src'), { recursive: true });
-  fs.writeFileSync(path.join(root, 'src', 'router.js'), 'export function route(input) {\n  return input.kind;\n}\n');
-  fs.writeFileSync(path.join(root, 'src', 'store.js'), 'export const store = new Map();\n');
-  git(root, 'init');
-  git(root, 'config', 'user.name', 'Mirofy Tests');
-  git(root, 'config', 'user.email', 'mirofy@example.test');
-  git(root, 'remote', 'add', 'origin', 'git@github.com:example/evidence-repo.git');
-  git(root, 'add', '.');
-  git(root, 'commit', '-m', 'fixture');
-  const revision = git(root, 'rev-parse', 'HEAD');
-
-  const diagram = JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples', 'web-app.architecture.json'), 'utf8'));
-  diagram.meta.repository = {
-    url: 'https://github.com/example/evidence-repo',
-    revision,
-  };
-  diagram.components[0].sources = [
-    { path: 'src/router.js', line: 1, end_line: 3, label: 'Request router' },
-    { path: 'src/store.js', line: 1 },
-  ];
-  const input = path.join(root, 'diagram.architecture.json');
-  fs.writeFileSync(input, JSON.stringify(diagram, null, 2));
-  return { root, revision, diagram, input };
-}
 
 function run(args) {
   return spawnSync(process.execPath, [cli, ...args], {

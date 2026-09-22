@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { detectHost, HOST_IDS } from './hosts.mjs';
+import { detectHost, hostOrLocal, HOST_IDS } from './hosts.mjs';
 import { throwDiagnosticError } from './diagnostics.mjs';
 
 const FULL_SHA_RE = /^[a-f0-9]{40}$/i;
@@ -16,6 +16,24 @@ function evidenceFailure(code, message, { subject = {}, evidence = {}, supported
     evidence,
     supportedFixes,
   }]);
+}
+
+/**
+ * Is this string shaped like a URL at all?
+ *
+ * Deliberately permissive: the question is "did the author mean to write a
+ * URL", not "is this a forge we know". An unknown forge is handled by falling
+ * back to the local adapter; gibberish is rejected here.
+ */
+function isUrlShaped(value) {
+  if (typeof value !== 'string' || !value.trim()) return false;
+  if (/^(git@|ssh:\/\/)/.test(value.trim())) return true;
+  try {
+    const parsed = new URL(value.trim());
+    return Boolean(parsed.protocol && parsed.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function runGit(repoRoot, args) {
@@ -69,6 +87,39 @@ function samePath(left, right) {
 function remoteSlug(value) {
   const host = detectHost(value);
   return host ? `${host.id}:${host.slug}` : null;
+}
+
+/**
+ * Reduce a remote URL to comparable text when neither side names a known
+ * forge: https, ssh:// and git@ spellings of the same self-hosted remote all
+ * collapse to "host/path", the way `remoteSlug` already does for a
+ * recognised one.
+ */
+function normalisedRemoteText(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const scp = raw.match(/^git@([^:]+):(.+)$/i);
+  const withoutScheme = scp ? `${scp[1]}/${scp[2]}` : raw.replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/(?:[^/@]+@)?/, '');
+  return withoutScheme.replace(/\.git\/?$/i, '').replace(/\/+$/, '').toLowerCase();
+}
+
+/**
+ * Is the checkout's real origin the repository the diagram declares?
+ *
+ * Two recognised hosts match, or don't, by slug: `remoteSlug` already
+ * collapses the https/ssh/scp spellings of the same GitHub (etc.) remote.
+ * But `remoteSlug` returns null for ANY unrecognised remote -- a self-hosted
+ * GitLab, an internal Gitea, an enterprise GitHub -- and `null === null`
+ * would make this check pass for two completely unrelated unrecognised
+ * remotes, which is worse than not checking at all: it looks like
+ * verification happened. When neither side resolves to a known host, fall
+ * back to comparing the two remotes as plain, normalised text instead.
+ */
+function sameRemote(origin, declaredUrl) {
+  const originSlug = remoteSlug(origin);
+  const declaredSlug = remoteSlug(declaredUrl);
+  if (originSlug || declaredSlug) return originSlug === declaredSlug;
+  return normalisedRemoteText(origin) === normalisedRemoteText(declaredUrl);
 }
 
 function verifiedSourcePath(value, where) {
@@ -199,14 +250,26 @@ function prepareRepository(entry, rootPath, declaredIds) {
       supportedFixes: ['pin one full 40-character commit SHA'],
     });
   }
-  const host = detectHost(entry.url);
-  if (!host) {
-    evidenceFailure('repository-evidence/url-invalid', `${where}/url must be a public repository URL on a supported host (${HOST_IDS.join(', ')}).`, {
+  // A value that is not a URL at all is an authoring mistake, and still fails.
+  // A well-formed URL on a forge we do not recognise -- a self-hosted GitLab,
+  // an internal Gitea, an enterprise GitHub -- is a property of the repository
+  // rather than a mistake: the evidence survives, the link does not. See the
+  // design note in hosts.mjs.
+  //
+  // A repository with NO url is a different case, and is NOT supported: the
+  // `entry.url &&` guard below is a shape check on a URL that is present, not
+  // permission to omit one. Omitting it still fails a few lines down, at the
+  // origin-remote-required check or at origin-mismatch, and the published
+  // schema requires /meta/repository/url before either is reached. Relaxing
+  // that is a public-contract change deferred to its own plan.
+  if (entry.url && !isUrlShaped(entry.url)) {
+    evidenceFailure('repository-evidence/url-invalid', `${where}/url must be a repository URL (supported hosts: ${HOST_IDS.join(', ')}).`, {
       subject: { path: `${where}/url` },
       evidence: { repositoryUrl: entry.url, supportedHosts: HOST_IDS },
-      supportedFixes: [`use a canonical public repository URL on one of: ${HOST_IDS.join(', ')}`],
+      supportedFixes: [`use a canonical repository URL on one of: ${HOST_IDS.join(', ')}`],
     });
   }
+  const host = hostOrLocal(entry.url);
   if (!rootPath) {
     // Naming WHICH repository is missing, and what was declared: with several
     // in play, "pass --repo-root" alone leaves the author guessing.
@@ -244,7 +307,7 @@ function prepareRepository(entry, rootPath, declaredIds) {
     });
   }
   const origin = gitValue(realRoot, ['remote', 'get-url', 'origin'], 'Evidence repository must have an origin remote.');
-  if (remoteSlug(origin) !== remoteSlug(entry.url)) {
+  if (!sameRemote(origin, entry.url)) {
     evidenceFailure('repository-evidence/origin-mismatch', `Evidence repository origin ${JSON.stringify(origin)} does not match ${JSON.stringify(entry.url)}.`, {
       subject: { repoRoot: realRoot },
       evidence: { localOrigin: origin, authoredRepository: entry.url },
@@ -265,7 +328,14 @@ function prepareRepository(entry, rootPath, declaredIds) {
     realRoot,
     revision,
     host,
-    url: host.web,
+    // `host.web` is the canonical forge URL a recognised adapter derived from
+    // the declared one, and stays the value for every hosted repository. The
+    // local adapter has none, so the declared URL stands in: it is the honest
+    // answer, and `host: 'local'` alongside it already tells a consumer this
+    // is not a canonical forge URL. Null only for a shape nothing produces
+    // today -- a local repository whose entry declared no URL at all, which
+    // the origin checks below still refuse.
+    url: host.web ?? entry.url ?? null,
   };
 }
 
@@ -431,6 +501,26 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     });
   }
 
+  // Repositories that fell back to the local adapter get one entry each here,
+  // regardless of how many sources cite them: this reports "this repository
+  // cannot be linked", not "this citation cannot be linked". `declaredUrl` is
+  // read from `declared` rather than from the prepared entry so that it is
+  // unambiguously what the document authored, whatever the prepared entry's
+  // `url` resolves to: a consumer reading a limitation is diagnosing the
+  // authored value -- a mistyped `guthub.com`, say -- and must not be handed
+  // something the resolver derived.
+  const limitations = [...repositories.values()]
+    .filter((entry) => entry.host.id === 'local')
+    .map((entry) => ({
+      // The single-repository form's reserved id is '' -- naming nothing --
+      // so it falls back to the verified checkout path, which still answers
+      // "which repository is this" when the document names none.
+      repository: entry.id || entry.realRoot,
+      reason: 'no recognised remote host; source locations are cited by path and '
+        + 'revision but cannot be linked',
+      declaredUrl: declared.get(entry.id)?.url || null,
+    }));
+
   const first = repositories.get(SINGLE) ?? [...repositories.values()][0];
   return {
     schemaVersion: 1,
@@ -458,5 +548,6 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     nodes,
     edges,
     sourceTotals,
+    ...(limitations.length ? { limitations } : {}),
   };
 }

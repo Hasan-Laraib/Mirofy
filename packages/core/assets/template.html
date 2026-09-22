@@ -1970,6 +1970,36 @@
     }
     .semantic-passport-repository:hover,
     .semantic-passport-repository:focus-visible { color: var(--backend-stroke); }
+    /* A local repository shows its DECLARED URL, which has no bound on its
+       length, where a hosted one shows a bounded owner/repo slug. As one text
+       node in this capped, nowrap, ellipsised line the tail that gets clipped
+       is " @ <shortRevision>" -- the evidence. Two elements let the URL alone
+       ellipsise while the revision refuses to shrink, so a long URL clips in
+       the middle of its path and both the domain and the revision survive.
+       The attribute is set by the renderer, so a hosted repository -- which
+       never carries it -- is laid out by the single rule above, unchanged. */
+    .semantic-passport-repository[data-repository-shape="split"] {
+      display: inline-flex;
+    }
+    /* An author `display` would beat the UA's `[hidden] { display: none }`,
+       which is why every other toggled rule in this file carries the same
+       companion. Unreachable today -- the split shape implies text, and text
+       implies not hidden -- but the guard is cheaper than the invariant. */
+    .semantic-passport-repository[data-repository-shape="split"][hidden] {
+      display: none;
+    }
+    .semantic-passport-repository-url {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    /* pre, not nowrap: a flex item trims its own leading whitespace, which
+       would eat the space in " @ " and read as "…/widgets@ ccccccc". */
+    .semantic-passport-repository-revision {
+      flex: none;
+      white-space: pre;
+    }
     .semantic-passport-evidence-links { display: grid; gap: 0.22rem; }
     .semantic-passport-source {
       display: grid;
@@ -5522,7 +5552,8 @@
               <div class="semantic-passport-evidence-head">
                 <span class="semantic-passport-evidence-status">{{i18n:viewer.passport.verified}}</span>
                 <code class="semantic-passport-provenance" id="focus-provenance" data-passport="provenance" hidden></code>
-                <a class="semantic-passport-repository" id="focus-repository" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"></a>
+                <!-- target/rel/referrerpolicy ride with the href in renderSourceEvidence: a local repository leaves this element unlinked, and affordances on it claim an openability it does not have. -->
+                <a class="semantic-passport-repository" id="focus-repository"></a>
               </div>
               <div class="semantic-passport-evidence-links" id="focus-evidence-links"></div>
             </div>
@@ -8156,6 +8187,21 @@
       function renderSourceEvidence(sources, provenanceClass, sourceTotal) {
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
+        /* The link affordances are cleared here and re-added with the href
+           below, rather than sitting in the static markup, for the same reason
+           an unlinkable cited source location carries none: an <a> with no
+           href is not a link, and target/rel/referrerpolicy on it advertise an
+           openability it does not have. Clearing at the top rather than only
+           in the unlinked branch matters because this one element is reused
+           for every focus change -- an attribute left by the previous subject
+           would outlive the payload that justified it, including on the early
+           return below. */
+        repositoryLink.removeAttribute('target');
+        repositoryLink.removeAttribute('rel');
+        repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('aria-label');
+        repositoryLink.removeAttribute('title');
+        repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';
         provenanceSlot.textContent = '';
         provenanceSlot.hidden = true;
@@ -8167,13 +8213,74 @@
         /* The slug and the revision link come from the payload, which the
            host adapter built. Deriving them here meant assuming one forge's
            URL shape: on anything but GitHub the link 404'd and the slug
-           displayed as a full URL. Older artifacts carry neither field, so
-           both fall back to the previous behaviour. */
-        var slug = repository.slug
-          || repository.url.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, '');
-        repositoryLink.href = repository.treeUrl || (repository.url + '/tree/' + repository.revision);
-        repositoryLink.textContent = slug + ' @ ' + repository.shortRevision;
-        repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
+           displayed as a full URL. Older artifacts carry neither field, and
+           a local repository carries no slug at all, so both branches below
+           tolerate an absent value instead of reading through it: throwing
+           here aborts the whole evidence panel, not merely this one line.
+
+           A local repository -- an unrecognised or self-hosted forge -- shows
+           its declared URL WHOLE rather than stripped to owner/repo. On a
+           self-hosted forge the domain is the informative half (it says WHICH
+           internal forge), and with no anchor to open it is the only place a
+           mistyped host is visible to a human rather than only in the
+           embedded JSON. Hosted repositories keep the stripping exactly. */
+        var declaredUrl = typeof repository.url === 'string' ? repository.url : '';
+        var slug = repository.host === 'local'
+          ? declaredUrl
+          : (repository.slug
+            || declaredUrl.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, ''));
+        var repositoryText = slug ? slug + ' @ ' + repository.shortRevision : repository.shortRevision;
+        /* A local repository has no tree URL. Drop the href rather than
+           synthesising one: a dead link claims a destination exists. The
+           element stays visible as plain text, because the repository and
+           revision are evidence in their own right -- hiding them would hide
+           the only human-readable copy of the declared URL. The "Open ..."
+           label goes with the href: on something that cannot be opened it
+           would be the same overclaim in the accessibility tree. */
+        if (repository.treeUrl) {
+          repositoryLink.href = repository.treeUrl;
+          repositoryLink.setAttribute('target', '_blank');
+          repositoryLink.setAttribute('rel', 'noopener noreferrer');
+          repositoryLink.setAttribute('referrerpolicy', 'no-referrer');
+          repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
+        } else {
+          repositoryLink.removeAttribute('href');
+          repositoryLink.removeAttribute('aria-label');
+        }
+        repositoryLink.hidden = !repositoryText;
+        /* This line is one flex item in a 22rem chip, capped, nowrap and
+           ellipsised, sharing its row with the VERIFIED pill. A slug is
+           bounded -- owner/repo -- but a declared URL is not, and an internal
+           forge URL overflows, so as ONE text node the tail that gets clipped
+           is ' @ <shortRevision>': the evidence itself, with no way to get it
+           back. Split into two elements only the URL may ellipsise, and a long
+           URL clips in the middle of its path instead, leaving both
+           load-bearing halves standing -- the domain, which is where a mistyped
+           host shows and which sits at the START, and the revision. Reading
+           order is unchanged, and so is the text: the revision element carries
+           the same leading space (held by white-space: pre, which a flex item
+           would otherwise trim).
+
+           Hosted repositories keep the single text node exactly: their slug is
+           already bounded by the strip to owner/repo, and changing the shape
+           there would change the DOM of every artifact that renders one. */
+        if (slug && repository.host === 'local') {
+          repositoryLink.setAttribute('data-repository-shape', 'split');
+          /* The full string, for a mouse. Not a substitute for the split --
+             title is invisible to touch and unreliable for assistive tech --
+             which is why it is an addition to it rather than the fix. */
+          repositoryLink.setAttribute('title', repositoryText);
+          var repositoryUrlSlot = document.createElement('span');
+          repositoryUrlSlot.className = 'semantic-passport-repository-url';
+          repositoryUrlSlot.textContent = slug;
+          var repositoryRevisionSlot = document.createElement('span');
+          repositoryRevisionSlot.className = 'semantic-passport-repository-revision';
+          repositoryRevisionSlot.textContent = ' @ ' + repository.shortRevision;
+          repositoryLink.appendChild(repositoryUrlSlot);
+          repositoryLink.appendChild(repositoryRevisionSlot);
+        } else {
+          repositoryLink.textContent = repositoryText;
+        }
         /* The class token is shown verbatim: it is published vocabulary the
            documentation and the legend both use, not prose to localise. The
            accessible label carries the localised framing instead. */
@@ -8182,24 +8289,54 @@
           provenanceSlot.setAttribute('aria-label', viewerText('viewer.passport.provenance', { class: provenanceClass }));
           provenanceSlot.hidden = false;
         }
+        /* The same conditional the repository line above takes, one element
+           down and once per citation: link if there is an href, plain text if
+           there is not. A local repository answers blobUrl() with null for
+           EVERY source, and `link.href = null` serialises as href="null" -- a
+           clickable dead link that resolves against the artifact's own URL.
+           A dead link is worse than no link because it claims a destination.
+
+           An unlinkable citation keeps the anchor element, so the class-based
+           layout, ordering and geometry are untouched, and drops everything
+           that claims openability: the href, the target/rel/referrerPolicy
+           affordances, the "Open verified source ..." label and the ' ↗'
+           glyph. The label is dropped rather than reworded because an <a>
+           with no href is not a link and has no name to override; what is
+           left -- the file label, the line range and the path -- states the
+           citation truthfully on its own, and the revision those lines are
+           pinned to is on the repository line directly above. The href branch
+           below is byte-for-byte what it was. */
         sources.forEach(function (source) {
           var link = document.createElement('a');
           link.className = 'semantic-passport-source';
-          link.href = source.href;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.referrerPolicy = 'no-referrer';
-          link.setAttribute('aria-label', viewerText('viewer.passport.source.open', { path: source.path, revision: repository.shortRevision }));
+          var lineRange = source.line
+            ? 'L' + source.line + (source.endLine && source.endLine !== source.line ? '–' + source.endLine : '')
+            : '';
+          if (source.href) {
+            link.href = source.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.referrerPolicy = 'no-referrer';
+            link.setAttribute('aria-label', viewerText('viewer.passport.source.open', { path: source.path, revision: repository.shortRevision }));
+          }
+          /* With an href the location slot doubles as the affordance, so a
+             citation carrying no line range still reads "Open ↗". Without an
+             href there is nothing for that slot to say when there is no line
+             range -- the path is already on the line below -- so the slot is
+             omitted rather than filled with wording that invites a click. */
+          var locationText = source.href
+            ? (lineRange ? lineRange + ' ↗' : viewerText('viewer.passport.source.openLink'))
+            : lineRange;
           var name = document.createElement('strong');
           name.textContent = source.label || source.path.split('/').pop() || source.path;
-          var location = document.createElement('code');
-          location.textContent = source.line
-            ? 'L' + source.line + (source.endLine && source.endLine !== source.line ? '–' + source.endLine : '') + ' ↗'
-            : viewerText('viewer.passport.source.openLink');
           var sourcePath = document.createElement('small');
           sourcePath.textContent = source.path;
           link.appendChild(name);
-          link.appendChild(location);
+          if (locationText) {
+            var location = document.createElement('code');
+            location.textContent = locationText;
+            link.appendChild(location);
+          }
           link.appendChild(sourcePath);
           evidenceLinks.appendChild(link);
         });
@@ -8995,6 +9132,14 @@
         evidence.hidden = true;
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
+        /* Same invariant as renderSourceEvidence's own reset: the affordances
+           go with the href, so a cleared passport leaves none behind. */
+        repositoryLink.removeAttribute('target');
+        repositoryLink.removeAttribute('rel');
+        repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('aria-label');
+        repositoryLink.removeAttribute('title');
+        repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';
         summary.textContent = '';
         reachSection.hidden = true;

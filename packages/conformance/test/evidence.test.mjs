@@ -262,18 +262,37 @@ for (const host of HOST_CASES) {
   });
 }
 
-test('[2.3] an unsupported host is refused by name rather than linked wrongly', async () => {
-  const { detectHost, HOSTS } = await import('../../core/renderers/shared/hosts.mjs');
+// A malformed (non-URL-shaped) repository URL is still a hard rejection --
+// but the schema's own `pattern` on /meta/repository/url (common.schema.json)
+// catches every such value before a document ever reaches repository-evidence
+// resolution, so that failure mode is a schema-validation test, not this
+// suite's concern. The runtime `isUrlShaped` guard it would otherwise hit is
+// exercised directly, bypassing the schema, in packages/core/test/
+// repository-evidence.test.mjs ("a malformed url is still a hard failure").
+//
+// An unsupported-but-well-formed host used to be refused outright. It is now
+// a supported state (see hosts.mjs's LOCAL_HOST / hostOrLocal): the evidence
+// survives, only the link does not. This checkout's own origin must also be
+// unrecognised, or the unrelated origin-mismatch check would fail first, for
+// a different reason than the one this test exists to prove.
+test('[2.3] an unrecognised host resolves to the local adapter instead of failing', async () => {
+  const { detectHost } = await import('../../core/renderers/shared/hosts.mjs');
   assert.equal(detectHost('https://sourcehut.example/acme/widgets'), null);
 
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'product-evidence-local-'));
+  fs.mkdirSync(path.join(root, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'src', 'app.js'), 'export function run() {\n  return 1;\n}\n');
+  execFileSync('git', ['init', '-q'], { cwd: root });
+  execFileSync('git', ['config', 'user.email', 'mirofy@example.test'], { cwd: root });
+  execFileSync('git', ['config', 'user.name', 'Mirofy Tests'], { cwd: root });
+  execFileSync('git', ['remote', 'add', 'origin', 'https://sourcehut.example/acme/widgets'], { cwd: root });
+  execFileSync('git', ['add', '-A'], { cwd: root });
+  execFileSync('git', ['commit', '-qm', 'fixture'], { cwd: root });
+  const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', cwd: root }).trim();
+
   const source = JSON.parse(fs.readFileSync(path.join(fixturesRoot, FIXTURE.architecture), 'utf8'));
-  source.meta = { ...source.meta, repository: { url: 'https://sourcehut.example/acme/widgets', revision: 'a'.repeat(40) } };
+  source.meta = { ...source.meta, repository: { url: 'https://sourcehut.example/acme/widgets', revision } };
   source.connections[0].sources = [{ path: 'src/app.js' }];
-  const rejected = validate('architecture', source, { repoRoot });
-  assert.equal(rejected.ok, false, 'an unsupported host was accepted');
-  // Naming the supported hosts is the difference between a dead end and a
-  // fixable error: the author cannot guess which forges are understood.
-  for (const id of HOSTS.map((h) => h.id)) {
-    assert.match(rejected.message, new RegExp(id), `the rejection does not name the ${id} adapter`);
-  }
+  const accepted = validate('architecture', source, { repoRoot: root });
+  assert.equal(accepted.ok, true, accepted.message);
 });

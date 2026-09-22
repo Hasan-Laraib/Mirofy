@@ -15,6 +15,106 @@ stops being one.
 
 ---
 
+## 2026-09-22
+
+### A repository on a forge we do not recognise is no longer a rendering failure
+
+`detectHost()` knows six public forges. Until now, a diagram whose repository
+was not on one of them could not be rendered at all: the evidence path raised
+`repository-evidence/url-invalid` and stopped. Self-hosted GitLab, self-hosted
+Gitea and enterprise GitHub were all excluded, which is an odd thing for a tool
+whose stated value is that it runs offline.
+
+The reason the failure existed was that the renderer wanted to build a web
+link, and could not. But **the link was never the evidence.** A fact's
+substance is its path, its line range and its revision, and all three are
+present and checkable in a local checkout. Making the convenience mandatory
+inverted the priority.
+
+So an unrecognised host is now a supported state. Such a repository reports
+`host: "local"` and `treeUrl: null` — a consumer can act on that without
+parsing prose — and the returned object carries a `limitations` entry naming
+the repository, the reason, and the URL that was declared. `limitations` is
+absent, not empty, when every repository is hosted, so nothing changes for
+anyone who was already fine.
+
+A malformed value that is not a URL at all still fails. That is an authoring
+mistake, not a property of the repository, and the two should not collapse
+into one.
+
+The viewer previously filled a missing tree URL by concatenating
+`repository.url + '/tree/' + revision`. With `treeUrl` now legitimately null
+that fallback would have fabricated a link to a destination that does not
+exist, so the href is dropped. A dead link claims a destination exists; no
+link claims nothing.
+
+**The passport line stays visible, unlinked.** Dropping the *anchor* is right;
+dropping the *line* was not, and briefly it did. The removed hard failure was
+load-bearing in one specific way: an author who mistyped `guthub.com` used to
+be told so, loudly, at render time. `limitations` records the typo faithfully
+but nothing reads it — not the viewer, not the CLI, not the layout binary — so
+in a rendered artifact it lives only inside the embedded JSON, which is to say
+in devtools. So a local repository now shows its declared URL **whole**, scheme
+and domain included, as plain text: `https://guthub.com/acme/app @ 56e37d0`.
+The domain is the informative half on a self-hosted forge — it says *which*
+internal forge — and it is the only place the typo reaches a human. Hosted
+repositories still show the stripped `owner/repo` and still link. The
+"Open verified repository revision …" accessible label goes with the href: on
+something that cannot be opened it would be the same overclaim, relocated to
+the accessibility tree.
+
+**A whole URL is longer than the line it sits on.** That line is one flex item
+in a chip capped at 22rem — `nowrap`, `overflow: hidden`,
+`text-overflow: ellipsis` — sharing its row with the VERIFIED pill. A hosted
+slug is bounded by the strip to `owner/repo`; a declared URL is not, and a
+realistic internal forge URL overruns. As a single text node the part that got
+clipped was the *tail*, which is ` @ 56e37d0` — the revision, which is the
+evidence — and with no `title` there was no way to recover it. The URL and the
+revision are separate elements now, on the same line and in the same order,
+with only the URL permitted to ellipsise and the revision not permitted to
+shrink. A long URL clips in the middle of its path instead, so both
+load-bearing halves survive: the domain, where a typo shows, at the start, and
+the revision at the end. The visible text is unchanged, and a `title` carries
+the whole string for a mouse — an addition, not the fix, since `title` is
+invisible to touch and unreliable for assistive tech. Hosted repositories keep
+the single text node exactly.
+
+The anchor's `target`, `rel` and `referrerpolicy` were static markup, so an
+unlinked repository line kept them while an unlinked *source* citation was
+deliberately denied the same three. Inert without an href, but the asymmetry
+stated two different rules for one principle. They are set alongside the href
+now and cleared alongside it, so the line carries link affordances only when it
+is actually a link.
+
+**And every cited source location, not only the repository line.** The passport
+draws one anchor per citation, and that anchor's href came straight from
+`blobUrl()` — which a local repository answers with null for every source. A
+null assigned to `href` serialises as `href="null"`: a clickable link that
+resolves against the artifact's own URL, one per cited line, and a diagram
+cites far more lines than it has repositories. Those entries now render as the
+same text unlinked, exactly as the repository line above them does: same file
+label, same `L12–20`, same path, and no href, no `target`/`rel`, no
+"Open verified source …" label and no `↗`. A citation carrying no line range
+used to fall back to the bare words "Open ↗", which is only an offer to click;
+with nothing to open, that slot is absent instead. What a hosted repository
+renders is unchanged, byte for byte.
+
+For the same reason the artifact now carries the declared URL in
+`repository.url` for a local repository, where it previously carried `null`
+(the local adapter has no canonical forge URL to offer). `host: "local"`
+already tells a consumer this is not a canonical forge URL; a null there told
+them nothing and, in the viewer, threw.
+
+**What this does not cover.** A repository with *no remote at all* is still
+refused, and deliberately so: three separate things block it — the evidence
+path requires an origin remote, the published JSON schema makes an
+`https://` url required, and the layout binary drops a repository that has no
+origin before the new code is ever reached. Relaxing a published schema is a
+public-contract change that deserves its own design rather than a quiet
+widening here.
+
+---
+
 ## 2026-09-10
 
 ### Four commands that shipped, were tested, and could not be run
@@ -1127,7 +1227,8 @@ patterns in the Python adapter end that way. On a Windows clone of a real
 it: no error, no warning, just a nearly empty diagram that looked like a correct
 answer. Every Windows checkout of every Python project would have hit it.
 
-Splitting on `/?
+Splitting on `/
+?
 /` instead of `'
 '` fixes it. On that same repository:
 
