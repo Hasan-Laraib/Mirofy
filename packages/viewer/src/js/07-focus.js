@@ -360,7 +360,15 @@
            both fall back to the previous behaviour. */
         var slug = repository.slug
           || repository.url.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, '');
-        repositoryLink.href = repository.treeUrl || (repository.url + '/tree/' + repository.revision);
+        /* A local repository has no tree URL. Hide the link rather than
+           synthesising one: a dead link claims a destination exists. */
+        if (repository.treeUrl) {
+          repositoryLink.href = repository.treeUrl;
+          repositoryLink.hidden = false;
+        } else {
+          repositoryLink.removeAttribute('href');
+          repositoryLink.hidden = true;
+        }
         repositoryLink.textContent = slug + ' @ ' + repository.shortRevision;
         repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
         /* The class token is shown verbatim: it is published vocabulary the

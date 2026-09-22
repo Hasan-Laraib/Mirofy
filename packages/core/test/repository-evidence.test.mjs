@@ -341,3 +341,13 @@ test('an unrecognised origin that does not match the declared URL is still rejec
     (error) => error.mirofyDiagnostics?.[0]?.code === 'repository-evidence/origin-mismatch',
   );
 });
+
+test('the viewer template never synthesises a repository url', () => {
+  const template = fs.readFileSync(
+    path.join(skillRoot, 'assets', 'template.html'), 'utf8',
+  );
+  assert.equal(
+    /repository\.url \+ '\/tree\/'/.test(template), false,
+    'template.html must not build a tree URL by string concatenation',
+  );
+});
