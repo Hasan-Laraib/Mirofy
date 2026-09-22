@@ -89,6 +89,39 @@ function remoteSlug(value) {
   return host ? `${host.id}:${host.slug}` : null;
 }
 
+/**
+ * Reduce a remote URL to comparable text when neither side names a known
+ * forge: https, ssh:// and git@ spellings of the same self-hosted remote all
+ * collapse to "host/path", the way `remoteSlug` already does for a
+ * recognised one.
+ */
+function normalisedRemoteText(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const scp = raw.match(/^git@([^:]+):(.+)$/i);
+  const withoutScheme = scp ? `${scp[1]}/${scp[2]}` : raw.replace(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/(?:[^/@]+@)?/, '');
+  return withoutScheme.replace(/\.git\/?$/i, '').replace(/\/+$/, '').toLowerCase();
+}
+
+/**
+ * Is the checkout's real origin the repository the diagram declares?
+ *
+ * Two recognised hosts match, or don't, by slug: `remoteSlug` already
+ * collapses the https/ssh/scp spellings of the same GitHub (etc.) remote.
+ * But `remoteSlug` returns null for ANY unrecognised remote -- a self-hosted
+ * GitLab, an internal Gitea, an enterprise GitHub -- and `null === null`
+ * would make this check pass for two completely unrelated unrecognised
+ * remotes, which is worse than not checking at all: it looks like
+ * verification happened. When neither side resolves to a known host, fall
+ * back to comparing the two remotes as plain, normalised text instead.
+ */
+function sameRemote(origin, declaredUrl) {
+  const originSlug = remoteSlug(origin);
+  const declaredSlug = remoteSlug(declaredUrl);
+  if (originSlug || declaredSlug) return originSlug === declaredSlug;
+  return normalisedRemoteText(origin) === normalisedRemoteText(declaredUrl);
+}
+
 function verifiedSourcePath(value, where) {
   const sourcePath = String(value || '');
   if (!sourcePath || sourcePath.startsWith('/') || sourcePath.includes('\\') || CONTROL_CHARACTER_RE.test(sourcePath)) {
@@ -266,7 +299,7 @@ function prepareRepository(entry, rootPath, declaredIds) {
     });
   }
   const origin = gitValue(realRoot, ['remote', 'get-url', 'origin'], 'Evidence repository must have an origin remote.');
-  if (remoteSlug(origin) !== remoteSlug(entry.url)) {
+  if (!sameRemote(origin, entry.url)) {
     evidenceFailure('repository-evidence/origin-mismatch', `Evidence repository origin ${JSON.stringify(origin)} does not match ${JSON.stringify(entry.url)}.`, {
       subject: { repoRoot: realRoot },
       evidence: { localOrigin: origin, authoredRepository: entry.url },
@@ -463,7 +496,10 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
   const limitations = [...repositories.values()]
     .filter((entry) => entry.host.id === 'local')
     .map((entry) => ({
-      repository: entry.id,
+      // The single-repository form's reserved id is '' -- naming nothing --
+      // so it falls back to the verified checkout path, which still answers
+      // "which repository is this" when the document names none.
+      repository: entry.id || entry.realRoot,
       reason: 'no recognised remote host; source locations are cited by path and '
         + 'revision but cannot be linked',
       declaredUrl: declared.get(entry.id)?.url || null,
