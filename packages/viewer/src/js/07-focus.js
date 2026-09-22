@@ -357,6 +357,7 @@
         repositoryLink.removeAttribute('target');
         repositoryLink.removeAttribute('rel');
         repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('aria-label');
         repositoryLink.removeAttribute('title');
         repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';
@@ -1294,6 +1295,7 @@
         repositoryLink.removeAttribute('target');
         repositoryLink.removeAttribute('rel');
         repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('aria-label');
         repositoryLink.removeAttribute('title');
         repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';

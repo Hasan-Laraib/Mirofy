@@ -1980,7 +1980,13 @@
        never carries it -- is laid out by the single rule above, unchanged. */
     .semantic-passport-repository[data-repository-shape="split"] {
       display: inline-flex;
-      align-items: baseline;
+    }
+    /* An author `display` would beat the UA's `[hidden] { display: none }`,
+       which is why every other toggled rule in this file carries the same
+       companion. Unreachable today -- the split shape implies text, and text
+       implies not hidden -- but the guard is cheaper than the invariant. */
+    .semantic-passport-repository[data-repository-shape="split"][hidden] {
+      display: none;
     }
     .semantic-passport-repository-url {
       min-width: 0;
@@ -8193,6 +8199,7 @@
         repositoryLink.removeAttribute('target');
         repositoryLink.removeAttribute('rel');
         repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('aria-label');
         repositoryLink.removeAttribute('title');
         repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';
@@ -9130,6 +9137,7 @@
         repositoryLink.removeAttribute('target');
         repositoryLink.removeAttribute('rel');
         repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('aria-label');
         repositoryLink.removeAttribute('title');
         repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';

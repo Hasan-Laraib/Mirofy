@@ -588,3 +588,20 @@ test('a local repository line carries no link affordances at all', () => {
   assert.equal('rel' in view.repositoryLink.attributes, false);
   assert.equal('referrerpolicy' in view.repositoryLink.attributes, false);
 });
+
+// The one element is reused for every focus change, so an affordance left by
+// the previous subject outlives the payload that justified it. The reset at
+// the top of renderSourceEvidence runs BEFORE the early return, which is the
+// path a subject with no cited sources takes -- and aria-label was the one
+// attribute the reset forgot, while the comment above it claimed otherwise.
+test('a subject with no sources leaves no affordance from the last one', () => {
+  const view = passportRenderer(HOSTED_PAYLOAD);
+  view.render(HOSTED_LINE, 'backend', 1);
+  assert.equal(typeof view.repositoryLink.attributes['aria-label'], 'string');
+
+  view.render([], 'backend', 0);
+  assert.equal(view.evidence.hidden, true);
+  for (const attribute of ['href', 'target', 'rel', 'referrerpolicy', 'aria-label', 'title', 'data-repository-shape']) {
+    assert.equal(attribute in view.repositoryLink.attributes, false, attribute + ' outlived the payload that set it');
+  }
+});
