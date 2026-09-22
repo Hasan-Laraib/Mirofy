@@ -8167,21 +8167,39 @@
         /* The slug and the revision link come from the payload, which the
            host adapter built. Deriving them here meant assuming one forge's
            URL shape: on anything but GitHub the link 404'd and the slug
-           displayed as a full URL. Older artifacts carry neither field: the
-           slug falls back to the previous behaviour, the link does not. */
-        var slug = repository.slug
-          || repository.url.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, '');
-        /* A local repository has no tree URL. Hide the link rather than
-           synthesising one: a dead link claims a destination exists. */
+           displayed as a full URL. Older artifacts carry neither field, and
+           a local repository carries no slug at all, so both branches below
+           tolerate an absent value instead of reading through it: throwing
+           here aborts the whole evidence panel, not merely this one line.
+
+           A local repository -- an unrecognised or self-hosted forge -- shows
+           its declared URL WHOLE rather than stripped to owner/repo. On a
+           self-hosted forge the domain is the informative half (it says WHICH
+           internal forge), and with no anchor to open it is the only place a
+           mistyped host is visible to a human rather than only in the
+           embedded JSON. Hosted repositories keep the stripping exactly. */
+        var declaredUrl = typeof repository.url === 'string' ? repository.url : '';
+        var slug = repository.host === 'local'
+          ? declaredUrl
+          : (repository.slug
+            || declaredUrl.replace(/^https:\/\/[^/]+\//, '').replace(/\/$/, ''));
+        var repositoryText = slug ? slug + ' @ ' + repository.shortRevision : repository.shortRevision;
+        /* A local repository has no tree URL. Drop the href rather than
+           synthesising one: a dead link claims a destination exists. The
+           element stays visible as plain text, because the repository and
+           revision are evidence in their own right -- hiding them would hide
+           the only human-readable copy of the declared URL. The "Open ..."
+           label goes with the href: on something that cannot be opened it
+           would be the same overclaim in the accessibility tree. */
         if (repository.treeUrl) {
           repositoryLink.href = repository.treeUrl;
-          repositoryLink.hidden = false;
+          repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
         } else {
           repositoryLink.removeAttribute('href');
-          repositoryLink.hidden = true;
+          repositoryLink.removeAttribute('aria-label');
         }
-        repositoryLink.textContent = slug + ' @ ' + repository.shortRevision;
-        repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
+        repositoryLink.hidden = !repositoryText;
+        repositoryLink.textContent = repositoryText;
         /* The class token is shown verbatim: it is published vocabulary the
            documentation and the legend both use, not prose to localise. The
            accessible label carries the localised framing instead. */

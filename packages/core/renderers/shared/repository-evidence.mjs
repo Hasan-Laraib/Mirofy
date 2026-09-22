@@ -251,9 +251,17 @@ function prepareRepository(entry, rootPath, declaredIds) {
     });
   }
   // A value that is not a URL at all is an authoring mistake, and still fails.
-  // A URL on a forge we do not recognise, or no URL at all, is a property of
-  // the repository rather than a mistake: the evidence survives, the link does
-  // not. See the design note in hosts.mjs.
+  // A well-formed URL on a forge we do not recognise -- a self-hosted GitLab,
+  // an internal Gitea, an enterprise GitHub -- is a property of the repository
+  // rather than a mistake: the evidence survives, the link does not. See the
+  // design note in hosts.mjs.
+  //
+  // A repository with NO url is a different case, and is NOT supported: the
+  // `entry.url &&` guard below is a shape check on a URL that is present, not
+  // permission to omit one. Omitting it still fails a few lines down, at the
+  // origin-remote-required check or at origin-mismatch, and the published
+  // schema requires /meta/repository/url before either is reached. Relaxing
+  // that is a public-contract change deferred to its own plan.
   if (entry.url && !isUrlShaped(entry.url)) {
     evidenceFailure('repository-evidence/url-invalid', `${where}/url must be a repository URL (supported hosts: ${HOST_IDS.join(', ')}).`, {
       subject: { path: `${where}/url` },
@@ -320,7 +328,14 @@ function prepareRepository(entry, rootPath, declaredIds) {
     realRoot,
     revision,
     host,
-    url: host.web,
+    // `host.web` is the canonical forge URL a recognised adapter derived from
+    // the declared one, and stays the value for every hosted repository. The
+    // local adapter has none, so the declared URL stands in: it is the honest
+    // answer, and `host: 'local'` alongside it already tells a consumer this
+    // is not a canonical forge URL. Null only for a shape nothing produces
+    // today -- a local repository whose entry declared no URL at all, which
+    // the origin checks below still refuse.
+    url: host.web ?? entry.url ?? null,
   };
 }
 
@@ -488,11 +503,12 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
 
   // Repositories that fell back to the local adapter get one entry each here,
   // regardless of how many sources cite them: this reports "this repository
-  // cannot be linked", not "this citation cannot be linked". The originally
-  // authored URL is read from `declared`, not from the prepared entry -- the
-  // prepared entry's `url` is `host.web`, which is null for every local
-  // repository whether the author wrote no URL at all or an unrecognised one,
-  // and those two cases are exactly what `declaredUrl` distinguishes.
+  // cannot be linked", not "this citation cannot be linked". `declaredUrl` is
+  // read from `declared` rather than from the prepared entry so that it is
+  // unambiguously what the document authored, whatever the prepared entry's
+  // `url` resolves to: a consumer reading a limitation is diagnosing the
+  // authored value -- a mistyped `guthub.com`, say -- and must not be handed
+  // something the resolver derived.
   const limitations = [...repositories.values()]
     .filter((entry) => entry.host.id === 'local')
     .map((entry) => ({

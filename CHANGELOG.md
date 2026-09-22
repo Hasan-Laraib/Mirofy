@@ -34,10 +34,9 @@ inverted the priority.
 So an unrecognised host is now a supported state. Such a repository reports
 `host: "local"` and `treeUrl: null` — a consumer can act on that without
 parsing prose — and the returned object carries a `limitations` entry naming
-the repository, the reason, and the URL that was declared. An author who
-mistyped `guthub.com` sees their typo there rather than silently losing their
-links. `limitations` is absent, not empty, when every repository is hosted, so
-nothing changes for anyone who was already fine.
+the repository, the reason, and the URL that was declared. `limitations` is
+absent, not empty, when every repository is hosted, so nothing changes for
+anyone who was already fine.
 
 A malformed value that is not a URL at all still fails. That is an authoring
 mistake, not a property of the repository, and the two should not collapse
@@ -46,8 +45,29 @@ into one.
 The viewer previously filled a missing tree URL by concatenating
 `repository.url + '/tree/' + revision`. With `treeUrl` now legitimately null
 that fallback would have fabricated a link to a destination that does not
-exist, so the anchor is hidden instead. A dead link claims a destination
-exists; no link claims nothing.
+exist, so the href is dropped. A dead link claims a destination exists; no
+link claims nothing.
+
+**The passport line stays visible, unlinked.** Dropping the *anchor* is right;
+dropping the *line* was not, and briefly it did. The removed hard failure was
+load-bearing in one specific way: an author who mistyped `guthub.com` used to
+be told so, loudly, at render time. `limitations` records the typo faithfully
+but nothing reads it — not the viewer, not the CLI, not the layout binary — so
+in a rendered artifact it lives only inside the embedded JSON, which is to say
+in devtools. So a local repository now shows its declared URL **whole**, scheme
+and domain included, as plain text: `https://guthub.com/acme/app @ 56e37d0`.
+The domain is the informative half on a self-hosted forge — it says *which*
+internal forge — and it is the only place the typo reaches a human. Hosted
+repositories still show the stripped `owner/repo` and still link. The
+"Open verified repository revision …" accessible label goes with the href: on
+something that cannot be opened it would be the same overclaim, relocated to
+the accessibility tree.
+
+For the same reason the artifact now carries the declared URL in
+`repository.url` for a local repository, where it previously carried `null`
+(the local adapter has no canonical forge URL to offer). `host: "local"`
+already tells a consumer this is not a canonical forge URL; a null there told
+them nothing and, in the viewer, threw.
 
 **What this does not cover.** A repository with *no remote at all* is still
 refused, and deliberately so: three separate things block it — the evidence

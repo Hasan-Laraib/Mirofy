@@ -26,10 +26,30 @@ const packagesDir = path.join(repoRoot, 'packages');
 // platform fact that makes it unrunnable. `npm run test:quarantine` runs
 // exactly these files.
 const QUARANTINE = new Map([
+  // Two upstream expectations this fork's code outgrew. The file itself is
+  // NOT browser-dependent -- it names no Chrome, no Puppeteer and launches
+  // nothing; an earlier reason here claimed it did, which was simply false,
+  // and a false quarantine reason is worse than none because it stops anyone
+  // from looking. The two failures, both pre-existing:
+  //
+  //   * "revision-verified, receipt-backed, searchable, and export-clean"
+  //     asserts the built template still contains `renderSourceEvidence(id)`.
+  //     This viewer's passport renderer takes (sources, provenanceClass,
+  //     sourceTotal) so the same renderer can serve a node and a relationship.
+  //   * "--repo-root stays bounded to architecture" asserts `--repo-root` is
+  //     refused on a workflow diagram. Here `supportsRepositoryEvidence`
+  //     accepts five diagram types, so the flag is legitimately accepted.
+  //
+  // Neither can be honestly skipped at the test: there is no platform fact
+  // that makes them unrunnable, only an expectation that has to be rewritten
+  // or retired, and rewriting an upstream contract is its own change.
+  // Everything this branch added about unrecognised / self-hosted hosts lives
+  // in repository-evidence-local.test.mjs, which is NOT quarantined and runs
+  // in `npm test` -- a test that cannot fail CI is not evidence of anything.
+  ['packages/core/test/repository-evidence.test.mjs', 'two pre-existing assertions describe an older viewer and an older --repo-root guard; the local-host coverage runs in repository-evidence-local.test.mjs'],
   // Browser-dependent, and the conformance suite already owns the Chrome-gated
-  // rows. These would fail here for want of a browser, not for want of
+  // rows. This would fail here for want of a browser, not for want of
   // correctness, and `npm run check` deliberately runs without one.
-  ['packages/core/test/repository-evidence.test.mjs', 'needs Chrome; conformance covers rows 2.2 and 2.6'],
   ['packages/core/test/desktop-reader-browser.test.mjs', 'needs Chrome; registers no tests without one'],
 ]);
 

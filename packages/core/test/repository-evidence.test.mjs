@@ -1,79 +1,17 @@
 import assert from 'node:assert/strict';
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { startPreview } from '../bin/preview.mjs';
-import { verifyRepositoryEvidence } from '../renderers/shared/repository-evidence.mjs';
-import { HOST_IDS } from '../renderers/shared/hosts.mjs';
+// The throwaway checkout and the diagram that cites it are shared with
+// repository-evidence-local.test.mjs rather than copied into it: a copied
+// fixture drifts, and two suites testing subtly different repositories is
+// exactly the kind of quiet divergence this module exists to prevent.
+import { fixture, git, skillRoot } from './helpers/evidence-repo.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const skillRoot = path.resolve(here, '..');
 const cli = path.join(skillRoot, 'bin', 'mirofy.mjs');
-
-function git(repo, ...args) {
-  return execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
-}
-
-function fixture() {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mirofy-evidence-repo-'));
-  fs.mkdirSync(path.join(root, 'src'), { recursive: true });
-  fs.writeFileSync(path.join(root, 'src', 'router.js'), 'export function route(input) {\n  return input.kind;\n}\n');
-  fs.writeFileSync(path.join(root, 'src', 'store.js'), 'export const store = new Map();\n');
-  git(root, 'init');
-  git(root, 'config', 'user.name', 'Mirofy Tests');
-  git(root, 'config', 'user.email', 'mirofy@example.test');
-  git(root, 'remote', 'add', 'origin', 'git@github.com:example/evidence-repo.git');
-  git(root, 'add', '.');
-  git(root, 'commit', '-m', 'fixture');
-  const revision = git(root, 'rev-parse', 'HEAD');
-
-  const diagram = JSON.parse(fs.readFileSync(path.join(skillRoot, 'examples', 'web-app.architecture.json'), 'utf8'));
-  diagram.meta.repository = {
-    url: 'https://github.com/example/evidence-repo',
-    revision,
-  };
-  diagram.components[0].sources = [
-    { path: 'src/router.js', line: 1, end_line: 3, label: 'Request router' },
-    { path: 'src/store.js', line: 1 },
-  ];
-  const input = path.join(root, 'diagram.architecture.json');
-  fs.writeFileSync(input, JSON.stringify(diagram, null, 2));
-  return { root, revision, diagram, input };
-}
-
-/**
- * A diagram citing source evidence in `repo` (a `fixture()` result), for
- * tests that call `verifyRepositoryEvidence` directly rather than through the
- * CLI. Copies the diagram shape `fixture()` already proves works, overriding
- * only what the test needs to vary: the declared repository URL and how many
- * source locations are cited.
- *
- * `url` is always a well-formed URL (this task ships the unrecognised /
- * self-hosted host case -- a self-hosted GitLab, an internal Gitea, an
- * enterprise GitHub -- not a repository with no remote at all; that case is
- * deferred, see repository-evidence.mjs). The checkout's real `origin`
- * remote is repointed to the same URL, so `verifyRepositoryEvidence`'s
- * origin-mismatch check (unrelated to this task, and still required even
- * when neither side names a known forge) agrees with what the diagram
- * declares.
- */
-function diagramCitingSource(repo, url, { locations = 1 } = {}) {
-  git(repo.root, 'remote', 'set-url', 'origin', url);
-  const diagram = JSON.parse(JSON.stringify(repo.diagram));
-  diagram.meta.repository = { url, revision: repo.revision };
-  const candidates = [
-    { path: 'src/router.js', line: 1, end_line: 3, label: 'Request router' },
-    { path: 'src/store.js', line: 1 },
-  ];
-  diagram.components[0].sources = Array.from(
-    { length: locations },
-    (_, index) => candidates[index % candidates.length],
-  );
-  return diagram;
-}
 
 function run(args) {
   return spawnSync(process.execPath, [cli, ...args], {
@@ -247,107 +185,4 @@ test('live preview forwards repo-root and publishes only verified evidence', { t
   } finally {
     await preview.stop();
   }
-});
-
-// This task ships the unrecognised / self-hosted host case (a self-hosted
-// GitLab, an internal Gitea, an enterprise GitHub): a well-formed URL on a
-// forge Mirofy does not recognise. It does NOT ship a repository with no
-// remote at all -- that is blocked upstream, unmodified by this task, by the
-// schema's required `/meta/repository/url` and by the origin-remote-required
-// check just below in this file -- and is deferred to a follow-up plan.
-const UNRECOGNISED_HOST_URL = 'https://git.self-hosted.example/team/widgets';
-
-test('a repository on an unrecognised host renders instead of failing', () => {
-  const repo = fixture();
-  const result = verifyRepositoryEvidence(
-    'architecture',
-    diagramCitingSource(repo, UNRECOGNISED_HOST_URL),
-    repo.root,
-  );
-  assert.equal(result.verified, true);
-  assert.equal(result.repository.host, 'local');
-  assert.equal(result.repository.treeUrl, null);
-});
-
-test('a local repository reports one limitation naming it', () => {
-  const repo = fixture();
-  const result = verifyRepositoryEvidence(
-    'architecture',
-    diagramCitingSource(repo, UNRECOGNISED_HOST_URL),
-    repo.root,
-  );
-  assert.equal(result.limitations.length, 1);
-  assert.match(result.limitations[0].reason, /cannot be linked/);
-  assert.equal(result.limitations[0].declaredUrl, UNRECOGNISED_HOST_URL);
-  // The single-repository form declares no id of its own (the reserved id is
-  // ''), so "naming it" must fall back to something else -- the verified
-  // checkout path -- rather than silently reporting an empty string.
-  assert.equal(result.limitations[0].repository, fs.realpathSync(repo.root));
-});
-
-test('an unrecognised forge is named by its declared URL', () => {
-  const repo = fixture();
-  const diagram = diagramCitingSource(repo, 'https://git.internal.example/owner/repo');
-  const result = verifyRepositoryEvidence('architecture', diagram, repo.root);
-  assert.equal(result.repository.host, 'local');
-  assert.equal(result.limitations[0].declaredUrl, 'https://git.internal.example/owner/repo');
-});
-
-test('one limitation per repository, not per cited source location', () => {
-  const repo = fixture();
-  const diagram = diagramCitingSource(repo, UNRECOGNISED_HOST_URL, { locations: 3 });
-  const result = verifyRepositoryEvidence('architecture', diagram, repo.root);
-  assert.equal(result.limitations.length, 1);
-});
-
-test('a hosted repository carries no limitations key at all', () => {
-  const repo = fixture();
-  const diagram = diagramCitingSource(repo, 'https://github.com/owner/repo');
-  const result = verifyRepositoryEvidence('architecture', diagram, repo.root);
-  assert.equal('limitations' in result, false);
-});
-
-test('a malformed url is still a hard failure, naming the supported hosts', () => {
-  const repo = fixture();
-  const diagram = diagramCitingSource(repo, 'not a url at all');
-  // The thrown Error's own `.message` is the human-readable diagnostic text,
-  // not the diagnostic code (see diagnostics.mjs's normalizedDiagnostic) --
-  // the code rides alongside on `mirofyDiagnostics`, so that is asserted
-  // directly rather than by matching the message against it.
-  try {
-    verifyRepositoryEvidence('architecture', diagram, repo.root);
-    assert.fail('expected verifyRepositoryEvidence to throw');
-  } catch (error) {
-    assert.equal(error.mirofyDiagnostics?.[0]?.code, 'repository-evidence/url-invalid');
-    // Naming the supported hosts is the difference between a dead end and a
-    // fixable error: the author cannot guess which forges are understood.
-    for (const id of HOST_IDS) {
-      assert.match(error.message, new RegExp(id), `the rejection does not name the ${id} adapter`);
-    }
-  }
-});
-
-test('an unrecognised origin that does not match the declared URL is still rejected', () => {
-  // remoteSlug(origin) and remoteSlug(declaredUrl) are both null for two
-  // different unrecognised hosts, so `remoteSlug(a) !== remoteSlug(b)` alone
-  // cannot tell them apart -- without the text-comparison fallback in
-  // `sameRemote`, this origin-mismatch check goes inert for every
-  // unrecognised host and accepts ANY two unrelated self-hosted remotes.
-  const repo = fixture();
-  const diagram = diagramCitingSource(repo, UNRECOGNISED_HOST_URL);
-  git(repo.root, 'remote', 'set-url', 'origin', 'https://git.totally-unrelated.example/someone/else');
-  assert.throws(
-    () => verifyRepositoryEvidence('architecture', diagram, repo.root),
-    (error) => error.mirofyDiagnostics?.[0]?.code === 'repository-evidence/origin-mismatch',
-  );
-});
-
-test('the viewer template never synthesises a repository url', () => {
-  const template = fs.readFileSync(
-    path.join(skillRoot, 'assets', 'template.html'), 'utf8',
-  );
-  assert.equal(
-    /repository\.url \+ '\/tree\/'/.test(template), false,
-    'template.html must not build a tree URL by string concatenation',
-  );
 });
