@@ -1462,6 +1462,30 @@
     }
     .semantic-passport-repository:hover,
     .semantic-passport-repository:focus-visible { color: var(--backend-stroke); }
+    /* A local repository shows its DECLARED URL, which has no bound on its
+       length, where a hosted one shows a bounded owner/repo slug. As one text
+       node in this capped, nowrap, ellipsised line the tail that gets clipped
+       is " @ <shortRevision>" -- the evidence. Two elements let the URL alone
+       ellipsise while the revision refuses to shrink, so a long URL clips in
+       the middle of its path and both the domain and the revision survive.
+       The attribute is set by the renderer, so a hosted repository -- which
+       never carries it -- is laid out by the single rule above, unchanged. */
+    .semantic-passport-repository[data-repository-shape="split"] {
+      display: inline-flex;
+      align-items: baseline;
+    }
+    .semantic-passport-repository-url {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    /* pre, not nowrap: a flex item trims its own leading whitespace, which
+       would eat the space in " @ " and read as "…/widgets@ ccccccc". */
+    .semantic-passport-repository-revision {
+      flex: none;
+      white-space: pre;
+    }
     .semantic-passport-evidence-links { display: grid; gap: 0.22rem; }
     .semantic-passport-source {
       display: grid;

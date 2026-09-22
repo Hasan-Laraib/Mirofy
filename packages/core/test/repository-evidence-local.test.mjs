@@ -151,20 +151,46 @@ function passportRenderer(repositoryPayload) {
   // `tagName` is recorded so a test can tell the three slots of a source
   // entry apart -- <strong> label, <code> location, <small> path -- which
   // matters once the <code> slot is conditional.
-  const element = (tagName) => ({
-    tagName,
-    attributes: Object.create(null),
-    children: [],
-    textContent: '',
-    hidden: false,
-    setAttribute(name, value) { this.attributes[name] = value; },
-    removeAttribute(name) { delete this.attributes[name]; if (name === 'href') delete this.href; },
-    appendChild(child) { this.children.push(child); },
-  });
+  const element = (tagName) => {
+    const node = {
+      tagName,
+      attributes: Object.create(null),
+      children: [],
+      hidden: false,
+      setAttribute(name, value) { this.attributes[name] = value; },
+      removeAttribute(name) { delete this.attributes[name]; if (name === 'href') delete this.href; },
+      appendChild(child) { this.children.push(child); },
+    };
+    // `textContent` is a getter/setter rather than a plain string because the
+    // DOM's is: reading it concatenates the text of every descendant, and
+    // writing it replaces all children with a single text node. A plain
+    // property reported '' for an element whose text lives in children, which
+    // is the shape the repository line takes once the revision is its own
+    // element -- so the assertion that the declared URL is shown WHOLE would
+    // have gone quiet on exactly the change it exists to watch.
+    let text = '';
+    Object.defineProperty(node, 'textContent', {
+      enumerable: true,
+      get() { return node.children.length ? node.children.map((child) => child.textContent).join('') : text; },
+      set(value) { text = value; node.children.length = 0; },
+    });
+    return node;
+  };
   const evidence = element();
   const evidenceLinks = element();
-  const repositoryLink = element();
   const provenanceSlot = element();
+  // The repository line starts as the SHIPPED markup declares it, not as a
+  // bare element. Its static attributes are part of what a reader gets, so a
+  // stub that invents an empty one cannot observe an affordance the markup put
+  // there and the renderer never took off -- which is precisely the asymmetry
+  // this file now pins: an <a> with no href is not a link, and target/rel/
+  // referrerpolicy on it claim an openability it does not have.
+  const repositoryLink = element('a');
+  const declaredTag = /<a class="semantic-passport-repository" id="focus-repository"([^>]*)>/.exec(source);
+  assert.notEqual(declaredTag, null, 'the repository line is missing from the built template');
+  for (const [, name, value] of declaredTag[1].matchAll(/([a-z-]+)="([^"]*)"/g)) {
+    repositoryLink.setAttribute(name, value);
+  }
   const doc = { createElement: (tagName) => element(tagName) };
   const Mirofy = { sourceEvidence: { repository: () => repositoryPayload } };
   const viewerText = (key) => key;
@@ -205,10 +231,29 @@ const HOSTED_PAYLOAD = Object.freeze({
 
 const SOURCES = Object.freeze([{ path: 'src/router.js', line: 1, href: null }]);
 
+// The payload a local artifact carried when the TypeError shipped:
+// `prepareRepository` returned `url: host.web`, and the local adapter answers
+// that with null. Today's build carries the declared URL instead, and a slug
+// derivation that reads `repository.url.replace(...)` survives THAT string
+// happily -- which is why this test, written against LOCAL_PAYLOAD, passed
+// with the fix reverted and proved nothing. The viewer is still asked to
+// render artifacts produced by the broken build, so this shape is the one the
+// no-throw guarantee is about.
+const THREW_PAYLOAD = Object.freeze({
+  url: null,
+  revision: 'e'.repeat(40),
+  shortRevision: 'eeeeeee',
+  host: 'local',
+  slug: null,
+  treeUrl: null,
+});
+
 test('the passport renders a local artifact instead of throwing', () => {
-  const view = passportRenderer(LOCAL_PAYLOAD);
+  const view = passportRenderer(THREW_PAYLOAD);
   view.render(SOURCES, 'observed', 0);
-  // The whole panel survives -- this is what the TypeError took down.
+  // The whole panel survives -- this is what the TypeError took down. Not the
+  // repository line alone: renderSourceEvidence is called bare, so a throw in
+  // the slug derivation aborts the file links and the provenance class too.
   assert.equal(view.evidence.hidden, false);
   assert.equal(view.evidenceLinks.children.length, 1);
   assert.equal(view.provenanceSlot.textContent, 'observed');
@@ -421,4 +466,125 @@ test('every cited location on a local artifact is unlinked, not just the first',
     assert.equal('aria-label' in entry.attributes, false);
     assert.equal(entry.children.some((child) => /↗/.test(child.textContent)), false);
   }
+});
+
+// ---------------------------------------------------------------------------
+// Where the evidence sits on the line. `.semantic-passport-repository` is one
+// flex item in a chip capped at 22rem, `white-space: nowrap; overflow: hidden;
+// text-overflow: ellipsis`, sharing its row with the VERIFIED pill. A hosted
+// slug is bounded -- owner/repo -- but a declared URL is not, and a realistic
+// internal forge URL overflows. As ONE text node the part that gets clipped is
+// the TAIL, which is ' @ <shortRevision>': the revision is the evidence, and
+// there was no way to recover it. Splitting the line into two elements, with
+// only the URL allowed to ellipsise, clips a long URL in the middle of its
+// path instead and leaves both load-bearing halves standing -- the domain,
+// where a mistyped host shows, and the revision.
+// ---------------------------------------------------------------------------
+
+/** The declared body of one CSS rule in the built template. */
+function cssRule(selector) {
+  const source = template();
+  const at = source.indexOf(selector + ' {');
+  assert.notEqual(at, -1, `the template has no ${selector} rule`);
+  const open = source.indexOf('{', at);
+  const close = source.indexOf('}', open);
+  return source.slice(open + 1, close);
+}
+
+/** The repository line's children, as [class, text] pairs in order. */
+function repositorySlots(view) {
+  return view.repositoryLink.children.map((child) => [child.className, child.textContent]);
+}
+
+test('a local repository keeps its revision out of the clippable tail', () => {
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(SOURCES, '', 0);
+  // Two elements, URL first: reading order is unchanged, and the revision is
+  // no longer the tail of the string the ellipsis eats.
+  assert.deepEqual(repositorySlots(view), [
+    ['semantic-passport-repository-url', 'https://git.self-hosted.example/team/widgets'],
+    ['semantic-passport-repository-revision', ' @ ccccccc'],
+  ]);
+  // Same visible text as before the split, space and all.
+  assert.equal(view.repositoryLink.textContent, 'https://git.self-hosted.example/team/widgets @ ccccccc');
+  assert.equal(view.repositoryLink.attributes['data-repository-shape'], 'split');
+});
+
+test('only the URL half of a local repository line may ellipsise', () => {
+  // The split is inert without the CSS that makes the URL the only shrinkable
+  // item: with both halves shrinking, the revision clips again.
+  const shape = cssRule('.semantic-passport-repository[data-repository-shape="split"]');
+  assert.match(shape, /display:\s*inline-flex/);
+  const url = cssRule('.semantic-passport-repository-url');
+  assert.match(url, /overflow:\s*hidden/);
+  assert.match(url, /text-overflow:\s*ellipsis/);
+  assert.match(url, /min-width:\s*0/);
+  const revision = cssRule('.semantic-passport-repository-revision');
+  assert.match(revision, /flex:\s*none/, 'the revision must not be allowed to shrink');
+  // `nowrap` would let the flex item trim the leading space of ' @ ' and
+  // render "…/widgets@ ccccccc". `pre` keeps the text as the DOM has it.
+  assert.match(revision, /white-space:\s*pre/);
+});
+
+test('a local repository line carries the full string as a title too', () => {
+  // An addition to the split, not a substitute for it: a title is invisible to
+  // touch and unreliable for assistive tech, which is why the split carries
+  // the fix and this only helps a mouse recover a clipped path.
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(SOURCES, '', 0);
+  assert.equal(view.repositoryLink.attributes.title, 'https://git.self-hosted.example/team/widgets @ ccccccc');
+});
+
+test('a hosted repository line is still one text node, unsplit and untitled', () => {
+  // The byte-identity claim for the hosted path: same single text node, same
+  // text, and none of the attributes the split shape introduces. A hosted slug
+  // is already bounded, and changing the shape here would change the DOM of
+  // every artifact that renders a recognised forge.
+  const view = passportRenderer(HOSTED_PAYLOAD);
+  view.render(SOURCES, 'verified', 0);
+  assert.deepEqual(view.repositoryLink.children, []);
+  assert.equal(view.repositoryLink.textContent, 'example/evidence-repo @ aaaaaaa');
+  assert.equal('data-repository-shape' in view.repositoryLink.attributes, false);
+  assert.equal('title' in view.repositoryLink.attributes, false);
+  // The pre-slug artifacts take the same unsplit path.
+  const legacy = passportRenderer({ url: 'https://github.com/example/evidence-repo/', revision: 'b'.repeat(40), shortRevision: 'bbbbbbb' });
+  legacy.render(SOURCES, '', 0);
+  assert.deepEqual(legacy.repositoryLink.children, []);
+  assert.equal(legacy.repositoryLink.textContent, 'example/evidence-repo @ bbbbbbb');
+});
+
+// ---------------------------------------------------------------------------
+// The repository line's link affordances, which used to be static markup. An
+// <a> with no href is not a link, so target/rel/referrerpolicy on it advertise
+// an openability it does not have -- the same overclaim an unlinkable cited
+// source location was fixed for one round earlier, and the asymmetry between
+// the two was the finding.
+// ---------------------------------------------------------------------------
+
+test('the repository line is declared with no link affordances in the markup', () => {
+  const tag = /<a class="semantic-passport-repository" id="focus-repository"([^>]*)>/.exec(template());
+  assert.notEqual(tag, null, 'the repository line is missing from the built template');
+  assert.equal(tag[1], '', 'link affordances must ride with the href, not sit in static markup');
+});
+
+test('a hosted repository line gets its link affordances with its href', () => {
+  const view = passportRenderer(HOSTED_PAYLOAD);
+  view.render(SOURCES, '', 0);
+  assert.equal(view.repositoryLink.href, HOSTED_PAYLOAD.treeUrl);
+  assert.equal(view.repositoryLink.attributes.target, '_blank');
+  assert.equal(view.repositoryLink.attributes.rel, 'noopener noreferrer');
+  assert.equal(view.repositoryLink.attributes.referrerpolicy, 'no-referrer');
+});
+
+test('a local repository line carries no link affordances at all', () => {
+  // The stub's element arrives carrying whatever the shipped markup declares,
+  // so this fails while they are static: they have to be REMOVED, not merely
+  // not set. One element serves every focus change, so the same removal is
+  // what stops a hosted subject's affordances outliving it onto a local one.
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(SOURCES, '', 0);
+  assert.equal('href' in view.repositoryLink.attributes, false);
+  assert.equal('target' in view.repositoryLink.attributes, false);
+  assert.equal('rel' in view.repositoryLink.attributes, false);
+  assert.equal('referrerpolicy' in view.repositoryLink.attributes, false);
 });

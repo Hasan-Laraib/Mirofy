@@ -345,6 +345,20 @@
       function renderSourceEvidence(sources, provenanceClass, sourceTotal) {
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
+        /* The link affordances are cleared here and re-added with the href
+           below, rather than sitting in the static markup, for the same reason
+           an unlinkable cited source location carries none: an <a> with no
+           href is not a link, and target/rel/referrerpolicy on it advertise an
+           openability it does not have. Clearing at the top rather than only
+           in the unlinked branch matters because this one element is reused
+           for every focus change -- an attribute left by the previous subject
+           would outlive the payload that justified it, including on the early
+           return below. */
+        repositoryLink.removeAttribute('target');
+        repositoryLink.removeAttribute('rel');
+        repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('title');
+        repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';
         provenanceSlot.textContent = '';
         provenanceSlot.hidden = true;
@@ -382,13 +396,48 @@
            would be the same overclaim in the accessibility tree. */
         if (repository.treeUrl) {
           repositoryLink.href = repository.treeUrl;
+          repositoryLink.setAttribute('target', '_blank');
+          repositoryLink.setAttribute('rel', 'noopener noreferrer');
+          repositoryLink.setAttribute('referrerpolicy', 'no-referrer');
           repositoryLink.setAttribute('aria-label', viewerText('viewer.passport.repository.open', { revision: repository.revision }));
         } else {
           repositoryLink.removeAttribute('href');
           repositoryLink.removeAttribute('aria-label');
         }
         repositoryLink.hidden = !repositoryText;
-        repositoryLink.textContent = repositoryText;
+        /* This line is one flex item in a 22rem chip, capped, nowrap and
+           ellipsised, sharing its row with the VERIFIED pill. A slug is
+           bounded -- owner/repo -- but a declared URL is not, and an internal
+           forge URL overflows, so as ONE text node the tail that gets clipped
+           is ' @ <shortRevision>': the evidence itself, with no way to get it
+           back. Split into two elements only the URL may ellipsise, and a long
+           URL clips in the middle of its path instead, leaving both
+           load-bearing halves standing -- the domain, which is where a mistyped
+           host shows and which sits at the START, and the revision. Reading
+           order is unchanged, and so is the text: the revision element carries
+           the same leading space (held by white-space: pre, which a flex item
+           would otherwise trim).
+
+           Hosted repositories keep the single text node exactly: their slug is
+           already bounded by the strip to owner/repo, and changing the shape
+           there would change the DOM of every artifact that renders one. */
+        if (slug && repository.host === 'local') {
+          repositoryLink.setAttribute('data-repository-shape', 'split');
+          /* The full string, for a mouse. Not a substitute for the split --
+             title is invisible to touch and unreliable for assistive tech --
+             which is why it is an addition to it rather than the fix. */
+          repositoryLink.setAttribute('title', repositoryText);
+          var repositoryUrlSlot = document.createElement('span');
+          repositoryUrlSlot.className = 'semantic-passport-repository-url';
+          repositoryUrlSlot.textContent = slug;
+          var repositoryRevisionSlot = document.createElement('span');
+          repositoryRevisionSlot.className = 'semantic-passport-repository-revision';
+          repositoryRevisionSlot.textContent = ' @ ' + repository.shortRevision;
+          repositoryLink.appendChild(repositoryUrlSlot);
+          repositoryLink.appendChild(repositoryRevisionSlot);
+        } else {
+          repositoryLink.textContent = repositoryText;
+        }
         /* The class token is shown verbatim: it is published vocabulary the
            documentation and the legend both use, not prose to localise. The
            accessible label carries the localised framing instead. */
@@ -1240,6 +1289,13 @@
         evidence.hidden = true;
         evidenceLinks.textContent = '';
         repositoryLink.removeAttribute('href');
+        /* Same invariant as renderSourceEvidence's own reset: the affordances
+           go with the href, so a cleared passport leaves none behind. */
+        repositoryLink.removeAttribute('target');
+        repositoryLink.removeAttribute('rel');
+        repositoryLink.removeAttribute('referrerpolicy');
+        repositoryLink.removeAttribute('title');
+        repositoryLink.removeAttribute('data-repository-shape');
         repositoryLink.textContent = '';
         summary.textContent = '';
         reachSection.hidden = true;

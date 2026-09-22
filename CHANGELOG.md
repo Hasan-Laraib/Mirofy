@@ -63,6 +63,29 @@ repositories still show the stripped `owner/repo` and still link. The
 something that cannot be opened it would be the same overclaim, relocated to
 the accessibility tree.
 
+**A whole URL is longer than the line it sits on.** That line is one flex item
+in a chip capped at 22rem — `nowrap`, `overflow: hidden`,
+`text-overflow: ellipsis` — sharing its row with the VERIFIED pill. A hosted
+slug is bounded by the strip to `owner/repo`; a declared URL is not, and a
+realistic internal forge URL overruns. As a single text node the part that got
+clipped was the *tail*, which is ` @ 56e37d0` — the revision, which is the
+evidence — and with no `title` there was no way to recover it. The URL and the
+revision are separate elements now, on the same line and in the same order,
+with only the URL permitted to ellipsise and the revision not permitted to
+shrink. A long URL clips in the middle of its path instead, so both
+load-bearing halves survive: the domain, where a typo shows, at the start, and
+the revision at the end. The visible text is unchanged, and a `title` carries
+the whole string for a mouse — an addition, not the fix, since `title` is
+invisible to touch and unreliable for assistive tech. Hosted repositories keep
+the single text node exactly.
+
+The anchor's `target`, `rel` and `referrerpolicy` were static markup, so an
+unlinked repository line kept them while an unlinked *source* citation was
+deliberately denied the same three. Inert without an href, but the asymmetry
+stated two different rules for one principle. They are set alongside the href
+now and cleared alongside it, so the line carries link affordances only when it
+is actually a link.
+
 **And every cited source location, not only the repository line.** The passport
 draws one anchor per citation, and that anchor's href came straight from
 `blobUrl()` — which a local repository answers with null for every source. A
