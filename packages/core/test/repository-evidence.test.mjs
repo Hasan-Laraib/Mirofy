@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { startPreview } from '../bin/preview.mjs';
+import { verifyRepositoryEvidence } from '../renderers/shared/repository-evidence.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const skillRoot = path.resolve(here, '..');
@@ -40,6 +41,36 @@ function fixture() {
   const input = path.join(root, 'diagram.architecture.json');
   fs.writeFileSync(input, JSON.stringify(diagram, null, 2));
   return { root, revision, diagram, input };
+}
+
+/**
+ * A diagram citing source evidence in `repo` (a `fixture()` result), for
+ * tests that call `verifyRepositoryEvidence` directly rather than through the
+ * CLI. Copies the diagram shape `fixture()` already proves works, overriding
+ * only what the test needs to vary: the declared repository URL and how many
+ * source locations are cited.
+ *
+ * The declared URL and the checkout's real `origin` remote are kept in step
+ * (both absent/unrecognised, or both equal): `verifyRepositoryEvidence`'s
+ * origin-mismatch check is unrelated to this task and still requires that
+ * agreement, whether or not the declared URL resolves to a known host.
+ */
+function diagramCitingSource(repo, url = null, { locations = 1 } = {}) {
+  git(repo.root, 'remote', 'set-url', 'origin', url || 'https://example.invalid/no-remote-declared');
+  const diagram = JSON.parse(JSON.stringify(repo.diagram));
+  diagram.meta.repository = {
+    ...(url ? { url } : {}),
+    revision: repo.revision,
+  };
+  const candidates = [
+    { path: 'src/router.js', line: 1, end_line: 3, label: 'Request router' },
+    { path: 'src/store.js', line: 1 },
+  ];
+  diagram.components[0].sources = Array.from(
+    { length: locations },
+    (_, index) => candidates[index % candidates.length],
+  );
+  return diagram;
 }
 
 function run(args) {
@@ -214,4 +245,55 @@ test('live preview forwards repo-root and publishes only verified evidence', { t
   } finally {
     await preview.stop();
   }
+});
+
+test('a repository with no remote renders instead of failing', () => {
+  const repo = fixture();
+  const result = verifyRepositoryEvidence('architecture', diagramCitingSource(repo), repo.root);
+  assert.equal(result.verified, true);
+  assert.equal(result.repository.host, 'local');
+  assert.equal(result.repository.treeUrl, null);
+});
+
+test('a local repository reports one limitation naming it', () => {
+  const repo = fixture();
+  const result = verifyRepositoryEvidence('architecture', diagramCitingSource(repo), repo.root);
+  assert.equal(result.limitations.length, 1);
+  assert.match(result.limitations[0].reason, /cannot be linked/);
+  assert.equal(result.limitations[0].declaredUrl, null);
+});
+
+test('an unrecognised forge is distinguished from having no remote', () => {
+  const repo = fixture();
+  const diagram = diagramCitingSource(repo, 'https://git.internal.example/owner/repo');
+  const result = verifyRepositoryEvidence('architecture', diagram, repo.root);
+  assert.equal(result.repository.host, 'local');
+  assert.equal(result.limitations[0].declaredUrl, 'https://git.internal.example/owner/repo');
+});
+
+test('one limitation per repository, not per cited source location', () => {
+  const repo = fixture();
+  const diagram = diagramCitingSource(repo, null, { locations: 3 });
+  const result = verifyRepositoryEvidence('architecture', diagram, repo.root);
+  assert.equal(result.limitations.length, 1);
+});
+
+test('a hosted repository carries no limitations key at all', () => {
+  const repo = fixture();
+  const diagram = diagramCitingSource(repo, 'https://github.com/owner/repo');
+  const result = verifyRepositoryEvidence('architecture', diagram, repo.root);
+  assert.equal('limitations' in result, false);
+});
+
+test('a malformed url is still a hard failure', () => {
+  const repo = fixture();
+  const diagram = diagramCitingSource(repo, 'not a url at all');
+  // The thrown Error's own `.message` is the human-readable diagnostic text,
+  // not the diagnostic code (see diagnostics.mjs's normalizedDiagnostic) --
+  // the code rides alongside on `mirofyDiagnostics`, so that is what a
+  // regex-on-message assertion cannot see and this checks directly instead.
+  assert.throws(
+    () => verifyRepositoryEvidence('architecture', diagram, repo.root),
+    (error) => error.mirofyDiagnostics?.[0]?.code === 'repository-evidence/url-invalid',
+  );
 });

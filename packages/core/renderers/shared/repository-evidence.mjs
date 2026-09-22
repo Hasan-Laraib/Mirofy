@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { detectHost, HOST_IDS } from './hosts.mjs';
+import { detectHost, hostOrLocal, HOST_IDS } from './hosts.mjs';
 import { throwDiagnosticError } from './diagnostics.mjs';
 
 const FULL_SHA_RE = /^[a-f0-9]{40}$/i;
@@ -16,6 +16,24 @@ function evidenceFailure(code, message, { subject = {}, evidence = {}, supported
     evidence,
     supportedFixes,
   }]);
+}
+
+/**
+ * Is this string shaped like a URL at all?
+ *
+ * Deliberately permissive: the question is "did the author mean to write a
+ * URL", not "is this a forge we know". An unknown forge is handled by falling
+ * back to the local adapter; gibberish is rejected here.
+ */
+function isUrlShaped(value) {
+  if (typeof value !== 'string' || !value.trim()) return false;
+  if (/^(git@|ssh:\/\/)/.test(value.trim())) return true;
+  try {
+    const parsed = new URL(value.trim());
+    return Boolean(parsed.protocol && parsed.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function runGit(repoRoot, args) {
@@ -199,14 +217,18 @@ function prepareRepository(entry, rootPath, declaredIds) {
       supportedFixes: ['pin one full 40-character commit SHA'],
     });
   }
-  const host = detectHost(entry.url);
-  if (!host) {
-    evidenceFailure('repository-evidence/url-invalid', `${where}/url must be a public repository URL on a supported host (${HOST_IDS.join(', ')}).`, {
+  // A value that is not a URL at all is an authoring mistake, and still fails.
+  // A URL on a forge we do not recognise, or no URL at all, is a property of
+  // the repository rather than a mistake: the evidence survives, the link does
+  // not. See the design note in hosts.mjs.
+  if (entry.url && !isUrlShaped(entry.url)) {
+    evidenceFailure('repository-evidence/url-invalid', `${where}/url must be a repository URL (supported hosts: ${HOST_IDS.join(', ')}).`, {
       subject: { path: `${where}/url` },
       evidence: { repositoryUrl: entry.url, supportedHosts: HOST_IDS },
-      supportedFixes: [`use a canonical public repository URL on one of: ${HOST_IDS.join(', ')}`],
+      supportedFixes: [`use a canonical repository URL on one of: ${HOST_IDS.join(', ')}`],
     });
   }
+  const host = hostOrLocal(entry.url);
   if (!rootPath) {
     // Naming WHICH repository is missing, and what was declared: with several
     // in play, "pass --repo-root" alone leaves the author guessing.
@@ -431,6 +453,22 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     });
   }
 
+  // Repositories that fell back to the local adapter get one entry each here,
+  // regardless of how many sources cite them: this reports "this repository
+  // cannot be linked", not "this citation cannot be linked". The originally
+  // authored URL is read from `declared`, not from the prepared entry -- the
+  // prepared entry's `url` is `host.web`, which is null for every local
+  // repository whether the author wrote no URL at all or an unrecognised one,
+  // and those two cases are exactly what `declaredUrl` distinguishes.
+  const limitations = [...repositories.values()]
+    .filter((entry) => entry.host.id === 'local')
+    .map((entry) => ({
+      repository: entry.id,
+      reason: 'no recognised remote host; source locations are cited by path and '
+        + 'revision but cannot be linked',
+      declaredUrl: declared.get(entry.id)?.url || null,
+    }));
+
   const first = repositories.get(SINGLE) ?? [...repositories.values()][0];
   return {
     schemaVersion: 1,
@@ -458,5 +496,6 @@ export function verifyRepositoryEvidence(diagramType, diagram, repoRootInput) {
     nodes,
     edges,
     sourceTotals,
+    ...(limitations.length ? { limitations } : {}),
   };
 }
