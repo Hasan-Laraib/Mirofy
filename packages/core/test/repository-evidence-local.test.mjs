@@ -148,7 +148,11 @@ function passportRenderer(repositoryPayload) {
   assert.notEqual(end, -1, 'could not find the end of renderSourceEvidence');
   const body = source.slice(start, end + '\n      }'.length);
 
-  const element = () => ({
+  // `tagName` is recorded so a test can tell the three slots of a source
+  // entry apart -- <strong> label, <code> location, <small> path -- which
+  // matters once the <code> slot is conditional.
+  const element = (tagName) => ({
+    tagName,
     attributes: Object.create(null),
     children: [],
     textContent: '',
@@ -161,7 +165,7 @@ function passportRenderer(repositoryPayload) {
   const evidenceLinks = element();
   const repositoryLink = element();
   const provenanceSlot = element();
-  const doc = { createElement: () => element() };
+  const doc = { createElement: (tagName) => element(tagName) };
   const Mirofy = { sourceEvidence: { repository: () => repositoryPayload } };
   const viewerText = (key) => key;
 
@@ -278,4 +282,143 @@ test('a hosted repository keeps the canonical forge url, not the declared spelli
   const result = verifyRepositoryEvidence('architecture', diagram, repo.root);
   assert.equal(result.repository.url, 'https://github.com/owner/repo');
   assert.equal(result.repository.host, 'github');
+});
+
+// ---------------------------------------------------------------------------
+// The cited source locations, which are the same defect as the repository
+// line one element above, repeated once per citation -- and a diagram cites
+// far more source lines than repositories. `link.href = source.href` with a
+// null href serialises as href="null": a clickable dead link that resolves
+// against the artifact's own URL, wearing an "Open verified source ..." label
+// and a ' ↗' glyph that both promise a destination. Design §3: "With a null
+// href it emits the same text unlinked."
+// ---------------------------------------------------------------------------
+
+const LOCAL_LINE = Object.freeze([{ path: 'src/router.js', line: 1, href: null }]);
+const LOCAL_RANGE = Object.freeze([{ path: 'src/router.js', line: 4, endLine: 9, href: null }]);
+const LOCAL_NO_LINE = Object.freeze([{ path: 'src/router.js', href: null }]);
+const HOSTED_BLOB = 'https://github.com/example/evidence-repo/blob/' + 'a'.repeat(40) + '/src/router.js#L1';
+const HOSTED_LINE = Object.freeze([{ path: 'src/router.js', line: 1, href: HOSTED_BLOB }]);
+const HOSTED_RANGE = Object.freeze([{ path: 'src/router.js', line: 4, endLine: 9, href: HOSTED_BLOB }]);
+const HOSTED_NO_LINE = Object.freeze([{ path: 'src/router.js', href: HOSTED_BLOB }]);
+
+/** The one source entry the passport rendered, as {tag: text} pairs in order. */
+function entryOf(view) {
+  assert.equal(view.evidenceLinks.children.length, 1);
+  const entry = view.evidenceLinks.children[0];
+  return { entry, slots: entry.children.map((child) => [child.tagName, child.textContent]) };
+}
+
+test('an unlinkable source location renders as text, not as href="null"', () => {
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(LOCAL_LINE, '', 0);
+  const { entry } = entryOf(view);
+  // The whole point: nothing a browser will serialise into an href.
+  assert.equal(entry.href, undefined);
+  assert.equal('href' in entry, false);
+  assert.equal('href' in entry.attributes, false);
+});
+
+test('an unlinkable source location carries no link affordances', () => {
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(LOCAL_LINE, '', 0);
+  const { entry } = entryOf(view);
+  assert.equal(entry.target, undefined);
+  assert.equal(entry.rel, undefined);
+  assert.equal(entry.referrerPolicy, undefined);
+  // "Open verified source ... " on something that cannot be opened is the
+  // same overclaim as the repository line's, just in the accessibility tree.
+  assert.equal('aria-label' in entry.attributes, false);
+  // Still styled and positioned as before: the fix is about what the entry
+  // claims, not about where it sits.
+  assert.equal(entry.className, 'semantic-passport-source');
+});
+
+test('an unlinkable source location keeps its label, line range and path', () => {
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(LOCAL_RANGE, '', 0);
+  const { slots } = entryOf(view);
+  // Same information, same three slots, same order -- only the claim of
+  // openability is gone. The location string is what design §3 pins.
+  assert.deepEqual(slots, [
+    ['strong', 'router.js'],
+    ['code', 'L4–9'],
+    ['small', 'src/router.js'],
+  ]);
+});
+
+test('an unlinkable source location shows no glyph and no "Open" wording', () => {
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(LOCAL_LINE, '', 0);
+  const { slots } = entryOf(view);
+  const text = slots.map(([, value]) => value).join(' ');
+  assert.equal(/↗/.test(text), false, 'the arrow glyph advertises a link that does not exist');
+  assert.equal(/openLink|\.open\b/.test(text), false, 'no string may offer to open an unlinkable citation');
+});
+
+test('an unlinkable source location with no line range omits the location slot', () => {
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render(LOCAL_NO_LINE, '', 0);
+  const { slots } = entryOf(view);
+  // Today's fallback for a source with no line range is the bare invitation
+  // "Open ↗", which is nothing but an affordance. With nothing to link there
+  // is nothing to put here: the path is already on the line below.
+  assert.deepEqual(slots, [
+    ['strong', 'router.js'],
+    ['small', 'src/router.js'],
+  ]);
+});
+
+test('a hosted source location links exactly as it did before', () => {
+  const view = passportRenderer(HOSTED_PAYLOAD);
+  view.render(HOSTED_LINE, '', 0);
+  const { entry, slots } = entryOf(view);
+  assert.equal(entry.href, HOSTED_BLOB);
+  assert.equal(entry.target, '_blank');
+  assert.equal(entry.rel, 'noopener noreferrer');
+  assert.equal(entry.referrerPolicy, 'no-referrer');
+  assert.equal(entry.attributes['aria-label'], 'viewer.passport.source.open');
+  assert.equal(entry.className, 'semantic-passport-source');
+  assert.deepEqual(slots, [
+    ['strong', 'router.js'],
+    ['code', 'L1 ↗'],
+    ['small', 'src/router.js'],
+  ]);
+});
+
+test('a hosted source location keeps its range and its "Open ↗" fallback', () => {
+  const range = passportRenderer(HOSTED_PAYLOAD);
+  range.render(HOSTED_RANGE, '', 0);
+  assert.deepEqual(entryOf(range).slots[1], ['code', 'L4–9 ↗']);
+  const bare = passportRenderer(HOSTED_PAYLOAD);
+  bare.render(HOSTED_NO_LINE, '', 0);
+  assert.deepEqual(entryOf(bare).slots[1], ['code', 'viewer.passport.source.openLink']);
+});
+
+test('a source label overrides the derived basename either way', () => {
+  // The label branch is untouched by the conditional, and a test that only
+  // ever passed unlabelled sources would not notice if it moved.
+  const local = passportRenderer(LOCAL_PAYLOAD);
+  local.render([{ path: 'src/router.js', label: 'Router', line: 1, href: null }], '', 0);
+  assert.equal(entryOf(local).slots[0][1], 'Router');
+  const hosted = passportRenderer(HOSTED_PAYLOAD);
+  hosted.render([{ path: 'src/router.js', label: 'Router', line: 1, href: HOSTED_BLOB }], '', 0);
+  assert.equal(entryOf(hosted).slots[0][1], 'Router');
+});
+
+test('every cited location on a local artifact is unlinked, not just the first', () => {
+  // The repository line was fixed one round ago and the sources were not, so
+  // "one element is handled" is exactly the failure mode to pin here.
+  const view = passportRenderer(LOCAL_PAYLOAD);
+  view.render([
+    { path: 'src/router.js', line: 1, href: null },
+    { path: 'src/server.js', line: 12, endLine: 20, href: null },
+    { path: 'src/db/index.js', href: null },
+  ], '', 0);
+  assert.equal(view.evidenceLinks.children.length, 3);
+  for (const entry of view.evidenceLinks.children) {
+    assert.equal('href' in entry, false);
+    assert.equal('aria-label' in entry.attributes, false);
+    assert.equal(entry.children.some((child) => /↗/.test(child.textContent)), false);
+  }
 });

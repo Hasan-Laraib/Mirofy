@@ -397,24 +397,54 @@
           provenanceSlot.setAttribute('aria-label', viewerText('viewer.passport.provenance', { class: provenanceClass }));
           provenanceSlot.hidden = false;
         }
+        /* The same conditional the repository line above takes, one element
+           down and once per citation: link if there is an href, plain text if
+           there is not. A local repository answers blobUrl() with null for
+           EVERY source, and `link.href = null` serialises as href="null" -- a
+           clickable dead link that resolves against the artifact's own URL.
+           A dead link is worse than no link because it claims a destination.
+
+           An unlinkable citation keeps the anchor element, so the class-based
+           layout, ordering and geometry are untouched, and drops everything
+           that claims openability: the href, the target/rel/referrerPolicy
+           affordances, the "Open verified source ..." label and the ' ↗'
+           glyph. The label is dropped rather than reworded because an <a>
+           with no href is not a link and has no name to override; what is
+           left -- the file label, the line range and the path -- states the
+           citation truthfully on its own, and the revision those lines are
+           pinned to is on the repository line directly above. The href branch
+           below is byte-for-byte what it was. */
         sources.forEach(function (source) {
           var link = document.createElement('a');
           link.className = 'semantic-passport-source';
-          link.href = source.href;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.referrerPolicy = 'no-referrer';
-          link.setAttribute('aria-label', viewerText('viewer.passport.source.open', { path: source.path, revision: repository.shortRevision }));
+          var lineRange = source.line
+            ? 'L' + source.line + (source.endLine && source.endLine !== source.line ? '–' + source.endLine : '')
+            : '';
+          if (source.href) {
+            link.href = source.href;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.referrerPolicy = 'no-referrer';
+            link.setAttribute('aria-label', viewerText('viewer.passport.source.open', { path: source.path, revision: repository.shortRevision }));
+          }
+          /* With an href the location slot doubles as the affordance, so a
+             citation carrying no line range still reads "Open ↗". Without an
+             href there is nothing for that slot to say when there is no line
+             range -- the path is already on the line below -- so the slot is
+             omitted rather than filled with wording that invites a click. */
+          var locationText = source.href
+            ? (lineRange ? lineRange + ' ↗' : viewerText('viewer.passport.source.openLink'))
+            : lineRange;
           var name = document.createElement('strong');
           name.textContent = source.label || source.path.split('/').pop() || source.path;
-          var location = document.createElement('code');
-          location.textContent = source.line
-            ? 'L' + source.line + (source.endLine && source.endLine !== source.line ? '–' + source.endLine : '') + ' ↗'
-            : viewerText('viewer.passport.source.openLink');
           var sourcePath = document.createElement('small');
           sourcePath.textContent = source.path;
           link.appendChild(name);
-          link.appendChild(location);
+          if (locationText) {
+            var location = document.createElement('code');
+            location.textContent = locationText;
+            link.appendChild(location);
+          }
           link.appendChild(sourcePath);
           evidenceLinks.appendChild(link);
         });

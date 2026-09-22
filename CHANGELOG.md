@@ -63,6 +63,19 @@ repositories still show the stripped `owner/repo` and still link. The
 something that cannot be opened it would be the same overclaim, relocated to
 the accessibility tree.
 
+**And every cited source location, not only the repository line.** The passport
+draws one anchor per citation, and that anchor's href came straight from
+`blobUrl()` — which a local repository answers with null for every source. A
+null assigned to `href` serialises as `href="null"`: a clickable link that
+resolves against the artifact's own URL, one per cited line, and a diagram
+cites far more lines than it has repositories. Those entries now render as the
+same text unlinked, exactly as the repository line above them does: same file
+label, same `L12–20`, same path, and no href, no `target`/`rel`, no
+"Open verified source …" label and no `↗`. A citation carrying no line range
+used to fall back to the bare words "Open ↗", which is only an offer to click;
+with nothing to open, that slot is absent instead. What a hosted repository
+renders is unchanged, byte for byte.
+
 For the same reason the artifact now carries the declared URL in
 `repository.url` for a local repository, where it previously carried `null`
 (the local adapter has no canonical forge URL to offer). `host: "local"`
