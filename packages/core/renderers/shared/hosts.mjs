@@ -150,3 +150,34 @@ export function detectHost(url) {
 
 /** The supported forge ids, for diagnostics that must name them. */
 export const HOST_IDS = Object.freeze(HOSTS.map((host) => host.id));
+
+/**
+ * The adapter for a repository with no recognised remote.
+ *
+ * It satisfies the same shape every forge adapter does, and answers `null`
+ * where a URL would go. A null href is the honest answer: the evidence is the
+ * path, the line and the revision, all of which survive in a local checkout.
+ * Only navigation is unavailable, and a consumer can see that from `id`.
+ */
+export const LOCAL_HOST = Object.freeze({
+  id: 'local',
+  slug: null,
+  web: null,
+  blobUrl: () => null,
+  treeUrl: () => null,
+});
+
+/**
+ * Resolve a repository URL to an adapter, falling back to LOCAL_HOST.
+ *
+ * `detectHost` deliberately returns null for input it does not recognise, and
+ * keeps doing so: a detector that answers confidently about input it did not
+ * recognise is the kind of guess this codebase forbids. Choosing to proceed
+ * without a host is the caller's decision, so it lives here rather than there.
+ *
+ * @param {string|null|undefined} url
+ * @returns {typeof LOCAL_HOST | ReturnType<typeof detectHost>}
+ */
+export function hostOrLocal(url) {
+  return detectHost(url || '') || LOCAL_HOST;
+}
