@@ -15,6 +15,96 @@ stops being one.
 
 ---
 
+## 2026-10-09
+
+### The reserved `inferred` slot now has something allowed to fill it
+
+`inferred` has been the sixth of the six published provenance classes since the
+visual system was written. It is in `common.schema.json`'s enum, it is accepted
+on every connection, and `packages/viewer` has always painted it — a faded
+dashed edge, three-on-five. Nothing has ever emitted one. The honest coverage
+report has the same hole in the other direction: `coverage.mjs` opens by quoting
+a contract about "what was derived, **inferred**, and not analysed" and then
+partitions files into three buckets, none of them that.
+
+Both were empty for a good reason, and `fact.mjs` states it: a scanner may
+claim `statically-derived` or `config-derived` and nothing else, because
+"`inferred` would be a guess dressed as a finding, which is the one thing the
+scanner rule forbids."
+
+That rule has not moved. `@mirofy/judge` is a separate package that nothing
+calls, and it is permitted to guess for exactly one reason — it attaches a
+probability and a receipt to every guess. The scanner stays honest by never
+guessing; the judge stays honest by never concealing that it did. Delete the
+package and every other command behaves identically; `scan` does not call it,
+`compile` does not read what it writes.
+
+It asks about one thing: imports the scanner recorded that it *could not
+resolve*. A computed specifier — `import(someVar)` — is the case worth paying
+for, because the target is genuinely unknowable statically and usually obvious
+to a reader. A gap reading `unreadable: EACCES` is never asked about; nothing
+was read, so there is nothing to have an opinion about, and asking a model to
+guess at a file nobody opened is the failure this package exists to avoid.
+
+**The field everyone would reach for is not what it sounds like.** The obvious
+design prints the model's `confidence` on the edge. Its own reference documents
+that number only as a normalised spread of the probability distribution — the
+closed form for three options is `(3 × p_max − 1) / 2` — and the AI SDK docs go
+further and say it "is not the selected option's probability or a portable
+confidence measure". The reading everyone has in mind, *90% means right 90% of
+the time*, appears in launch coverage and nowhere in the reference. Printing it
+on a diagram that argues for checking claims would have been the exact thing
+this repository refuses. So the package uses the `noul` primitive, which returns
+a probability and carries no `confidence` field at all, and the word is not
+printed anywhere.
+
+Four smaller decisions came the same way, from the documented behaviour rather
+than from taste. The model version is pinned rather than aliased, because
+`--min` is a threshold tuned against one version and an alias moves underneath
+it. One question per HTTP call, because partial-failure semantics for a batch
+are documented nowhere and one-per-call means the situation never arises. The
+state sent per question is a few lines around the citation, because "large state
+full of irrelevant detail" is a listed defect of this model version. And the
+client speaks one named wire dialect: at least three incompatible contracts
+front the same model, and the gateway one renames the answer field, so a
+mismatched endpoint would have read every probability as missing instead of
+failing — the response reader refuses a body it does not recognise rather than
+coercing one.
+
+Nothing in `packages/core` changed, and nothing needed to. `compile.mjs` already
+passes `labels[0]` and `provenance` through verbatim, so a relationship carrying
+`provenance: 'inferred'` and a label renders through the existing pipeline. The
+alternative was a `confidence` field on a connection, which every schema here
+forbids via `additionalProperties: false` — and buying it would have meant
+re-baselining the core manifest for what is, from core's side, no change at all.
+
+The package added one gap to this repository's own scan, and it is kept
+deliberately: the scanner reads a regex literal in `gaps.mjs` as a computed
+import. That makes `@mirofy/judge` a candidate against a component it does not
+import, which is precisely the mention-versus-dependency distinction the
+question is written to reject. The self-scan figures in `README.md` and
+`assets/pipeline.svg` moved to match.
+
+64 tests, all offline, no key and no socket — the client is injected. The
+fixtures are written to the *documented* wire shape rather than captured from a
+live call, and the test headers say so, because they prove the adapter matches
+the published contract and cannot prove the contract matches the server.
+
+### Two high advisories, neither of them ours
+
+`brace-expansion` 1.1.18 → 1.1.21 and `fast-uri` 3.1.6 → 3.1.8, both reached
+only as transitive devDependencies — the first through `eslint` → `minimatch`,
+the second through `ajv`. Both are patch bumps inside their parents' existing
+ranges; no package here declares a runtime dependency and none gained one.
+
+No behaviour change. Worth recording anyway, because of how it surfaced:
+`check:audit` passed locally and failed on every CI leg hours later, on an
+unchanged lockfile. The gate asks a live advisory endpoint, so a green commit
+goes red when the database moves rather than when the code does. That is the
+gate working — but it means "it passed when I ran it" is not a durable claim
+about this particular check, and the lockfile was already carrying both before
+any of today's work.
+
 ## 2026-09-10
 
 ### Four commands that shipped, were tested, and could not be run
