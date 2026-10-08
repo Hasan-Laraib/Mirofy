@@ -1,0 +1,14 @@
+{
+  "name": "@mirofy/judge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Opt-in: asks a System One model about what the scanner recorded it could not see, and records the receipt.",
+  "exports": {
+    "./gaps": "./src/gaps.mjs",
+    "./questions": "./src/questions.mjs",
+    "./client": "./src/client.mjs",
+    "./judge": "./src/judge.mjs",
+    "./annotate": "./src/annotate.mjs"
+  }
+}

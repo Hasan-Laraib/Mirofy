@@ -44,6 +44,7 @@
     "drift": "node packages/explain/bin/drift.mjs",
     "export": "node packages/export/bin/export.mjs",
     "layout": "node packages/layout/bin/layout.mjs",
+    "judge": "node packages/judge/bin/judge.mjs",
     "check:brand-marks": "node packages/core/scripts/generate-brand-marks.mjs --check",
     "check:server-json": "node scripts/check-server-json.mjs",
     "check:shell": "node scripts/check-shell.mjs"
