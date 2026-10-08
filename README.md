@@ -214,7 +214,7 @@ node packages/core/bin/mirofy.mjs render architecture scan/diagram.json out.html
 ```
 
 Against **this repository** it records **1,227 facts** across **223 files**,
-with **16 gaps** it could not read; derives **18 components and 20
+with **17 gaps** it could not read; derives **19 components and 21
 relationships** — every one citing the file and line it came from — and draws
 **twelve**, recording what it left out and why.
 
@@ -602,6 +602,7 @@ a path from a sibling repo passes as evidence for this one.
 | `import` | Mermaid into typed documents |
 | `export` | draw.io and Excalidraw escape hatches |
 | `layout` | constraint layout: intent to coordinates (dev-time) |
+| `judge` | opt-in: asks a System One model about the gaps, and keeps the receipt |
 | `core` | renderers, schemas, validators, CLI |
 | `viewer` | the interactive viewer, built into one template |
 | `benchmark` | first-pass usable rate, over a saved corpus |
