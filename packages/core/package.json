@@ -62,6 +62,7 @@
   "author": "Hasan-Laraib",
   "exports": {
     ".": "./bin/mirofy.mjs",
+    "./api": "./api.mjs",
     "./schemas/*": "./schemas/*",
     "./examples/*": "./examples/*",
     "./renderers/shared/*": "./renderers/shared/*",
@@ -71,6 +72,7 @@
     "SKILL.md",
     "README.md",
     "LICENSE",
+    "api.mjs",
     "bin",
     "pipeline",
     "renderers",
