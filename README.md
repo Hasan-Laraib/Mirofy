@@ -111,6 +111,30 @@ nothing lands in your repository; without it the intermediates go to
 workspaces: where there are no packages to draw, it models the **source
 directories** and the imports between them.
 
+### Or call it from your own code
+
+`mirofy-cli/api` is the same pipeline as a library — no argv, no `process.exit`,
+and no stderr to parse:
+
+```js
+import { render, validate, map } from 'mirofy-cli/api';
+
+const html = await render('architecture', diagram);   // one HTML string
+const { ok, diagnostics } = await validate('architecture', diagram);
+const { html, drawn, coveragePath } = await map('.');  // the whole pipeline
+```
+
+A rejected document throws a `MirofyRenderError` carrying `.diagnostics` — the
+renderer's own structured report, each entry with a `code`, a `subject`, the
+`evidence` behind it and the fixes it supports. `validate` **returns** that
+report instead of throwing, because "this document is invalid" is an answer,
+and checking a hundred documents should not need a hundred `try`/`catch`
+blocks.
+
+`map` needs a git repository: every fact is pinned to a revision, so a
+directory with no commit has nothing for the evidence to cite, and it says so
+rather than failing further down.
+
 ### What it reads
 
 **JavaScript and TypeScript** imports · **Python** imports · **Go** imports ·
@@ -348,7 +372,7 @@ omission. Every fact is labelled with one of six provenance classes, so
 
 The same rule holds where a decision has to be made that evidence cannot
 settle. A derived component's kind is `package` — the scanner knows a manifest
-exists, not whether something is a "backend". 784 imports of Node builtins are
+exists, not whether something is a "backend". 878 imports of Node builtins are
 *counted and named*, not drawn and not dropped in silence. In Python a computed
 `importlib.import_module(name)` is a gap with its line, and docstrings are
 blanked before parsing — a docstring full of example imports would otherwise

@@ -73,6 +73,7 @@ const EXCLUDE_REASON = {
   scripts: 'build tooling; the two the CLI calls at runtime are named in INCLUDE',
   node_modules: 'a workspace link; every package here has zero runtime dependencies',
   '.scratch': 'test scratch; it lives here because ajv resolves through this package',
+  'api.mjs': 'the library API, for someone importing mirofy-cli/api from npm; a skill drives the CLI and never imports this',
 };
 
 /** @param {string} from @param {string} to */
