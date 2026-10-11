@@ -17,6 +17,64 @@ stops being one.
 
 ## 2026-10-11
 
+### `mirofy-cli/api`: the renderers are callable now
+
+`import 'mirofy-cli'` did not give you a library. It gave you the CLI — the
+package's `.` export is `packages/core/bin/mirofy.mjs`, which reads `process.argv` at module
+scope, so importing it *ran the command* and, with no arguments, printed usage.
+
+The renderers underneath were no better. They are standalone scripts: input
+path, output path, configuration through environment variables, write a file,
+exit with a status. They export nothing. There has never been a function to
+call, which is why "expose the renderers as an importable library API" is the
+single most-discussed request against the upstream project this one forked
+from.
+
+`mirofy-cli/api` is that function. Three of them:
+
+```js
+import { render, validate, map } from 'mirofy-cli/api';
+```
+
+It spawns exactly what the CLI spawns, and that is the design rather than a
+shortcut: the API and the command cannot disagree about what a diagram looks
+like, because they run the same renderer the same way. A caller sees an async
+function returning a string. Whether that string came from a subprocess is an
+implementation detail, and the day the renderers become importable modules this
+signature does not move.
+
+Two things it does that the CLI cannot:
+
+**Nothing here calls `process.exit`.** The CLI does, through `fail()`, and that
+is correct for a command — but a library that kills its host process is not a
+library. Every failure throws a `MirofyError` carrying the renderer's own
+structured diagnostics, so a caller branches on `error.diagnostics[0].code`
+rather than matching against prose that was never a contract.
+
+**`validate` answers rather than throws.** "This document is invalid" is a
+finding, not an exception. Someone checking a hundred documents should not need
+a hundred `try`/`catch` blocks to collect the answer, so an invalid document
+resolves to `{ok: false, diagnostics}` and only an unaskable question — an
+unknown diagram type — throws.
+
+`map` gained one thing the CLI leaves implicit: it refuses a directory that is
+not a git repository, with `input/not-a-repository`, instead of letting the
+scanner fail three steps later. The requirement is not incidental — every fact
+is pinned to a revision, so a directory with no commit has nothing for the
+evidence to cite — and that deserves one sentence rather than a captured
+stderr buffer.
+
+Fifteen tests, including the one that matters most: importing the module is
+spawned in a real subprocess and asserted to print its sentinel and nothing
+else. Grepping the source for an import of the CLI would have been the easy
+test and the wrong one, because the CLI can be reached indirectly and what
+actually matters is that importing this module produces no output and no exit.
+
+`packages/core/` gained two files, so `scripts/core-manifest.json` is
+re-baselined in its own commit — which is what that gate asks for: not that
+core never changes, but that it never changes without someone saying so in a
+reviewable diff.
+
 ### The reserved `inferred` slot now has something allowed to fill it
 
 `inferred` has been the sixth of the six published provenance classes since the
